@@ -1,0 +1,18 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main">
+    <div>
+        <input sn-model='name' />
+
+        <dl sn-repeat="item in data|filter:contains(item.name,name)">
+            <dt>{{item.name}}</dt>
+            <dd sn-repeat="p in children">{{p.name}}
+                <p>{{p.id}}</p>
+                <p>{{p.content}}</p>{{item.name}}
+                <p sn-repeat="c in p.children" style="color:#f90">{{c.name}}</p>
+            </dd>
+        </dl>
+    </div>
+</div>

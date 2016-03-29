@@ -1,0 +1,28 @@
+<style>
+    .connection_list {
+        border: 1px dashed #ddd;
+        width: 500px;
+        text-align: right;
+    }
+    
+    .connection_list li {
+        padding: 5px 10px;
+        background: #f2f2f2;
+        color: #666;
+    }
+    
+    .connection_list a {
+        color: #c00;
+        margin-left: 10px;
+    }
+</style>
+
+<div ref="main" class="main">
+    <h1>{{title}}</h1>
+    <ul class="connection_list">
+        <li sn-repeat="item in connections">{{item.user}}@@{{item.host}} <a href="javascript:;" sn-click="this.select(item)">[选择]</a></li>
+    </ul>
+    <div ref="action" class="action">
+        <b class="button" sn-click="this.connect()">连接</b>
+    </div>
+</div>

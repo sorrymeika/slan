@@ -1,0 +1,29 @@
+{
+    "root": "/",
+    "js": {
+        "components": {
+            "components/share": null,
+            "components/confirm": null,
+            "components/deletion": null,
+            "models/api": null
+        }
+    },
+    "css": {
+        "images/style.css": [
+            "images/views.css"
+        ],
+        "images/append.css": [
+            "images/append.css"
+        ]
+    },
+    "images": [
+        "./images"
+    ],
+    "route": {
+        "/": "home",
+        "/login": {
+            "controller": "login",
+            "template": "login"
+        }
+    }
+}

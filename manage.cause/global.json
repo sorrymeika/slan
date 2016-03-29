@@ -1,0 +1,68 @@
+{
+    "debug": true,
+    "dest": "./dest",
+    "api": "http://127.0.0.1:6006/",
+    "proxy": {},
+    "css": [
+        "../webresource/images/reset.css",
+        "../webresource/images/manage.css"
+    ],
+    "images": [
+        "../webresource/images"
+    ],
+    "path": [
+        "../webresource",
+        "../webresource/js"
+    ],
+    "port": 6006,
+    "projects": [
+        "./",
+        "./settings"
+    ],
+    "env": {
+        "production": {
+            "api": "http://appuser.abs.cn"
+        },
+        "test": {
+            "api": "http://localhost:6006"
+        },
+        "dev": {
+            "api": "http://127.0.0.1:6006"
+        }
+    },
+    "framework": {
+        "slan": {
+            "seajs": "../webresource/js/seajs/sea",
+            "zepto": "../webresource/js/zepto",
+            "extend/fx": "../webresource/js/extend/fx",
+            "util": "../webresource/js/util",
+            "graphics/matrix2d": "../webresource/js/graphics/matrix2d",
+            "graphics/tween": "../webresource/js/graphics/tween",
+            "core/base": "../webresource/js/core/base",
+            "core/promise": "../webresource/js/core/promise",
+            "core/linklist": "../webresource/js/core/linklist",
+            "core/event": "../webresource/js/core/event",
+            "core/component": "../webresource/js/core/component",
+            "core/view": "../webresource/js/core/view",
+            "core/model": "../webresource/js/core/model",
+            "core/master": "../webresource/js/core/master",
+            "core/page": "../webresource/js/core/page",
+            "core/navigation": "../webresource/js/core/navigation",
+            "core/route": "../webresource/js/core/route",
+            "core/animation": "../webresource/js/core/animation",
+            "core/http": "../webresource/js/core/http",
+            "common/page": "./common/page",
+            "common/menu.html": "./common/menu.html",
+            "common/menu": "./common/menu",
+            "models/api": "./models/api",
+            "components/timepicker": "../webresource/js/components/timepicker",
+            "components/validator": "../webresource/js/components/validator",
+            "components/form.tpl": "../webresource/js/components/form.tpl",
+            "components/form": "../webresource/js/components/form",
+            "components/grid": "../webresource/js/components/grid",
+            "components/page": "../webresource/js/components/page",
+            "widget/tip": "../webresource/js/widget/tip",
+            "widget/dialog": "../webresource/js/widget/dialog"
+        }
+    }
+}
