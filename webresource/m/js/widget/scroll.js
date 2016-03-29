@@ -1,7 +1,7 @@
 ﻿var $ = require('$'),
     util = require('util'),
     animation = require('../core/animation'),
-    ScrollView = require('./scrollview2');
+    ScrollView = require('./scrollview');
 
 var _start = function(e) {
     var self = this;

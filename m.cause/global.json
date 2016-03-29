@@ -1,7 +1,7 @@
 {
     "debug": true,
     "dest": "./dest",
-    "api": "http://10.0.74.50:5559/proxy",
+    "api": "http://127.0.0.1:6006",
     "proxy": {
         "/proxy/*": "testappapi-1-2-0.abs.cn"
     },
@@ -64,16 +64,11 @@
             "core/app": "../webresource/m/js/core/app",
             "core/activity": "../webresource/m/js/core/activity",
             "core/touch": "../webresource/m/js/core/touch",
-            "core/touch2": "../webresource/m/js/core/touch2",
             "widget/scrollview": "../webresource/m/js/widget/scrollview",
-            "widget/scrollview2": "../webresource/m/js/widget/scrollview2",
             "widget/scroll": "../webresource/m/js/widget/scroll",
             "widget/tip": "../webresource/js/widget/tip",
             "widget/dialog": "../webresource/js/widget/dialog",
-            "util/barcode": "../webresource/js/util/barcode",
             "widget/loading": "../webresource/m/js/widget/loading",
-            "widget/slider": "../webresource/m/js/widget/slider",
-            "widget/selector": "../webresource/m/js/widget/selector",
             "anim/default": "../webresource/m/js/anim/default"
         }
     }
