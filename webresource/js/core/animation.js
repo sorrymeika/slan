@@ -5,7 +5,6 @@
     var tween = require("graphics/tween");
     var CubicBezier = require("graphics/cubicBezier");
     var util = require("util");
-    var CubicBezier = require('../graphics/cubicBezier');
     var vendors = ['webkit'/*,'moz','o','ms'*/];
 
     for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {

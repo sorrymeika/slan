@@ -19,7 +19,7 @@ var Page = view.extend({
     application: null,
     el: '<div class="view"></div>',
 
-    _setRoute: function (route) {
+    _setRoute: function(route) {
         this.route = route;
         this.hash = route.hash;
         this.url = route.url;
@@ -28,10 +28,10 @@ var Page = view.extend({
         this.query = $.extend({}, route.query);
     },
 
-    loadTemplate: function () {
+    loadTemplate: function() {
         var that = this,
             count = 1,
-            callback = function () {
+            callback = function() {
                 count--;
                 if (count == 0) {
                     that.$el.html(that.razor.html(that.data)).appendTo(that.application.$el);
@@ -46,17 +46,17 @@ var Page = view.extend({
                 url: that.route.api,
                 type: 'GET',
                 dataType: 'json',
-                success: function (res) {
+                success: function(res) {
                     that.data = res;
                     callback(res);
                 },
-                error: function (xhr) {
+                error: function(xhr) {
                     callback({ success: false, content: xhr.responseText });
                 }
             });
         }
 
-        seajs.use(that.route.template, function (razor) {
+        seajs.use(that.route.template, function(razor) {
             that.razor = razor;
             callback();
         });
@@ -64,7 +64,7 @@ var Page = view.extend({
         return that._promise;
     },
 
-    initialize: function () {
+    initialize: function() {
         var that = this,
             promise = Promise.resolve();
 
@@ -89,7 +89,7 @@ var Page = view.extend({
             promise.then(that.loadTemplate, that);
         }
         promise.then(that.onCreate, that)
-            .then(function () {
+            .then(function() {
                 that.trigger('Start');
                 that.checkQuery();
             });
@@ -108,7 +108,7 @@ var Page = view.extend({
     //离开动画结束时触发
     onPause: noop,
 
-    _statusChange: function (e) {
+    _statusChange: function(e) {
         if (this._status == 'Pause') {
             this.trigger('Resume');
         }
@@ -117,12 +117,12 @@ var Page = view.extend({
 
     onQueryChange: noop,
 
-    then: function (fn) {
+    then: function(fn) {
         this._promise.then(fn, this);
         return this;
     },
 
-    queryString: function (key, val) {
+    queryString: function(key, val) {
         if (typeof val === 'undefined')
             return this.route.query[key];
 
@@ -136,13 +136,13 @@ var Page = view.extend({
     },
 
     _queryActions: {},
-    checkQuery: function () {
+    checkQuery: function() {
         var that = this;
         var query = that.query;
         var prevQueries = that._query;
         var actionName;
 
-        $.each(that._queryActions, function (name, option) {
+        $.each(that._queryActions, function(name, option) {
             actionName = query[name] || '';
 
             if ((actionName && !prevQueries) || (prevQueries && actionName != prevQueries[name])) {
@@ -156,7 +156,7 @@ var Page = view.extend({
         });
     },
 
-    bindQueryAction: function (name, ctx, fnMap) {
+    bindQueryAction: function(name, ctx, fnMap) {
         var that = this;
         var newFn;
         var map = {};
@@ -165,7 +165,7 @@ var Page = view.extend({
             map: map
         };
 
-        $.each(fnMap, function (key, functionName) {
+        $.each(fnMap, function(key, functionName) {
             var functionName = fnMap[key];
             var fn = ctx[functionName];
             var action = {
@@ -175,7 +175,7 @@ var Page = view.extend({
 
             map[key] = action;
 
-            ctx[functionName] = function () {
+            ctx[functionName] = function() {
                 fn.apply(ctx, arguments);
 
                 if (that.queryString(name) != key) {
@@ -189,22 +189,22 @@ var Page = view.extend({
         return this;
     },
 
-    onResult: function (event, fn) {
+    onResult: function(event, fn) {
         return this.listenTo(this.application, event, fn);
     },
 
-    setResult: function () {
+    setResult: function() {
         this.application.trigger.apply(this.application, arguments);
         return this;
     },
 
-    compareUrl: function (url) {
+    compareUrl: function(url) {
         return getUrlPath(url) === this.route.path.toLowerCase();
     },
-    back: function (url) {
+    back: function(url) {
         this.application.to(url);
     },
-    forward: function (url) {
+    forward: function(url) {
         this.application.to(url);
     }
 });

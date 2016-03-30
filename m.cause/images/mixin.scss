@@ -1,0 +1,7 @@
+@mixin border($color:#aaa) {
+    content:''; display:block;-webkit-transform: scale(.5);width:200%;border-top: 1px solid $color;-webkit-transform-origin: left bottom;position: absolute; bottom: 0px;
+}
+.border_bottom {
+    position: relative;
+    &:after{@include border(#ddd);} }
+.icon {content: '';display: block; background: url(icon.png) no-repeat 0px 0px; background-size: 320px auto; width: 30px; height: 30px;}

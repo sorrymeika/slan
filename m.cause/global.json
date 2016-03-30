@@ -18,7 +18,7 @@
         "../webresource/m",
         "../webresource/m/js"
     ],
-    "port": 5559,
+    "port": 5560,
     "projects": [
         "./"
     ],

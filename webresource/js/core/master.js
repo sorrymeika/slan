@@ -1,4 +1,4 @@
-﻿define(function (require, exports, module) {
+﻿define(function(require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
@@ -8,15 +8,15 @@
     var getPath = util.getPath;
 
     var Master = {
-        checkQueryString: function (activity, route) {
+        checkQueryString: function(activity, route) {
             if (activity.route.url != route.url) {
                 activity._setRoute(route);
                 activity.trigger('QueryChange');
             }
         },
 
-        mapRoute: function (routes, isDebug) {
-            this.route = new Route(routes, isDebug);
+        mapRoute: function(routes) {
+            this.route = new Route(routes);
             return this;
         },
         skip: 0,
@@ -24,11 +24,11 @@
         _currentActivity: null,
         _activities: {},
 
-        set: function (url, activity) {
+        set: function(url, activity) {
             this._activities[getPath(url)] = activity;
         },
 
-        get: function (url, callback) {
+        get: function(url, callback) {
             var that = this,
                 route = typeof url === 'string' ? that.route.match(url) : url;
 
@@ -40,12 +40,12 @@
             var activity = this._activities[path];
 
             if (activity == null) {
-                (function (fn) {
+                (function(fn) {
                     route.package ? seajs.use(route.package + ".js?v" + sl.buildVersion, fn) : fn();
 
-                })(function () {
+                })(function() {
 
-                    seajs.use(route.view, function (Activity) {
+                    seajs.use(route.view, function(Activity) {
                         var options = {
                             application: that,
                             route: route
@@ -61,7 +61,7 @@
                             activity = new Activity(options);
                             that.set(path, activity);
 
-                            activity.then(function () {
+                            activity.then(function() {
                                 callback.call(that, activity, route);
                             });
 
@@ -77,7 +77,7 @@
             }
         },
 
-        remove: function (url) {
+        remove: function(url) {
             this._activities[getPath(url)] = void 0;
         }
     };

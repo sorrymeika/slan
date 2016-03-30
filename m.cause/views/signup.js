@@ -27,6 +27,7 @@ define(function(require, exports, module) {
                 this.loading.setParam({
                     mobile: mobile,
                     smsCode: smsCode,
+                    invitedCode: this.model.data.invitedCode,
                     platform: navigator.platform,
                     deviceVersion: (util.ios ? "IOS " : "Android ") + util.osVersion,
                     version: sl.appVersion
@@ -35,34 +36,46 @@ define(function(require, exports, module) {
             }
         },
 
+
         onCreate: function() {
             var self = this;
 
+
+            this.swipeRightBackAction = this.route.query.from || '/login';
+
             this.model = new model.ViewModel(this.$el, {
+                back: this.swipeRightBackAction
             });
+            
             Scroll.bind(this.model.refs.main);
+            
 
             this.loading = new Loading({
                 url: '/api/user/login',
+                method: 'POST',
                 check: false,
                 checkData: false,
                 $el: this.$el,
                 success: function(res) {
-                    if (!res.success) {
+                    if (!res.success)
                         sl.tip(res.msg);
+                    else {
+                        var backUrl = self.route.query.success || "/";
 
-                    } else {
-                        userModel.set(res.data);
+                        userModel.set(res.data).request(function() {
+                            self.back(backUrl);
 
-                        self.back(self.route.query.success || "/");
-
-                        self.setResult("Login");
+                            setTimeout(function() {
+                                self.setResult("Login");
+                            }, 0);
+                        });
                     }
                 },
                 error: function(res) {
                     sl.tip(res.msg);
                 }
             });
+
         },
 
         onShow: function() {

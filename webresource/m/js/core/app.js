@@ -1,4 +1,4 @@
-﻿define(function (require, exports, module) {
+﻿define(function(require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
@@ -19,7 +19,7 @@
         getPath = util.getPath,
         standardizeHash = Route.standardizeHash;
 
-    var getToggleAnimation = function (isForward, currentActivity, activity, toggleAnim) {
+    var getToggleAnimation = function(isForward, currentActivity, activity, toggleAnim) {
         if (!toggleAnim) toggleAnim = (isForward ? activity : currentActivity).toggleAnim;
 
         var anim = require('anim/' + toggleAnim),
@@ -45,103 +45,106 @@
             }];
     }
 
-    var adjustActivity = function (currentActivity, activity) {
+    var adjustActivity = function(currentActivity, activity) {
         currentActivity.startExit();
         currentActivity.$el.siblings('.view:not([data-path="' + activity.path + '"])').hide();
         if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
     };
 
-    var bindBackGesture = function (application) {
-        application.touch = new Touch(application.el, {
-            start: function () {
-                var that = this,
-                    action,
-                    isForward,
-                    deltaX = that.touch.dx;
+    var bindBackGesture = function(application) {
 
-                if (that.touch.isDirectionY || that.swiperPromise || that.swiper) {
-                    if (that.swiperPromise) {
-                        that.touch.options.stop.call(that);
-                    }
-                    that.touch.stop();
-                    return;
+        var touch = application.touch = new Touch(application.el, {
+            enableVertical: false,
+            enableHorizontal: true,
+            momentum: false
+        });
+
+        touch.on('start', function() {
+            var that = this,
+                action,
+                isForward,
+                deltaX = that.deltaX;
+
+            if (that.isDirectionY || that.swiperPromise || that.swiper) {
+                if (that.swiperPromise) {
+                    that._stop();
                 }
-                that.width = window.innerWidth;
+                that.stop();
+                return;
+            }
+            that.width = window.innerWidth;
 
-                var currentActivity = that._currentActivity;
-                var isSwipeLeft = that.isSwipeLeft = deltaX > 0;
+            var currentActivity = application._currentActivity;
+            var isSwipeLeft = that.isSwipeLeft = deltaX > 0;
 
-                that.swiper = null;
+            that.swiper = null;
 
-                action = isSwipeLeft ? (currentActivity.swipeLeftForwardAction ? (isForward = true, currentActivity.swipeLeftForwardAction) : (isForward = false, currentActivity.swipeLeftBackAction))
-                    : (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeRightBackAction));
+            action = isSwipeLeft ? (currentActivity.swipeLeftForwardAction ? (isForward = true, currentActivity.swipeLeftForwardAction) : (isForward = false, currentActivity.swipeLeftBackAction))
+                : (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeRightBackAction));
 
-                if (!action) {
-                    if (isSwipeLeft && currentActivity.referrerDir == "Left") {
-                        action = currentActivity.referrer;
-                    } else if (!isSwipeLeft && currentActivity.referrerDir != "Left") {
-                        action = currentActivity.referrer;
-                    }
-                    isForward = false;
+            if (!action) {
+                if (isSwipeLeft && currentActivity.referrerDir == "Left") {
+                    action = currentActivity.referrer;
+                } else if (!isSwipeLeft && currentActivity.referrerDir != "Left") {
+                    action = currentActivity.referrer;
                 }
+                isForward = false;
+            }
 
-                if (action) {
-                    that.swiperPromise = new Promise();
+            if (action) {
+                that.swiperPromise = new Promise();
 
-                    that.mask.show();
-                    that.get(action, function (activity) {
-                        that.needRemove = activity.el.parentNode === null;
-                        adjustActivity(currentActivity, activity);
+                application.mask.show();
+                application.get(action, function(activity) {
+                    that.needRemove = activity.el.parentNode === null;
+                    adjustActivity(currentActivity, activity);
 
-                        that.isSwipeOpen = isForward;
+                    that.isSwipeOpen = isForward;
 
-                        that.swiper = new animation.Animation(getToggleAnimation(isForward, currentActivity, activity));
-                        that.swipeActivity = activity;
+                    that.swiper = new animation.Animation(getToggleAnimation(isForward, currentActivity, activity));
+                    that.swipeActivity = activity;
 
-                        that.swiperPromise.resolve();
-                    });
-
-                } else {
-                    that.swiperPromise = null;
-                }
-            },
-
-            move: function (e) {
-                var that = this,
-                    deltaX = that.touch.dx;
-
-                if (!that.swiperPromise) return;
-
-                that.swiperPromise.then(function () {
-                    that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
-                        0 :
-                        (Math.abs(deltaX) * 100 / that.width));
+                    that.swiperPromise.resolve();
                 });
-            },
 
-            stop: function () {
+            } else {
+                that.swiperPromise = null;
+            }
+        }).on('move', function(e) {
+            var that = this,
+                deltaX = that.deltaX;
+
+            if (!that.swiperPromise) return;
+
+            that.swiperPromise.then(function() {
+                that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
+                    0 :
+                    (Math.abs(deltaX) * 100 / that.width));
+            });
+        })
+            .on('stop', function() {
                 var that = this;
 
-                that.isCancelSwipe = that.touch.isMoveLeft !== that.isSwipeLeft || Math.abs(that.touch.dx) <= 10;
+                that.isCancelSwipe = that.isMoveLeft !== that.isSwipeLeft || Math.abs(that.deltaX) <= 10;
 
                 if (that.swiperPromise) {
-                    that.swiperPromise.then(function () {
+                    that.swiperPromise.then(function() {
 
-                        that.queue.then([200, that.isCancelSwipe ? 0 : 100, function () {
+                        application.queue.then([200, that.isCancelSwipe ? 0 : 100, function() {
                             var activity = that.swipeActivity,
-                                currentActivity = that._currentActivity;
+                                currentActivity = application._currentActivity;
 
                             if (that.isCancelSwipe) {
                                 currentActivity.isPrepareExitAnimation = false;
                                 currentActivity.$el.addClass('active');
                                 that.needRemove && activity.$el.remove();
-                                that.mask.hide();
-                                
+                                application.mask.hide();
+
                             } else {
                                 activity.isForward = that.isSwipeOpen;
 
-                                that._currentActivity = that.swipeActivity;
-                                that.navigate(activity.url, that.isSwipeOpen);
+                                application._currentActivity = that.swipeActivity;
+                                application.navigate(activity.url, that.isSwipeOpen);
 
                                 activity.finishEnterAnimation();
 
@@ -153,29 +156,25 @@
                                     currentActivity.destroy();
                                 }
                             }
-                            that.queue.resolve();
+                            application.queue.resolve();
 
                         }], that.swiper.animate, that.swiper);
 
                         that.swiperPromise = null;
                         that.swiper = null;
                     });
-
-
                 }
-            }
-        }, application);
+            });
     };
 
     var Application = View.extend($.extend(Master, {
         events: {
-            'tap,click a[href]:not(.js-link-default)': function (e) {
+            'tap,click a[href]:not(.js-link-default)': function(e) {
                 var that = this,
                     target = $(e.currentTarget);
                 var href = target.attr('href');
 
                 if (!/^(http\:|https\:|javascript\:|mailto\:|tel\:)/.test(href)) {
-                    e.preventDefault();
                     if (e.type == 'tap') {
                         if (!/^#/.test(href)) href = '#' + href;
 
@@ -191,29 +190,29 @@
 
                 return false;
             },
-            'tap [data-back]': function (e) {
+            'tap [data-back]': function(e) {
                 this.back($(e.currentTarget).attr('data-back'));
             },
-            'tap [data-forward]': function (e) {
+            'tap [data-forward]': function(e) {
                 this.forward($(e.currentTarget).attr('data-forward'));
             },
-            'focus input': function (e) {
+            'focus input': function(e) {
                 this.activeInput = e.target;
             }
         },
 
-        el: '<div class="viewport"><div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div></div>',
+        el: <div class="viewport">
+            <div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div>
+        </div>,
 
         backGesture: true,
 
-        initialize: function () {
+        initialize: function() {
             var that = this;
             //var preventEvents = 'tap click touchmove touchstart';
 
             that.el = that.$el[0];
             that.mask = that.$el.children('.screen');//.off(preventEvents).on(preventEvents, false);
-            //that.canvas = that.$el[2];
-            //that.$input = that.$el[3];
 
             that.history = [];
 
@@ -221,7 +220,7 @@
 
             var prepareExit = false;
 
-            $(window).on('back', function () {
+            $(window).on('back', function() {
 
                 var hash = location.hash;
                 if (hash == '' || hash === '#' || hash === "/" || hash === "#/") {
@@ -229,7 +228,7 @@
                         bridge.exit();
                     } else {
                         prepareExit = true;
-                        setTimeout(function () {
+                        setTimeout(function() {
                             prepareExit = false;
                         }, 2000);
                         sl.tip("再按一次退出程序");
@@ -241,7 +240,7 @@
             });
         },
 
-        start: function (delay) {
+        start: function(delay) {
             var that = this;
             var $win = $(window);
             var hash = location.hash || '/';
@@ -250,7 +249,7 @@
             that.queue = new Promise();
 
             if (delay) {
-                setTimeout(function () {
+                setTimeout(function() {
                     $el.appendTo(document.body);
                     delay.resolve();
                 }, delay);
@@ -270,7 +269,7 @@
 
             that.historyPromise = new Promise().resolve();
 
-            that.get(hash, function (activity) {
+            that.get(hash, function(activity) {
 
                 that.history.push(hash);
 
@@ -278,7 +277,7 @@
                 that._currentActivity = activity;
 
                 activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
-                activity.then(delay).then(function () {
+                activity.then(delay).then(function() {
                     activity.$el.addClass('active');
                     activity.trigger('Appear').trigger('Show');
 
@@ -286,7 +285,7 @@
                     that.queue.resolve();
                 });
 
-                $win.on('hashchange', function () {
+                $win.on('hashchange', function() {
                     var hash = that.hash = standardizeHash(location.hash);
                     var hashIndex;
 
@@ -295,7 +294,7 @@
                         that.historyPromise.resolve();
 
                     } else {
-                        that.historyPromise.then(function () {
+                        that.historyPromise.then(function() {
 
                             hashIndex = lastIndexOf(that.history, hash);
                             if (hashIndex == -1) {
@@ -308,10 +307,10 @@
                 });
             });
 
-            $win.one('load', function () { if (!location.hash) location.hash = '/'; });
+            $win.one('load', function() { if (!location.hash) location.hash = '/'; });
         },
 
-        _toggle: function (route, options, callback) {
+        _toggle: function(route, options, callback) {
 
             var that = this,
                 currentActivity = that._currentActivity,
@@ -329,20 +328,20 @@
 
             route.referrer = currentActivity.url;
 
-            that.get(route, function (activity) {
+            that.get(route, function(activity) {
                 that._currentActivity = activity;
 
                 adjustActivity(currentActivity, activity);
 
                 that.checkQueryString(activity, route);
-                activity.then(function () {
+                activity.then(function() {
                     activity.trigger('Appear');
                 });
 
                 var ease = 'cubic-bezier(.34,.86,.54,.99)',
                     anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim),
                     anim;
-                    
+
                 activity.isForward = isForward;
 
                 if (isForward) {
@@ -350,7 +349,7 @@
                     activity.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
                 }
 
-                var finish = function () {
+                var finish = function() {
                     activity.finishEnterAnimation();
                     callback && callback(activity);
                     that.queue.resolve();
@@ -372,10 +371,10 @@
         },
 
         //改变当前hash但不触发viewchange
-        navigate: function (url, isForward) {
+        navigate: function(url, isForward) {
             var that = this;
 
-            that.historyPromise.then(function () {
+            that.historyPromise.then(function() {
                 var index,
                     hashChanged = url !== standardizeHash(location.hash);
 
@@ -404,15 +403,15 @@
 
         },
 
-        forward: function (url, options) {
+        forward: function(url, options) {
 
             var route = this.route.match(url);
             if (route) {
-                this.queue.then(function () {
+                this.queue.then(function() {
                     var currentActivity = this._currentActivity;
                     (options || (options = {})).isForward = true;
 
-                    this._toggle(route, options, function () {
+                    this._toggle(route, options, function() {
                         currentActivity.trigger('Pause');
                     });
 
@@ -421,15 +420,15 @@
             }
         },
 
-        back: function (url, options) {
+        back: function(url, options) {
             var route = this.route.match(url);
             if (route) {
-                this.queue.then(function () {
+                this.queue.then(function() {
                     var currentActivity = this._currentActivity;
 
                     (options || (options = {})).isForward = false;
 
-                    this._toggle(route, options, function () {
+                    this._toggle(route, options, function() {
                         currentActivity.destroy();
                     });
 

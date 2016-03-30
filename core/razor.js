@@ -102,7 +102,7 @@ XRegExp.prototype = {
 
 var ruse = /(?:^|[^@])@use\s+('|")([^\r\n]+?)\1\s+as\s+([^\s]+)/mg;
 var rcmd = /^(for|if|(function|helper)\s+([a-zA-Z_$][a-zA-Z_$1-9]*))\s*\(([^\)]*)\)\s*(?={)/m;
-var rparam = /^(html|)([\w]+(?:\[(?:\"[^\"]+\"|[^\]]+?)\]|\.[\w]+|\([^\)]*\))*|\((?:[^@]+?\((?:\"[^\"]+\"|(?:[^@]*?\((?:\"[^\"]+\"|(?:[^@]*?\((?:\"[^\"]+\"|[^\)]*?)\))|[^\)]*?)\))|[^\)]+?|)\)|.+?)\))/m;
+var rparam = /^(encode|)([\w]+(?:\[(?:\"[^\"]+\"|[^\]]+?)\]|\.[\w]+|\([^\)]*\))*|\((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\((?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|[^\)])*\)|[^\(\)])+\))/m;
 
 var rif = new XRegExp('^if\\s*\\(([^\\)]*)\\)\\s*{...}');
 var relse = new XRegExp('^\\s*(?:else\\s+if\\s*\\(([^\\)]*)\\)|else)\\s*{...}');
@@ -241,7 +241,7 @@ var parse = function(templateStr) {
                     } else {
                         m = rparam.exec(codeStr);
 
-                        str += "'+" + ((m[1] == "html" || m[2].indexOf('.helpers.') !== -1) ? m[2] : "util.encodeHTML(" + m[2] + ")") + "+'";
+                        str += "'+" + (m[1] == "encode" ? "util.encodeHTML(" + m[2] + ")" : m[2]) + "+'";
                         i += m[0].length;
                     }
                 }
@@ -319,7 +319,17 @@ razor.create = function(templateStr) {
 };
 
 razor.nodeFn = function(templateStr) {
-    return eval('[(function(){' + razor.create(templateStr) + ' return T;})()][0]');
+
+    try {
+        return eval('[(function(){' + razor.create(templateStr) + ' return T;})()][0]');
+
+    } catch (e) {
+        return {
+            html: function() {
+                return "";
+            }
+        }
+    }
 };
 
 razor.web = function(templateStr) {

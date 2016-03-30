@@ -1,5 +1,5 @@
 var $ = require('$');
-var Touch2 = require('core/touch2');
+var Touch = require('core/touch');
 var Event = require('core/event');
 
 var Deletion = function (options) {
@@ -37,7 +37,7 @@ var Deletion = function (options) {
         this._cancel = true;
     });
 
-    this.touch = new Touch2(options.el, {
+    this.touch = new Touch(options.el, {
         enableVertical: false,
         enableHorizontal: true,
         children: options.children

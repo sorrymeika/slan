@@ -21,6 +21,7 @@
     ],
     "route": {
         "/": "home",
+        "/signup": "signup",
         "/login": {
             "controller": "login",
             "template": "login"
