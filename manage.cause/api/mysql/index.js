@@ -125,11 +125,15 @@ app.post('/get_sql', function(req, res) {
 
 app.post('/save', function(req, res) {
     var query = req.body.query;
+    var origin = req.body.origin;
     var database = req.body.database;
 
     getSQL(database, function(result) {
         if (result.indexOf(query) == -1) {
-
+            var originIndex;
+            if (origin && (originIndex = result.indexOf(origin)) !== -1) {
+                result.splice(originIndex, 1);
+            }
             result.unshift(query);
 
             saveSQL(database, result, function() {

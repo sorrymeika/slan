@@ -1,7 +1,7 @@
 <style>
     .mysql_tables {
         position: absolute;
-        left: 230px;
+        left: 200px;
         bottom: 0;
         top: 60px;
         width: 150px;
@@ -25,7 +25,7 @@
     
     .mysql_results {
         position: absolute;
-        left: 410px;
+        left: 380px;
         right: 0;
         bottom: 5px;
         top: 460px;
@@ -34,11 +34,10 @@
     
     .mysql_form {
         position: absolute;
-        left: 410px;
+        left: 380px;
         right: 10px;
         top: 65px;
         height: 395px;
-        overflow: auto;
     }
     
     .mysql_text {
@@ -98,12 +97,27 @@
         vertical-align: -1px;
     }
     
-    .mysql_query_list .filter {
+    .mysql_topbar .filter {
         display: block;
         width: 100%;
         box-sizing: border-box;
         height: 20px;
         margin-top: 3px;
+    }
+    
+    .mysql_topbar {
+        position: relative;
+        z-index: 1;
+        background: #fff;
+    }
+    
+    .mysql_query_list {
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        top: 80px;
+        overflow: auto;
     }
 </style>
 
@@ -120,20 +134,22 @@
         </ul>
     </div>
     <div class="mysql_form">
-        <div class="mysql_text">
-            <textarea ref="sql" sn-model="query" value="{{query}}"></textarea>
-            <div class="mysql_action">
-                <b class="button" sn-click="query=''">清空</b>
-                <b class="button" sn-click="this.save()">执行</b>
+        <div class="mysql_topbar">
+            <div class="mysql_text">
+                <textarea ref="sql" sn-model="query" value="{{query}}"></textarea>
+                <div class="mysql_action">
+                    <b class="button" sn-click="query='',origin=''">清空</b>
+                    <b class="button" sn-click="this.save()">执行</b>
+                </div>
             </div>
+            <input ref="query_search" class="filter" sn-model="sql_keywords" />
         </div>
         <div class="mysql_query_list">
-            <input ref="query_search" class="filter" sn-model="sql_keywords" />
             <ul>
-                <li sn-repeat="item in queries|filter:like(item.text,sql_keywords)" sn-click="item.checked=!item.checked" >
+                <li sn-repeat="item in queries|filter:like(item.text,sql_keywords)" sn-click="item.checked=!item.checked">
                     <input type="checkbox" checked="{{item.checked}}" /><span html="{{this.formatSQL(item.text)}}"></span>
                     <a href="javascript:;" class="exec" sn-click="this.exec(item.text)">执行</a>
-                    <a href="javascript:;" sn-click="query=item.text">[选择]</a>
+                    <a href="javascript:;" sn-click="query=item.text,origin=item.text">[选择]</a>
                     <a href="javascript:;" sn-click="this.del(item.text)">[删除]</a>
                 </li>
             </ul>
@@ -152,5 +168,6 @@
                 </tr>
             </tbody>
         </table>
+        <div html="{{errors}}"></div>
     </div>
 </div>

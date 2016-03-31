@@ -4,17 +4,17 @@
     guid = 0;
 
 var Util = {
-    guid: function () {
+    guid: function() {
         return ++guid;
     },
 
-    combinePath: function () {
+    combinePath: function() {
         var args = [].slice.apply(arguments);
         var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^\:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
         var flag = true;
         while (flag) {
             flag = false;
-            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function (match, name) {
+            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function(match, name) {
                 if (name == '..') return match;
                 if (!flag) flag = true;
                 return '';
@@ -23,7 +23,7 @@ var Util = {
         return result.replace(/\/$/, '');
     },
 
-    random: function (min, max) {
+    random: function(min, max) {
         if (max == null) {
             max = min;
             min = 0;
@@ -31,7 +31,7 @@ var Util = {
         return min + Math.floor(Math.random() * (max - min + 1));
     },
 
-    indexOf: function (arr, val) {
+    indexOf: function(arr, val) {
         var isFn = typeof val === 'function',
             length = arr.length;
 
@@ -41,7 +41,7 @@ var Util = {
         return -1;
     },
 
-    lastIndexOf: function (arr, val) {
+    lastIndexOf: function(arr, val) {
         var isFn = typeof val === 'function';
         for (var i = arr.length - 1; i >= 0; i--) {
             if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;
@@ -49,7 +49,7 @@ var Util = {
         return -1;
     },
 
-    first: function (arr, fn) {
+    first: function(arr, fn) {
         var item;
 
         for (var i = 0, len = arr.length; i < len; i++) {
@@ -60,7 +60,7 @@ var Util = {
         return null;
     },
 
-    find: function (arr, fn) {
+    find: function(arr, fn) {
         var result = [],
             item;
 
@@ -73,7 +73,7 @@ var Util = {
         return result;
     },
 
-    select: function (arr, fn) {
+    select: function(arr, fn) {
         var result = [],
             length = arr.length;
 
@@ -83,7 +83,7 @@ var Util = {
         return result;
     },
 
-    pick: function (obj, iteratee) {
+    pick: function(obj, iteratee) {
         var result = {}, key;
         if (obj == null) return result;
         if (typeof iteratee === 'function') {
@@ -101,14 +101,18 @@ var Util = {
         return result;
     },
 
-    pad: function (num, n) {
+    pad: function(num, n) {
         var a = '0000000000000000' + num;
         return a.substr(a.length - (n || 2));
     },
 
-    formatDate: function (d, f) {
+    formatDate: function(d, f) {
         if (typeof d === "string" && /^\/Date\(\d+\)\/$/.test(d)) {
             d = new Function("return new " + d.replace(/\//g, ''))();
+        } else if (typeof d === 'string') {
+            f = d, d = new Date;
+        } else if (typeof d === 'number' || !d) {
+            d = new Date(d);
         }
 
         var y = d.getFullYear() + "", M = d.getMonth() + 1, D = d.getDate(), H = d.getHours(), m = d.getMinutes(), s = d.getSeconds(), mill = d.getMilliseconds() + "0000", pad = this.pad;
@@ -124,19 +128,19 @@ var Util = {
             .replace(/m/, m)
             .replace(/s{2,}/, pad(s))
             .replace(/s/, s)
-            .replace(/f+/, function (w) {
+            .replace(/f+/, function(w) {
                 return mill.substr(0, w.length)
             })
     },
 
-    template: function (str, data) {
+    template: function(str, data) {
         var tmpl = 'var __p=[];var $data=obj||{};with($data){__p.push(\'' +
             str.replace(/\\/g, '\\\\')
                 .replace(/'/g, '\\\'')
-                .replace(/<%=([\s\S]+?)%>/g, function (match, code) {
+                .replace(/<%=([\s\S]+?)%>/g, function(match, code) {
                     return '\',' + code.replace(/\\'/, '\'') + ',\'';
                 })
-                .replace(/<%([\s\S]+?)%>/g, function (match, code) {
+                .replace(/<%([\s\S]+?)%>/g, function(match, code) {
                     return '\');' + code.replace(/\\'/, '\'')
                         .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
                 })
@@ -150,20 +154,20 @@ var Util = {
         return data ? func(data) : func;
     },
 
-    encodeHTML: function (text) {
+    encodeHTML: function(text) {
         return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
     },
 
-    getPath: function (url) {
+    getPath: function(url) {
         return url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase();
     },
 
-    noop: function () { },
+    noop: function() { },
 
-    validateEmail: function (email) {
+    validateEmail: function(email) {
         return /^[-_a-zA-Z0-9\.]+@([-_a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,3}$/.test(email)
     },
-    validateMobile: function (str) {
+    validateMobile: function(str) {
         return /^1[0-9]{10}$/.test(str)
     }
 };

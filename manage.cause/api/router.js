@@ -12,5 +12,6 @@ app.all("*", function(req, res, next) {
 app.use("/db", require("./db/index"));
 app.use("/mysql", require("./mysql/index"));
 app.use("/settings", require("./settings/index"));
+app.use("/user", require("./user/index"));
 
 module.exports = app;

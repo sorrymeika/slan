@@ -55,6 +55,7 @@ $bgcolor: #fe4a5d;
 .sign_subhd { @extend .border_bottom; text-align: center; color: #999; padding:10px 0 20px 0; font-size: 14px; }
 .sign_form li { width: 100%; height: 44px; @extend .border_bottom; }
 .sign_form input[type="text"],.sign_form input[type="email"],.sign_form input[type="password"] { display: block; border: 0;width:100%; height: 100%; margin-left: 8px; font-size: 14px; }
+.sign_form .validcode { display: block; position: absolute; right: 10px; top: 7px; height: 30px;width:70px; }
 .sign_form input::-webkit-input-placeholder { font-size: 14px;color: #ccc; }
 .sign_btn { margin-top: 20px; }
 .sign_ft { margin: 10px 10px 0 10px; font-size: 14px;}

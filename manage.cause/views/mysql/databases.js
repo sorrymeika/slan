@@ -60,10 +60,14 @@
             }
 
             this.model.query = function(e) {
+
                 $.post('/api/mysql/query', {
                     query: this.data.query
 
                 }, function(res) {
+                    if (typeof e === 'function') {
+                        e.call(self.model, res);
+                    }
                     self.setQueryResult(res);
 
                 }, 'json');
@@ -80,24 +84,31 @@
             }
 
             this.model.save = function(e) {
-                this.query();
+                this.query(function(res) {
+                    if (res.success) {
+                        if (this.data.queries.indexOf(this.data.query) == -1) {
+                            $.post('/api/mysql/save', {
+                                query: this.data.query,
+                                origin: this.data.origin,
+                                database: this.data.database
 
-                if (this.data.queries.indexOf(this.data.query) == -1) {
-                    $.post('/api/mysql/save', {
-                        query: this.data.query,
-                        database: this.data.database
+                            }, function(res) {
 
-                    }, function(res) {
+                                if (res.success) {
+                                    self.model.set({
+                                        origin: ''
+                                    });
 
-                        if (res.success) {
-                            self.getSQL(self.model.data.database);
+                                    self.getSQL(self.model.data.database);
 
-                        } else {
-                            sl.tip(res.msg)
+                                } else {
+                                    sl.tip(res.msg)
+                                }
+
+                            }, 'json');
                         }
-
-                    }, 'json');
-                }
+                    }
+                });
             }
 
             this.model.del = function(e, sql) {
@@ -119,7 +130,7 @@
                     }, 'json');
             }
 
-            var re_sql_key = /'(?:''|[^'])*'|(?:\!|=|\.|,|\d+|\(|\)|\b(?:select|from|where|and|or|order\s+by|group\s+by|limit|create|table|create\s+database|drop|alter|add|set|varchar\(\d+\)|int|utf8|PRIMARY\s+KEY|not\s+null|null)\b)/ig;
+            var re_sql_key = /'(?:''|[^'])*'|\b(?:select|from|where|and|or|order\s+by|group\s+by|limit|create|table|create\s+database|drop|alter|add|set|tinyint|datetime|varchar|int|utf8|PRIMARY\s+KEY|not\s+null|null)(?=,|\s|$|;|\()|(?:\!|=|\.|,|\d+|\(|\))/ig;
 
             this.model.formatSQL = function(code) {
                 code = code.replace(re_sql_key, function(m, m1) {
@@ -192,8 +203,9 @@
         setQueryResult: function(res) {
             if (res.success) {
                 var columns = [];
-                if (res.data && res.data.length) {
-                    for (var key in res.data[0]) {
+                var data = $.isPlainObject(res.data) ? [res.data] : res.data;
+                if (data && data.length) {
+                    for (var key in data[0]) {
                         columns.push({
                             key: key
                         });
@@ -207,8 +219,14 @@
                 }
 
                 this.model.set({
-                    result: res.data,
-                    columns: columns
+                    result: data,
+                    columns: columns,
+                    errors: ''
+                });
+
+            } else {
+                this.model.set({
+                    errors: JSON.stringify(res.msg)
                 });
             }
         }

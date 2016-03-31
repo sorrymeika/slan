@@ -2,14 +2,14 @@
 <html>
 
 <head>
-    <meta name="api-base-url" content="@html(api)" />
+    <meta name="api-base-url" content="@(api)" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
     <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <title></title>
-    @html(style)
-    <!--[if lte IE 9]><script src="@html(debug?'jquery-1.11.3.js':'jquery-1.11.3.min.js')"></script><![endif]-->
-    <script src="@html(debug?'seajs/sea.js':'slan.js')?v@(Date.now())"></script>
+    @(style)
+    <!--[if lte IE 9]><script src="@(debug?'jquery-1.11.3.js':'jquery-1.11.3.min.js')"></script><![endif]-->
+    <script src="@(debug?'seajs/sea.js':'slan.js')?v@(Date.now())"></script>
     @if(debug){
     <script src="zepto.js"></script>
     <script src="extend/fx.js"></script>
@@ -38,7 +38,7 @@
             sl.isDebug=@debug;
             sl.buildVersion=@(Date.now());
             
-            var app = new Navigation().mapRoute(@html(JSON.stringify(routes)),@debug).start();
+            var app = new Navigation().mapRoute(@(JSON.stringify(routes))).start();
             
             var menu = new Menu({
                 data: [{

@@ -47,10 +47,7 @@
             }
             var resourceMappingLoader=new Loading({
                 $el: $('body'),
-                url: '/api/settings/resourceMapping',
-                params: {
-                    v: sl.appVersion
-                },
+                url: '/api/settings/resourceMapping?v='+sl.appVersion+'&token='+(util.store('token')?1:0),
                 timeout: 5000,
                 checkData: false,
                 error: function(){
@@ -58,6 +55,8 @@
                 },
                 success: function(res){
                     Offline.getInstance().hide();
+                    
+                    res.token && util.store('token',res.token);
                     
                     var resourceMapping=res.data;
                     seajs.on('fetch', function (emitData) {

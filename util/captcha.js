@@ -71,4 +71,6 @@ module.exports=function(req,res) {
     res.set('Content-Type','text/html');
     res.end('<img src="'+canvas.toDataURL()+'" />'+result)
     */
+    
+    return result;
 }
