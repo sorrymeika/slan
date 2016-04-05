@@ -110,13 +110,15 @@
         set: function(arg0, arg1, arg2) {
             this.model.getModel('data').set(arg0, arg1, arg2);
 
-            console.log(this.model.data.data);
-
             return this;
         },
 
         get: function(key) {
             return this.model.getModel('data').get(key);
+        },
+
+        data: function() {
+            return $.extend({}, this.model.data.data);
         },
 
         reset: function() {

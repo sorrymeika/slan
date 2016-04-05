@@ -315,9 +315,25 @@ exports.bind = function(selector, options) {
                         .off('touchend', touchEnd)
                         .off('scroll', scroll);
                 },
-                scrollTo: function(x, y) {
-                    el._scrollLeft = el.scrollLeft = x;
-                    el._scrollTop = el.scrollTop = y;
+                scrollTo: function(x, y, duration) {
+                    if (duration) {
+
+                        var startX = el.scrollLeft;
+                        var startY = el.scrollTop;
+
+                        var distX = x - startX;
+                        var distY = y - startY;
+
+                        animation.animate(function(step) {
+                            el._scrollLeft = el.scrollLeft = startX + animation.step(0, distX, step);
+                            el._scrollTop = el.scrollTop = startY + animation.step(0, distY, step);
+
+                        }, duration);
+
+                    } else {
+                        el._scrollLeft = el.scrollLeft = x;
+                        el._scrollTop = el.scrollTop = y;
+                    }
                 }
             };
         }

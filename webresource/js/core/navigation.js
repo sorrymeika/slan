@@ -1,4 +1,4 @@
-﻿define(function (require, exports, module) {
+﻿define(function(require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
@@ -16,7 +16,7 @@
 
     var Navigation = View.extend($.extend(Master, {
         events: {
-            'click a[href]:not(.js-link-default)': function (e) {
+            'click a[href]:not(.js-link-default)': function(e) {
                 var that = this,
                     target = $(e.currentTarget);
 
@@ -34,7 +34,7 @@
             }
         },
         el: '<div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:2000;display:none"></div><div class="viewport"></div>',
-        initialize: function () {
+        initialize: function() {
             var that = this;
 
             that.$mask = $(that.$el[0]).on('click', false);
@@ -42,7 +42,7 @@
             that.promise = Promise.resolve();
         },
 
-        start: function () {
+        start: function() {
             var that = this,
                 hash,
                 $win = $(window),
@@ -59,12 +59,12 @@
             if (!location.hash) location.hash = '/';
             that.hash = hash = standardizeHash(location.hash);
 
-            that.promise.then(function () {
-                that.get(hash, function (activity) {
+            that.promise.then(function() {
+                that.get(hash, function(activity) {
                     activity.$el.show().appendTo(that.el);
                     that._currentActivity = activity;
 
-                    activity.then(function () {
+                    activity.then(function() {
                         activity.trigger('Resume').trigger('Show');
 
                         that.trigger('start');
@@ -72,7 +72,7 @@
                     });
                 });
 
-                $win.on('hashchange', function () {
+                $win.on('hashchange', function() {
                     hash = that.hash = standardizeHash(location.hash);
 
                     if (that.skip == 0) {
@@ -90,19 +90,19 @@
             return that;
         },
 
-        navigate: function (url) {
+        navigate: function(url) {
             url = standardizeHash(url);
             this.skip++;
             location.hash = url;
         },
 
-        to: function (url) {
+        to: function(url) {
             url = standardizeHash(url);
 
             var that = this,
                 promise = that.promise;
 
-            promise.then(function () {
+            promise.then(function() {
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
@@ -115,18 +115,17 @@
                     promise.resolve();
                     return;
                 }
-                that.get(route, function (activity) {
-                    if (activity.path == currentActivity.path) {
-                        checkQueryString(activity, route);
+                that.get(route, function(activity) {
+                    checkQueryString(activity, route);
 
-                    } else {
+                    if (activity.path != currentActivity.path) {
                         that._currentActivity = activity;
 
                         if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
 
                         activity.$el.show().siblings('.view').hide();
 
-                        activity.then(function () {
+                        activity.then(function() {
                             activity.trigger('Resume').trigger('Show');
                         });
                     }
