@@ -1,16 +1,17 @@
-﻿define(function (require, exports, module) {
+﻿define(function(require, exports, module) {
     var $ = require('$'),
         _ = require('util'),
-        app = require('bridge');
+        app = require('bridge'),
+        $empty = $();
 
     var extend = ['$el', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'complete', 'pageIndex', 'pageSize', 'append', 'checkData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
 
-    var Loading = function (options) {
+    var Loading = function(options) {
         $.extend(this, _.pick(options, extend));
 
         if (options.el)
             this.$el = $(options.el);
-        !this.$el && (this.$el=$());
+        !this.$el && (this.$el = $empty);
         this.el = this.$el[0];
 
         this.params = $.extend({}, this.params, options.params);
@@ -47,21 +48,21 @@
         refresh: '<div class="refreshing"><p class="loading js_loading"></p><p class="msg js_msg"></p></div>',
         errorTemplate: '<div class="server_error"><i class="msg js_msg"></i><i class="ico_reload js_reload"></i></div>',
 
-        check: function (res) {
+        check: function(res) {
             var flag = !!(res && res.success);
             return flag;
         },
 
-        hasData: function (res) {
+        hasData: function(res) {
             return res.data && res.data.length;
         },
 
-        showMoreLoading: function () {
+        showMoreLoading: function() {
             this.showMoreMsg(this.MSG_LOADING_MORE);
             this.$refreshing.find('.js_loading').show();
         },
 
-        showMsg: function (msg) {
+        showMsg: function(msg) {
             if (this.pageIndex == 1) {
                 this.$loading.find('.js_msg').show().html(msg);
                 this.$loading.show().find('.js_loading').hide();
@@ -70,7 +71,7 @@
             }
         },
 
-        showMoreMsg: function (msg) {
+        showMoreMsg: function(msg) {
             var $refreshing = (this.$refreshing || (this.$refreshing = $(this.refresh)).appendTo(this.$content));
 
             $refreshing.find('.js_msg').show().html(msg);
@@ -79,14 +80,14 @@
 
         complete: _.noop,
 
-        showError: function (option) {
+        showError: function(option) {
             var that = this;
 
             if (this.pageIndex == 1) {
 
                 that.$loading && this.$loading.animate({
                     opacity: 0
-                }, 300, 'ease-out', function () {
+                }, 300, 'ease-out', function() {
                     that.$loading.hide().css({ opacity: '' });
                 });
 
@@ -110,7 +111,7 @@
             }
         },
 
-        showLoading: function () {
+        showLoading: function() {
             var that = this,
                 $refreshing;
 
@@ -131,13 +132,13 @@
             }
         },
 
-        hideLoading: function () {
+        hideLoading: function() {
             this.$error && this.$error.hide();
             this.$refreshing && this.$refreshing.hide();
             this.$loading.removeClass('show');
         },
 
-        setHeaders: function (key, val) {
+        setHeaders: function(key, val) {
             var attrs;
             if (!val)
                 attrs = key
@@ -152,7 +153,7 @@
             return this;
         },
 
-        setParam: function (key, val) {
+        setParam: function(key, val) {
             var attrs;
             if (!val)
                 attrs = key
@@ -172,24 +173,24 @@
             return this;
         },
 
-        getParam: function (key) {
+        getParam: function(key) {
             if (key) return this.params[key];
             return this.params;
         },
 
-        setUrl: function (url) {
+        setUrl: function(url) {
             this.url = /^http\:\/\//.test(url) ? url : (this.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
             return this;
         },
 
-        reload: function (options, callback) {
+        reload: function(options, callback) {
             if (!this.isLoading) {
                 this.pageIndex = 1;
                 this.load(options, callback);
             }
         },
 
-        load: function (options, callback) {
+        load: function(options, callback) {
             var that = this;
 
             if (that.beforeSend && that.beforeSend() === false) return;
@@ -216,7 +217,7 @@
                 type: that.method,
                 dataType: that.dataType,
                 cache: false,
-                error: function (xhr) {
+                error: function(xhr) {
                     that.isShowLoading && that.hideLoading();
 
                     var res = {};
@@ -224,7 +225,7 @@
                     that.error(res, xhr);
                     callback && callback.call(that, res, null);
                 },
-                success: function (res, status, xhr) {
+                success: function(res, status, xhr) {
                     that.isShowLoading && that.hideLoading();
 
                     if (!that.check || that.check(res)) {
@@ -245,7 +246,7 @@
                         callback && callback.call(that, res, null);
                     }
                 },
-                complete: function () {
+                complete: function() {
                     that._xhr = null;
                     that.isLoading = false;
                     that.complete();
@@ -255,24 +256,24 @@
             return that;
         },
 
-        _refresh: function () {
+        _refresh: function() {
             this.abort().load();
         },
 
-        dataNotFound: function (e, res) {
+        dataNotFound: function(e, res) {
             var that = this;
 
             if (that.pageIndex == 1) {
                 that.showError('暂无数据');
             } else {
-                setTimeout(function () {
+                setTimeout(function() {
                     that.$refreshing.hide()
 
                 }, 3000);
             }
         },
 
-        _scroll: function (e, options) {
+        _scroll: function(e, options) {
             var that = this;
 
             if (!that.isLoading && options.height + options.y + options.height / 2 >= options.scrollHeight) {
@@ -284,7 +285,7 @@
 
         _autoRefreshingEnabled: false,
 
-        checkAutoRefreshing: function (res) {
+        checkAutoRefreshing: function(res) {
             var that = this,
                 data = that.params;
 
@@ -298,7 +299,7 @@
             }
         },
 
-        enableAutoRefreshing: function () {
+        enableAutoRefreshing: function() {
 
             this.showMoreLoading('正在载入...');
 
@@ -307,12 +308,12 @@
 
             this.$scroll.on('scrollStop', $.proxy(this._scroll, this));
 
-            if (this.el.scrollTop + this.$scroll.height() >= this.$refreshing[0].offsetTop) {
+            if (this.el && this.el.scrollTop + this.$scroll.height() >= this.$refreshing[0].offsetTop) {
                 this._refresh();
             }
         },
 
-        disableAutoRefreshing: function () {
+        disableAutoRefreshing: function() {
             if (!this._autoRefreshingEnabled) return;
             this._autoRefreshingEnabled = false;
 
@@ -321,7 +322,7 @@
             this.showMoreMsg(this.MSG_NO_MORE);
         },
 
-        abort: function () {
+        abort: function() {
             if (this._xhr) {
                 this.isLoad = false;
                 this._xhr.abort();
@@ -332,7 +333,7 @@
             return this;
         },
 
-        destory: function () {
+        destory: function() {
             this.abort();
             this.disableAutoRefreshing();
             this.$error && this.$error.off('tap', '.js_reload', this.reload);

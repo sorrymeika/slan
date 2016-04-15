@@ -811,6 +811,9 @@
             mod.dependencies = meta.deps || []
             mod.factory = meta.factory
             mod.status = STATUS.SAVED
+            
+        } else if (meta.factory) {
+            mod.factory = meta.factory;
         }
     }
 

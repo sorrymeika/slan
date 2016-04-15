@@ -49,7 +49,6 @@ var User = {
 };
 
 var userApi = new api.API({
-    el: $(''),
     url: '/api/user/get',
     checkData: false,
 

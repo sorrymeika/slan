@@ -8,28 +8,26 @@ define(function(require, exports, module) {
     var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var userModel = require("models/user");
+    var md5 = require("util/md5").md5;
 
     return Activity.extend({
         events: {
             'tap .js_login:not(.disabled)': function() {
-                var mobile = this.model.get('mobile');
-                var smsCode = this.model.get('smsCode');
+                var email = this.model.get('email');
+                var password = this.model.get('password');
 
-                if (!mobile || !util.validateMobile(mobile)) {
-                    sl.tip('请输入正确的手机');
+                if (!email || !util.validateEmail(email)) {
+                    sl.tip('请输入正确的邮箱地址');
                     return;
                 }
-                if (!smsCode) {
+                if (!password) {
                     sl.tip('请输入密码');
                     return;
                 }
 
                 this.loading.setParam({
-                    mobile: mobile,
-                    smsCode: smsCode,
-                    platform: navigator.platform,
-                    deviceVersion: (util.ios ? "IOS " : "Android ") + util.osVersion,
-                    version: sl.appVersion
+                    email: email,
+                    password: md5(password)
 
                 }).load();
             }
@@ -43,7 +41,7 @@ define(function(require, exports, module) {
             Scroll.bind(this.model.refs.main);
 
             this.loading = new Loading({
-                url: '/api/user/login',
+                url: '/api/user/signin',
                 check: false,
                 checkData: false,
                 $el: this.$el,
@@ -52,7 +50,7 @@ define(function(require, exports, module) {
                         sl.tip(res.msg);
 
                     } else {
-                        userModel.set(res.data);
+                        userModel.set(res.user);
 
                         self.back(self.route.query.success || "/");
 

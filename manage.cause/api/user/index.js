@@ -15,6 +15,7 @@ app.get('/captcha', function(req, res) {
 });
 
 app.post('/signup', require("./signup"));
+app.post('/signin', require("./signin"));
 
 //用户登录权限设置
 app.use(function(req, res, next) {

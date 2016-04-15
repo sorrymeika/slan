@@ -408,7 +408,7 @@ if (args.build) {
         //复制图片资源
         var imgPromise = new Promise().resolve();
         imgPromise.each(config.images, function(i, imgDir) {
-            fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png)', function(err, result) {
+            fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function(err, result) {
                 imgPromise.next(i, err, result);
             });
 

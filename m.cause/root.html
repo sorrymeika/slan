@@ -59,6 +59,7 @@
                     res.token && util.store('token',res.token);
                     
                     var resourceMapping=res.data;
+                    var routes=$.extend(@(JSON.stringify(routes)),res.routes||{});
                     seajs.on('fetch', function (emitData) {
                         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
                         
@@ -73,7 +74,7 @@
                         });
                     });
 
-                    new App().mapRoute(@(JSON.stringify(routes))).start();
+                    new App().mapRoute(routes).start();
                 }
             });
             

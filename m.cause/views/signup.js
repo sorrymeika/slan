@@ -8,6 +8,7 @@ define(function(require, exports, module) {
     var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var userModel = require("models/user");
+    var md5 = require("util/md5").md5;
 
     return Activity.extend({
         events: {
@@ -36,7 +37,7 @@ define(function(require, exports, module) {
 
                 this.request.setParam({
                     email: email,
-                    password: password,
+                    password: md5(password),
                     validcode: this.model.data.validcode,
                     version: sl.appVersion,
                     token: util.store('token')
@@ -52,7 +53,6 @@ define(function(require, exports, module) {
 
             this.model = new model.ViewModel(this.$el, {
                 back: this.swipeRightBackAction,
-                now: Date.now(),
                 validcodeImg: api.url("/api/user/captcha?token=" + util.store('token'))
             });
 
@@ -73,7 +73,9 @@ define(function(require, exports, module) {
                         });
 
                     } else {
-                        var backUrl = self.route.query.success || "/";
+                        //var backUrl = self.route.query.success || "/";
+
+                        userModel.set(res.user);
                     }
                 },
                 error: function(res) {
@@ -84,7 +86,11 @@ define(function(require, exports, module) {
         },
 
         onShow: function() {
-            var that = this;
+            var self = this;
+
+            self.model.set({
+                now: Date.now()
+            });
         },
 
         onDestory: function() {

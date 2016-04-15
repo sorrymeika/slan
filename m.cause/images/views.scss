@@ -1,11 +1,14 @@
 ﻿@import "mixin.scss";
 @import "iconfont.css";
 
-header { background: #fff; height: 44px; line-height: 44px; }
+$color: #f54559;
+$bgcolor: #fe4a5d;
+
+header { background: #fff; height: 44px; line-height: 44px; font-weight: 200; }
 header:after { content:''; display:block;-webkit-transform: scale(.5);width:200%;border-top: 1px solid #aaa;-webkit-transform-origin: left bottom;position: absolute; bottom: 0px; }
 .has_status_bar header { border-top-color: #fff; }
 
-.head_title { color: #333; font-size: 16rem; }
+.head_title { color: $color; font-size: 16rem; font-weight: 400;}
 .has_status_bar header.header_trans { border-top-color: transparent; }
 .header_trans { background: transparent; }
 .header_trans .head_back, .header_trans .head_call, .header_trans .head_share { border-radius: 50%; background-color: rgba(0, 0, 0, .8); width: 36px; height: 36px; margin: 5px 0 0 5px; }
@@ -16,11 +19,10 @@ header:after { content:''; display:block;-webkit-transform: scale(.5);width:200%
 .head_right { position: absolute; right: 5px; left: 0px; top: 0; left: 0; text-align: right; }
 .head_right .head_call, .head_right .head_share { display: inline-block; }
 .head_back, .head_menu,.head_all { width: 60px; height: 44px; z-index: 1000; position: absolute; top: 0; left: 0; }
-.head_back:before, .head_menu:before, .head_msg:before,.head_all:before { display: block; background: url(icon.png) no-repeat; content: ''; width: 30px; height: 30px; background-size: 320px auto; margin: 7px 0 0 8px; }
-.head_back:before { background-position: -30px 0px; }
-.head_msg { width: 50px; position: absolute; right: 0px; top: 0px; height: 44px; z-index: 1000; }
-.head_msg:before { background-position: -60px 0px; }
-.head_msg i { position: absolute; top: 5px; left: 27px; background: #fff; color: #c00; border-radius: 8px; height: 14px; font-size: 12px; line-height: 14px; font-weight: normal; padding: 0 4px; }
+
+.head_msg { width: 50px; position: absolute; right: 0px; top: 0px; height: 44px; z-index: 1000; color: #999; font-size: 28px;  }
+.head_msg i { position: absolute; top: 5px; left: 27px; background: #c00; color: #fff; border-radius: 8px; height: 14px; font-size: 12px; line-height: 14px; font-weight: normal; padding: 0 4px; }
+
 .head_search_btn { min-width: 60px; position: absolute; right: 0px; top: 0px; }
 .head_search_btn .btn_small { background: #74c0f3; height: 30px; line-height: 31px; color: #fff; font-size: 14px; display: block; margin: 9px 6px 0 6px; border-radius: 4px; padding: 0 10px; }
 .head_tab, .head_search { display: -webkit-box; text-align: center; margin: 0 50px; font-size: 3rem; position: relative; }
@@ -43,12 +45,10 @@ header:after { content:''; display:block;-webkit-transform: scale(.5);width:200%
 .main { background: #eeefef; padding-top: .1px; top: 44px; }
 .refreshing { background: transparent; color: #333; }
 
-$color: #f54559;
-$bgcolor: #fe4a5d;
 
 .btn_large { height: 35px; line-height: 35px; color: #fff; background: $bgcolor; font-size: 15px;  }
 
-
+//登录注册
 .sign { top: 0px; background: #fff; }
 .sign .icon-close { font-size: 20px;  position: absolute; top: 15px; left: 15px; }
 .sign_hd { margin: 35px 10% 0 10%; font-size: 16px; color: $color; text-align: center; }
@@ -61,3 +61,12 @@ $bgcolor: #fe4a5d;
 .sign_ft { margin: 10px 10px 0 10px; font-size: 14px;}
 .sign_ft a:first-child,.sign_ft i { color: $color; }
 .sign_ft a:last-child { float: right; }
+
+.footer {  background: rgba(255, 255, 255, .8); height: 48px; line-height: 48px; }
+.footer ul { display: -webkit-box; }
+.footer ul li { -webkit-box-flex: 1; width: 0px; }
+.footer .iconfont {font-size: 30px; color: #ccc; text-align: center; }
+.footer .iconfont.curr {color: $color;}
+
+//首页
+.home { margin-bottom: 48px; }

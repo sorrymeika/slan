@@ -32,7 +32,6 @@ module.exports = function(req, res) {
                 }
 
                 if (result && result.length) {
-                    console.log(result);
                     res.json({ success: false, msg: '该邮箱已被注册' });
                     return;
                 }
@@ -48,16 +47,16 @@ module.exports = function(req, res) {
                     }
 
                     var token = md5(email + password + util.formatDate(Date.now(), "yyyyMM"));
-
-                    userModel.setToken(result.insertId, token);
+                    var user = {
+                        id: result.insertId,
+                        email: email,
+                        token: token
+                    };
+                    userModel.set(result.insertId, user);
 
                     res.json({
                         success: true,
-                        user: {
-                            id: result.insertId,
-                            email: email,
-                            token: token
-                        }
+                        user: user
                     });
                 });
 

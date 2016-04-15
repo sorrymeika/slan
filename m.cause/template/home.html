@@ -1,5 +1,18 @@
 ﻿<header>
     <div class="head_title">{{title}}</div>
+    <div class="head_msg iconfont icon-message" ref="msg">
+        <i sn-display="{{$state.msgCount}}">{{$state.msgCount}}</i>
+    </div>
 </header>
 <div ref="main" class="main">
+    <div class="home"></div>
 </div>
+<footer class="footer">
+    <ul>
+        <li class="iconfont icon-home1{{tab==0?' curr':''}}" sn-tap="this.changeTab(0)"></li>
+        <li class="iconfont icon-topic1{{tab==1?' curr':''}}" sn-tap="this.changeTab(1)"></li>
+        <li class="iconfont icon-find{{tab==2?' curr':''}}" sn-tap="this.changeTab(2)"></li>
+        <li class="iconfont icon-group{{tab==3?' curr':''}}" sn-tap="this.changeTab(3)"></li>
+        <li class="iconfont icon-user2{{tab==4?' curr':''}}" sn-tap="this.changeTab(4)"></li>
+    </ul>
+</footer>
