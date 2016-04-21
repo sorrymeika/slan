@@ -1,10 +1,11 @@
-﻿var $ = require('$');
+var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var bridge = require('bridge');
 var Loading = require('../widget/loading');
 var vm = require('core/model');
 var Scroll = require('../widget/scroll');
+var Slider = require('../widget/slider');
 var animation = require('animation');
 var Confirm = require("components/confirm");
 var api = require("models/api");
@@ -15,47 +16,68 @@ var State = vm.State;
 module.exports = Activity.extend({
     events: {},
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var model = self.model = new vm.ViewModel(this.$el, {
-            title: '起姻'
+            title: '缘起之因'
         });
 
-        Scroll.bind(self.model.refs.main);
+        Scroll.bind(this.$('.main'));
+        Scroll.bind(model.refs.interest, {
+            vScroll: false,
+            hScroll: true
+        });
 
-        model.changeTab = function(e, tab) {
+        model.changeTab = function (e, tab) {
             this.set({
                 tab: tab
             })
         }
 
         this.shakeMsg();
+
+        var slider = new Slider({
+            container: model.refs.topbanner,
+            loop: true,
+            data: [{
+                src: 'http://pic2.pedaily.cn/201604/20160420@137756.jpg',
+                url: ''
+            }, {
+                    src: 'http://pic2.pedaily.cn/201604/20160421@137950.jpg',
+                    url: ''
+                }]
+        });
+
     },
 
-    onLoad: function() {
+    onLoad: function () {
 
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onPause: function() {
+    onPause: function () {
     },
 
-    onDestory: function() {
+    onDestory: function () {
     },
 
     //消息图标抖一抖
-    shakeMsg: function() {
+    shakeMsg: function () {
         var model = this.model;
 
-        setInterval(function() {
+        State.set({
+            msgCount: 1
+        })
+
+        setInterval(function () {
             if (State.data.msgCount > 0) {
                 var anims = 1;
 
-                setTimeout(function(params) {
+                setTimeout(function (params) {
                     var rotate;
 
                     if (anims < 10) {

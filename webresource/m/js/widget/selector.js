@@ -1,9 +1,9 @@
-﻿define(function (require, exports, module) {
+﻿define(function(require, exports, module) {
     var $ = require('$'),
         util = require('util'),
         Scroll = require('./scrollview');
 
-    var SelectorItem = function (options) {
+    var SelectorItem = function(options) {
         var that = this;
 
         Scroll.call(this, this.el, options);
@@ -29,22 +29,21 @@
 
     $.extend(SelectorItem.prototype, {
         options: {
-            bounce: false,
             hScroll: false,
             vScroll: true
         },
 
-        init: function () {
+        init: function() {
         },
 
         el: '<div></div>',
 
         template: util.template('<li><%=text%></li>'),
 
-        set: function (data) {
+        set: function(data) {
             var that = this;
             var html = '';
-            $.each(data, function (i, item) {
+            $.each(data, function(i, item) {
                 html += that.template(item);
             });
 
@@ -54,16 +53,16 @@
             return this.index(0);
         },
 
-        beforeMomentum: function () {
+        beforeMomentum: function() {
             this.touch.addMomentumOptions(this._startTop, this.y, this.minY, this.maxY, this.wrapperH, this.itemHeight);
         },
 
-        momentum: function (a) {
+        momentum: function(a) {
             this.y = a.current;
             this.$scroller.css({ '-webkit-transform': 'translate(' + (-this.x) + 'px,' + (-this.y) + 'px) translateZ(0)' });
         },
 
-        stop: function () {
+        stop: function() {
             this.index(Math.round(this.y / this.itemHeight));
         },
 
@@ -71,7 +70,7 @@
         minDelta: 0,
 
         _index: 0,
-        index: function (index) {
+        index: function(index) {
             if (typeof index === 'undefined') return this._index;
 
             if (index >= this.data.length) {
@@ -89,11 +88,11 @@
             return this;
         },
 
-        val: function (val) {
+        val: function(val) {
             if (typeof val === 'undefined')
                 return this.selectedData.value;
 
-            var index = util.indexOf(this.data, function (item) {
+            var index = util.indexOf(this.data, function(item) {
                 return item.value == val;
             });
 
@@ -102,9 +101,9 @@
 
     });
 
-    var Selector = function (options) {
+    var Selector = function(options) {
         options = $.extend({
-            complete: function () { },
+            complete: function() { },
             options: []
         }, options);
 
@@ -117,7 +116,7 @@
         this.$selector = this.$el.find('.selector');
         this.selectors = [];
 
-        $container.on('tap', function (e) {
+        $container.on('tap', function(e) {
             if (e.target === $container[0])
                 that.hide();
         });
@@ -126,26 +125,26 @@
             options.options = [options.options];
         }
 
-        $.each(options.options, function (i, item) {
+        $.each(options.options, function(i, item) {
             that.add(item);
         });
 
-        this.$el.on($.fx.transitionEnd, function () {
+        this.$el.on($.fx.transitionEnd, function() {
 
             that._visible = that.$el.hasClass('show');
             if (!that._visible) {
                 that.$el.hide();
                 that.$container.hide();
             } else {
-                that.each(function () {
+                that.each(function() {
                     this.scrollTo(0, this._index * this.itemHeight);
                 });
             }
         });
 
-        this.$click = this.$el.find('.js_click').on('tap', function () {
+        this.$click = this.$el.find('.js_click').on('tap', function() {
             var result = [];
-            $.each(that.selectors, function (i, sel) {
+            $.each(that.selectors, function(i, sel) {
                 result.push(sel.selectedData);
             });
 
@@ -156,24 +155,24 @@
 
     Selector.prototype = {
         _visible: false,
-        eq: function (i) {
+        eq: function(i) {
             return this.selectors[i];
         },
-        each: function (fn) {
+        each: function(fn) {
             $.each(this.selectors, fn);
         },
-        add: function (options) {
+        add: function(options) {
             var sel = new SelectorItem(options);
             this.selectors.push(sel);
             this.$selector.append(sel.$el);
         },
-        hide: function () {
+        hide: function() {
             var that = this;
 
             if (this._visible) {
                 that.$mask.animate({
                     backgroundColor: 'rgba(0,0,0,0)'
-                }, 350, function () {
+                }, 350, function() {
                     that.$mask.hide().css({ backgroundColor: 'rgba(0,0,0,.3)' });
                 });
 
@@ -182,7 +181,7 @@
 
             return that;
         },
-        show: function () {
+        show: function() {
             var that = this;
 
             if (!that._visible) {
@@ -199,7 +198,7 @@
 
             return that;
         },
-        destory: function () {
+        destory: function() {
             this.$el.off($.fx.transitionEnd);
             this.$click.off('click').off('tap');
             this.$mask.remove();

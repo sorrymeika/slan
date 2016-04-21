@@ -1,120 +1,198 @@
 ﻿define(function(require, exports, module) {
     var $ = require('$'),
         _ = require('util'),
-        ScrollView = require('./scrollview');
+        ScrollView = require('./scrollview'),
+        Touch = require('core/touch');
 
-    var Slider = function(el, options) {
+    var Slider = function(options) {
         options = $.extend({
             maxDuration: 400,
-            ease: 'ease-out',
             hScroll: true,
             vScroll: false,
             width: '100%',
             index: 0,
             autoLoop: false,
-            align: 'center'
+            align: 'center',
+            container: null
 
         }, options);
 
         $.extend(this, _.pick(options, ['width', 'loop', 'render', 'template', 'itemTemplate', 'navTemplate']));
 
-        var that = this,
+        var self = this,
             data = options.data,
             itemsHtml = '',
             item,
             $slider;
 
-        if (typeof that.itemTemplate === 'string') that.itemTemplate = _.template(that.itemTemplate);
-        if (typeof that.width == 'string') that.width = parseInt(that.width.replace('%', ''));
+        if (typeof self.itemTemplate === 'string') self.itemTemplate = _.template(self.itemTemplate);
+        if (typeof self.width == 'string') self.width = parseInt(self.width.replace('%', ''));
 
-        if (options.index != undefined) options.index = options.index;
+        if (options.index !== undefined) options.index = options.index;
 
-        ScrollView.call(this, $(that.template).appendTo($(el)), options);
+        this.options = options;
 
-        options = this.options;
+        self.$el = $(self.template());
+        self.el = self.$el[0];
 
-        that.touch.on('stop', that.stop, that);
+        if (options.container) {
+            self.$el.appendTo(options.container);
+        }
 
-        $slider = that.$slider = that.$el.find('.js_slider');
+        self.$slider = $slider = self.$el.find('.js_slider');
+        self.slider = $slider[0];
+        self.$dots = self.$el.find('.js_slide_navs').appendTo(self.$el);
 
-        that.$dots = that.$el.find('.js_slide_navs').appendTo(that.$el);
+        this.touch = new Touch(self.$el, {
+            enableVertical: options.vScroll,
+            enableHorizontal: options.hScroll,
+            momentum: false
+        });
+
+        this.touch.on('start', function() {
+
+        }).on('move', function() {
+            self.slider.style.webkitTransform = 'translate3d(' + this.x * -1 + 'px,' + this.y * -1 + 'px,0)';
+
+        }).on('end', function() {
+
+            var index = this.isMoveLeft && this.x - this.startX > 0 ? options.index + 1 : !this.isMoveLeft && this.x - this.startX < 0 ? options.index - 1 : options.index;
+
+            self._toPage(options.loop ? index : index < 0 ? 0 : index >= self.length ? self.length - 1 : index, 250);
+
+            if (self.options.autoLoop) {
+                self.startAutoLoop();
+            }
+        });
+
+        self.set(data);
 
         if (options.imagelazyload) {
-            that.bind("Change", function() {
-                that._loadImage();
-            });
-            that._loadImage();
+            self._loadImage();
         }
 
         if (options.arrow) {
-            that._prev = $('<span class="slider-pre js_pre"></span>').appendTo(that.$el);
-            that._next = $('<span class="slider-next js_next"></span>').appendTo(that.$el);
+            self._prev = $('<span class="slider-pre js_pre"></span>').appendTo(self.$el);
+            self._next = $('<span class="slider-next js_next"></span>').appendTo(self.$el);
 
-            that.$el.on('tap', '.js_pre', function(e) {
-                that.index(options.index - 1, 300);
+            self.$el.on('tap', '.js_pre', function(e) {
+                self._toPage(options.index - 1, 250);
             })
                 .on('tap', '.js_next', function(e) {
-                    that.index(options.index + 1, 300);
+                    self._toPage(options.index + 1, 250);
                 });
         }
 
-        $(window).on('ortchange', $.proxy(that._adjustWidth, that));
-
-        that.set(data);
+        $(window).on('ortchange', $.proxy(self._adjustWidth, self));
 
         if (options.autoLoop) {
-            that.startAutoLoop();
+            self.startAutoLoop();
         }
 
-        that.$el.css({ overflow: '' })
+        self.$el.css({ overflow: '' })
     }
 
-    $.extend(Slider.prototype, ScrollView.prototype, {
+    $.extend(Slider.prototype, {
         loop: false,
         x: 0,
+        itemTemplate: '<a href="<%=url%>" forward><img src="<%=src%>" /></a>',
         renderItem: _.template('<li class="js_slide_item slider-item"><%=$data%></li>'),
-        itemTemplate: '<%= %>',
-        template: '<div class="slider"><ul class="js_slider slider-con"></ul><ol class="js_slide_navs slider-nav"></ol></div>',
+        template: _.template('<div class="slider"><ul class="js_slider slider-con"></ul><ol class="js_slide_navs slider-nav"></ol></div>'),
+
+        _loadImage: function() {
+            var self = this;
+
+            var item = self.$items.eq(self.options.index);
+            if (!item.prop('_detected')) {
+
+                if (self.loop) {
+                    if (self.options.index == 1) {
+                        item = item.add(self.$slider.children(':last-child'));
+                    } else if (self.options.index == self.length + 1) {
+                        item = item.add(self.$slider.children(':first-child'));
+                    }
+                }
+
+                item.find('img[lazyload]').each(function() {
+                    this.src = this.getAttribute('lazyload');
+                    this.removeAttribute('lazyload');
+                });
+
+                item.prop('_detected', true);
+            }
+        },
+
+        _adjust: function() {
+            var self = this,
+                slider = self.$slider,
+                children = slider.children(),
+                length = children.length;
+
+            self.containerW = self.el.clientWidth;
+            self.wrapperW = self.containerW * self.width / 100;
+            self.scrollerW = self.wrapperW * length;
+
+            slider.css({ width: length * self.width + '%', marginLeft: '0%' });
+
+            children.css({ width: 100 / length + '%' });
+
+            self.touch.maxX = self.scrollerW;
+            self.touch.minX = self.wrapperW * -1;
+        },
+        _adjustWidth: function() {
+            var self = this;
+
+            self._adjust();
+
+            self.x = self.wrapperW * self.options.index;
+            self.$slider.css({ '-webkit-transform': 'translate(' + (-self.x) + 'px,0px) translateZ(0)' });
+        },
+
+        _change: function() {
+            var self = this,
+                options = self.options;
+
+            if (options.onChange) options.onChange.call(self, options.index);
+
+            self._loadImage();
+
+            self.$dots.children().removeClass('curr').eq(options.index).addClass('curr');
+
+            console.log(options.index);
+        },
 
         _set: function(data) {
-            var that = this,
+            var self = this,
                 itemsHtml = '',
                 $slider,
-                options = that.options;
+                options = self.options;
 
             if (!$.isArray(data)) data = [data];
-            that._data = data;
-            that.length = data.length;
+            self._data = data;
+            self.length = data.length;
 
             var dotsHtml = '';
             for (var i = 0, n = data.length; i < n; i++) {
-                itemsHtml += that.render(data[i]);
+                itemsHtml += self.render(data[i]);
                 dotsHtml += '<li class="slider-nav-item"></li>';
             }
 
-            $slider = that.$slider.html(itemsHtml);
-            that.$items = $slider.children();
-            that.slider = $slider[0];
+            $slider = self.$slider.html(itemsHtml);
+            self.$items = $slider.children();
 
             if (options.dots) {
-                that.$dots.html(dotsHtml);
-                that.$dots.children().eq(options.index).addClass('curr')
+                self.$dots.html(dotsHtml);
+                self.$dots.children().eq(options.index).addClass('curr')
             }
 
-            //that.index=index== -1?that.length%2==0?that.length/2-1:Math.floor(that.length/2):index;
-            if (that.length < 2) that.loop = false;
-            else if (that.width < 100) that.loop = false;
+            if (self.length < 2) self.loop = false;
+            else if (self.width < 30) self.loop = false;
 
-            var length;
-            if (that.loop) {
-                $slider.prepend(that.$items.eq(that.length - 1).clone());
-                $slider.append(that.$items.eq(0).clone());
-                that.$items = $slider.children();
-                options.index++;
-            } else {
-                length = that.length;
+            if (self.loop) {
+                $slider.prepend(self.$items.eq(self.length - 1).clone());
+                $slider.append(self.$items.eq(0).clone());
+                self.$items = $slider.children();
             }
-
         },
 
         prepend: function(data) {
@@ -138,14 +216,14 @@
         },
 
         startAutoLoop: function() {
-            var that = this;
-            if (that.loopTimer) return;
+            var self = this;
+            if (self.loopTimer) return;
 
-            that.loopTimer = setTimeout(function() {
-                that.index(that.options.index + 1);
+            self.loopTimer = setTimeout(function() {
+                self.index(self.options.index + 1);
 
-                that.loopTimer = setTimeout(arguments.callee, that.options.autoLoop);
-            }, that.options.autoLoop);
+                self.loopTimer = setTimeout(arguments.callee, self.options.autoLoop);
+            }, self.options.autoLoop);
         },
 
         stopAutoLoop: function() {
@@ -153,61 +231,48 @@
             this.loopTimer = null;
         },
 
-        start: function() {
-            var that = this,
-                touch = that.touch,
-                index = this._getIndex();
+        _toPage: function(page, duration) {
+            var self = this;
+            var index = page > this.$items.length ? 0 : page < -1 ? this.$items.length - 1 : page;
+            var x = this.wrapperW * (this.loop ? index + 1 : index);
 
-            if (!that.options.hScroll && touch.isDirectionX || !that.options.vScroll && touch.isDirectionY) {
-                touch.stop();
-                return;
-            }
+            self.options.index = page >= self.length ? 0 : page < 0 ? self.length - 1 : page;
+            self._change();
 
-            that.maxX = Math.min(that.scrollerW - that.wrapperW, Math.min(index + 1, that.loop ? index + 1 : (that.length - Math.floor(that.containerW / that.wrapperW))) * that.wrapperW);
-            that.minX = Math.max(0, (index - 1) * that.wrapperW);
-            that._startLeft = that.startLeft = that.x;
-
-            that.stopAutoLoop();
+            self.touch.scrollTo(x, 0, duration, function() {
+                if (self.options.index != index) {
+                    self.index(page);
+                }
+            });
         },
 
         index: function(index, duration) {
             var options = this.options,
-                x,
-                changeFlag;
+                x;
 
             if (typeof index === 'undefined') return options.index;
 
-            index = index >= this.$items.length ? 0 : index < 0 ? this.$items.length - 1 : index;
+            index = index >= this.length ? 0 : index < 0 ? this.length - 1 : index;
 
             if (this.loop) {
-                if (index == 0) {
-                    index = this.$items.length - 2;
-                    this.maxX = x = index * this.wrapperW;
-                } else if (index == this.$items.length - 1) {
-                    index = 1;
-                    this.minX = x = index * this.wrapperW;
-                }
-            }
+                x = this.wrapperW * (index + 1);
 
-            if (options.index != index) {
-                this.currentData = this._data[this.loop ? index - 1 : index];
-                options.index = index;
+            } else {
+                x = this.wrapperW * index;
+            }
+            if (index != options.index) {
                 this._change();
+                options.index = index;
             }
 
-            x = index * this.wrapperW;
-            this.maxX = x;
-
-            this.scrollTo(x, 0, duration);
+            if (x != this.x) this.touch.scrollTo(x, 0, duration);
         },
-        _getIndex: function() {
-            var index = Math.round(this.x / this.wrapperW);
 
-            return index || 0;
-        },
+
         data: function(index) {
             return this._data[index || this.options.index];
         },
+        
         appendItem: function() {
             var item = $(this.renderItem(''));
             this.$slider.append(item);
@@ -224,84 +289,14 @@
 
             return item;
         },
+        
         render: function(dataItem) {
             return this.renderItem(this.itemTemplate(dataItem));
         },
 
-        stop: function() {
-            var that = this;
-            var x = that.x;
-            var index = this._getIndex();
-
-            that.index(index);
-
-            if (that.options.autoLoop) {
-                that.startAutoLoop();
-            }
-            that.trigger('stop');
-        },
-        _loadImage: function() {
-            var that = this;
-
-            var item = that.$items.eq(that.options.index);
-            if (!item.prop('_detected')) {
-
-                if (that.loop) {
-                    if (that.options.index == 1) {
-                        item = item.add(that.$slider.children(':last-child'));
-                    } else if (that.options.index == that.length + 1) {
-                        item = item.add(that.$slider.children(':first-child'));
-                    }
-                }
-
-                item.find('img[lazyload]').each(function() {
-                    this.src = this.getAttribute('lazyload');
-                    this.removeAttribute('lazyload');
-                });
-
-                item.prop('_detected', true);
-            }
-        },
-
-        _adjust: function() {
-            var that = this,
-                slider = that.$slider,
-                children = slider.children(),
-                length = children.length;
-
-            that.containerW = that.el.clientWidth;
-            that.wrapperW = that.containerW * that.width / 100;
-            that.scrollerW = that.wrapperW * length;
-
-            slider.css({ width: length * that.width + '%', marginLeft: this.options.align == 'center' ? (100 - that.width) / 2 + '%' : '0%' });
-
-            that.divisorX = that.wrapperW;
-
-            children.css({ width: 100 / length + '%' });
-        },
-        _adjustWidth: function() {
-            var that = this;
-
-            that._adjust();
-
-            that.x = that.wrapperW * that.options.index;
-            that.$scroller.css({ '-webkit-transform': 'translate(' + (-that.x) + 'px,0px) translateZ(0)' });
-        },
-
-        _change: function() {
-            var that = this,
-                options = that.options,
-                index = that.loop ? options.index - 1 : options.index;
-
-            if (options.onChange) options.onChange.call(that, index);
-            that.trigger('change', index, that.currentData);
-
-            that.$dots.children().removeClass('curr').eq(index).addClass('curr')
-        },
-
         destory: function() {
             $(window).off('ortchange', this._adjustWidth);
-            that.$el.off('tap');
+            self.$el.off('tap');
             this.touch.destory();
         }
     })

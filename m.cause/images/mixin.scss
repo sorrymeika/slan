@@ -3,5 +3,12 @@
 }
 .border_bottom {
     position: relative;
-    &:after{@include border(#ddd);} }
+    &:after{@include border(#ddd);} 
+}
+
+.right_arrow { position: relative; }
+.right_arrow:after { display: inline-block; content: '';border-right: 2px solid #ccc;border-top: 2px solid #ddd; -webkit-transform: rotate(45deg); width: 10px; height: 10px; position: absolute; right: 10px; top: 50%; margin-top: -7px; }
+
+.bottom_line {background-image: url(repeat-x.png);background-repeat: repeat-x;background-position: 0 bottom;background-size: auto 1px;}
+.right_line {background-image: url(repeat-y.png);background-repeat: repeat-y;background-position: right 0;background-size: 1px auto;}
 .icon {content: '';display: block; background: url(icon.png) no-repeat 0px 0px; background-size: 320px auto; width: 30px; height: 30px;}

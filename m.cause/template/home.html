@@ -1,18 +1,110 @@
-﻿<header>
+<header>
     <div class="head_title">{{title}}</div>
-    <div class="head_msg iconfont icon-message" ref="msg">
-        <i sn-display="{{$state.msgCount}}">{{$state.msgCount}}</i>
+    <div class="head_msg iconfont icon-mail" ref="msg">
+        <i class="iconfont icon-favfull" sn-display="{{$state.msgCount}}"><em>{{$state.msgCount}}</em></i>
     </div>
 </header>
-<div ref="main" class="main">
-    <div class="home"></div>
+<div class="main">
+    <div class="home" ref="home">
+        <div class="topbanner" ref="topbanner"></div>
+        <ul class="nav">
+            <li>
+                <i class="iconfont icon-dict"></i>
+                <em>恋爱速配</em>
+            </li>
+            <li>
+                <i class="iconfont icon-random"></i> 随机聊
+            </li>
+            <li>
+                <i class="iconfont icon-life"></i>
+                <em>生活与兴趣</em>
+            </li>
+        </ul>
+        <div class="hm_interest">
+            <div class="hd"><i class="iconfont icon-lovelist"></i>你可能感兴趣的人</div>
+            <div class="listwrap" ref="interest">
+                <div class="list" style="width:{{242*2}}px">
+                    <div class="item">
+                        <div class="bd">
+                            <img src="http://ubmcmm.baidustatic.com/media/v1/0f0000RguPJWnQNYGdVyV6.jpg" class="img">
+                            <p class="name">小柚子</p>
+                            <p class="like">被200人关注</p>
+                        </div>
+                        <div class="album">
+                            <ul>
+                                <li><img src="http://ubmcmm.baidustatic.com/media/v1/0f0000RguPJWnQNYGdVyV6.jpg"></li>
+                                <li><img src="http://ubmcmm.baidustatic.com/media/v1/0f0000RguPJWnQNYGdVyV6.jpg"></li>
+                                <li><img src="http://ubmcmm.baidustatic.com/media/v1/0f0000RguPJWnQNYGdVyV6.jpg"></li>
+                            </ul>
+                        </div>
+                        <div class="ft"><b class="btn_empty">关注</b></div>
+                    </div>
+                    <div class="item">
+                        <div class="bd">
+                            <img src="" class="img">
+                            <p class="name">小柚子</p>
+                            <p class="like">被200人关注</p>
+                        </div>
+                        <div class="album">
+                            <ul>
+                                <li><img src="https://pic1.zhimg.com/123344aa685e33fd370bbd7945924e8c_200x112.jpg"></li>
+                                <li><img src="https://pic1.zhimg.com/123344aa685e33fd370bbd7945924e8c_200x112.jpg"></li>
+                                <li><img src="https://pic1.zhimg.com/123344aa685e33fd370bbd7945924e8c_200x112.jpg"></li>
+                            </ul>
+                        </div>
+                        <div class="ft"><b class="btn_empty">关注</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hm_topic">
+            <div class="hd"><i class="iconfont icon-coffee"></i>每日话题</div>
+            <div class="bd">
+                <div class="tit right_arrow">结婚门当户对很重要么？</div>
+                <div class="con">
+                    <p class="img">
+                        <img src="http://i1.s2.dpfile.com/pc/b3e31bfd4669086784064d51ca432683(48c48)/thumb.jpg" />
+                        <span>200</span>
+                    </p>
+                    <p class="text">所谓的门当户对不一定是指物质上的。而是指两个人有着相似的成长经历，相似的人生观和价值观，能为了相似的目标而并肩同行。</p>
+                </div>
+            </div>
+        </div>
+        <div class="hm_activity">
+            <div class="hd"><i class="iconfont icon-activity"></i>近期活动
+                <a href="#/" class="more">更多&gt;</a>
+            </div>
+            <ul class="bd">
+                <li>
+                    <div class="img">
+                        <img src="http://i1.s2.dpfile.com/pc/b3e31bfd4669086784064d51ca432683(48c48)/thumb.jpg" />
+                    </div>
+                    <div class="con">
+                        <p class="tit">大悦城魔兽世界展</p>
+                        <p class="date">3/14-4/15</p>
+                        <p class="addr">上海市大悦城</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="img">
+                        <img src="http://i1.s2.dpfile.com/pc/b3e31bfd4669086784064d51ca432683(48c48)/thumb.jpg" />
+                    </div>
+                    <div class="con">
+                        <p class="tit">大悦城魔兽世界展</p>
+                        <p class="date">3/14-4/15</p>
+                        <p class="addr">上海市大悦城</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
 <footer class="footer">
     <ul>
         <li class="iconfont icon-home1{{tab==0?' curr':''}}" sn-tap="this.changeTab(0)"></li>
         <li class="iconfont icon-topic1{{tab==1?' curr':''}}" sn-tap="this.changeTab(1)"></li>
         <li class="iconfont icon-find{{tab==2?' curr':''}}" sn-tap="this.changeTab(2)"></li>
-        <li class="iconfont icon-group{{tab==3?' curr':''}}" sn-tap="this.changeTab(3)"></li>
+        <li class="iconfont icon-lovemessage{{tab==3?' curr':''}}" sn-tap="this.changeTab(3)"></li>
         <li class="iconfont icon-user2{{tab==4?' curr':''}}" sn-tap="this.changeTab(4)"></li>
     </ul>
 </footer>

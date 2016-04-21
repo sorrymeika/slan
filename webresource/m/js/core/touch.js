@@ -176,7 +176,6 @@ $.extend(Touch.prototype, {
             }
             self._stop();
             e.cancelTap = true;
-            console.log('cancelTap', e.cancelTap)
             return;
         }
 
@@ -328,15 +327,15 @@ $.extend(Touch.prototype, {
         });
     },
 
-    scrollTo: function(x, y, duration) {
+    scrollTo: function(x, y, duration, callback) {
         var self = this;
         x = self.options.enableHorizontal ?
             x >= this.maxX ? this.maxX : x <= this.minX ? this.minX : x
             : self.x;
 
         y = self.options.enableVertical ?
-            y >= this.maxY ? this.maxY : y <= this.minY ? this.minY : x
-            : self.x;
+            y >= this.maxY ? this.maxY : y <= this.minY ? this.minY : y
+            : self.y;
 
         if (!duration) {
             self.x = x;
@@ -347,14 +346,14 @@ $.extend(Touch.prototype, {
             var currentX = self.x;
             var currentY = self.y;
             var distX = x - self.x;
-            var distY = y - self.x;
+            var distY = y - self.y;
             animation.animate(function(d) {
                 self.x = currentX + distX * d;
                 self.y = currentY + distY * d;
 
                 self.trigger('move');
 
-            }, duration, 'ease');
+            }, duration, 'ease', callback);
         }
     },
 

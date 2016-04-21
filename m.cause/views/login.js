@@ -1,4 +1,4 @@
-define(function(require, exports, module) {
+define(function (require, exports, module) {
 
     var $ = require('$');
     var util = require('util');
@@ -12,7 +12,7 @@ define(function(require, exports, module) {
 
     return Activity.extend({
         events: {
-            'tap .js_login:not(.disabled)': function() {
+            'tap .js_login:not(.disabled)': function () {
                 var email = this.model.get('email');
                 var password = this.model.get('password');
 
@@ -33,7 +33,7 @@ define(function(require, exports, module) {
             }
         },
 
-        onCreate: function() {
+        onCreate: function () {
             var self = this;
 
             this.model = new model.ViewModel(this.$el, {
@@ -45,7 +45,7 @@ define(function(require, exports, module) {
                 check: false,
                 checkData: false,
                 $el: this.$el,
-                success: function(res) {
+                success: function (res) {
                     if (!res.success) {
                         sl.tip(res.msg);
 
@@ -57,17 +57,17 @@ define(function(require, exports, module) {
                         self.setResult("Login");
                     }
                 },
-                error: function(res) {
+                error: function (res) {
                     sl.tip(res.msg);
                 }
             });
         },
 
-        onShow: function() {
+        onShow: function () {
             var that = this;
         },
 
-        onDestory: function() {
+        onDestory: function () {
         }
     });
 });
