@@ -4,7 +4,7 @@
         <i class="iconfont icon-favfull" sn-display="{{$state.msgCount}}"><em>{{$state.msgCount}}</em></i>
     </div>
 </header>
-<div class="main">
+<div class="main" sn-display="{{tab==0}}">
     <div class="home" ref="home">
         <div class="topbanner" ref="topbanner"></div>
         <ul class="nav">
@@ -47,9 +47,9 @@
                         </div>
                         <div class="album">
                             <ul>
-                                <li><img src="https://pic1.zhimg.com/123344aa685e33fd370bbd7945924e8c_200x112.jpg"></li>
-                                <li><img src="https://pic1.zhimg.com/123344aa685e33fd370bbd7945924e8c_200x112.jpg"></li>
-                                <li><img src="https://pic1.zhimg.com/123344aa685e33fd370bbd7945924e8c_200x112.jpg"></li>
+                                <li><img src="http://i1.s2.dpfile.com/pc/b3e31bfd4669086784064d51ca432683(48c48)/thumb.jpg"></li>
+                                <li><img src="http://i1.s2.dpfile.com/pc/b3e31bfd4669086784064d51ca432683(48c48)/thumb.jpg"></li>
+                                <li><img src="http://i1.s2.dpfile.com/pc/b3e31bfd4669086784064d51ca432683(48c48)/thumb.jpg"></li>
                             </ul>
                         </div>
                         <div class="ft"><b class="btn_empty">关注</b></div>
@@ -97,6 +97,32 @@
                 </li>
             </ul>
         </div>
+    </div>
+</div>
+<div class="main" sn-display="{{tab==4}}">
+    <div class="user">
+        <div class="info">
+            <img src="" class="img">
+            <div class="bd">
+                <p class="name">小黄鱼</p>
+                <p class="con"><em>20岁</em><em>男</em><em>IT工程师</em></p>
+                <p class="text">猪队友</p>
+            </div>
+        </div>
+
+        <ul>
+            <li>我的好友</li>
+            <li>我的关注</li>
+            <li>我的追求者</li>
+            <li>关注我的人</li>
+        </ul>
+
+        <ul>
+            <li>意见反馈</li>
+            <li>分享APP</li>
+            <li>设置</li>
+        </ul>
+
     </div>
 </div>
 <footer class="footer">

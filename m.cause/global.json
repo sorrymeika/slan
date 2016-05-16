@@ -1,7 +1,7 @@
 {
     "debug": true,
     "dest": "./dest",
-    "api": "http://10.0.72.241:6006",
+    "api": "http://10.0.73.103:6006",
     "proxy": {
         "/proxy/*": "testappapi-1-2-0.abs.cn"
     },
@@ -30,10 +30,10 @@
             "api": "http://appuser2.abs.cn"
         },
         "debug": {
-            "api": "http://10.0.79.244:5559/proxy1"
+            "api": "http://10.0.73.103:5559/proxy1"
         },
         "dev": {
-            "api": "http://172.16.168.185:6005"
+            "api": "http://10.0.73.103:6005"
         }
     },
     "framework": {
