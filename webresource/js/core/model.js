@@ -279,8 +279,7 @@
 
         replacement.repeat = this;
         this.replacement = replacement;
-        this.el.parentNode.insertBefore(replacement, this.el);
-        this.el.parentNode.removeChild(this.el);
+        this.el.parentNode.replaceChild(replacement, this.el);
         this.snRepeats = [];
 
         if (this.filters) {
@@ -392,6 +391,7 @@
             var repeat = this.repeat;
             var orderBy = repeat.orderBy;
             var root = this.referenceModel.root;
+            var parentNode = this.replacement.parentNode;
 
             if (orderBy) {
                 list.sort(function (a, b) {
@@ -401,13 +401,25 @@
                 });
             }
 
+            var prevEl;
             for (var i = 0, len = list.length; i < len; i++) {
                 var item = list[i];
                 var el;
 
                 if (repeat.filter === undefined || root.call(repeat.filter, Filters, item.model, this.replacement)) {
                     el = item.el ? item.el : (item.el = this.cloneNode(this.el || (this.el = this.cloneNode(repeat.el)), item.model));
-                    fragment.appendChild(el);
+                    if (prevEl) {
+                        if (prevEl.nextSibling != el) {
+                            prevEl.nextSibling
+                                ? prevEl.parentNode.insertBefore(el, prevEl.nextSibling)
+                                : prevEl.parentNode.appendChild(el);
+                        }
+
+                    } else if (!el.parentNode) {
+                        fragment.appendChild(el);
+                    }
+                    prevEl = el;
+
                     el.snIndex = index;
                     if (repeat.indexAlias) {
                         el.setAttribute('sn-index-alias', repeat.indexAlias);
@@ -421,7 +433,7 @@
                 }
             }
 
-            this.replacement.parentNode.insertBefore(fragment, this.replacement);
+            if (fragment.childNodes.length) parentNode.insertBefore(fragment, this.replacement);
         },
 
         cloneNode: function (el, model, parentNode, repeatNode) {
@@ -861,7 +873,7 @@
                             el.style.cssText += val;
                             break;
                         case 'checked':
-                        case 'selected':
+                         case 'selected':
                             (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
                             break;
                         default:
