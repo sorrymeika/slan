@@ -1,7 +1,7 @@
 {
     "debug": true,
     "dest": "./dest",
-    "api": "http://10.0.74.143:6006",
+    "api": "http://10.0.76.217:6006",
     "proxy": {
         "/proxy/*": "testappapi-1-2-0.abs.cn"
     },
@@ -12,6 +12,7 @@
     "images": [
         "../webresource/m/images"
     ],
+    "combine": {},
     "path": [
         "../webresource",
         "../webresource/js",
@@ -37,39 +38,37 @@
         }
     },
     "framework": {
-        "slan.m": {
-            "seajs": "../webresource/js/seajs/sea",
-            "zepto": "../webresource/js/zepto",
-            "extend/touch": "../webresource/m/js/extend/touch",
-            "extend/fx": "../webresource/js/extend/fx",
-            "extend/matchMedia": "../webresource/m/js/extend/matchMedia",
-            "extend/ortchange": "../webresource/m/js/extend/ortchange",
-            "util": "../webresource/js/util",
-            "util/md5": "../webresource/js/util/md5",
-            "bridge": "../webresource/m/js/bridge",
-            "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
-            "graphics/matrix2d": "../webresource/js/graphics/matrix2d",
-            "graphics/tween": "../webresource/js/graphics/tween",
-            "core/base": "../webresource/js/core/base",
-            "core/promise": "../webresource/js/core/promise",
-            "core/linklist": "../webresource/js/core/linklist",
-            "core/event": "../webresource/js/core/event",
-            "core/component": "../webresource/js/core/component",
-            "core/view": "../webresource/js/core/view",
-            "core/model": "../webresource/js/core/model",
-            "core/page": "../webresource/js/core/page",
-            "core/route": "../webresource/js/core/route",
-            "core/animation": "../webresource/js/core/animation",
-            "core/master": "../webresource/js/core/master",
-            "core/app": "../webresource/m/js/core/app",
-            "core/activity": "../webresource/m/js/core/activity",
-            "core/touch": "../webresource/m/js/core/touch",
-            "widget/scrollview": "../webresource/m/js/widget/scrollview",
-            "widget/scroll": "../webresource/m/js/widget/scroll",
-            "widget/tip": "../webresource/js/widget/tip",
-            "widget/dialog": "../webresource/js/widget/dialog",
-            "widget/loading": "../webresource/m/js/widget/loading",
-            "anim/default": "../webresource/m/js/anim/default"
-        }
+        "seajs": "../webresource/js/seajs/sea",
+        "zepto": "../webresource/js/zepto",
+        "extend/touch": "../webresource/m/js/extend/touch",
+        "extend/fx": "../webresource/js/extend/fx",
+        "extend/matchMedia": "../webresource/m/js/extend/matchMedia",
+        "extend/ortchange": "../webresource/m/js/extend/ortchange",
+        "util": "../webresource/js/util",
+        "util/md5": "../webresource/js/util/md5",
+        "bridge": "../webresource/m/js/bridge",
+        "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
+        "graphics/matrix2d": "../webresource/js/graphics/matrix2d",
+        "graphics/tween": "../webresource/js/graphics/tween",
+        "core/base": "../webresource/js/core/base",
+        "core/promise": "../webresource/js/core/promise",
+        "core/linklist": "../webresource/js/core/linklist",
+        "core/event": "../webresource/js/core/event",
+        "core/component": "../webresource/js/core/component",
+        "core/view": "../webresource/js/core/view",
+        "core/model": "../webresource/js/core/model",
+        "core/page": "../webresource/js/core/page",
+        "core/route": "../webresource/js/core/route",
+        "core/animation": "../webresource/js/core/animation",
+        "core/master": "../webresource/js/core/master",
+        "core/app": "../webresource/m/js/core/app",
+        "core/activity": "../webresource/m/js/core/activity",
+        "core/touch": "../webresource/m/js/core/touch",
+        "widget/scrollview": "../webresource/m/js/widget/scrollview",
+        "widget/scroll": "../webresource/m/js/widget/scroll",
+        "widget/tip": "../webresource/js/widget/tip",
+        "widget/dialog": "../webresource/js/widget/dialog",
+        "widget/loading": "../webresource/m/js/widget/loading",
+        "anim/default": "../webresource/m/js/anim/default"
     }
 }

@@ -1,12 +1,12 @@
 ﻿var UglifyJS = require('uglify-js');
 var razor = require('./../core/razor');
 
-var replaceBOM = function(text) {
+var replaceBOM = function (text) {
     return text.replace(/^\uFEFF/i, '');
 }
 
-var compressCss = function(res) {
-    return replaceBOM(res).replace(/\s*([;|,|\{|\}])\s*/img, '$1').replace(/\{(\s*[-a-zA-Z]+\s*\:\s*[^;\}]+?(;|\}))+/mg, function(match) {
+var compressCss = function (res) {
+    return replaceBOM(res).replace(/\s*([;|,|\{|\}])\s*/img, '$1').replace(/\{(\s*[-a-zA-Z]+\s*\:\s*[^;\}]+?(;|\}))+/mg, function (match) {
         return match.replace(/\s*:\s*/mg, ':');
     }).replace(/[\r\n]/mg, '').replace(/;}/mg, '}').replace(/\s*\/\*.*?\*\/\s*/mg, '');
 }
@@ -62,7 +62,7 @@ function formatJs(jsText) {
 
     var rdom = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\s*(return\s+|=|\:|\()\s*(<([a-zA-Z]+)[^>]*>[\s\S]*?<\/\3>)\s*(,|;|\}|\))/mg;
 
-    jsText = jsText.replace(rdom, function(match, symbol, dom, tagName, end) {
+    jsText = jsText.replace(rdom, function (match, symbol, dom, tagName, end) {
 
         return dom ? symbol + "'" + dom.replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/(\s*(\r|\n)+\s*)+/g, ' ') + "'" + end : match;
     });
@@ -71,7 +71,7 @@ function formatJs(jsText) {
 }
 
 
-var compressJs = function(code, mangle_names) {
+var compressJs = function (code, mangle_names) {
     code = replaceBOM(code).replace(/\/\/<--debug[\s\S]+?\/\/debug-->/img, '');
 
     var ast = UglifyJS.parse(code);
@@ -84,13 +84,13 @@ var compressJs = function(code, mangle_names) {
     return code;
 };
 
-var concat = function() {
+var concat = function () {
     var res = [],
         arr;
 
     for (var i = 0; i < arguments.length; i++) {
         arr = arguments[i];
-        arr.forEach(function(item) {
+        arr.forEach(function (item) {
             if (res.indexOf(item) == -1) {
                 res.push(item);
             }
@@ -109,7 +109,7 @@ function parseDependencies(code) {
     //requireRe = new RegExp("\\b" + m[1] + "\\s*\\(\\s*([\"'])(.+?)\\1\\s*\\)", 'g');
 
     code.replace(SLASH_RE, "")
-        .replace(REQUIRE_RE, function(m, m1, m2) {
+        .replace(REQUIRE_RE, function (m, m1, m2) {
             if (m2) {
                 ret.push(m2)
             }
@@ -120,7 +120,7 @@ function parseDependencies(code) {
 
 var re_defined_id = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*define|(?:^|\uFEFF|[^$])(\bdefine\(([\'\"])[^\2]+\2)/g;
 
-var replaceDefine = function(id, code, requires, exclude) {
+var replaceDefine = function (id, code, requires, exclude) {
     if (typeof requires == 'string') requires = [requires];
 
     code = replaceBOM(code);
@@ -129,7 +129,7 @@ var replaceDefine = function(id, code, requires, exclude) {
         return code;
     }
 
-    return code.replace(/"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*define|(^|\uFEFF|[^$])(\bdefine\((?:\s*(\[[^\]]*\]){0,1}\s*,\s*){0,1})/mg, function(match, pre, fn, param) {
+    return code.replace(/"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*define|(^|\uFEFF|[^$])(\bdefine\((?:\s*(\[[^\]]*\]){0,1}\s*,\s*){0,1})/mg, function (match, pre, fn, param) {
         if (!fn) return match;
         param = param ? JSON.parse(param.replace(/\'/g, '"')) : [];
 
@@ -152,11 +152,11 @@ var replaceDefine = function(id, code, requires, exclude) {
     });
 }
 
-var compressHTML = function(html) {
+var compressHTML = function (html) {
     return replaceBOM(html).replace(/\s*(<(\/{0,1}[a-zA-Z]+)(?:\s+[a-zA-Z1-9_-]+="[^"]*"|\s+[^\s]+)*?\s*(\/){0,1}\s*>)\s*/img, '$1')
-        .replace(/<script[^>]*>([\S\s]*?)<\/script>/img, function(r0, r1) {
+        .replace(/<script[^>]*>([\S\s]*?)<\/script>/img, function (r0, r1) {
             return /^\s*$/.test(r1) ? r0 : ('<script>' + compressJs(r1) + '</script>');
-        }).replace(/<style[^>]*>([\S\s]*?)<\/style>/img, function(r0, r1) {
+        }).replace(/<style[^>]*>([\S\s]*?)<\/style>/img, function (r0, r1) {
             return /^\s*$/.test(r1) ? r0 : ('<style>' + compressCss(r1) + '</style>');
         });
 }
@@ -166,14 +166,14 @@ var fs = require('fs');
 var fse = require('fs-extra');
 var Promise = require('./../core/promise');
 
-var _save = function(savePath, data, isCopy, callback) {
+var _save = function (savePath, data, isCopy, callback) {
 
     var promise = new Promise();
     var dir = path.dirname(savePath);
 
-    fs.exists(dir, function(exists) {
+    fs.exists(dir, function (exists) {
         if (!exists) {
-            fse.mkdirs(dir, function(err, r) {
+            fse.mkdirs(dir, function (err, r) {
                 promise.resolve(null, data);
             });
         } else {
@@ -186,7 +186,7 @@ var _save = function(savePath, data, isCopy, callback) {
     }
 
     promise.then([savePath, '$1'], fs.writeFile)
-        .then(function() {
+        .then(function () {
             console.log('save', savePath)
         });
 
@@ -195,15 +195,15 @@ var _save = function(savePath, data, isCopy, callback) {
     return promise;
 };
 
-var save = function(savePath, data, callback) {
+var save = function (savePath, data, callback) {
     return _save(savePath, data, false, callback);
 };
 
-var copy = function(sourcePath, destPath, callback) {
+var copy = function (sourcePath, destPath, callback) {
     return _save(sourcePath, destPath, true, callback)
 }
 
-var Tools = function(baseDir, destDir) {
+var Tools = function (baseDir, destDir) {
     this.baseDir = baseDir;
     this.destDir = destDir;
 
@@ -212,8 +212,10 @@ var Tools = function(baseDir, destDir) {
 
 Tools.prototype = {
 
-    combine: function(pathDict) {
+    combine: function (pathDict) {
         var self = this;
+
+        var map = {};
 
         for (var destPath in pathDict) {
             var fileList = [],
@@ -243,13 +245,15 @@ Tools.prototype = {
                 }
             }
 
+            map[destPath] = ids;
+
             if (fileList.length) {
 
-                (function(fileList, ids, isCss, destPath) {
+                (function (fileList, ids, isCss, destPath) {
                     var promise = new Promise().resolve();
 
                     promise.map(fileList, fs.readFile, fs)
-                        .then(function(err, result) {
+                        .then(function (err, result) {
                             if (err) {
                                 console.log(err)
                                 return;
@@ -257,7 +261,7 @@ Tools.prototype = {
 
                             var text = '';
 
-                            result.forEach(function(data, i) {
+                            result.forEach(function (data, i) {
                                 data = data.toString('utf-8');
 
                                 if (/\.(tpl|html|cshtml)$/.test(fileList[i]))
@@ -279,10 +283,10 @@ Tools.prototype = {
 
         }
 
-        return this;
+        return map;
     },
 
-    html: function(fileList, api, combinedPathDict) {
+    html: function (fileList, api, combinedPathDict) {
 
         api = '<meta name="api-base-url" content="' + api + '" />';
         if (!(fileList instanceof Array)) fileList = [fileList];
@@ -290,10 +294,10 @@ Tools.prototype = {
         var self = this,
             now = new Date().getTime();
 
-        fileList.forEach(function(fileName) {
+        fileList.forEach(function (fileName) {
             var promise = new Promise();
 
-            fs.readFile(path.join(self.baseDir, fileName), { encoding: 'utf-8' }, function(err, html) {
+            fs.readFile(path.join(self.baseDir, fileName), { encoding: 'utf-8' }, function (err, html) {
 
                 html = html.replace(/<script[^>]+debug[^>]*>[\S\s]*?<\/script>/img, '')
                     .replace(/<link[^>]+debug[^>]*\/*\s*>/img, '')
@@ -324,13 +328,13 @@ Tools.prototype = {
         return this;
     },
 
-    resource: function(resourceDir) {
+    resource: function (resourceDir) {
 
         var self = this;
         var promise = new Promise().resolve();
         var pathArr = [];
 
-        resourceDir.forEach(function(dir, i) {
+        resourceDir.forEach(function (dir, i) {
             pathArr.push([path.join(self.baseDir, dir), path.join(self.destDir, dir)]);
         });
 
@@ -339,14 +343,14 @@ Tools.prototype = {
         this.promise.then(promise);
     },
 
-    compress: function(fileList) {
+    compress: function (fileList) {
 
         var self = this,
             dict;
 
         if (fileList.length) {
             dict = {};
-            fileList.forEach(function(fileName, i) {
+            fileList.forEach(function (fileName, i) {
                 dict[fileName] = '';
             });
 
@@ -355,7 +359,7 @@ Tools.prototype = {
         }
 
         for (var key in dict) {
-            (function(fileName, readPath) {
+            (function (fileName, readPath) {
                 var promise = new Promise();
 
                 if (/\.css$/.test(fileName)) {
@@ -363,7 +367,7 @@ Tools.prototype = {
                     fs.readFile(path.join(self.baseDir, readPath || fileName), {
                         encoding: 'utf-8'
 
-                    }, function(err, text) {
+                    }, function (err, text) {
                         self.save(path.join(self.destDir, fileName), compressCss(text), promise.resolveSelf);
                     });
 
@@ -372,7 +376,7 @@ Tools.prototype = {
                     fs.readFile(path.join(self.baseDir, readPath || fileName), {
                         encoding: 'utf-8'
 
-                    }, function(err, text) {
+                    }, function (err, text) {
                         self.save(path.join(self.destDir, fileName), compressHTML(text), promise.resolveSelf);
                     });
 
@@ -381,7 +385,7 @@ Tools.prototype = {
 
                     fs.readFile(path.join(self.baseDir, readPath ? readPath + '.js' : jsFileName), {
                         encoding: 'utf-8'
-                    }, function(err, text) {
+                    }, function (err, text) {
                         if (err) console.log(path.join(self.baseDir, readPath || jsFileName));
 
                         text = compressJs(replaceDefine(fileName, text));
@@ -401,18 +405,18 @@ Tools.prototype = {
 
     razorUri: 'js/razor.text.js',
 
-    razor: function(fileList) {
+    razor: function (fileList) {
         var self = this;
 
         var promise = new Promise().resolve();
         var result = '';
 
-        fileList.forEach(promise.bind(function(fileName, i) {
+        fileList.forEach(promise.bind(function (fileName, i) {
 
             fs.readFile(path.join(self.baseDir, fileName + '.tpl'), {
                 encoding: 'utf-8'
 
-            }, function(err, text) {
+            }, function (err, text) {
                 if (err) console.log(fileName)
 
                 text = compressJs(replaceDefine(fileName, razor.web(replaceBOM(text))));
@@ -424,7 +428,7 @@ Tools.prototype = {
         }));
 
         self.promise.then(promise)
-            .then(function() {
+            .then(function () {
                 return self.save(path.join(self.destDir, self.razorUri), result);
             });
 
@@ -434,14 +438,14 @@ Tools.prototype = {
     save: save,
     copy: copy,
 
-    build: function(options) {
+    build: function (options) {
         options.combine && this.combine(options.combine);
         options.html && this.html(options.html, options.api, options.combine);
         options.resource && this.resource(options.resource);
         options.compress && this.compress(options.compress);
         options.razor && this.razor(options.razor);
 
-        this.promise.then(function() {
+        this.promise.then(function () {
             console.log('finish')
         });
     }
@@ -457,7 +461,7 @@ Tools.replaceBOM = replaceBOM;
 Tools.formatJs = formatJs;
 
 var rwebresource = /([^@]{0,1})@webresource\(\s*([\"|\'])([^\2]+)\2\s*\)/mg;
-Tools.webresource = function(webresource, template) {
+Tools.webresource = function (webresource, template) {
     return template.replace(rwebresource, '$1' + webresource + '$3');
 };
 
