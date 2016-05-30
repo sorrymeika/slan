@@ -7,7 +7,7 @@
 var slice = Array.prototype.slice;
 var cb = new CubicBezier(.08, .53, .2, .96);
 
-var Touch = function(el, options) {
+var Touch = function (el, options) {
     var self = this,
         $el = $(el);
 
@@ -39,7 +39,7 @@ $.extend(Touch.prototype, {
     x: 0,
     y: 0,
 
-    delegate: function(event, sub, fn) {
+    delegate: function (event, sub, fn) {
         if (typeof sub == 'undefined' && typeof fn == 'function')
             sub = fn;
 
@@ -49,7 +49,7 @@ $.extend(Touch.prototype, {
         return this;
     },
 
-    _stopMomentum: function() {
+    _stopMomentum: function () {
         if (this.momentum) {
             this.momentum.stop();
             this._isClickStopAni = true;
@@ -59,7 +59,7 @@ $.extend(Touch.prototype, {
             return false;
     },
 
-    _start: function(e) {
+    _start: function (e) {
         var self = this,
             point = e.touches[0];
 
@@ -82,7 +82,7 @@ $.extend(Touch.prototype, {
         self.timestamp = Date.now();
     },
 
-    _move: function(e) {
+    _move: function (e) {
         if (this.isTouchStop) return;
 
         var self = this,
@@ -162,12 +162,12 @@ $.extend(Touch.prototype, {
         return false;
     },
 
-    shouldBounceBack: function() {
+    shouldBounceBack: function () {
         var self = this;
         return self.options.enableHorizontal && (self.x < self.minX || self.x > self.maxX) || self.options.enableVertical && (self.y < self.minY || self.y > self.maxY);
     },
 
-    _end: function(e) {
+    _end: function (e) {
         var self = this;
 
         if ((!self.isTouchMoved || self.isTouchStop) && self._isClickStopAni) {
@@ -215,10 +215,13 @@ $.extend(Touch.prototype, {
             changeX = point.pageX - (self.prevPointX || self.oldPointX);
             changeY = point.pageY - (self.prevPointY || self.oldPointY);
 
-            distX = changeX * Math.abs(changeX) / -4;
-            distY = changeY * Math.abs(changeY) / -4;
+            changeY = changeY > 80 ? 80 : changeY < -80 ? -80 : changeY;
+            changeX = changeX > 80 ? 80 : changeX < -80 ? -80 : changeX;
 
-            duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 100;
+            distX = (changeX * Math.abs(changeX) / -4) * 1.2;
+            distY = (changeY * Math.abs(changeY) / -4) * 1.2;
+
+            duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 60;
         }
 
         if (self.options.divisorX) {
@@ -245,7 +248,7 @@ $.extend(Touch.prototype, {
             !duration && (duration = 200) || self.options.maxDuration && duration > self.options.maxDuration && (duration = self.options.maxDuration);
 
             //惯性移动
-            self.momentum = animation.animate(function(d, current, duration) {
+            self.momentum = animation.animate(function (d, current, duration) {
                 d = cb.get(current / duration);
                 x = currentX + distX * d;
                 y = currentY + distY * d;
@@ -266,13 +269,13 @@ $.extend(Touch.prototype, {
                     distX -= currentX;
 
                     //当前惯性移动的值超过阀值减速移动
-                    self.momentum = animation.animate(function(d) {
+                    self.momentum = animation.animate(function (d) {
                         self.options.enableHorizontal && (self.x = currentX + distX * d);
                         self.options.enableVertical && (self.y = currentY + distY * d);
 
                         self.trigger('move');
 
-                    }, Math.min(200, (duration - current) / 4), 'easeOutCubic', function() {
+                    }, Math.min(200, (duration - current) / 4), 'easeOutCubic', function () {
                         self.bounceBack();
                     });
 
@@ -282,7 +285,7 @@ $.extend(Touch.prototype, {
                     self.trigger('move');
                 }
 
-            }, duration, 'ease', function() {
+            }, duration, 'ease', function () {
                 self._stop();
             });
         } else {
@@ -292,7 +295,7 @@ $.extend(Touch.prototype, {
         return false;
     },
 
-    bounceBack: function() {
+    bounceBack: function () {
         var self = this;
         var currentX = self.x;
         var currentY = self.y;
@@ -316,18 +319,18 @@ $.extend(Touch.prototype, {
             }
         }
 
-        animation.animate(function(d) {
+        animation.animate(function (d) {
             self.x = currentX + distX * d;
             self.y = currentY + distY * d;
 
             self.trigger('move');
 
-        }, 200, 'ease', function() {
+        }, 200, 'ease', function () {
             self._stop();
         });
     },
 
-    scrollTo: function(x, y, duration, callback) {
+    scrollTo: function (x, y, duration, callback) {
         var self = this;
         x = self.options.enableHorizontal ?
             x >= this.maxX ? this.maxX : x <= this.minX ? this.minX : x
@@ -347,7 +350,7 @@ $.extend(Touch.prototype, {
             var currentY = self.y;
             var distX = x - self.x;
             var distY = y - self.y;
-            animation.animate(function(d) {
+            animation.animate(function (d) {
                 self.x = currentX + distX * d;
                 self.y = currentY + distY * d;
 
@@ -357,17 +360,17 @@ $.extend(Touch.prototype, {
         }
     },
 
-    stop: function() {
+    stop: function () {
         this.isTouchStop = true;
     },
 
-    _stop: function() {
+    _stop: function () {
         this.momentum = null;
         this._isClickStopAni = false;
         this.trigger('stop');
     },
 
-    destory: function() {
+    destory: function () {
         this.$el.off('touchstart', this._start)
             .off('touchmove', this._move)
             .off('touchend', this._end)

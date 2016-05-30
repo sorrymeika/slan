@@ -83,8 +83,8 @@
         } else if (options.type == "textbox") {
 
             var $textbox = $('<textarea class="grid_cell_textbox" data-row="' + row.index + '" data-cell="' + self.index + '"></textarea>')
-                            .css({ height: settings.rowHeight })
-                            .val(val);
+                .css({ height: settings.rowHeight })
+                .val(val);
 
             self.$textbox = $textbox;
             self.$body.append($textbox);
@@ -764,8 +764,8 @@
 
                     if (option.type == "calendar") {
                         input = $('<input name="' + name + '" class="' + option.className + '" type="text"/>');
-                        seajs.use(['./components/jquery.datepicker', './components/jquery.datepicker.css'], function () {
-                            input.datePicker($.extend(option.options, {
+                        seajs.use(['components/datepicker'], function () {
+                            input.datePicker($.extend({}, option.options, {
                                 clickInput: true
                             }));
                         });

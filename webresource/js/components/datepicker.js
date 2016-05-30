@@ -1,8 +1,6 @@
 ﻿define(function (require) {
-    var jQuery=require('jquery');
-
-    require('./jquery.datepicker.css')
-
+    var $=require('$');
+	
     Date.prototype.getWeekNumber=function () {
         var e=new Date(this.getFullYear(),this.getMonth(),this.getDate(),0,0,0),
 	t=e.getDay()+1;
@@ -222,7 +220,7 @@
         function r(t) {
             return t._dpId?e.event._dpCache[t._dpId]:!1
         }
-        e.fn.extend({
+        e.extend(e.fn,{
             renderCalendar: function (t) {
                 var n=function (e) {
                     return document.createElement(e)
@@ -235,7 +233,7 @@
                     for(var i=Date.firstDayOfWeek;i<Date.firstDayOfWeek+7;i++) {
                         var s=i%7,
 					    o=Date.dayNames[s];
-                        r.append(jQuery(n("th")).attr({
+                        r.append($(n("th")).attr({
                             scope: "col",
                             abbr: o,
                             title: o,
@@ -273,7 +271,7 @@
 			    },
 			    y=0;
                 while(y++ <d) {
-                    var b=jQuery(n("tr"));
+                    var b=$(n("tr"));
                     if(t.selectWeek) {
                         var w=h.getWeek()+1;
                         b.append("<td class='weeknum'>"+w+"</td>")
@@ -281,7 +279,7 @@
                     var E=t.dpController?h>t.dpController.startDate:!1;
                     for(var i=0;i<7;i++) {
                         var S=h.getMonth()==l,
-					    x=e(n("td")).text(h.getDate()+"").addClass((S?"current-month ":"other-month ")+(h.isWeekend()?"weekend ":"weekday ")+(S&&h.getTime()==f.getTime()?"today ":"")).data("datePickerDate",h.asString()).hover(v(E),m);
+					    x=e(n("td")).text(h.getDate()+"").addClass((S?"current-month ":"other-month ")+(h.isWeekend()?"weekend ":"weekday ")+(S&&h.getTime()==f.getTime()?"today ":"")).data("datePickerDate",h.asString()).on("mouseover",v(E)).on("mouseleave",m);
                         b.append(x),
 					    t.renderCallback&&t.renderCallback(x,h,l,c),
 					    h=new Date(h.getFullYear(),h.getMonth(),h.getDate()+1)
@@ -294,6 +292,7 @@
 			    })
             },
             datePicker: function (t) {
+				e.guid===undefined&&(e.guid=1);
                 return e.event._dpCache||(e.event._dpCache=[]),
 			    t=e.extend({},e.fn.datePicker.defaults,t),
 			    this.each(function () {
@@ -325,6 +324,7 @@
 					    function () {
 					        r.trigger("change"),
 						    r.dpDisplay()
+							
 					    });
 			            var o=Date.fromString(this.value);
 			            this.value!=""&&o&&s.setSelected(o,!0,!0)
@@ -483,6 +483,7 @@
 			    e("td.selected",this.context).removeClass("selected").parent().removeClass("selectedWeek")
             },
             display: function (t) {
+				
                 if(e(this.ele).is(".dp-disabled")) return;
                 t=t||this.ele;
                 var n=this,
@@ -594,12 +595,6 @@
 				    function () {
 				        $(this).hasClass("disabled")||(r.val(e(this).parents(".dp-popup").find(".month-year").text()+"-"+e(this).attr("abbr")),n._closeCalendar())
 				    }),
-				    h.find(".dp-month td").hover(function () {
-				        $(this).addClass("dp-year-hover")
-				    },
-				    function () {
-				        $(this).removeClass("dp-year-hover")
-				    }),
 				    h.find("div.dp-calendar").add("h2.day-year").add("div.dp-nav-prev").add("div.dp-nav-next").add("div.dp-calendarNum").hide(),
 				    h.find("div.dp-month").add("div.dp-monthNum").add(".month-year").add(".dp-month-nav-prev").add(".dp-month-nav-next").show(),
 				    h.append('<div class="dp-monthNum">'+d[1]+"</div>")
@@ -619,7 +614,7 @@
                 t.bind("click",
 			    function () {
 			        var t=e(this);
-			        t.is(".disabled")||(s.setSelected(o,!t.is(".selected")||!s.selectMultiple,!1,!0),s.closeOnSelect&&s._closeCalendar(),e.browser.msie||e(s.ele).trigger("focus",[e.dpConst.DP_INTERNAL_FOCUS]))
+			        t.is(".disabled")||(s.setSelected(o,!t.is(".selected")||!s.selectMultiple,!1,!0),s.closeOnSelect&&s._closeCalendar(),e(s.ele).trigger("focus",[e.dpConst.DP_INTERNAL_FOCUS]))
 			    }),
 			    s.selectWeek&&s.selected,
 			    s.isSelected(o)?(t.addClass("selected"),s.settings.selectWeek&&t.parent().addClass("selectedWeek")):s.selectMultiple&&s.numSelected==s.numSelectable&&t.addClass("unselectable")
@@ -736,7 +731,7 @@
 	        TEXT_CHOOSE_DATE: "\u9009\u62e9\u65e5\u671f",
 	        HEADER_FORMAT: "yyyy mmmm"
 	    },
-	    e.dpVersion="$Id: jquery.datePicker.js 70 2009-04-05 19:25:15Z kelvin.luck $",
+	    e.dpVersion="$Id: $.datePicker.js 70 2009-04-05 19:25:15Z kelvin.luck $",
 	    e.fn.datePicker.defaults={
 	        month: undefined,
 	        year: undefined,
@@ -769,5 +764,5 @@
 	        var t=e.event._dpCache||[];
 	        for(var n in t) e(t[n].ele)._dpDestroy()
 	    })
-    } (jQuery);
+    } ($);
 });

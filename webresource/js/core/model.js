@@ -5,6 +5,13 @@
         Event = require('./event'),
         ComponentBase = require('./component');
 
+    var eventsCache = [];
+    var changeEventsTimer;
+    var elementId = 0;
+
+    var snEvents = ['tap', 'click', 'change', 'focus', 'blur', 'transition-end'];
+    var snGlobal = ['this', '$', 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
+
     var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
     var rparams = /\s*\:\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')/g;
     var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
@@ -13,6 +20,30 @@
     var rvar = /'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
     var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
     var rthis = /\b(this\.[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
+
+    var withData = function (repeat, content) {
+        var code = 'var $el=$(el),root=model.root,$data=$.extend({},global,root.data,{$state:root.$state.data}';
+        if (repeat) {
+            code += ',{';
+            for (var parent = repeat.parent, current = repeat; parent != null; current = parent, parent = parent.parent) {
+                code += parent.alias + ':' + (current.isChild ? 'model.closest(\'' + parent.collectionName + '^child\').data' : 'root.upperRepeatEl(el,function(el){ if (el.snRepeat.repeat.alias == "' + parent.alias + '") return el.snModel.data; },null)') + ',';
+
+                if (parent.indexAlias) {
+                    code += parent.indexAlias + ':function(){ for (var node=el;node!=null;node=node.parentNode) { if (node.snIndexAlias=="' + parent.indexAlias + '") return node.snIndex } return ""},';
+                }
+            }
+            code += repeat.alias + ':model.data';
+
+            if (repeat.indexAlias) {
+                code += ',' + repeat.indexAlias + ':function(){ for (var node=el;node!=null;node=node.parentNode) { if (node.snIndexAlias=="' + repeat.indexAlias + '") return node.snIndex }return ""}';
+            }
+            code += '}';
+        }
+
+        code += ');with($data){' + content + '}';
+
+        return code;
+    }
 
     var isNull = function (str) {
         var arr = str.split('.');
@@ -26,7 +57,7 @@
         for (var i = 0; i < result.length; i++) {
             code += (i ? '&&' : '') + result[i] + '!==null&&' + result[i] + '!==undefined';
         }
-        return '((' + code + ')?' + str + ':"")';
+        return '((' + code + ')?typeof ' + str + '==="function"?' + str + '():' + str + ':"")';
     }
 
     var eachElement = function (el, fn, extend) {
@@ -74,6 +105,7 @@
         this.model = {};
         this.parent = parent;
         this.root = parent.root;
+        this._elements = {};
 
         this.set(data);
     }
@@ -119,10 +151,11 @@
                 changed,
                 attrs,
                 model = self.model,
-                parent;
-            var keys;
+                parent,
+                keys,
+                coverChild = false;
 
-            if (cover !== true)
+            if (typeof cover != "boolean")
                 val = key, key = cover, cover = false;
 
             if ($.isPlainObject(key)) {
@@ -138,22 +171,29 @@
 
                 this.data = val;
 
-                return this._triggerChangeEvent(this.key);
+                !this.root._initSet && this._triggerChangeEvent(this.key);
+
+                return this;
 
             } else {
-                attrs = {};
                 keys = key.split('.');
                 if (keys.length > 1) {
                     var lastKey = keys.pop();
-                    var lastData = attrs;
-                    for (var i = 0, len = keys.length, prev; i < len; i++) {
+                    for (var i = 0, len = keys.length; i < len; i++) {
                         key = keys[i];
-                        lastData = lastData[key] = {};
+                        model = model[key];
+
+                        if (!(model instanceof Model)) {
+                            model = model[key] = new Model(this, key, {});
+                        }
                     }
-                    lastData[lastKey] = val;
+                    model.set(cover, lastKey, val);
+                    return;
 
                 } else {
-                    attrs[key] = val;
+                    coverChild = cover;
+                    cover = false;
+                    (attrs = {})[key] = val;
                 }
             }
             if (!$.isPlainObject(this.data)) this.data = {};
@@ -175,7 +215,7 @@
                 if (origin !== value) {
 
                     if (origin instanceof Model) {
-                        value === null || value === undefined ? origin.clear() : origin.set(value);
+                        value === null || value === undefined ? origin.reset() : origin.set(coverChild, value);
 
                     } else if (origin instanceof Collection) {
                         if (!$.isArray(value)) {
@@ -196,24 +236,63 @@
                     } else {
                         model[attr] = value;
 
-                        this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr, origin, value);
+                        !this.root._initSet && this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr);
                     }
                 }
             }
 
-            this._triggerChangeEvent(this.key);
+            !this.root._initSet && this._triggerChangeEvent(this.key);
 
             return self;
         },
 
-        _triggerChangeEvent: function (eventName, origin, value) {
-            if (!this.root._initSet) {
-                this.root.trigger('change' + (eventName ? ":" + eventName : '').replace(/\./g, '/'), this, origin, value);
+        _triggerChangeEvent: function (eventName, model) {
+            var self = this;
+
+            eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
+            !model && (model = this);
+
+            if (util.indexOf(eventsCache, function (evt) {
+
+                return evt[0] == self.root && evt[1] == eventName && evt[2] == model;
+
+            }) == -1) {
+
+                eventsCache.push([this.root, eventName, model]);
             }
+
+            if (!changeEventsTimer) {
+                changeEventsTimer = setTimeout(function () {
+                    var now = Date.now();
+
+                    var roots = [];
+
+                    for (var evt, cachedRoot, i = 0, n = eventsCache.length; i < n; i++) {
+                        evt = eventsCache[i];
+                        cachedRoot = evt[0];
+                        cachedRoot.trigger(evt[1], evt[2]);
+
+                        if (roots.indexOf(cachedRoot) === -1) {
+                            roots.push(cachedRoot);
+                        }
+                    }
+
+                    eventsCache.length = 0;
+                    changeEventsTimer = null;
+
+                    roots.forEach(function (root) {
+                        root.trigger("viewDidUpdate");
+                    });
+
+                    console.log(Date.now() - now);
+
+                }, 0);
+            }
+
             return this;
         },
 
-        clear: function () {
+        reset: function () {
 
             var data = {};
             for (var attr in this.data) {
@@ -250,9 +329,15 @@
                 }
             }
             return true;
+        },
+
+        _pushNode: function (source, node) {
+            var id = source.snElementId || (source.snElementId = ++elementId);
+
+            (this._elements[id] || (this._elements[id] = [])).push(node);
         }
     }
-    ModelProto.reset = ModelProto.clear;
+    ModelProto.clear = ModelProto.reset;
 
     Model.prototype = $.extend({}, Event, ModelProto);
 
@@ -370,11 +455,11 @@
         },
 
         _removeEl: function (el) {
-            eachElement($(el).remove(), function (child, i) {
-                if (child._origin) {
-                    var elements = child._origin._elements;
+            eachElement($(el).remove(), function (node, i) {
+                if (node._origin) {
+                    var elements = node._origin._elements;
                     for (var i = elements.length - 1; i >= 0; i--) {
-                        if (elements[i] == child) {
+                        if (elements[i] == node) {
                             elements.splice(i, 1);
                             break;
                         }
@@ -386,7 +471,6 @@
         update: function () {
 
             var fragment = document.createDocumentFragment();
-            var index = 0;
             var list = this.elements;
             var repeat = this.repeat;
             var orderBy = repeat.orderBy;
@@ -402,6 +486,10 @@
             }
 
             var prevEl;
+            var changedEls = [];
+
+            this.elIndex = 0;
+
             for (var i = 0, len = list.length; i < len; i++) {
                 var item = list[i];
                 var el;
@@ -420,17 +508,21 @@
                     }
                     prevEl = el;
 
-                    el.snIndex = index;
-                    if (repeat.indexAlias) {
-                        el.setAttribute('sn-index-alias', repeat.indexAlias);
-
-                        root._triggerChangeEvent(repeat.collectionName + '/' + repeat.alias + '/' + repeat.indexAlias, item.model);
+                    if (repeat.indexAlias && el.snIndex !== this.elIndex) {
+                        el.snIndex = this.elIndex;
+                        changedEls.push(el);
                     }
-                    index++;
+                    this.elIndex++;
 
                 } else if (item.el && item.el.parentNode) {
                     item.el.parentNode.removeChild(item.el);
                 }
+            }
+
+            if (changedEls.length) {
+                console.log(changedEls.length);
+
+                root._triggerChangeEvent(repeat.collectionName + '/' + repeat.alias + '/' + repeat.indexAlias, changedEls);
             }
 
             if (fragment.childNodes.length) parentNode.insertBefore(fragment, this.replacement);
@@ -441,10 +533,13 @@
             var len;
 
             if (el == this.el) {
+                node.snIndex = this.elIndex;
+                node.snIndexAlias = this.repeat.indexAlias;
                 node.snRepeat = this;
                 node.snModel = model;
                 node.snReplacement = this.replacement;
                 repeatNode = node;
+
             } else {
                 node.snRepeatNode = repeatNode;
             }
@@ -467,9 +562,13 @@
                     node.bindings = el.bindings;
 
                     if (model) {
-                        node._origin = el._origin;
-                        el._origin._elements.push(node);
-                        model.root.render(node);
+                        (node._origin = el._origin)._elements.push(node);
+
+                        model.root.upperRepeatEl(node, function (elem) {
+
+                            elem.snModel._pushNode(el._origin, node);
+
+                        })._render(node);
 
                     } else {
                         //SNRepeat实例化时cloneNode执行
@@ -498,6 +597,7 @@
             return this;
         },
         remove: function (start, count) {
+            var self = this;
             if (typeof start == 'function') {
                 for (var i = this.elements.length - 1; i >= 0; i--) {
                     var item = this.elements[i];
@@ -507,9 +607,9 @@
                     }
                 }
             } else {
-                this.elements.splice(start, count || 1).forEach((function (item) {
-                    this._removeEl(item.el);
-                }).bind(this));
+                this.elements.splice(start, count || 1).forEach(function (item) {
+                    self._removeEl(item.el);
+                });
             }
             return this;
         },
@@ -593,8 +693,8 @@
 
     Collection.prototype._triggerChangeEvent = function () {
         if (!this._silent) {
-            this.root._triggerChangeEvent(this.key, this, this.data)
-                ._triggerChangeEvent(this.key + '/length', this, this.data.length);
+            this.root._triggerChangeEvent(this.key, this)
+                ._triggerChangeEvent(this.key + '/length', this);
         }
     }
 
@@ -633,8 +733,10 @@
 
     Collection.prototype.set = function (data) {
         this._silent = true;
+
         if (!data || data.length == 0) {
             this.clear();
+
         } else {
             var modelsLen = this.models.length;
 
@@ -661,33 +763,6 @@
         return this.models[i];
     }
 
-    var snEvents = ['tap', 'click', 'change', 'focus', 'blur', 'transition-end'];
-    var snGlobal = ['this', '$', 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
-
-    var withData = function (repeat, content) {
-        var code = 'var $el=$(el),root=model.root,$data=$.extend({},global,root.data,{$state:root.$state.data}';
-        if (repeat) {
-            code += ',{';
-            for (var parent = repeat.parent, current = repeat; parent != null; current = parent, parent = parent.parent) {
-                code += parent.alias + ':' + (current.isChild ? 'model.closest(\'' + parent.collectionName + '^child\').data' : 'root.eachRepeat(el,function(rp,md){ if (rp.repeat.alias == "' + parent.alias + '") return md.data; },null)') + ',';
-
-                if (parent.indexAlias) {
-                    code += parent.indexAlias + ':$el.closest(\'[sn-index-alias="' + parent.indexAlias + '"]\').snIndex,';
-                }
-            }
-            code += repeat.alias + ':model.data';
-
-            if (repeat.indexAlias) {
-                code += ',' + repeat.indexAlias + ':$el.closest(\'[sn-index-alias="' + repeat.indexAlias + '"]\').snIndex';
-            }
-            code += '}';
-        }
-
-        code += ');with($data){' + content + '}';
-
-        return code;
-    }
-
     var ViewModel = function (el, data) {
         if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
             data = el, el = this.el;
@@ -701,6 +776,7 @@
         this.fns = [];
         this.refs = {};
         this.root = this;
+        this._elements = {};
 
         el && this.bind(el);
 
@@ -725,6 +801,10 @@
 
         getState: function (key) {
             return this.$state.get(key);
+        },
+
+        endRender: function (callback) {
+            return this.one('viewDidUpdate', callback);
         },
 
         compile: function (code) {
@@ -818,7 +898,7 @@
             }
         },
 
-        render: function (el, attribute) {
+        _render: function (el, attribute) {
             var self = this;
             if (el.bindings) {
                 var attrs;
@@ -873,7 +953,7 @@
                             el.style.cssText += val;
                             break;
                         case 'checked':
-                         case 'selected':
+                        case 'selected':
                             (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
                             break;
                         default:
@@ -883,33 +963,50 @@
                 }
             }
         },
+
+        _renderEls: function (elements, attr) {
+            for (var i = 0, n = elements && elements.length; i < n; i++) {
+                this._render(elements[i], attr);
+            }
+
+        },
         _bindAttr: function (node, attr, expression, repeat) {
             var self = this;
+            var elements;
 
             if (!rmatch.test(expression)) return;
 
             (node.bindings || (node._elements = [], node.bindings = {}))[attr] = self._compile(expression, repeat, function (e, model) {
                 if (!repeat) {
-                    self.render(node, attr);
+                    self._render(node, attr);
 
-                } else {
-                    for (var i = 0; i < node._elements.length; i++) {
-                        var el = node._elements[i];
+                } else if (model instanceof Model) {
+                    elements = (model == self || model.under()) ? node._elements : model._elements[node.snElementId];
 
-                        if (model == this || model.under() || self.eachRepeat(el, function (snRepeat, snModel) {
-                            if (snModel == model || snModel.contains(model, true))
-                                return true;
-                        }, false)) {
-                            self.render(el, attr);
-                        }
+                    self._renderEls(elements);
+
+                } else if (model instanceof Collection) {
+                    for (var i = 0, n = model.models.length; i < n; i++) {
+
+                        elements = model.models[i]._elements[node.snElementId];
+
+                        self._renderEls(elements);
+                    }
+                } else if ($.isArray(model)) {
+                    for (var el, i = 0, n = model.length; i < n; i++) {
+                        el = model[i];
+
+                        elements = el.snModel._elements[node.snElementId];
+
+                        self._renderEls(elements);
                     }
                 }
             });
         },
 
         _closestByEl: function (el) {
-            return this.eachRepeat(el, function (snRepeat, snModel) {
-                return snModel;
+            return this.upperRepeatEl(el, function (el) {
+                return el.snModel;
             });
         },
 
@@ -923,8 +1020,8 @@
             } else if (alias == "$state")
                 return self.$state;
 
-            return this.eachRepeat(el, function (snRepeat, snModel) {
-                if (snRepeat.repeat.alias == alias)
+            return this.upperRepeatEl(el, function (el) {
+                if (el.snRepeat.repeat.alias == alias)
                     return snModel;
             });
         },
@@ -940,14 +1037,14 @@
             model.set(model == this || model == self.$state ? name : name.replace(/^[^\.]+\./, ''), value);
         },
 
-        eachRepeat: function (el, fn, ret) {
+        upperRepeatEl: function (el, fn, ret) {
 
             while (el) {
                 if (el.snRepeatNode)
                     el = el.snRepeatNode;
 
                 if (el.snModel && el.snRepeat) {
-                    if ((val = fn(el.snRepeat, el.snModel)) !== undefined) return val;
+                    if ((val = fn(el)) !== undefined) return val;
 
                     el = el.snReplacement;
 
@@ -956,9 +1053,6 @@
             }
 
             return ret === undefined ? this : ret;
-        },
-
-        isCurrentEvent: function () {
         },
 
         bind: function (el) {
@@ -1111,6 +1205,7 @@
                     fn.apply(ctx, args);
                 }
             };
+
             for (var i = 0, eventName, attr; i < snEvents.length; i++) {
                 eventName = snEvents[i] == 'transition-end' ? $.fx.transitionEnd : snEvents[i];
                 attr = '[sn-' + self.cid + snEvents[i] + ']';
@@ -1121,7 +1216,7 @@
             this._fns.length = 0;
 
             for (var i = 0, len = elements.length; i < len; i++) {
-                self.render(elements[i]);
+                self._render(elements[i]);
             }
             return this;
         }

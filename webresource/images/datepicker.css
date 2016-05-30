@@ -74,14 +74,14 @@ table.jMonth td.unselectable, table.jMonth td.unselectable:hover, table.jMonth t
 /*new picker*/
 div.datepicker { position: relative; font-family: Arial, Helvetica, sans-serif; font-size: 12px; width: 196px; height: 147px; position: absolute; cursor: default; top: 0; left: 0; display: none; }
 .datepickerContainer { position: absolute; top: 10px; left: 10px; }
-.datepickerBorderT { position: absolute; left: 10px; top: 0; right: 10px; height: 10px; background: url(../images/datepicker_t.png); }
-.datepickerBorderB { position: absolute; left: 10px; bottom: 0; right: 10px; height: 10px; background: url(../images/datepicker_b.png); }
-.datepickerBorderL { position: absolute; left: 0; bottom: 10px; top: 10px; width: 10px; background: url(../images/datepicker_l.png); }
-.datepickerBorderR { position: absolute; right: 0; bottom: 10px; top: 10px; width: 10px; background: url(../images/datepicker_r.png); }
-.datepickerBorderTL { position: absolute; top: 0; left: 0; width: 10px; height: 10px; background: url(../images/datepicker_tl.png); }
-.datepickerBorderTR { position: absolute; top: 0; right: 0; width: 10px; height: 10px; background: url(../images/datepicker_tr.png); }
-.datepickerBorderBL { position: absolute; bottom: 0; left: 0; width: 10px; height: 10px; background: url(../images/datepicker_bl.png); }
-.datepickerBorderBR { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: url(../images/datepicker_br.png); }
+.datepickerBorderT { position: absolute; left: 10px; top: 0; right: 10px; height: 10px; }
+.datepickerBorderB { position: absolute; left: 10px; bottom: 0; right: 10px; height: 10px; }
+.datepickerBorderL { position: absolute; left: 0; bottom: 10px; top: 10px; width: 10px; }
+.datepickerBorderR { position: absolute; right: 0; bottom: 10px; top: 10px; width: 10px;}
+.datepickerBorderTL { position: absolute; top: 0; left: 0; width: 10px; height: 10px; }
+.datepickerBorderTR { position: absolute; top: 0; right: 0; width: 10px; height: 10px; }
+.datepickerBorderBL { position: absolute; bottom: 0; left: 0; width: 10px; height: 10px; }
+.datepickerBorderBR { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; }
 .datepickerHidden { display: none; }
 div.datepicker table { border-collapse: collapse; }
 div.datepicker a { color: #555; text-decoration: none; outline: none; padding: 2px; }

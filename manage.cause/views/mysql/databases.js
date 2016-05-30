@@ -174,6 +174,47 @@
                 }).useDatabase();
 
             }, 'json');
+            
+            
+            this.grid = new Grid({
+                search: {
+                    url: ('/api/settings/news_list'),
+                    type: 'POST',
+                    beforeSend: function () {
+                    },
+                    data: {
+                        name: {
+                            label: '活动页位置',
+                            type: 'calendar'
+                        }
+                    }
+                },
+                onSelectRow: function () {
+                },
+                columns: [{
+                    text: "编号",
+                    bind: "ID",
+                    width: 5
+                }, {
+                        text: "活动页名称",
+                        bind: "Title",
+                        width: 20
+                    }, {
+                        text: "操作",
+                        width: 10,
+                        align: 'center',
+                        valign: 'center',
+                        render: function (data) {
+                            var name = self.$('[name="name"]').val();
+                            this.append($('<a href="javascript:;" class="js_click" data-id="' + data.ID + '" data-url="/settings/modify_news/' + name + '/' + data.ID + '">[修改]</a>'))
+
+                            this.append(' <a href="javascript:;" data-id="' + data.ID + '" data-name="' + name + '" class="js_grid_delete">[删除]</a>');
+                        }
+                    }]
+
+            }).search();
+
+            this.$('.mysql_table_name').after(this.grid.$el);
 
         },
 
