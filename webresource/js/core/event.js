@@ -1,188 +1,194 @@
-﻿define(function(require,exports,module) {
-    var $=require('$'),
-        sl=require('./base');
+﻿var $ = require('$');
 
-    var slice=[].slice,
-        separator=/\s+/,
+var slice = [].slice,
+    separator = /\s+/,
 
-        returnFalse=function() {
-            return false;
-        },
+    returnFalse = function () {
+        return false;
+    },
 
-        returnTrue=function() {
-            return true;
-        };
+    returnTrue = function () {
+        return true;
+    };
 
-    function eachEvent(events,callback,iterator) {
+function eachEvent(events, callback, iterator) {
 
-        (events||'').split(separator).forEach(function(type) {
-            iterator(type,callback);
-        });
+    (events || '').split(separator).forEach(function (type) {
+        iterator(type, callback);
+    });
+}
+
+function matcherFor(ns) {
+    return new RegExp('(?:^| )' + ns.replace(' ', ' .* ?') + '(?: |$)');
+}
+
+function parse(name) {
+    var parts = ('' + name).split('.');
+
+    return {
+        e: parts[0],
+        ns: parts.slice(1).sort().join(' ')
+    };
+}
+
+function findHandlers(arr, name, callback, context) {
+    var matcher,
+        obj;
+
+    obj = parse(name);
+    obj.ns && (matcher = matcherFor(obj.ns));
+    return arr.filter(function (handler) {
+        return handler &&
+            (!obj.e || handler.e === obj.e) &&
+            (!obj.ns || matcher.test(handler.ns)) &&
+            (!callback || handler.cb === callback ||
+                handler.cb._cb === callback) &&
+            (!context || handler.ctx === context);
+    });
+}
+
+function Event(type, props) {
+    if (!(this instanceof Event)) {
+        return new Event(type, props);
     }
 
-    function matcherFor(ns) {
-        return new RegExp('(?:^| )'+ns.replace(' ',' .* ?')+'(?: |$)');
+    props && $.extend(this, props);
+    this.type = type;
+
+    return this;
+}
+
+Event.prototype = {
+
+    isDefaultPrevented: returnFalse,
+
+    isPropagationStopped: returnFalse,
+
+
+    preventDefault: function () {
+        this.isDefaultPrevented = returnTrue;
+    },
+
+    stopPropagation: function () {
+        this.isPropagationStopped = returnTrue;
     }
+};
 
-    function parse(name) {
-        var parts=(''+name).split('.');
+var event = {
 
-        return {
-            e: parts[0],
-            ns: parts.slice(1).sort().join(' ')
-        };
-    }
+    on: function (name, callback, context) {
+        var me = this,
+            set;
 
-    function findHandlers(arr,name,callback,context) {
-        var matcher,
-            obj;
-
-        obj=parse(name);
-        obj.ns&&(matcher=matcherFor(obj.ns));
-        return arr.filter(function(handler) {
-            return handler&&
-                    (!obj.e||handler.e===obj.e)&&
-                    (!obj.ns||matcher.test(handler.ns))&&
-                    (!callback||handler.cb===callback||
-                    handler.cb._cb===callback)&&
-                    (!context||handler.ctx===context);
-        });
-    }
-
-    function Event(type,props) {
-        if(!(this instanceof Event)) {
-            return new Event(type,props);
+        if (!callback) {
+            return this;
         }
 
-        props&&$.extend(this,props);
-        this.type=type;
+        set = this._events || (this._events = []);
+
+        eachEvent(name, callback, function (name, callback) {
+            var handler = parse(name);
+
+            handler.cb = callback;
+            handler.ctx = context;
+            handler.ctx2 = context || me;
+            handler.id = set.length;
+            set.push(handler);
+        });
+
+        return this;
+    },
+
+    one: function (name, callback, context) {
+        var me = this;
+
+        if (!callback) {
+            return this;
+        }
+
+        eachEvent(name, callback, function (name, callback) {
+            var once = function () {
+                me.off(name, once);
+                return callback.apply(context || me, arguments);
+            };
+
+            once._cb = callback;
+            me.on(name, once, context);
+        });
+
+        return this;
+    },
+
+    off: function (name, callback, context) {
+        var events = this._events;
+
+        if (!events) {
+            return this;
+        }
+
+        if (!name && !callback && !context) {
+            this._events = [];
+            return this;
+        }
+
+        eachEvent(name, callback, function (name, callback) {
+            findHandlers(events, name, callback, context)
+                .forEach(function (handler) {
+                    delete events[handler.id];
+                });
+        });
+
+        return this;
+    },
+
+    trigger: function (evt) {
+        var i = -1,
+            args,
+            events,
+            stoped,
+            len,
+            ev;
+
+        if (!this._events || !evt) {
+            return this;
+        }
+
+        typeof evt === 'string' && (evt = new Event(evt));
+
+        args = slice.call(arguments, 1);
+        evt.args = args;
+        args.unshift(evt);
+
+        events = findHandlers(this._events, evt.type);
+
+        if (events) {
+            len = events.length;
+
+            while (++i < len) {
+                if ((stoped = evt.isPropagationStopped()) || false ===
+                    (ev = events[i]).cb.apply(ev.ctx2, args)
+                ) {
+
+                    stoped || (evt.stopPropagation(), evt.preventDefault());
+                    break;
+                }
+            }
+        }
 
         return this;
     }
+};
 
-    Event.prototype={
+Event.mixin = function (Fn, ext) {
+    Fn.prototype = Object.create(event);
 
-        isDefaultPrevented: returnFalse,
+    ext && $.extend(Fn.prototype, ext);
 
-        isPropagationStopped: returnFalse,
+    return Fn;
+}
 
+Event.extend = function (obj) {
+    return $.extend(obj, event);
+}
 
-        preventDefault: function() {
-            this.isDefaultPrevented=returnTrue;
-        },
-
-        stopPropagation: function() {
-            this.isPropagationStopped=returnTrue;
-        }
-    };
-
-    sl.event={
-        createEvent: Event,
-
-        on: function(name,callback,context) {
-            var me=this,
-                set;
-
-            if(!callback) {
-                return this;
-            }
-
-            set=this._events||(this._events=[]);
-
-            eachEvent(name,callback,function(name,callback) {
-                var handler=parse(name);
-
-                handler.cb=callback;
-                handler.ctx=context;
-                handler.ctx2=context||me;
-                handler.id=set.length;
-                set.push(handler);
-            });
-
-            return this;
-        },
-
-        one: function(name,callback,context) {
-            var me=this;
-
-            if(!callback) {
-                return this;
-            }
-
-            eachEvent(name,callback,function(name,callback) {
-                var once=function() {
-                    me.off(name,once);
-                    return callback.apply(context||me,arguments);
-                };
-
-                once._cb=callback;
-                me.on(name,once,context);
-            });
-
-            return this;
-        },
-
-        off: function(name,callback,context) {
-            var events=this._events;
-
-            if(!events) {
-                return this;
-            }
-
-            if(!name&&!callback&&!context) {
-                this._events=[];
-                return this;
-            }
-
-            eachEvent(name,callback,function(name,callback) {
-                findHandlers(events,name,callback,context)
-                        .forEach(function(handler) {
-                            delete events[handler.id];
-                        });
-            });
-
-            return this;
-        },
-
-        trigger: function(evt) {
-            var i= -1,
-                args,
-                events,
-                stoped,
-                len,
-                ev;
-
-            if(!this._events||!evt) {
-                return this;
-            }
-
-            typeof evt==='string'&&(evt=new Event(evt));
-
-            args=slice.call(arguments,1);
-            evt.args=args;
-            args.unshift(evt);
-
-            events=findHandlers(this._events,evt.type);
-
-            if(events) {
-                len=events.length;
-
-                while(++i<len) {
-                    if((stoped=evt.isPropagationStopped())||false===
-                            (ev=events[i]).cb.apply(ev.ctx2,args)
-                            ) {
-
-                        stoped||(evt.stopPropagation(),evt.preventDefault());
-                        break;
-                    }
-                }
-            }
-
-            return this;
-        }
-    };
-
-    sl.Event=Event;
-
-    return sl.event;
-});
+return Event;

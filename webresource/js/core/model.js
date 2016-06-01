@@ -3,7 +3,7 @@
         util = require('util'),
         Base = require('./base'),
         Event = require('./event'),
-        ComponentBase = require('./component');
+        Component = require('./component');
 
     var eventsCache = [];
     var changeEventsTimer;
@@ -339,7 +339,7 @@
     }
     ModelProto.clear = ModelProto.reset;
 
-    Model.prototype = $.extend({}, Event, ModelProto);
+    Event.mixin(Model, ModelProto);
 
     var Repeat = function (options) {
         $.extend(this, options);
@@ -632,7 +632,7 @@
         }
     }
 
-    var Collection = function (parent, attr, data) {
+    var Collection = Event.mixin(function (parent, attr, data) {
 
         this.models = [];
 
@@ -647,25 +647,23 @@
         parent.data[attr] = this.data;
 
         this.add(data);
-    }
 
-    Collection.prototype = Object.create(Event);
-
-    Collection.prototype.each = function (fn) {
-        for (var i = 0; i < this.models.length; i++) {
-            if (fn.call(this, this.models[i], i) === false) break;
-        }
-        return this;
-    }
-
-    Collection.prototype.first = function (fn) {
-        for (var i = 0; i < this.models.length; i++) {
-            if (fn.call(this, this.data[i], i)) {
-                return this.models[i];
+    }, {
+            each: function (fn) {
+                for (var i = 0; i < this.models.length; i++) {
+                    if (fn.call(this, this.models[i], i) === false) break;
+                }
+                return this;
+            },
+            first: function (fn) {
+                for (var i = 0; i < this.models.length; i++) {
+                    if (fn.call(this, this.data[i], i)) {
+                        return this.models[i];
+                    }
+                }
+                return null;
             }
-        }
-        return null;
-    }
+        });
 
     Collection.prototype.add = function (data) {
         var model;
@@ -1022,7 +1020,7 @@
 
             return this.upperRepeatEl(el, function (el) {
                 if (el.snRepeat.repeat.alias == alias)
-                    return snModel;
+                    return el.snModel;
             });
         },
         _getVal: function (model, name) {
@@ -1221,7 +1219,7 @@
             return this;
         }
 
-    }, util.pick(ComponentBase.prototype, ['$', 'undelegateEvents', 'listenTo', 'listen', 'destroy']));
+    }, util.pick(Component.prototype, ['$', 'undelegateEvents', 'listenTo', 'listen', 'destroy']));
 
     ViewModel.extend = util.extend;
 

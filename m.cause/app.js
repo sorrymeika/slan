@@ -112,6 +112,8 @@ exports.startWebServer = function (config) {
     var express = require('express');
     var app = express();
 
+    config.resourceMapping = {};
+
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
             res.send(html);

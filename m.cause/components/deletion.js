@@ -25,7 +25,7 @@ var Deletion = function (options) {
             for (var key in events) {
                 for (var node = el; node != target.parentNode; node = node.parentNode) {
                     if ($(node).is(key)) {
-                        events[key].call(self, Event.createEvent('tap', { currentTarget: node, target: el }));
+                        events[key].call(self, new Event('tap', { currentTarget: node, target: el }));
                         return false;
                     }
                 }

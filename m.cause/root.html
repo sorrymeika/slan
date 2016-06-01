@@ -60,13 +60,13 @@
                     
                     var resourceMapping=res.data;
                     var routes=$.extend(@(JSON.stringify(routes)),res.routes||{});
-                    var combineMapping =  @(JSON.stringify(resourceMapping);
+                    var combineMapping=@(JSON.stringify(resourceMapping));
                     seajs.on('fetch', function (emitData) {
                         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
                         
-                        if (resourceMapping&&resourceMapping[id])
+                        if (resourceMapping&&resourceMapping[id]) {
                             emitData.requestUri = resourceMapping[id];
-                        else if (combineMapping) {
+                        } else if (combineMapping) {
                             for (var key in combineMapping) {
                                 if (combineMapping[key].indexOf(id) != -1) {
                                     emitData.requestUri = seajs.resolve(key);

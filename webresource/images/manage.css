@@ -173,7 +173,7 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .menu_bd dt.curr a { color: #533; text-decoration: underline; font-size: 14px; }
 .menu_bd dt a { color: #000; text-decoration: underline; }
 .menu_bd dd { padding: 4px 0 4px 5px; font-size: 12px; color: #7a7a7a; }
-.menu_bd dd:before { content: ' '; }
+.menu_bd dd:before { content: '-'; color: #f2f5f0; }
 .menu_bd dd.curr a { color: #c00; text-decoration: underline; }
 .menu ~ .view { margin-left: 180px; }
 

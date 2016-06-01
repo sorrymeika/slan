@@ -7,7 +7,7 @@
 var slice = Array.prototype.slice;
 var cb = new CubicBezier(.08, .53, .2, .96);
 
-var Touch = function (el, options) {
+var Touch = Event.mixin(function (el, options) {
     var self = this,
         $el = $(el);
 
@@ -26,356 +26,352 @@ var Touch = function (el, options) {
     this.delegate('touchstart', self.options.children, self._start)
         .delegate('touchmove', self.options.children, self._move)
         .delegate('touchend', self.options.children, self._end);
-}
+}, {
+        minDelta: 0,
+        minX: 0,
+        maxX: 0,
+        minY: 0,
+        maxY: 0,
+        x: 0,
+        y: 0,
 
-Touch.prototype = Object.create(Event);
+        delegate: function (event, sub, fn) {
+            if (typeof sub == 'undefined' && typeof fn == 'function')
+                sub = fn;
 
-$.extend(Touch.prototype, {
-    minDelta: 0,
-    minX: 0,
-    maxX: 0,
-    minY: 0,
-    maxY: 0,
-    x: 0,
-    y: 0,
+            (typeof sub == 'function') ?
+                this.$el.on(event, $.proxy(sub, this)) :
+                this.$el.on(event, sub, $.proxy(fn, this));
+            return this;
+        },
 
-    delegate: function (event, sub, fn) {
-        if (typeof sub == 'undefined' && typeof fn == 'function')
-            sub = fn;
+        _stopMomentum: function () {
+            if (this.momentum) {
+                this.momentum.stop();
+                this._isClickStopAni = true;
+                return true;
+            }
+            else
+                return false;
+        },
 
-        (typeof sub == 'function') ?
-            this.$el.on(event, $.proxy(sub, this)) :
-            this.$el.on(event, sub, $.proxy(fn, this));
-        return this;
-    },
+        _start: function (e) {
+            var self = this,
+                point = e.touches[0];
 
-    _stopMomentum: function () {
-        if (this.momentum) {
-            this.momentum.stop();
-            this._isClickStopAni = true;
-            return true;
-        }
-        else
-            return false;
-    },
+            self.pointX = self.startPointX = self.sx = point.pageX;
+            self.pointY = self.startPointY = self.sy = point.pageY;
 
-    _start: function (e) {
-        var self = this,
-            point = e.touches[0];
+            self.isTouchStop = false;
+            self.isTouchStart = false;
+            self.isTouchMoved = false;
 
-        self.pointX = self.startPointX = self.sx = point.pageX;
-        self.pointY = self.startPointY = self.sy = point.pageY;
+            self.startTime = e.timeStamp || Date.now();
 
-        self.isTouchStop = false;
-        self.isTouchStart = false;
-        self.isTouchMoved = false;
+            self.startX = self.x;
+            self.startY = self.y;
 
-        self.startTime = e.timeStamp || Date.now();
+            self.prevPointX = self.prevPointY = 0;
 
-        self.startX = self.x;
-        self.startY = self.y;
+            self.isClickStopMomentum = self._stopMomentum();
 
-        self.prevPointX = self.prevPointY = 0;
+            self.timestamp = Date.now();
+        },
 
-        self.isClickStopMomentum = self._stopMomentum();
+        _move: function (e) {
+            if (this.isTouchStop) return;
 
-        self.timestamp = Date.now();
-    },
+            var self = this,
+                point = e.touches[0],
+                deltaX = self.startPointX - point.pageX,
+                deltaY = self.startPointY - point.pageY,
+                x,
+                y;
 
-    _move: function (e) {
-        if (this.isTouchStop) return;
+            self.deltaX = deltaX;
+            self.deltaY = deltaY;
 
-        var self = this,
-            point = e.touches[0],
-            deltaX = self.startPointX - point.pageX,
-            deltaY = self.startPointY - point.pageY,
-            x,
-            y;
+            if (!self.isTouchStart) {
+                var isDirectionX = Math.abs(deltaX) >= self.minDelta && Math.abs(deltaX) > Math.abs(deltaY),
+                    isDirectionY = !isDirectionX;
 
-        self.deltaX = deltaX;
-        self.deltaY = deltaY;
+                if (isDirectionY || isDirectionX) {
 
-        if (!self.isTouchStart) {
-            var isDirectionX = Math.abs(deltaX) >= self.minDelta && Math.abs(deltaX) > Math.abs(deltaY),
-                isDirectionY = !isDirectionX;
+                    if (isDirectionY && !self.options.enableVertical || isDirectionX && !self.options.enableHorizontal) {
+                        this.stop();
+                        return;
+                    }
 
-            if (isDirectionY || isDirectionX) {
+                    self.isTouchStart = true;
+                    self.isDirectionY = isDirectionY;
+                    self.isDirectionX = isDirectionX;
+                    self.dir = isDirectionX;
 
-                if (isDirectionY && !self.options.enableVertical || isDirectionX && !self.options.enableHorizontal) {
-                    this.stop();
-                    return;
-                }
-
-                self.isTouchStart = true;
-                self.isDirectionY = isDirectionY;
-                self.isDirectionX = isDirectionX;
-                self.dir = isDirectionX;
-
-                if (!self.isInit) {
-                    self.trigger(Event.createEvent('init', {
+                    if (!self.isInit) {
+                        self.trigger(new Event('init', {
+                            currentTarget: e.currentTarget
+                        }));
+                        self.isInit = true;
+                    }
+                    self.trigger(new Event('start', {
                         currentTarget: e.currentTarget
                     }));
-                    self.isInit = true;
-                }
-                self.trigger(Event.createEvent('start', {
-                    currentTarget: e.currentTarget
-                }));
 
-                if (self.isTouchStop) {
-                    return;
+                    if (self.isTouchStop) {
+                        return;
+                    }
+                } else {
+                    return false;
                 }
-            } else {
-                return false;
             }
-        }
 
-        if (self.options.enableHorizontal) {
-            x = self.startX + deltaX;
-            self.x = x < self.minX ? self.minX + (x - self.minX) / 2 : x > self.maxX ? self.maxX + (x - self.maxX) / 2 : x;
-        }
+            if (self.options.enableHorizontal) {
+                x = self.startX + deltaX;
+                self.x = x < self.minX ? self.minX + (x - self.minX) / 2 : x > self.maxX ? self.maxX + (x - self.maxX) / 2 : x;
+            }
 
-        if (self.options.enableVertical) {
-            y = self.startY + deltaY;
-            self.y = y < self.minY ? self.minY + (y - self.minY) / 2 : y > self.maxY ? self.maxY + (y - self.maxY) / 2 : y;
-        }
+            if (self.options.enableVertical) {
+                y = self.startY + deltaY;
+                self.y = y < self.minY ? self.minY + (y - self.minY) / 2 : y > self.maxY ? self.maxY + (y - self.maxY) / 2 : y;
+            }
 
-        self.trigger(Event.createEvent('move', {
-            currentTarget: e.currentTarget
-        }));
+            self.trigger(new Event('move', {
+                currentTarget: e.currentTarget
+            }));
 
-        self.isTouchMoved = true;
+            self.isTouchMoved = true;
 
-        self.isMoveLeft = self.pointX - point.pageX > 0 ? true : self.pointX == point.pageX ? self.isMoveLeft : false;
-        self.isMoveTop = self.pointY - point.pageY > 0 ? true : self.pointY == point.pageY ? self.isMoveTop : false;
+            self.isMoveLeft = self.pointX - point.pageX > 0 ? true : self.pointX == point.pageX ? self.isMoveLeft : false;
+            self.isMoveTop = self.pointY - point.pageY > 0 ? true : self.pointY == point.pageY ? self.isMoveTop : false;
 
-        self.prevPointX = self.oldPointX;
-        self.prevPointY = self.oldPointY;
+            self.prevPointX = self.oldPointX;
+            self.prevPointY = self.oldPointY;
 
-        self.oldPointX = self.pointX;
-        self.oldPointY = self.pointY;
+            self.oldPointX = self.pointX;
+            self.oldPointY = self.pointY;
 
-        self.pointX = point.pageX;
-        self.pointY = point.pageY;
+            self.pointX = point.pageX;
+            self.pointY = point.pageY;
 
-        self.timestamp = Date.now();
+            self.timestamp = Date.now();
 
-        return false;
-    },
+            return false;
+        },
 
-    shouldBounceBack: function () {
-        var self = this;
-        return self.options.enableHorizontal && (self.x < self.minX || self.x > self.maxX) || self.options.enableVertical && (self.y < self.minY || self.y > self.maxY);
-    },
+        shouldBounceBack: function () {
+            var self = this;
+            return self.options.enableHorizontal && (self.x < self.minX || self.x > self.maxX) || self.options.enableVertical && (self.y < self.minY || self.y > self.maxY);
+        },
 
-    _end: function (e) {
-        var self = this;
+        _end: function (e) {
+            var self = this;
 
-        if ((!self.isTouchMoved || self.isTouchStop) && self._isClickStopAni) {
+            if ((!self.isTouchMoved || self.isTouchStop) && self._isClickStopAni) {
+                if (self.shouldBounceBack()) {
+                    self.bounceBack();
+                }
+                self._stop();
+                e.cancelTap = true;
+                return;
+            }
+
+            if (!self.isTouchMoved) return;
+            self.isTouchMoved = false;
+
+            if (self.isTouchStop) return;
+            self.isTouchStop = true;
+
+            $(e.target).trigger('touchcancel');
+            self.trigger('end');
+
+            if (!self.options.momentum) {
+                self._stop();
+                return;
+            }
+
             if (self.shouldBounceBack()) {
                 self.bounceBack();
+                return;
             }
-            self._stop();
-            e.cancelTap = true;
-            return;
-        }
 
-        if (!self.isTouchMoved) return;
-        self.isTouchMoved = false;
+            var point = e.changedTouches[0],
+                changeX,
+                changeY,
+                currentX = self.x,
+                currentY = self.y,
+                distX = 0,
+                distY = 0,
+                x,
+                y,
+                duration,
+                resultX,
+                resultY;
 
-        if (self.isTouchStop) return;
-        self.isTouchStop = true;
+            if (Date.now() - self.timestamp < 50) {
+                changeX = point.pageX - (self.prevPointX || self.oldPointX);
+                changeY = point.pageY - (self.prevPointY || self.oldPointY);
 
-        $(e.target).trigger('touchcancel');
-        self.trigger('end');
+                changeY = changeY > 80 ? 80 : changeY < -80 ? -80 : changeY;
+                changeX = changeX > 80 ? 80 : changeX < -80 ? -80 : changeX;
 
-        if (!self.options.momentum) {
-            self._stop();
-            return;
-        }
+                distX = (changeX * Math.abs(changeX) / -4) * 1.2;
+                distY = (changeY * Math.abs(changeY) / -4) * 1.2;
 
-        if (self.shouldBounceBack()) {
-            self.bounceBack();
-            return;
-        }
+                duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 60;
+            }
 
-        var point = e.changedTouches[0],
-            changeX,
-            changeY,
-            currentX = self.x,
-            currentY = self.y,
-            distX = 0,
-            distY = 0,
-            x,
-            y,
-            duration,
-            resultX,
-            resultY;
+            if (self.options.divisorX) {
 
-        if (Date.now() - self.timestamp < 50) {
-            changeX = point.pageX - (self.prevPointX || self.oldPointX);
-            changeY = point.pageY - (self.prevPointY || self.oldPointY);
+                resultX = distX + currentX;
 
-            changeY = changeY > 80 ? 80 : changeY < -80 ? -80 : changeY;
-            changeX = changeX > 80 ? 80 : changeX < -80 ? -80 : changeX;
+                distX = resultX % self.options.divisorX == 0 ? distX :
+                    self.isMoveLeft ? Math.ceil(resultX / self.options.divisorX) * self.options.divisorX - currentX :
+                        (Math.floor(resultX / self.options.divisorX) * self.options.divisorX - currentX);
+            }
 
-            distX = (changeX * Math.abs(changeX) / -4) * 1.2;
-            distY = (changeY * Math.abs(changeY) / -4) * 1.2;
+            if (self.options.divisorY) {
+                resultY = distY + currentY;
 
-            duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 60;
-        }
+                distY = resultY % self.options.divisorY == 0 ? distY :
+                    self.isMoveTop ? Math.ceil(resultY / self.options.divisorY) * self.options.divisorY - currentY :
+                        (Math.floor(resultY / self.options.divisorY) * self.options.divisorY - currentY);
 
-        if (self.options.divisorX) {
+                console.log(resultY, distY, self.isMoveTop, Math.ceil(resultY / self.options.divisorY) * self.options.divisorY);
+            }
 
-            resultX = distX + currentX;
+            if (distX || distY) {
 
-            distX = resultX % self.options.divisorX == 0 ? distX :
-                self.isMoveLeft ? Math.ceil(resultX / self.options.divisorX) * self.options.divisorX - currentX :
-                    (Math.floor(resultX / self.options.divisorX) * self.options.divisorX - currentX);
-        }
+                !duration && (duration = 200) || self.options.maxDuration && duration > self.options.maxDuration && (duration = self.options.maxDuration);
 
-        if (self.options.divisorY) {
-            resultY = distY + currentY;
+                //惯性移动
+                self.momentum = animation.animate(function (d, current, duration) {
+                    d = cb.get(current / duration);
+                    x = currentX + distX * d;
+                    y = currentY + distY * d;
 
-            distY = resultY % self.options.divisorY == 0 ? distY :
-                self.isMoveTop ? Math.ceil(resultY / self.options.divisorY) * self.options.divisorY - currentY :
-                    (Math.floor(resultY / self.options.divisorY) * self.options.divisorY - currentY);
+                    if (self.options.enableVertical && (y < self.minY || y > self.maxY) || (self.options.enableHorizontal && !self.options.enableVertical && (x < self.minX || x > self.maxX))) {
+                        self.momentum && self.momentum.stop();
 
-            console.log(resultY, distY, self.isMoveTop, Math.ceil(resultY / self.options.divisorY) * self.options.divisorY);
-        }
+                        distX = currentX + distX;
+                        distY = currentY + distY;
 
-        if (distX || distY) {
+                        currentX = self.x;
+                        currentY = self.y;
 
-            !duration && (duration = 200) || self.options.maxDuration && duration > self.options.maxDuration && (duration = self.options.maxDuration);
+                        distX = distX < self.minX ? self.minX + Math.max(-80, (distX - self.minX) / 36) : distX > self.maxX ? self.maxX + Math.min(100, (distX - self.maxX) / 36) : distX;
+                        distY = distY < self.minY ? self.minY + Math.max(-80, (distY - self.minY) / 36) : distY > self.maxY ? self.maxY + Math.min(100, (distY - self.maxY) / 36) : distY;
 
-            //惯性移动
-            self.momentum = animation.animate(function (d, current, duration) {
-                d = cb.get(current / duration);
-                x = currentX + distX * d;
-                y = currentY + distY * d;
+                        distY -= currentY;
+                        distX -= currentX;
 
-                if (self.options.enableVertical && (y < self.minY || y > self.maxY) || (self.options.enableHorizontal && !self.options.enableVertical && (x < self.minX || x > self.maxX))) {
-                    self.momentum && self.momentum.stop();
+                        //当前惯性移动的值超过阀值减速移动
+                        self.momentum = animation.animate(function (d) {
+                            self.options.enableHorizontal && (self.x = currentX + distX * d);
+                            self.options.enableVertical && (self.y = currentY + distY * d);
 
-                    distX = currentX + distX;
-                    distY = currentY + distY;
+                            self.trigger('move');
 
-                    currentX = self.x;
-                    currentY = self.y;
+                        }, Math.min(200, (duration - current) / 4), 'easeOutCubic', function () {
+                            self.bounceBack();
+                        });
 
-                    distX = distX < self.minX ? self.minX + Math.max(-80, (distX - self.minX) / 36) : distX > self.maxX ? self.maxX + Math.min(100, (distX - self.maxX) / 36) : distX;
-                    distY = distY < self.minY ? self.minY + Math.max(-80, (distY - self.minY) / 36) : distY > self.maxY ? self.maxY + Math.min(100, (distY - self.maxY) / 36) : distY;
-
-                    distY -= currentY;
-                    distX -= currentX;
-
-                    //当前惯性移动的值超过阀值减速移动
-                    self.momentum = animation.animate(function (d) {
-                        self.options.enableHorizontal && (self.x = currentX + distX * d);
-                        self.options.enableVertical && (self.y = currentY + distY * d);
-
+                    } else {
+                        self.options.enableHorizontal && (self.x = x < self.minX ? self.minX : x > self.maxX ? self.maxX : x);
+                        self.options.enableVertical && (self.y = y);
                         self.trigger('move');
+                    }
 
-                    }, Math.min(200, (duration - current) / 4), 'easeOutCubic', function () {
-                        self.bounceBack();
-                    });
-
-                } else {
-                    self.options.enableHorizontal && (self.x = x < self.minX ? self.minX : x > self.maxX ? self.maxX : x);
-                    self.options.enableVertical && (self.y = y);
-                    self.trigger('move');
-                }
-
-            }, duration, 'ease', function () {
+                }, duration, 'ease', function () {
+                    self._stop();
+                });
+            } else {
                 self._stop();
-            });
-        } else {
-            self._stop();
-        }
-
-        return false;
-    },
-
-    bounceBack: function () {
-        var self = this;
-        var currentX = self.x;
-        var currentY = self.y;
-        var distX = 0;
-        var distY = 0;
-
-        if (self.options.enableHorizontal) {
-            if (self.x < self.minX) {
-                distX = self.minX - self.x;
             }
-            else if (self.x > self.maxX) {
-                distX = self.maxX - self.x;
-            }
-        }
-        if (self.options.enableVertical) {
-            if (self.y < self.minY) {
-                distY = self.minY - self.y;
-            }
-            else if (self.y > self.maxY) {
-                distY = self.maxY - self.y;
-            }
-        }
 
-        animation.animate(function (d) {
-            self.x = currentX + distX * d;
-            self.y = currentY + distY * d;
+            return false;
+        },
 
-            self.trigger('move');
-
-        }, 200, 'ease', function () {
-            self._stop();
-        });
-    },
-
-    scrollTo: function (x, y, duration, callback) {
-        var self = this;
-        x = self.options.enableHorizontal ?
-            x >= this.maxX ? this.maxX : x <= this.minX ? this.minX : x
-            : self.x;
-
-        y = self.options.enableVertical ?
-            y >= this.maxY ? this.maxY : y <= this.minY ? this.minY : y
-            : self.y;
-
-        if (!duration) {
-            self.x = x;
-            self.y = y;
-
-            self.trigger('move');
-        } else {
+        bounceBack: function () {
+            var self = this;
             var currentX = self.x;
             var currentY = self.y;
-            var distX = x - self.x;
-            var distY = y - self.y;
+            var distX = 0;
+            var distY = 0;
+
+            if (self.options.enableHorizontal) {
+                if (self.x < self.minX) {
+                    distX = self.minX - self.x;
+                }
+                else if (self.x > self.maxX) {
+                    distX = self.maxX - self.x;
+                }
+            }
+            if (self.options.enableVertical) {
+                if (self.y < self.minY) {
+                    distY = self.minY - self.y;
+                }
+                else if (self.y > self.maxY) {
+                    distY = self.maxY - self.y;
+                }
+            }
+
             animation.animate(function (d) {
                 self.x = currentX + distX * d;
                 self.y = currentY + distY * d;
 
                 self.trigger('move');
 
-            }, duration, 'ease', callback);
+            }, 200, 'ease', function () {
+                self._stop();
+            });
+        },
+
+        scrollTo: function (x, y, duration, callback) {
+            var self = this;
+            x = self.options.enableHorizontal ?
+                x >= this.maxX ? this.maxX : x <= this.minX ? this.minX : x
+                : self.x;
+
+            y = self.options.enableVertical ?
+                y >= this.maxY ? this.maxY : y <= this.minY ? this.minY : y
+                : self.y;
+
+            if (!duration) {
+                self.x = x;
+                self.y = y;
+
+                self.trigger('move');
+            } else {
+                var currentX = self.x;
+                var currentY = self.y;
+                var distX = x - self.x;
+                var distY = y - self.y;
+                animation.animate(function (d) {
+                    self.x = currentX + distX * d;
+                    self.y = currentY + distY * d;
+
+                    self.trigger('move');
+
+                }, duration, 'ease', callback);
+            }
+        },
+
+        stop: function () {
+            this.isTouchStop = true;
+        },
+
+        _stop: function () {
+            this.momentum = null;
+            this._isClickStopAni = false;
+            this.trigger('stop');
+        },
+
+        destory: function () {
+            this.$el.off('touchstart', this._start)
+                .off('touchmove', this._move)
+                .off('touchend', this._end)
         }
-    },
-
-    stop: function () {
-        this.isTouchStop = true;
-    },
-
-    _stop: function () {
-        this.momentum = null;
-        this._isClickStopAni = false;
-        this.trigger('stop');
-    },
-
-    destory: function () {
-        this.$el.off('touchstart', this._start)
-            .off('touchmove', this._move)
-            .off('touchend', this._end)
-    }
-})
+    });
 
 module.exports = Touch;
 
