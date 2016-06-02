@@ -1,4 +1,4 @@
-﻿var $ = require('$');
+var $ = require('$');
 
 var slice = [].slice,
     separator = /\s+/,

@@ -1,4 +1,4 @@
-﻿var $ = require('$'),
+var $ = require('$'),
     util = require('util'),
     view = require('./../core/view');
 

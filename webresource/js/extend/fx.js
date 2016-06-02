@@ -1,4 +1,4 @@
-﻿(function($,undefined) {
+(function($,undefined) {
     var prefix='',eventPrefix,endEventName,endAnimationName,
     vendors={ Webkit: 'webkit',Moz: '',O: 'o' },
     document=window.document,testEl=document.createElement('div'),
