@@ -2,7 +2,7 @@ var $ = require('$');
 var Touch = require('core/touch');
 var Event = require('core/event');
 
-var Deletion = function (options) {
+var Deletion = Event.extend(function (options) {
 
     var self = this;
     var events = options.events;
@@ -40,6 +40,8 @@ var Deletion = function (options) {
     this.touch = new Touch(options.el, {
         enableVertical: false,
         enableHorizontal: true,
+        maxDuration: 200,
+        divisorX: options.width,
         children: options.children
     });
 
@@ -64,8 +66,6 @@ var Deletion = function (options) {
             this.scrollTo(options.width, 0, 50);
         }
     });
-};
-
-Deletion.prototype = Object.create(Event);
+});
 
 module.exports = Deletion;

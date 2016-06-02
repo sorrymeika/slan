@@ -188,7 +188,7 @@ Event.mixin = function (Fn, ext) {
 Event.extend = function (Fn, ext) {
     Fn.prototype = Object.create(event);
 
-    ext && $.extend(Fn.prototype, event, ext);
+    ext && $.extend(Fn.prototype, ext);
 
     return Fn;
 }

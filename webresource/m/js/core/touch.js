@@ -165,6 +165,7 @@ var Touch = Event.mixin(function (el, options) {
 
         _end: function (e) {
             var self = this;
+            var endEvent;
 
             if ((!self.isTouchMoved || self.isTouchStop) && self._isClickStopAni) {
                 if (self.shouldBounceBack()) {
@@ -181,8 +182,12 @@ var Touch = Event.mixin(function (el, options) {
             if (self.isTouchStop) return;
             self.isTouchStop = true;
 
+            endEvent = new Event('end', {
+                currentTarget: e.currentTarget
+            });
+            self.trigger(endEvent);
+
             $(e.target).trigger('touchcancel');
-            self.trigger('end');
 
             if (!self.options.momentum) {
                 self._stop();
@@ -205,7 +210,8 @@ var Touch = Event.mixin(function (el, options) {
                 y,
                 duration,
                 resultX,
-                resultY;
+                resultY,
+                maxDuration = endEvent.maxDuration || self.options.maxDuration;
 
             if (Date.now() - self.timestamp < 50) {
                 changeX = point.pageX - (self.prevPointX || self.oldPointX);
@@ -241,7 +247,7 @@ var Touch = Event.mixin(function (el, options) {
 
             if (distX || distY) {
 
-                !duration && (duration = 200) || self.options.maxDuration && duration > self.options.maxDuration && (duration = self.options.maxDuration);
+                !duration && (duration = 200) || maxDuration && duration > maxDuration && (duration = maxDuration);
 
                 //惯性移动
                 self.momentum = animation.animate(function (d, current, duration) {
