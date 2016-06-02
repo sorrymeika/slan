@@ -6,7 +6,7 @@
 var Component = Event.mixin(function (options) {
     var self = this;
 
-    self.options = $.extend({}, self.options, options);
+    self.options = options = $.extend({}, self.options, options);
     if (self.options.className) self.className = self.options.className;
     if (self.options.el) self.el = self.options.el;
     self.cid = util.guid();
@@ -14,6 +14,10 @@ var Component = Event.mixin(function (options) {
     self.setElement(self.el);
 
     self.onDestroy && self.on('Destroy', self.onDestroy);
+
+    if (self.initialize) {
+        self.initialize.apply(self, arguments);
+    }
 
 }, {
         options: {},

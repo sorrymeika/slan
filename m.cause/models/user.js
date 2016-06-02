@@ -5,7 +5,7 @@ var util = require('util');
 var $ = require('$');
 var State = model.State;
 
-var User = Event.extend({
+var User = Event.mixin({
 
     get: function () {
         var user = State.get('user');

@@ -19,13 +19,9 @@
         }
 
         Component.apply(this, args);
-
-        that.initialize.apply(that, args);
-
-        if (that.options.initialize) that.options.initialize.apply(that, args);
     };
-    
-    View.prototype = $.extend({}, Component.prototype);
+
+    $.extend(View.prototype, Component.prototype);
 
     View.extend = function (options) {
         var child = util.extend.call(this, options);

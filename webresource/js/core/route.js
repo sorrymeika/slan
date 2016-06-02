@@ -1,6 +1,6 @@
 ﻿var util = require('util');
 
-var standardizeHash = function(hash) {
+var trimHash = function (hash) {
     var searchIndex = hash.indexOf('?');
     var search = '';
     if (searchIndex != -1) {
@@ -10,12 +10,12 @@ var standardizeHash = function(hash) {
     return (hash.replace(/^#+|\/$/, '') || '/').toLowerCase() + search;
 };
 
-var Route = function(options) {
+var Route = function (options) {
     this.routes = [];
     this.append(options);
 };
 
-Route.prototype.append = function(options) {
+Route.prototype.append = function (options) {
     var option,
         parts,
         root,
@@ -26,7 +26,7 @@ Route.prototype.append = function(options) {
         option = options[key];
         parts = [];
 
-        regex = '^(?:\/{0,1})' + key.replace(/(\/|^|\?)\{((?:.+?\{[^\}]+\}){0,}[^\}]*)\}/g, function(match, first, param) {
+        regex = '^(?:\/{0,1})' + key.replace(/(\/|^|\?)\{((?:.+?\{[^\}]+\}){0,}[^\}]*)\}/g, function (match, first, param) {
             namedParam = param.split(':');
 
             if (namedParam.length > 1) {
@@ -53,10 +53,10 @@ Route.prototype.append = function(options) {
     }
 }
 
-Route.prototype.match = function(url) {
+Route.prototype.match = function (url) {
     var result = null,
         query = {},
-        hash = url = standardizeHash(url),
+        hash = url = trimHash(url),
         index = url.indexOf('?'),
         search,
         routes = this.routes,
@@ -68,7 +68,7 @@ Route.prototype.match = function(url) {
 
         url = url.substr(0, index);
 
-        search.replace(/(?:^|&)([^=&]+)=([^&]*)/g, function(r0, r1, r2) {
+        search.replace(/(?:^|&)([^=&]+)=([^&]*)/g, function (r0, r1, r2) {
             query[r1] = decodeURIComponent(r2);
             return '';
         })
@@ -100,7 +100,7 @@ Route.prototype.match = function(url) {
             }
 
             if (route.api) {
-                result.api = route.api.replace(/\{([^\}]+?)\}/g, function(match, key) {
+                result.api = route.api.replace(/\{([^\}]+?)\}/g, function (match, key) {
                     return result.data[key];
                 });
             }
@@ -111,6 +111,6 @@ Route.prototype.match = function(url) {
     return result;
 }
 
-Route.standardizeHash = standardizeHash;
+Route.trimHash = trimHash;
 
 module.exports = Route;

@@ -47,7 +47,7 @@
             "core/component": "../webresource/js/core/component",
             "core/view": "../webresource/js/core/view",
             "core/model": "../webresource/js/core/model",
-            "core/master": "../webresource/js/core/master",
+            "core/appProto": "../webresource/js/core/appProto",
             "core/page": "../webresource/js/core/page",
             "core/navigation": "../webresource/js/core/navigation",
             "core/route": "../webresource/js/core/route",

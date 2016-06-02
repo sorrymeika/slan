@@ -180,15 +180,17 @@ var event = {
 };
 
 Event.mixin = function (Fn, ext) {
-    Fn.prototype = Object.create(event);
-
-    ext && $.extend(Fn.prototype, ext);
+    $.extend(typeof Fn == 'function' ? Fn.prototype : Fn, event, ext);
 
     return Fn;
 }
 
-Event.extend = function (obj) {
-    return $.extend(obj, event);
+Event.extend = function (Fn, ext) {
+    Fn.prototype = Object.create(event);
+
+    ext && $.extend(Fn.prototype, event, ext);
+
+    return Fn;
 }
 
 return Event;

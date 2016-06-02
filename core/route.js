@@ -1,4 +1,4 @@
-﻿var standardizeHash = function (hash) {
+﻿var trimHash = function (hash) {
     var searchIndex = hash.indexOf('?');
     if (searchIndex != -1) {
 
@@ -53,7 +53,7 @@ var Route = function (options, isDebug) {
 Route.prototype.match = function (url) {
     var result = null,
         queries = {},
-        hash = url = standardizeHash(url),
+        hash = url = trimHash(url),
         index = url.indexOf('?'),
         query,
         routes = this.routes,
@@ -109,6 +109,6 @@ Route.prototype.match = function (url) {
     return result;
 }
 
-Route.standardizeHash = standardizeHash;
+Route.trimHash = trimHash;
 
 module.exports = Route;

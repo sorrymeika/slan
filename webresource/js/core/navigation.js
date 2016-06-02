@@ -1,22 +1,22 @@
-﻿define(function(require, exports, module) {
+﻿define(function (require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
         Base = require('./base'),
         View = require('./view'),
         Route = require('./route'),
-        Master = require('./master'),
+        appProto = require('./appProto'),
         Promise = require('./promise');
 
     var noop = util.noop,
         slice = Array.prototype.slice,
         getPath = util.getPath,
-        standardizeHash = Route.standardizeHash,
-        checkQueryString = Master.checkQueryString;
+        trimHash = Route.trimHash,
+        checkQueryString = appProto.checkQueryString;
 
-    var Navigation = View.extend($.extend(Master, {
+    var Navigation = View.extend($.extend(appProto, {
         events: {
-            'click a[href]:not(.js-link-default)': function(e) {
+            'click a[href]:not(.js-link-default)': function (e) {
                 var that = this,
                     target = $(e.currentTarget);
 
@@ -34,7 +34,7 @@
             }
         },
         el: '<div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:2000;display:none"></div><div class="viewport"></div>',
-        initialize: function() {
+        initialize: function () {
             var that = this;
 
             that.$mask = $(that.$el[0]).on('click', false);
@@ -42,7 +42,7 @@
             that.promise = Promise.resolve();
         },
 
-        start: function() {
+        start: function () {
             var that = this,
                 hash,
                 $win = $(window),
@@ -57,14 +57,14 @@
             }
 
             if (!location.hash) location.hash = '/';
-            that.hash = hash = standardizeHash(location.hash);
+            that.hash = hash = trimHash(location.hash);
 
-            that.promise.then(function() {
-                that.get(hash, function(activity) {
+            that.promise.then(function () {
+                that.get(hash, function (activity) {
                     activity.$el.show().appendTo(that.el);
                     that._currentActivity = activity;
 
-                    activity.then(function() {
+                    activity.then(function () {
                         activity.trigger('Resume').trigger('Show');
 
                         that.trigger('start');
@@ -72,8 +72,8 @@
                     });
                 });
 
-                $win.on('hashchange', function() {
-                    hash = that.hash = standardizeHash(location.hash);
+                $win.on('hashchange', function () {
+                    hash = that.hash = trimHash(location.hash);
 
                     if (that.skip == 0) {
 
@@ -90,23 +90,23 @@
             return that;
         },
 
-        navigate: function(url) {
-            url = standardizeHash(url);
+        navigate: function (url) {
+            url = trimHash(url);
             this.skip++;
             location.hash = url;
         },
 
-        to: function(url) {
-            url = standardizeHash(url);
+        to: function (url) {
+            url = trimHash(url);
 
             var that = this,
                 promise = that.promise;
 
-            promise.then(function() {
+            promise.then(function () {
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
-                if (promise.queue.length == 0 && url != standardizeHash(location.hash)) {
+                if (promise.queue.length == 0 && url != trimHash(location.hash)) {
                     that.navigate(url);
                 }
 
@@ -115,7 +115,7 @@
                     promise.resolve();
                     return;
                 }
-                that.get(route, function(activity) {
+                that.get(route, function (activity) {
                     checkQueryString(activity, route);
 
                     if (activity.path != currentActivity.path) {
@@ -125,7 +125,7 @@
 
                         activity.$el.show().siblings('.view').hide();
 
-                        activity.then(function() {
+                        activity.then(function () {
                             activity.trigger('Resume').trigger('Show');
                         });
                     }
