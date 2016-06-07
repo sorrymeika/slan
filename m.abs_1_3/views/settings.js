@@ -4,7 +4,7 @@ define(function (require, exports, module) {
     var util = require('util');
     var Activity = require('activity');
     var Loading = require('../widget/loading');
-    var model = require('core/model2');
+    var model = require('core/model');
     var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var userModel = require("models/user");

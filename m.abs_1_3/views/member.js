@@ -11,14 +11,7 @@
     var guid = 0;
 
     return Activity.extend({
-        events: {
-            'tap .radio': function (e) {
-                var $target = $(e.currentTarget);
-                var value = e.currentTarget.getAttribute('value');
-
-                this.model.set($target.attr('sn-model'), value);
-            }
-        },
+        events: {},
 
         onCreate: function () {
             var self = this;
@@ -27,35 +20,37 @@
 
             this.model = new model.ViewModel(this.$el, {
                 title: '个人信息',
-                back: self.swipeRightBackAction,
-                showCity: function () {
-                    var index = util.indexOf(self.provinceList, function (item) {
-                        return item.PRV_ID == self.model.data.user.ProvID;
-                    });
-
-                    if (index != -1) {
-                        self.city.eq(0).index(index);
-                        changeCity(self.model.data.user.ProvID);
-                    }
-                    self.city.show();
-                },
-                submit: function () {
-                    this.set('submiting', true);
-                    var user = this.data.user;
-                    self.update.setParam({
-                        ID: user.ID,
-                        Auth: user.Auth,
-                        UserName: user.UserName,
-                        Gender: user.Gender,
-                        BirthDay: user.BirthDay && util.formatDate(user.BirthDay),
-                        ChildBirthDay: user.ChildBirthDay && util.formatDate(user.ChildBirthDay),
-                        CityID: user.CityID,
-                        FamilySize: user.FamilySize,
-                        HasChild: user.HasChild
-
-                    }).load();
-                }
+                back: self.swipeRightBackAction
             });
+
+            this.model.showCity = function () {
+                var index = util.indexOf(self.provinceList, function (item) {
+                    return item.PRV_ID == self.model.data.user.ProvID;
+                });
+
+                if (index != -1) {
+                    self.city.eq(0).index(index);
+                    changeCity(self.model.data.user.ProvID);
+                }
+                self.city.show();
+            }
+
+            this.model.submit = function () {
+                this.set('submiting', true);
+                var user = this.data.user;
+                self.update.setParam({
+                    ID: user.ID,
+                    Auth: user.Auth,
+                    UserName: user.UserName,
+                    Gender: user.Gender,
+                    BirthDay: user.BirthDay && util.formatDate(user.BirthDay),
+                    ChildBirthDay: user.ChildBirthDay && util.formatDate(user.ChildBirthDay),
+                    CityID: user.CityID,
+                    FamilySize: user.FamilySize,
+                    HasChild: user.HasChild
+
+                }).load();
+            }
 
             this.update = new Loading({
                 url: '/api/user/update',
@@ -78,13 +73,13 @@
                 options: [{
                     template: '<li><%=PRV_DESC%></li>',
                     data: [],
-                    onChange: function (e, index, res) {
+                    onChange: function (index, res) {
                         changeCity(res.PRV_ID)
                     }
                 }, {
-                    template: '<li><%=CTY_DESC%></li>',
-                    data: []
-                }],
+                        template: '<li><%=CTY_DESC%></li>',
+                        data: []
+                    }],
                 complete: function (res) {
                     self.model.set('user.City', res[1].CTY_DESC);
                     self.model.set('user.CityID', res[1].CTY_ID);

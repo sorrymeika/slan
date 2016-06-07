@@ -1,5 +1,5 @@
 var $ = require('$');
-var model = require('core/model2');
+var model = require('core/model');
 var api = require('models/base');
 var Size = require('components/size');
 var util = require('util');

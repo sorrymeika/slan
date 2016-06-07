@@ -81,7 +81,7 @@ exports.loadConfig = function (callback) {
 }
 
 exports.createIndex = function (config, callback) {
-    fs.readFile('./index.html', { encoding: 'utf-8' }, function (err, html) {
+    fs.readFile('./root.html', { encoding: 'utf-8' }, function (err, html) {
 
         var T = razor.nodeFn(html.replace(/^\uFEFF/i, ''));
 
@@ -96,7 +96,7 @@ exports.createIndex = function (config, callback) {
         }).then(function (err, styles) {
 
             var style = styles.join('').replace(rimg, function (r0, r1, r2) {
-                return "url(images/" + r2 + ")";
+                return /^data\:image\//.test(r2) ? r0 : ("url(images/" + r2 + ")");
             });
 
             callback(null, T.html(_.extend({}, config, {
@@ -111,8 +111,8 @@ exports.createIndex = function (config, callback) {
 exports.startWebServer = function (config) {
     var express = require('express');
     var app = express();
-    
-    app.use('/dest', express.static(config.dest));
+
+    config.resourceMapping = {};
 
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
@@ -166,7 +166,7 @@ exports.startWebServer = function (config) {
                     return;
                 }
                 text = text.replace(/^\uFEFF/i, '');
-                
+
                 text = formatJs(text);
                 text = Tools.replaceDefine(filePath.replace(/(^\/)|(\.js$)/g, ''), text, requires);
 
@@ -227,6 +227,7 @@ exports.startWebServer = function (config) {
         });
     });
 
+    app.use('/dest', express.static(config.dest));
 
     for (var key in config.proxy) {
         var proxy = config.proxy[key].split(':');
@@ -262,7 +263,12 @@ if (args.build) {
         var tools = new Tools(baseDir, destDir);
 
         //打包框架
-        tools.combine(config.framework);
+        tools.combine({
+            "slan.m": config.framework
+        });
+
+        //合并js、css
+        config.resourceMapping = tools.combine(config.combine);
 
         //生成首页
         exports.createIndex(config, function (err, html) {
@@ -278,7 +284,7 @@ if (args.build) {
             for (var key in project.js) {
                 requires.push(combinePath(project.root, key));
 
-                if (project.js[key]) { 
+                if (project.js[key]) {
                     //打包项目引用js                
                     (function (key, fileList, filePromise) {
                         var ids;
@@ -291,6 +297,8 @@ if (args.build) {
 
                         filePromise.each(fileList, function (i, file) {
                             var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
+
+                            console.log(file);
 
                             fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
 
@@ -313,7 +321,7 @@ if (args.build) {
             for (var key in project.css) {
                 requires.push(combinePath(project.root, key));
 
-                if (project.css[key] && project.css[key].length) { 
+                if (project.css[key] && project.css[key].length) {
                     //打包项目引用css
                     (function (key, fileList, filePromise) {
                         filePromise.each(fileList, function (i, file) {
@@ -366,7 +374,7 @@ if (args.build) {
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
 
-                    promise.then(function () { 
+                    promise.then(function () {
                         //打包模版
                         fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
                             if (!err && contains.indexOf(fileName) == -1) {
@@ -404,12 +412,12 @@ if (args.build) {
                 Tools.save(path.join(destDir, project.root, 'controller.js'), codes);
             });
         });
-        
-        
+
+
         //复制图片资源
         var imgPromise = new Promise().resolve();
         imgPromise.each(config.images, function (i, imgDir) {
-            fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png)', function (err, result) {
+            fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function (err, result) {
                 imgPromise.next(i, err, result);
             });
 
@@ -432,4 +440,3 @@ if (args.build) {
         exports.startWebServer(config);
     });
 }
-    

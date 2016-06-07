@@ -4,7 +4,7 @@ var Activity = require('activity');
 var bridge = require('bridge');
 var Loading = require('../widget/loading');
 var Slider = require('../widget/slider');
-var Model = require('core/model2');
+var Model = require('core/model');
 var Scroll = require('../widget/scroll');
 var barcode = require('../util/barcode');
 var animation = require('animation');
@@ -320,12 +320,15 @@ module.exports = Activity.extend({
                     topbanner: res.topbanner
                 });
 
+                console.log(res.topbanner.data);
+
                 if (self.slider)
                     self.slider.set(res.topbanner.data);
                 else
-                    self.slider = new Slider(model.refs.topbanner, {
+                    self.slider = new Slider({
                         loop: true,
-                        autoLoop: 3000,
+                        container: model.refs.topbanner,
+                        //autoLoop: 3000,
                         data: res.topbanner.data,
                         dots: true,
                         itemTemplate: '<img src="<%=src%>" data-forward="<%=url%>?from=%2f" />'

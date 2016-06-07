@@ -1,5 +1,5 @@
 var $ = require('$');
-var model = require('core/model2');
+var model = require('core/model');
 
 var Confirm = model.ViewModel.extend({
 	el: <div class="cp_mask" style="display:none">

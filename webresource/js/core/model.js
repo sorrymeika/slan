@@ -181,10 +181,11 @@
                     var lastKey = keys.pop();
                     for (var i = 0, len = keys.length; i < len; i++) {
                         key = keys[i];
-                        model = model[key];
 
-                        if (!(model instanceof Model)) {
+                        if (!(model[key] instanceof Model)) {
                             model = model[key] = new Model(this, key, {});
+                        } else {
+                            model = model[key];
                         }
                     }
                     model.set(cover, lastKey, val);
@@ -284,7 +285,7 @@
                         root.trigger("viewDidUpdate");
                     });
 
-                    console.log(Date.now() - now);
+                    //console.log(Date.now() - now);
 
                 }, 0);
             }
@@ -520,8 +521,6 @@
             }
 
             if (changedEls.length) {
-                console.log(changedEls.length);
-
                 root._triggerChangeEvent(repeat.collectionName + '/' + repeat.alias + '/' + repeat.indexAlias, changedEls);
             }
 

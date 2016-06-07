@@ -5,7 +5,7 @@
     var Activity = require('activity');
     var Loading = require('widget/loading');
     var Slider = require('widget/slider');
-    var model = require('core/model2');
+    var model = require('core/model');
     var Scroll = require('widget/scroll');
     var animation = require('animation');
     var bridge = require('bridge');
@@ -59,9 +59,11 @@
                     if (!res.data.length) {
                         sl.tip('没有更多月礼了');
                         self.model.set({
-                            nomore: true
+                            nomore: true,
+                            minDate: false
                         })
-                        self.slider.index(1);
+                        self.slider.shift();
+                        self.slider.index(0);
                         return;
                     }
 
@@ -100,7 +102,8 @@
                         year: res.year
                     });
 
-                    self.slider = new Slider(self.$slider, {
+                    self.slider = new Slider({
+                        container: self.$slider,
                         itemTemplate: '<%if (FRE_TITLE_PIC=="loading") {%><div class="img"><div class="dataloading" style="opacity:1"></div></div><%}else{%><p class="img<%=CanGet?" canget js_canget":""%><%=Overdue?" disabled":""%><%=FRE_ID&&LPF_PUR_ID?" hasget":""%>" data-id="<%=FRE_ID%>">\
                                     <img src="<%=FRE_TITLE_PIC||(Overdue?"images/overdue.jpg":"images/coming_soon.png")%>" />\
                                 </p>\
@@ -125,7 +128,7 @@
                         }
                     });
 
-                    self.slider.on('move', function () {
+                    self.slider.touch.on('end', function (e) {
 
                         if (self.model.data.minDate && !self.nextLoading.isLoading && !this.added && this.x < -30) {
                             this.added = true;
@@ -147,14 +150,13 @@
                     }).on('stop', function () {
                         if (this.canLoad) {
                             this.canLoad = false;
-                            if (this.index() == 0) {
+                            if (self.slider.index() == 0) {
 
                                 if (self.model.data.nomore) {
                                     self.slider.index(1);
 
                                 } else self.nextLoading.load();
                             }
-
                         }
                     });
                 },

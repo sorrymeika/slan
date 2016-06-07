@@ -17,7 +17,7 @@ var Touch = Event.mixin(function (el, options) {
         enableVertical: true,
         enableHorizontal: false,
         divisorX: 0,
-        divisorY: 100,
+        divisorY: 0,
         maxDuration: 0,
         momentum: true
 
@@ -189,8 +189,7 @@ var Touch = Event.mixin(function (el, options) {
 
             $(e.target).trigger('touchcancel');
 
-            if (!self.options.momentum) {
-                self._stop();
+            if (endEvent.isDefaultPrevented()) {
                 return;
             }
 
@@ -220,8 +219,8 @@ var Touch = Event.mixin(function (el, options) {
                 changeY = changeY > 80 ? 80 : changeY < -80 ? -80 : changeY;
                 changeX = changeX > 80 ? 80 : changeX < -80 ? -80 : changeX;
 
-                distX = (changeX * Math.abs(changeX) / -4) * 1.2;
-                distY = (changeY * Math.abs(changeY) / -4) * 1.2;
+                distX = (changeX * Math.abs(changeX) / -4) * 1.5;
+                distY = (changeY * Math.abs(changeY) / -4) * 1.5;
 
                 duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 60;
             }
@@ -245,7 +244,7 @@ var Touch = Event.mixin(function (el, options) {
                 console.log(resultY, distY, self.isMoveTop, Math.ceil(resultY / self.options.divisorY) * self.options.divisorY);
             }
 
-            if (distX || distY) {
+            if (self.options.momentum && (distX || distY)) {
 
                 !duration && (duration = 200) || maxDuration && duration > maxDuration && (duration = maxDuration);
 
@@ -329,6 +328,8 @@ var Touch = Event.mixin(function (el, options) {
 
             }, 200, 'ease', function () {
                 self._stop();
+
+                self.trigger('bounceBack');
             });
         },
 
@@ -341,7 +342,7 @@ var Touch = Event.mixin(function (el, options) {
             y = self.options.enableVertical ?
                 y >= this.maxY ? this.maxY : y <= this.minY ? this.minY : y
                 : self.y;
-
+                
             if (!duration) {
                 self.x = x;
                 self.y = y;

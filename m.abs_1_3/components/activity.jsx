@@ -1,5 +1,5 @@
 var $ = require('$');
-var model = require('core/model2');
+var model = require('core/model');
 var api = require("models/base");
 var Scroll = require('widget/scroll');
 
