@@ -198,7 +198,7 @@ module.exports = Activity.extend({
         self.$tabs = self.$('.hm_tab_con');
 
         self.$tabs.on($.fx.transitionEnd, function () {
-            if (self.model.data.tab == 1 && self.slider) {
+            if (self.model.data.tab == 0 && self.slider) {
                 setTimeout(function () {
                     self.slider._adjustWidth();
                 }, 400)
@@ -340,7 +340,7 @@ module.exports = Activity.extend({
                     useScroll: true
                 });
 
-                if (model.data.tab == 1) {
+                if (model.data.tab == 0) {
                     self.scroll.get('.js_shop').imageLazyLoad();
                 }
 

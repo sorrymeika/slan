@@ -16,8 +16,8 @@
     <header sn-display="{{isLogin}}">
         <div class="head_menu" sn-display="{{bottomTab==4}}" data-forward="/settings"></div>
         <ul class="head_tab" sn-display="{{bottomTab==0}}">
-            <li class="{{tab==0?'curr':''}}">会员卡</li>
-            <li class="{{tab==1?'curr':''}}">去购物</li>
+            <li class="{{tab==0?'curr':''}}">去购物</li>
+            <li class="{{tab==1?'curr':''}}">会员卡</li>
             <i class="cursor" style="-webkit-transform: translate3d({{tab==1?100:0}}%, 0%, 0);"></i>
         </ul>
         <form class="head_search head_disc" sn-if="{{bottomTab==2}}">
@@ -45,63 +45,9 @@
         </div>
     </div>
     <div sn-display="{{isLogin}}">
-        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
-        data-index="0">
-            <div class="hm_chart_wrap">
-                <div class="hm_chart">
-                    <div class="hm_chart_con" sn-tap="chartType=1" sn-display="{{chartType==0}}">
-                        <div class="hd">当前活力值</div>
-                        <div class="bd">{{util.formatMoney(energyAnimNum)}}</div>
-                        <div class="ft">目标 {{util.formatMoney(levelAmounts)}}</div>
-                    </div>
-                    <div class="hm_chart_con" sn-tap="chartType=2" sn-display="{{chartType==1}}">
-                        <div class="hd">我的月礼</div>
-                        <div class="bd">{{user.FreeMonths}}</div>
-                    </div>
-                    <div class="hm_chart_con" sn-tap="chartType=3" sn-display="{{chartType==2}}">
-                        <div class="hd">我的卡券</div>
-                        <div class="bd">{{user.FreeCouponsCount+user.CouponsCount}}</div>
-                    </div>
-                    <div class="hm_chart_con" sn-tap="chartType=0" sn-display="{{chartType==3}}">
-                        <div class="hd">积分钱包</div>
-                        <div class="bd">{{user.Points}}</div>
-                    </div>
-                    <canvas class="hm_chart_canvas js_canvas"></canvas>
-                </div>
-                <div class="hm_chart_desc">{{vipName}}</div>
-                <div class="hm_steward_link" data-forward="/steward">您现在拥有<em>{{user.StewardNum}}</em>条爱管家记录啦！</div>
-                <ul class="hm_chart_list">
-                    <li data-forward="/month"><i>我的月礼</i><em>{{user.FreeMonths}}</em></li>
-                    <li data-forward="/coupon"><i>我的卡券</i><em>{{user.FreeCouponsCount+user.CouponsCount}}</em></li>
-                    <li data-forward="/mypoint"><i>积分钱包</i><em>{{user.Points}}</em></li>
-                </ul>
-            </div>
-            <div class="hm_my_barcode">
-                <div class="barcode" sn-html="{{barcode}}">
-                </div>
-                <div class="mobile">{{user.Mobile}}</div>
-            </div>
-            <ul class="hm_cards">
-                <li data-forward="/list?type=new&from=%2f"><i></i>
-                    <p>NEW ARRIVAL</p>
-                    <p>新品上市</p>
-                </li>
-                <li data-forward="/news/activity2"><i></i>
-                    <p>BEST BUYS</p>
-                    <p>最热商品</p>
-                </li>
-                <li data-forward="/news/fastbuy?from=%2f"><i></i>
-                    <p>FLASH SALE</p>
-                    <p>周一闪购</p>
-                </li>
-                <li data-forward="/news/activity3"><i></i>
-                    <p>APP ONLY</p>
-                    <p>APP专享</p>
-                </li>
-            </ul>
-        </div>
-        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
-        data-index="1">
+
+        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
+            data-index="0">
             <div class="hm_shop">
                 <div class="hm_cate">
                     <div class="hd" data-forward="/all">所有<br>商品</div>
@@ -159,6 +105,63 @@
 
             </div>
         </div>
+
+        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
+            data-index="1">
+            <div class="hm_chart_wrap">
+                <div class="hm_chart">
+                    <div class="hm_chart_con" sn-tap="chartType=1" sn-display="{{chartType==0}}">
+                        <div class="hd">当前活力值</div>
+                        <div class="bd">{{util.formatMoney(energyAnimNum)}}</div>
+                        <div class="ft">目标 {{util.formatMoney(levelAmounts)}}</div>
+                    </div>
+                    <div class="hm_chart_con" sn-tap="chartType=2" sn-display="{{chartType==1}}">
+                        <div class="hd">我的月礼</div>
+                        <div class="bd">{{user.FreeMonths}}</div>
+                    </div>
+                    <div class="hm_chart_con" sn-tap="chartType=3" sn-display="{{chartType==2}}">
+                        <div class="hd">我的卡券</div>
+                        <div class="bd">{{user.FreeCouponsCount+user.CouponsCount}}</div>
+                    </div>
+                    <div class="hm_chart_con" sn-tap="chartType=0" sn-display="{{chartType==3}}">
+                        <div class="hd">积分钱包</div>
+                        <div class="bd">{{user.Points}}</div>
+                    </div>
+                    <canvas class="hm_chart_canvas js_canvas"></canvas>
+                </div>
+                <div class="hm_chart_desc">{{vipName}}</div>
+                <div class="hm_steward_link" data-forward="/steward">您现在拥有<em>{{user.StewardNum}}</em>条爱管家记录啦！</div>
+                <ul class="hm_chart_list">
+                    <li data-forward="/month"><i>我的月礼</i><em>{{user.FreeMonths}}</em></li>
+                    <li data-forward="/coupon"><i>我的卡券</i><em>{{user.FreeCouponsCount+user.CouponsCount}}</em></li>
+                    <li data-forward="/mypoint"><i>积分钱包</i><em>{{user.Points}}</em></li>
+                </ul>
+            </div>
+            <div class="hm_my_barcode">
+                <div class="barcode" sn-html="{{barcode}}">
+                </div>
+                <div class="mobile">{{user.Mobile}}</div>
+            </div>
+            <ul class="hm_cards">
+                <li data-forward="/list?type=new&from=%2f"><i></i>
+                    <p>NEW ARRIVAL</p>
+                    <p>新品上市</p>
+                </li>
+                <li data-forward="/news/activity2"><i></i>
+                    <p>BEST BUYS</p>
+                    <p>最热商品</p>
+                </li>
+                <li data-forward="/news/fastbuy?from=%2f"><i></i>
+                    <p>FLASH SALE</p>
+                    <p>周一闪购</p>
+                </li>
+                <li data-forward="/news/activity3"><i></i>
+                    <p>APP ONLY</p>
+                    <p>APP专享</p>
+                </li>
+            </ul>
+        </div>
+
         <div class="main" style="display:{{bottomTab==1?'block':'none'}}">
             <div class="baiduMap" sn-html="{{baiduMap}}">
             </div>
