@@ -26,14 +26,6 @@
 
 <body>
     <div class="viewport applaunch js_global_launch"></div>
-    <div class="viewport js_global_offline" style="display:none;z-index:1000;">
-        <div class="vp_offline" style="position: absolute;left: 50%;top: 50%;margin: -100px 0 0 -66px;">
-            <div class="ico"></div>
-            <div class="txt">您的网络不太顺畅哦</div>
-            <div class="txt_sub">请检查您的手机是否联网</div>
-            <div class="btn">重新加载</div>
-        </div>
-    </div>
     <script>
         var launchImage=localStorage.getItem("LAUNCH_IMAGE");
         if (launchImage){
@@ -57,19 +49,17 @@
                 'activity': 'core/activity'
             }
         });
-        seajs.use(['$','util','core/app','bridge','widget/loading'],function($,util,App,bridge,Loading) {
+        seajs.use(['$','util','core/app','bridge','widget/loading','widget/offline'],function($,util,App,bridge,Loading,Offline) {
             var matchUA=navigator.userAgent.match(/SLApp ([0-9\.]+)/);
             sl.isDebug=@debug;
             sl.buildVersion=@(Date.now());
             sl.isInApp=util.isInApp=!!matchUA;
             sl.appVersion=matchUA?matchUA[1]:'1.2.0';
-            sl.$globalOffline=$('.js_global_offline');
-            sl.offline=function(reloadFn){
-                sl.$globalOffline.show().find('.btn').one('tap',function(){
-                    sl.$globalOffline.hide();
-                    reloadFn();
-                });
-            };
+            
+            function loadResourceMapping(){
+               loading.reload();
+            }
+            
             var loading=new Loading({
                 url: bridge.url('/api/settings/resourceMapping'),
                 params: {
@@ -79,9 +69,12 @@
                 checkData: false,
                 $el: $('body'),
                 error: function(){
-                    sl.offline(load);
+                    Offline.getInstance().show(loadResourceMapping);
+
                 },
                 success: function(res){
+                    Offline.getInstance().hide();
+                    
                     var resourceMapping=res.data;
                     var routes=$.extend(@(JSON.stringify(routes)),res.routes||{});
                     
@@ -94,8 +87,9 @@
                     });
                     seajs.on("error", function(errorData){
                         errorData.pause=true;
-                        alert(errorData.uri);
-                        sl.offline(function(){
+                        
+                        Offline.getInstance().show(function(){
+                            this.hide();
                             seajs.request(errorData.uri,errorData.callback);
                         });
                     });
@@ -104,10 +98,8 @@
                 }
 
             });
-            var load=function(){
-               loading.reload();
-            };
-            load();
+            loadResourceMapping();
+            
         });
     </script>
 </body>
