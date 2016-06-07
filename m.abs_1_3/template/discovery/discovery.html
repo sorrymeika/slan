@@ -1,0 +1,40 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{data.DCV_TITLE}}</div>
+    <div class="head_right">
+        <div class="head_share js_share"></div>
+    </div>
+</header>
+<div class="main discovery">
+    <div class="disc_con" html="{{data.DCV_CONTENT}}"></div>
+    <div sn-if="{{plist}}" class="disc_relative">
+        <div class="hd">相关商品</div>
+        <div class="hm_shop_scroll" ref="productScroll" style="padding-right:10px;">
+            <ul class="hm_shop_list" style="width:{{101*plist.length}}px">
+                <li class="hm_shop_list_item" sn-repeat="prd in plist" data-forward="/item/{{prd.PRD_ID}}?from={{url}}">
+                    <img sn-src="{{prd.WPP_LIST_PIC}}" />
+                    <p class="price">￥{{prd.PRD_PRICE}} <del sn-display="{{prd.PRD_SPECIAL_FLAG}}">¥{{prd.PRD_MEMBER_PRICE}}</del></p>
+                    <p class="name">{{prd.PRD_NAME}}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="disc_fav">
+        <div class="hd"><span>支持有态度的生活</span></div>
+        <ul>
+            <li>
+                <p class="{{data.Like_Flag?'curr':''}}" sn-tap="this.fav()">喜欢</p>
+            </li>
+            <li>
+                <p class="js_share">分享</p>
+            </li>
+        </ul>
+    </div>
+</div>
+<footer class="disc_bottom">
+    <ul>
+        <li class="fav {{data.Like_Flag?'curr':''}}" sn-tap="this.fav()">{{data.DCV_LIKE_QTY}}</li>
+        <li class="share js_share">{{data.DCV_SHARE_QTY}}</li>
+        <li class="see">{{data.DCV_VIEW_QTY}}</li>
+    </ul>
+</footer>

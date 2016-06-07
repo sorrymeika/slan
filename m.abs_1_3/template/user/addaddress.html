@@ -1,0 +1,23 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main uc_addaddress">
+    <ul>
+        <li>
+            <input type="text" placeholder="收货人姓名" sn-model="address.mbaName" value="{{address.mbaName}}" />
+        </li>
+        <li>
+            <input type="tel" placeholder="手机号码" sn-model="address.mbaMobile" value="{{address.mbaMobile}}" />
+        </li>
+        <li>
+            <input type="tel" placeholder="邮政编码" sn-model="address.mbaZip" />
+        </li>
+        <li class="js_area">{{province.PRV_ABBR||'省'}}、{{city.CTY_ABBR||'市'}}、{{region.REG_DESC||'区'}}</li>
+        <li>
+            <input type="text" placeholder="详细地址" sn-model="address.mbaAddress" value="{{address.mbaAddress}}">
+        </li>
+        <li class="set_default{{address.mbaDefault?' checked':''}}" sn-tap="address.mbaDefault=!address.mbaDefault">设为默认地址</li>
+    </ul>
+</div>
+<b class="uc_addaddress_btn js_submit">确&nbsp;&nbsp;定</b>

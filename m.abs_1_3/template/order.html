@@ -1,0 +1,33 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main">
+    <div class="sp_buy">
+        <div class="sp_buy_hd js_address">
+            <div class="info"><span class="name">{{data.ORA_NAME}}</span><span class="mobi">{{data.ORA_MOBILE}}</span></div>
+            <div class="loc">{{data.CTY_DESC}}{{data.REG_DESC}}{{data.ORA_ADDRESS}}</div>
+        </div>
+        <div class="sp_buy_bd sp_buy_bill">
+            <div class="hd">订单信息</div>
+            <ul>
+                <li><span>订单号</span><em>{{data.PUR_CODE}}</em></li>
+                <li><span>下单日期</span><em>{{util.formatDate(data.PUR_DT)}}</em></li>
+                <li><span>订单金额</span><em>{{util.currency(data.PUR_AMOUNT,'￥')}}</em></li>
+                <li><span>运费</span><em>{{util.currency(data.PUR_EXP_IN_AMOUNT,'￥')}}</em></li>
+                <li><span>总计</span><b>{{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}}</b></li>
+            </ul>
+        </div>
+        <div class="sp_buy_bd sp_buy_pay">
+            <div class="hd">支付方式</div>
+            <ul>
+                <li class="ico_alipay{{payType==1?' checked':''}}" sn-tap="payType=1">支付宝支付</li>
+                <li class="ico_wxpay{{payType==2?' checked':''}}" sn-tap="payType=2">微信支付</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<footer class="sp_buy_action" sn-display="{{data.PUS_DESC=='待付款'}}">
+    <div class="total">总计：<b>{{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}}</b></div>
+    <div class="btn_buy js_pay">立即支付</div>
+</footer>

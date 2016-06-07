@@ -1,4 +1,7 @@
 /node_modules
 /.vs
+/*/dest
+/*/*.zip
+/*/dest*
 .DS_Store
 *.DS_Store

@@ -1,0 +1,11 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main">
+    <ul class="stw_items">
+        <li class="stw_items_item" sn-repeat="item in data">
+            <a href="/steward/detail/{{item.id}}?from={{url}}"><img src="{{item.pic}}" /></a>
+        </li>
+    </ul>
+</div>

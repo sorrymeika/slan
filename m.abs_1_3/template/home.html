@@ -1,0 +1,253 @@
+<div sn-display="{{!showGuide}}">
+    <div class="searchwrap" ref="searchwrap" style="display:none">
+        <header>
+            <form class="head_search head_disc">
+                <input type="search" placeholder="热门搜索：新月枕" ref="searchText" />
+            </form>
+            <div class="head_right" sn-tap="this.hideSearch()">取消</div>
+        </header>
+        <div class="main">
+            <div class="searchhistory"><i class="icon-clear" sn-tap="this.clearSearch()"></i> 历史记录</div>
+            <ul class="searchlist">
+                <li sn-repeat="item in searchHistory" sn-tap="this.search(item)">{{item}}</li>
+            </ul>
+        </div>
+    </div>
+    <header sn-display="{{isLogin}}">
+        <div class="head_menu" sn-display="{{bottomTab==4}}" data-forward="/settings"></div>
+        <ul class="head_tab" sn-display="{{bottomTab==0}}">
+            <li class="{{tab==0?'curr':''}}">会员卡</li>
+            <li class="{{tab==1?'curr':''}}">去购物</li>
+            <i class="cursor" style="-webkit-transform: translate3d({{tab==1?100:0}}%, 0%, 0);"></i>
+        </ul>
+        <form class="head_search head_disc" sn-if="{{bottomTab==2}}">
+            <input type="search" placeholder="搜索专题" ref="search" />
+        </form>
+        <div class="head_title" style="display:{{bottomTab!=0&&bottomTab!=2?'block':'none'}}">{{bottomTab==1?'查找店铺':bottomTab==2?"发现":bottomTab==3?"消息":"我"}}</div>
+        <div class="head_msg" data-forward="/cart">
+            <i sn-display="{{$state.cartQty!=0}}">{{$state.cartQty}}</i>
+        </div>
+        <div class="head_all" sn-tap="this.showSearch()" sn-display="{{tab==1&&bottomTab==0}}">
+        </div>
+    </header>
+    <div sn-display="{{!isLogin}}" style="position:absolute;z-index: 1000;right:0;left:0;top:0;bottom:0;">
+        <div class="home_mask"></div>
+        <div class="home_text" data-forward="/login">
+            <h1></h1>
+            <h2>让回家的灯，为爱亮起来。</h2>
+            <h3>开启时尚居家之旅</h3>
+            <h4>LIFE STARTS HERE</h4>
+        </div>
+        <div class="launch">
+            <img src="images/launch0.jpg" />
+            <img src="images/launch1.jpg" class="launch_hide" />
+            <img src="images/launch2.jpg" class="launch_hide" />
+        </div>
+    </div>
+    <div sn-display="{{isLogin}}">
+        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
+        data-index="0">
+            <div class="hm_chart_wrap">
+                <div class="hm_chart">
+                    <div class="hm_chart_con" sn-tap="chartType=1" sn-display="{{chartType==0}}">
+                        <div class="hd">当前活力值</div>
+                        <div class="bd">{{util.formatMoney(energyAnimNum)}}</div>
+                        <div class="ft">目标 {{util.formatMoney(levelAmounts)}}</div>
+                    </div>
+                    <div class="hm_chart_con" sn-tap="chartType=2" sn-display="{{chartType==1}}">
+                        <div class="hd">我的月礼</div>
+                        <div class="bd">{{user.FreeMonths}}</div>
+                    </div>
+                    <div class="hm_chart_con" sn-tap="chartType=3" sn-display="{{chartType==2}}">
+                        <div class="hd">我的卡券</div>
+                        <div class="bd">{{user.FreeCouponsCount+user.CouponsCount}}</div>
+                    </div>
+                    <div class="hm_chart_con" sn-tap="chartType=0" sn-display="{{chartType==3}}">
+                        <div class="hd">积分钱包</div>
+                        <div class="bd">{{user.Points}}</div>
+                    </div>
+                    <canvas class="hm_chart_canvas js_canvas"></canvas>
+                </div>
+                <div class="hm_chart_desc">{{vipName}}</div>
+                <div class="hm_steward_link" data-forward="/steward">您现在拥有<em>{{user.StewardNum}}</em>条爱管家记录啦！</div>
+                <ul class="hm_chart_list">
+                    <li data-forward="/month"><i>我的月礼</i><em>{{user.FreeMonths}}</em></li>
+                    <li data-forward="/coupon"><i>我的卡券</i><em>{{user.FreeCouponsCount+user.CouponsCount}}</em></li>
+                    <li data-forward="/mypoint"><i>积分钱包</i><em>{{user.Points}}</em></li>
+                </ul>
+            </div>
+            <div class="hm_my_barcode">
+                <div class="barcode" sn-html="{{barcode}}">
+                </div>
+                <div class="mobile">{{user.Mobile}}</div>
+            </div>
+            <ul class="hm_cards">
+                <li data-forward="/list?type=new&from=%2f"><i></i>
+                    <p>NEW ARRIVAL</p>
+                    <p>新品上市</p>
+                </li>
+                <li data-forward="/news/activity2"><i></i>
+                    <p>BEST BUYS</p>
+                    <p>最热商品</p>
+                </li>
+                <li data-forward="/news/fastbuy?from=%2f"><i></i>
+                    <p>FLASH SALE</p>
+                    <p>周一闪购</p>
+                </li>
+                <li data-forward="/news/activity3"><i></i>
+                    <p>APP ONLY</p>
+                    <p>APP专享</p>
+                </li>
+            </ul>
+        </div>
+        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
+        data-index="1">
+            <div class="hm_shop">
+                <div class="hm_cate">
+                    <div class="hd" data-forward="/all">所有<br>商品</div>
+                    <div class="bd">
+                        <ul>
+                            <li data-forward="/all?id=1">出行</li>
+                            <li data-forward="/all?id=2">睡眠</li>
+                            <li data-forward="/all?id=3">美食</li>
+                            <li data-forward="/all?id=4">沐浴</li>
+                        </ul>
+                        <ul>
+                            <li data-forward="/all?id=5">休闲</li>
+                            <li data-forward="/all?id=6">家务</li>
+                            <li data-forward="/all?id=7">空间</li>
+                            <li data-forward="/all?id=8">儿童</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="banner" ref="topbanner">
+
+                </div>
+                <ul class="hm_shop_cate">
+                    <li data-forward="/list?type=new&from=%2f"><i></i>新品<br>上市</li>
+                    <li data-forward="/news/activity2"><i></i>最热<br>商品</li>
+                    <li data-forward="/news/fastbuy?from=%2f"><i></i>周一<br>闪购</li>
+                    <li data-forward="/news/activity3"><i></i>APP<br>专享</li>
+                </ul>
+                <div sn-repeat="item in activity">
+                    <div sn-if="{{item.type==1}}" class="hm_shop_banner">
+                        <ul>
+                            <li><img sn-repeat="img in item.data" data-src="{{img.src}}" data-forward="{{img.url}}?from=%2f"
+                                /></li>
+                        </ul>
+                    </div>
+                    <div sn-if="{{item.type==2&&item.data.length}}" class="hm_shop_scroll js_shop_scroll" style="padding-right:10px;">
+                        <ul class="hm_shop_list">
+                            <li class="hm_shop_list_item" sn-repeat="prd in item.data" data-forward="/item/{{prd.PRD_ID}}?from={{encodeURIComponent('/')}}">
+                                <img data-src="{{prd.WPP_LIST_PIC}}" />
+                                <p class="price">￥{{prd.PRD_PRICE}} <del sn-display="{{prd.PRD_SPECIAL_FLAG}}">¥{{prd.PRD_MEMBER_PRICE}}</del></p>
+                                <p class="name">{{prd.PRD_NAME}}</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <ul class="sp_list">
+                    <li sn-repeat="item in newproducts" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}">
+                        <img src="{{item.WPP_LIST_PIC1}}" />
+                        <p class="price"><b>￥{{item.PRD_PRICE}}</b><del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del></p>
+                        <p class="name">{{item.PRD_NAME}}</p>
+                        <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销
+                            <br>Sold Out</div>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <div class="main" style="display:{{bottomTab==1?'block':'none'}}">
+            <div class="baiduMap" sn-html="{{baiduMap}}">
+            </div>
+        </div>
+        <div ref="discovery" class="main" style="display:{{bottomTab==2?'block':'none'}}">
+
+        </div>
+        <div ref="messages" class="main hm_msg" style="display:{{bottomTab==3?'block':'none'}}">
+            <div style="overflow:hidden">
+                <div class="hm_msg_list" data-forward="/messages">通知<i sn-display="{{msg_count!=0}}">{{msg_count}}</i></div>
+                <div class="hm_msg_service" data-forward="/news/100">联系客服</div>
+                <div class="hm_msg_discovery">
+                    <div class="hd">更多态度</div>
+                    <ul class="disc_list">
+                        <li sn-repeat="item in rec" data-forward="/discovery/{{item.DCV_ID}}">
+                            <img src="{{item.DCV_REC_PIC}}" />
+                            <em class="see">点击查看</em>
+                        </li>
+                    </ul>
+                    <div class="ft" data-forward="/discovery/list/0">查看更多态度>></div>
+                </div>
+            </div>
+
+        </div>
+        <div class="main" style="display:{{bottomTab==4?'block':'none'}}" data-index="3">
+            <div class="hm_my_card">
+                <div class="vip_name">{{vipName}}</div>
+                <div class="energy">
+                    当前活力值<span>{{util.formatMoney(energy)}}</span>
+                </div>
+                <div class="energy_bar">
+                    <span style="width:{{energyPercent}}"></span>
+                </div>
+                <div class="energy_val">
+                    <div class="energy_val_from">{{util.formatMoney(currentLevel)}}</div>
+                    <div class="energy_val_to">{{util.formatMoney(nextLevel)}}</div>
+                </div>
+            </div>
+            <div class="hm_my_barcode">
+                <div class="barcode" sn-html="{{barcode}}">
+                </div>
+                <div class="mobile">{{user.Mobile}}</div>
+            </div>
+            <ul class="hm_my_list">
+                <li data-forward="/month">
+                    <b>我的月礼</b>
+                    <span><em>{{user.FreeMonths}}</em>个月</span>
+                </li>
+                <li data-forward="/coupon">
+                    <b>我的卡券</b>
+                    <span><em>{{user.FreeCouponsCount+user.CouponsCount}}</em>张</span>
+                </li>
+                <li data-forward="/mypoint">
+                    <b>积分钱包</b>
+                    <span><em>{{user.Points}}</em>分</span>
+                </li>
+                <li data-forward="/myorder">
+                    <b>购买记录</b>
+                    <span><em>{{user.OrderCount}}</em>条</span>
+                </li>
+                <li data-forward="/steward">
+                    <b>爱管家记录</b>
+                    <span><em>{{user.StewardNum}}</em>条</span>
+                </li>
+            </ul>
+        </div>
+        <div class="main js_offline" sn-display="{{isOffline}}">
+            <div class="home_offline">
+                <div class="ico"></div>
+                <div class="txt">您的网络不太顺畅哦</div>
+                <div class="txt_sub">请检查您的手机是否联网</div>
+                <div class="btn">重新加载</div>
+            </div>
+        </div>
+    </div>
+    <ul class="footer" sn-display="{{isLogin}}">
+        <li class="curr">首页</li>
+        <li>附近门店</li>
+        <li></li>
+        <li>消息<i sn-display="{{msg_count!=0}}">{{msg_count}}</i></li>
+        <li>我</li>
+    </ul>
+    <div class="footer_line"></div>
+    <div class="footer_discovery_ico"></div>
+    <div class="open_msg" style="display:none">
+        <div class="msg_bd" sn-html="{{message}}"></div>
+    </div>
+    <div class="home_tip_mask" sn-display="{{isLogin&&showTipStep==1}}"></div>
+</div>
+<div class="hm_guide" sn-display="{{showGuide}}">
+
+</div>

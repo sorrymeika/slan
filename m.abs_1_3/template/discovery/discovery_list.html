@@ -1,0 +1,17 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main">
+    <ul class="disc_list_sort">
+        <li class="curr" sn-tap="this.sortBy('VIEW')">热门</li>
+        <li sn-tap="this.sortBy('POST')">最新</li>
+    </ul>
+    <ul class="disc_list">
+        <li sn-repeat="item in data" data-forward="/discovery/{{item.DCV_ID}}">
+            <img src="{{item.DCV_SUBTITLE_PIC}}" />
+            <em class="see">{{item.DCV_VIEW_QTY}}</em>
+            <em class="fav{{item.Like_Flag?' curr':''}}">{{item.DCV_LIKE_QTY}}</em>
+        </li>
+    </ul>
+</div>

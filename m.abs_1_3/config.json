@@ -1,0 +1,148 @@
+{
+    "root": "/",
+    "js": {
+        "components": {
+            "components/activity": null,
+            "components/share": null,
+            "components/confirm": null,
+            "components/deletion": null,
+            "components/month": null,
+            "components/shareOrder": null,
+            "components/size": null,
+            "components/fastbuy": null,
+            "components/package": null,
+            "components/banner": null,
+            "models/base": null,
+            "models/user": null,
+            "models/discovery": null
+        }
+    },
+    "css": {
+        "images/style.css": [
+            "images/views.css"
+        ],
+        "images/append.css": [
+            "images/append.css"
+        ]
+    },
+    "images": [
+        "./images"
+    ],
+    "route": {
+        "/":  "home",
+        "/about": {
+            "controller": "about",
+            "template": "about"
+        },
+        "/member": {
+            "controller": "member",
+            "template": "member"
+        },
+        "/settings": {
+            "controller": "settings",
+            "template": "settings"
+        },
+        "/login": {
+            "controller": "login",
+            "template": "login"
+        },
+        "/month": {
+            "controller": "user/month",
+            "template": "user/month"
+        },
+        "/coupon": {
+            "controller": "user/coupon",
+            "template": "user/coupon"
+        },
+        "/couponshare": {
+            "controller": "user/couponshare",
+            "template": "user/couponshare"
+        },
+        "/address": {
+            "controller": "user/address",
+            "template": "user/address"
+        },
+        "/addaddress": {
+            "controller": "user/addaddress",
+            "template": "user/addaddress"
+        },
+        "/modifypwd": {
+            "controller": "user/modifypwd",
+            "template": "user/modifypwd"
+        },
+        "/messages": {
+            "controller": "messages",
+            "template": "messages"
+        },
+        "/mypoint": {
+            "controller": "mypoint",
+            "template": "mypoint"
+        },
+        "/myorder": {
+            "controller": "myorder",
+            "template": "myorder"
+        },
+        "/order/{id:\\w+}": {
+            "controller": "order",
+            "template": "order"
+        },
+        "/news/{id:\\w+}": {
+            "controller": "news",
+            "template": "news"
+        },
+        "/register": {
+            "controller": "register",
+            "template": "register"
+        },
+        "/guide": {
+            "controller": "guide",
+            "template": "guide"
+        },
+        "/all": {
+            "controller": "shop/index",
+            "template": "shop/index"
+        },
+        "/list": {
+            "controller": "shop/list",
+            "template": "shop/list"
+        },
+        "/item/{id:\\d+}": {
+            "controller": "shop/item",
+            "template": "shop/item"
+        },
+        "/detail/{id:\\d+}": {
+            "controller": "shop/detail",
+            "template": "shop/detail"
+        },
+        "/cart": {
+            "controller": "shop/cart",
+            "template": "shop/cart"
+        },
+        "/buy": {
+            "controller": "shop/buy",
+            "template": "shop/buy"
+        },
+        "/steward": {
+            "controller": "steward/index",
+            "template": "steward/index"
+        },
+        "/steward/{id:\\d+}": {
+            "controller": "steward/item",
+            "template": "steward/item"
+        },
+        "/steward/detail/{id:\\d+}": {
+            "controller": "steward/detail",
+            "template": "steward/detail"
+        },
+        "/test": {
+            "controller": "test",
+            "template": "test"
+        },
+        "/coupon/activity/{id:\\d+}": "coupon/activity",
+        "/discovery": "discovery/discovery_index",
+        "/discovery/{id:\\d+}": "discovery/discovery",
+        "/discovery/list": "discovery/discovery_list",
+        "/discovery/list/{id:\\d+}": "discovery/discovery_list",
+        "/discovery/comment/{id:\\d+}": "discovery/discovery_comment"        
+    }
+}

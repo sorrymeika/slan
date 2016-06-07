@@ -1,4 +1,4 @@
-﻿var $ = require('$'),
+var $ = require('$'),
     util = require('util'),
     Base = require('./base'),
     Component = require('./component'),

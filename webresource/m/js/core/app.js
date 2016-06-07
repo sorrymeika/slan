@@ -44,7 +44,7 @@ var getToggleAnimation = function (isForward, currentActivity, activity, toggleA
 }
 
 var adjustActivity = function (currentActivity, activity) {
-    currentActivity.startExit();
+    currentActivity._startExit();
     currentActivity.$el.siblings('.view:not([data-path="' + activity.path + '"])').hide();
     if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
 };
@@ -144,7 +144,7 @@ var bindBackGesture = function (application) {
                             application._currentActivity = that.swipeActivity;
                             application.navigate(activity.url, that.isSwipeOpen);
 
-                            activity.finishEnterAnimation();
+                            activity._enterAnimationEnd();
 
                             if (that.isSwipeOpen) {
                                 activity.referrer = currentActivity.url;
@@ -349,7 +349,7 @@ var Application = Component.extend($.extend(appProto, {
             }
 
             var finish = function () {
-                activity.finishEnterAnimation();
+                activity._enterAnimationEnd();
                 callback && callback(activity);
                 that.queue.resolve();
             };

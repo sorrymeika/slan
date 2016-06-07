@@ -1,0 +1,54 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main">
+    <div class="stw_title_bar">
+        <div class="hd">总共<em>{{user.StewardNum}}</em>条爱管家记录</div>
+        <i class="stw_title_bar_thumb ico{{displayType==0?' curr':''}}" sn-tap="displayType=0"></i>
+        <i class="stw_title_bar_list ico{{displayType==1?' curr':''}}" sn-tap="displayType=1"></i>
+    </div>
+    <ul class="stw_list" sn-if="{{displayType==1}}">
+        <li class="stw_list_item" sn-repeat="item in data">
+            <div class="thumb" data-forward="/item/{{item.LPK_PRD_ID}}?from=/steward">
+                <i>{{item.LPK_QTY}}</i>
+                <img src="{{item.WPP_M_PIC}}"/>
+                <b class="btn">再来一个</b>
+            </div>
+            <div class="con" data-forward="/steward/{{item.PRD_PRH_ID}}">
+                <h4>{{item.PRH_NAME}}</h4>
+                <div class="date">最新购入时间：{{util.formatDate(item.PUR_DT,'yyyy/MM/dd')}}</div>
+                <!--<div class="text">
+                    <p>提醒：文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字</p>
+                </div>-->
+                <a class="link" href="/steward/{{item.PRD_PRH_ID}}">查看详情&gt;&gt;</a>
+            </div>
+        </li>
+    </ul>
+    <div class="stw_category" sn-if="{{displayType==0}}">
+        <div class="stw_category_item{{cate.currCate?' curr':''}}" sn-repeat="cate in cates">
+            <div class="hd" sn-tap="this.setCate(cate)">
+                <span>{{cate.name}}</span>
+            </div>
+            <ul class="stw_list">
+                <li class="stw_list_item" sn-repeat="item in data|filter:item.CAT_ID==cate.id" data-forward="/item/{{item.LPK_PRD_ID}}?from=/steward">
+                    <div class="thumb">
+                        <img src="{{item.WPP_M_PIC}}"/>
+                        <b class="btn">再来一个</b>
+                    </div>
+                    <div class="con" data-forward="/steward/{{item.PRD_PRH_ID}}">
+                        <h4>{{item.PRH_NAME}}</h4>
+                        <div class="date">最新购入时间：{{util.formatDate(item.PUR_DT,'yyyy/MM/dd')}} </div>
+                        <!--<div class="text">
+                            <p>提醒：文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字</p>
+                        </div>-->
+                        <a class="link" href="/steward/{{item.PRD_PRH_ID}}">查看详情&gt;&gt;</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="datanotfound" sn-display="{{!data.length}}">
+        您的爱管家还没有记录哦！
+    </div>
+</div>

@@ -12,7 +12,12 @@
     "images": [
         "../webresource/m/images"
     ],
-    "combine": {},
+    "combine": {
+        "components": {
+            "components/share": null,
+            "models/api": null
+        }
+    },
     "path": [
         "../webresource",
         "../webresource/js",
@@ -69,6 +74,7 @@
         "widget/tip": "../webresource/js/widget/tip",
         "widget/dialog": "../webresource/js/widget/dialog",
         "widget/loading": "../webresource/m/js/widget/loading",
+        "widget/offline": "../webresource/m/js/widget/offline",
         "anim/default": "../webresource/m/js/anim/default"
     }
 }

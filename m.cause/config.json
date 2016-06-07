@@ -1,12 +1,7 @@
 {
     "root": "/",
     "js": {
-        "components": {
-            "components/share": null,
-            "components/confirm": null,
-            "components/deletion": null,
-            "models/api": null
-        }
+        
     },
     "css": {
         "images/style.css": [

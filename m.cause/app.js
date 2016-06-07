@@ -272,7 +272,7 @@ if (args.build) {
 
         //生成首页
         exports.createIndex(config, function (err, html) {
-            Tools.save(path.join(destDir, 'root.html'), Tools.compressHTML(html));
+            Tools.save(path.join(destDir, 'index.html'), Tools.compressHTML(html));
         });
 
         //打包业务代码
@@ -297,6 +297,8 @@ if (args.build) {
 
                         filePromise.each(fileList, function (i, file) {
                             var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
+
+                            console.log(file);
 
                             fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
 

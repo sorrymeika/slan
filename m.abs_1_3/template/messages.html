@@ -1,0 +1,13 @@
+﻿<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main message_center">
+    <div class="message_card" sn-repeat="item in data">
+        <div class="hd">
+            <h2>{{item.MSG_TITLE}}</h2>
+            <h3>{{util.formatDate(item.LPM_START_DT,'yyyy.MM.dd')}}</h3>
+        </div>
+        <div class="bd" sn-html="item.MSG_CONTENT"></div>
+    </div>
+</div>

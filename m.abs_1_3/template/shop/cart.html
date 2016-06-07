@@ -1,0 +1,120 @@
+﻿@helper list(){
+<div class="ct_list_wrap" sn-display="{{util.isTrue(data_baglist)||util.isTrue(data_package)}}">
+    <ul class="ct_list">
+        <li sn-repeat="item in data_baglist" class="ct_list_item" data-id="{{item.SPB_ID}}">
+            <div class="ct_list_item_con js_delete_item">
+                <img sn-src="{{item.PRD_PIC}}" data-back="/item/{{item.PRD_ID}}" />
+                <div class="con">
+                    <b class="name">{{item.PRD_NAME}}</b>
+                    <p class="size">尺寸：{{item.PRD_SPEC.split('|')[0]}}</p>
+                    <p class="color">颜色：{{item.PRD_COLOR}}</p>
+                    <p class="qty">
+                        <span class="minus" sn-tap="this.changeQty(item,Math.max(!item.SPB_QTY?1:(parseInt(item.SPB_QTY)-1),1))">-</span>
+                        <input type="text" value="{{item.SPB_QTY||1}}" sn-model="changedQty" sn-change="this.changeQty(item,changedQty)" />
+                        <span class="plus" sn-tap="this.changeQty(item,(parseInt(item.SPB_QTY)||1)+1)">+</span>
+                    </p>
+                </div>
+                <div class="ft">
+                    <b class="price">￥{{Math.round(item.SPB_AMOUNT*100)/100}}</b>
+                    <del sn-display="{{item.SPB_AMOUNT>item.PRD_MEMBER_PRICE*(item.SPB_QTY||1)}}">￥{{Math.round(item.PRD_MEMBER_PRICE*(item.SPB_QTY||1)*100)/100}}</del>
+                </div>
+            </div>
+            <i class="js_delete" data-id="{{item.SPB_ID}}"></i>
+        </li>
+    </ul>
+    <div sn-repeat="ppg in data_package" class="ct_list_pkg">
+        <dl class="js_delete_item">
+            <dt class="ct_list_pkg_item">{{ppg.PPG_NAME}}
+                <b class="price">￥{{Math.round(ppg.PPG_PRICE*100)/100}}</b>
+            </dt>
+            <dd sn-repeat="item in ppg.PackageList" class="ct_list_item">
+                <div class="ct_list_item_con">
+                    <img sn-src="{{item.PRD_PIC}}" data-back="/item/{{item.PRD_ID}}" />
+                    <div class="con">
+                        <b class="name">{{item.PRD_NAME}}</b>
+                        <p class="size">尺寸：{{item.PRD_SPEC.split('|')[0]}}</p>
+                        <p class="color">颜色：{{item.PRD_COLOR}}</p>
+                    </div>
+                    <div class="ft">
+                        <del>￥{{Math.round(item.PRD_MEMBER_PRICE*(item.SPB_QTY||1)*100)/100}}</del>
+                    </div>
+                </div>
+            </dd>
+        </dl>
+        <i class="js_delete" data-wacid="{{ppg.SPB_WAC_ID}}" data-groupid="{{ppg.SPB_GROUP}}" data-ppgid="{{ppg.PPG_ID}}"></i>
+    </div>
+    <div class="ct_buy_more" data-back="/?tab=1" sn-display="{{this.getPrice(bag_amount,couponcode,Points)<=99}}">
+        <i>去凑单</i> 满<em>¥99</em>即可免运费，还差<em>¥{{Math.round((99-this.getPrice(bag_amount,couponcode,Points))*100)/100}}</em>
+    </div>
+    <ul class="ct_list_info">
+        <li><span>商品总价</span><em><b class="price">￥{{prod_amount}}</b></em></li>
+        <li class="link js_use_coupon"><span>使用优惠券</span><em sn-display="{{couponcode.CSV_CODE}}"><b>-¥{{couponcode.VCA_DEDUCT_AMOUNT}}</b></em><em sn-display="{{!couponcode.CSV_CODE}}"><b>{{couponCount||0}}</b>张可用</em></li>
+        <li class="link js_use_point">
+            <span>积分抵扣</span>
+            <em sn-display="{{Points}}"><b>-¥{{Points/100}}</b></em>
+            <em sn-display="{{!Points}}"><b>{{user.Points}}</b>积分可用</em>
+        </li>
+        <li class="link js_use_freecard" sn-display="{{freeCount&&this.getPrice(bag_amount,couponcode,Points)<99}}">
+            <span>选择免邮卡</span>
+            <em sn-display="{{freecouponcode.CSV_CODE}}"><b>已选1张</b></em> <em sn-display="{{!freecouponcode.CSV_CODE}}"><b>{{freeCount||0}}</b>张免邮卡可用</em></li>
+        <li><span>运费</span>
+            <em><b>{{this.getFreight(bag_amount,couponcode,Points||0,freecouponcode.CSV_CODE)}}</b></em>
+        </li>
+        <li><span>总计</span><em><b class="price">{{this.getTotal(bag_amount,couponcode,Points||0,freecouponcode.CSV_CODE)}}</b></em></li>
+    </ul>
+</div>
+<div class="my_nodata" sn-display="{{!loading&&util.isFalse(data_baglist)&&util.isFalse(data_package)}}" style="display:none">
+    <div class="icon"></div>
+    <div class="text">您的购物车内还没有商品</div>
+    <div class="btn" data-back="/?tab=1">去逛逛吧</div>
+</div>
+}
+<header>
+    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div class="main">
+    @this.helpers.list()
+</div>
+<footer class="ct_list_action">
+    <div class="total">总计：<b>{{this.getTotal(bag_amount,couponcode,Points||0,freecouponcode.CSV_CODE)}}</b></div>
+    <div class="btn_buy js_buy">结 算</div>
+</footer>
+<div class="ct_coupon_wrap {{isShowCoupon?'':'out'}} js_coupon" style="display:none">
+    <div class="ct_coupon">
+        <div class="ct_coupon_hd">{{couponType==4?"选择免邮卡":"选择优惠券"}}</div>
+        <div class="ct_coupon_use" sn-display="{{couponType!=4}}">
+            <input type="text" placeholder="请输入券码" sn-model="code" />
+            <b class="btn" sn-tap="this.couponGetApi.load()">使用</b>
+        </div>
+        <div class="ct_coupon_list">
+            <div class="hd">已有优惠券</div>
+            <ul class="bd" sn-style="top: {{couponType==4?'106px':'146px'}}">
+                <li sn-repeat="item in coupon|filter:couponType==4?item.VCT_ID==4:(item.VCT_ID!=4)" class="{{(item.VCT_ID == 4 ? 'free' : item.VCT_ID == 2 ? 'vct2' : item.VCT_ID == 5 ? 'vct5' : '') + (item.IsOverdue ? ' dis' : '')+((couponType==4&&freecouponcode.CSV_CODE==item.CSV_CODE||couponType!=4&&couponcode.CSV_CODE.indexOf(item.CSV_CODE)!=-1)?' checked':'')}}"
+                    sn-tap="this.useCoupon(item)">
+                    <i class="ico_check"></i>
+                    <div class="price">{{util.currency(item.VCA_DEDUCT_AMOUNT,'')}}</div>
+                    <div class="name">{{item.VCT_ID==4?'免邮卡':item.VCA_NAME}}</div>
+                    <div class="time">有效期:{{item.IsOverdue?'已过期':(util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(item.CSV_END_DT,'yyyy/MM/dd'))}}</div>
+                </li>
+                <div class="nodata">暂无优惠券</div>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="ct_coupon_wrap {{isShowPoint?'':'out'}} js_points" style="display:none">
+    <div class="ct_coupon">
+        <div class="ct_coupon_hd">使用积分</div>
+        <div class="ct_points">
+            <div class="hd">当前积分</div>
+            <div class="points">{{user.Points}}</div>
+        </div>
+        <div class="ct_coupon_use">
+            <input type="tel" placeholder="请输入积分" value="{{_points||''}}" sn-model="_points" />
+            <b class="btn" sn-tap="this.usePoint(_points)">使用</b>
+        </div>
+        <div class="ct_points_tip">
+            *您的积分可以直接抵扣现金使用。<em>（100积分＝1元）</em>
+        </div>
+    </div>
+</div>
