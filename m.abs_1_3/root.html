@@ -14,6 +14,8 @@
         .viewport.applaunch {
             background: url(images/launch101.jpg) no-repeat center top;
             background-size: auto 100%;
+            opacity: 0;
+            -webkit-transition: opacity 1500ms ease 0ms;
         }
         
         @@media screen and (max-height: 480px) {
@@ -27,10 +29,13 @@
 <body>
     <div class="viewport applaunch js_global_launch"></div>
     <script>
+        var launch = document.querySelector('.js_global_launch');
         var launchImage=localStorage.getItem("LAUNCH_IMAGE");
         if (launchImage){
-            document.querySelector('.js_global_launch').style.backgroundImage='url('+launchImage+')';
+            launch.style.backgroundImage='url('+launchImage+')';
         }
+        launch.offsetHeight;
+        launch.style.opacity = 1;
     </script>
     <script src="@(debug?'seajs/sea.js':'slan.m.js')?v@(Date.now())"></script>
     @if(debug){
@@ -54,7 +59,7 @@
             sl.isDebug=@debug;
             sl.buildVersion=@(Date.now());
             sl.isInApp=util.isInApp=!!matchUA;
-            sl.appVersion=matchUA?matchUA[1]:'1.2.0';
+            sl.appVersion=matchUA?matchUA[1]:'1.3.0';
             
             function loadResourceMapping(){
                loading.reload();
@@ -77,13 +82,24 @@
                     
                     var resourceMapping=res.data;
                     var routes=$.extend(@(JSON.stringify(routes)),res.routes||{});
-                    
+                    var combineMapping=@(JSON.stringify(resourceMapping));
+
                     seajs.on('fetch', function (emitData) {
-                        var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*)*/, '');
                         @if (!debug) {
-                            if (resourceMapping&&resourceMapping[id]) emitData.requestUri = resourceMapping[id];
+                            var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
+                            
+                            if (resourceMapping&&resourceMapping[id]) {
+                                emitData.requestUri = resourceMapping[id];
+                                
+                            } else if (combineMapping) {
+                                for (var key in combineMapping) {
+                                    if (combineMapping[key].indexOf(id) != -1) {
+                                        emitData.requestUri = resourceMapping&&resourceMapping[key] ? resourceMapping[key] : seajs.resolve(key);
+                                        break;
+                                    }
+                                }
+                            }
                         }
-                        
                     });
                     seajs.on("error", function(errorData){
                         errorData.pause=true;

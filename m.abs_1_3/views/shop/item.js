@@ -89,7 +89,8 @@ define(function (require, exports, module) {
                         PHP_PIC_M: res.data.WPP_M_PIC
                     });
 
-                    self.slider = new Slider(self.model.refs.image, {
+                    self.slider = new Slider({
+                        container: self.model.refs.image,
                         loop: true,
                         autoLoop: 3000,
                         data: res.prhpic,

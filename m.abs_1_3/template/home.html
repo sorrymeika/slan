@@ -46,7 +46,7 @@
     </div>
     <div sn-display="{{isLogin}}">
 
-        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
+        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
             data-index="0">
             <div class="hm_shop">
                 <div class="hm_cate">
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
+        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
             data-index="1">
             <div class="hm_chart_wrap">
                 <div class="hm_chart">

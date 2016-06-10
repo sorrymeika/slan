@@ -5,16 +5,19 @@
     </form>
 </header>
 <div class="main" style="padding-bottom:10px">
-    <ul class="sp_all_cates">
-        <li sn-repeat="item in categories" class="{{item.PCG_ID==id?'curr':''}}" sn-tap="current=item,id=item.PCG_ID,this.bindScroll()">{{item.PCG_DESC}}</li>
-    </ul>
+    <div class="sp_all_cates">
+        <ul>
+            <li sn-repeat="item in categories" class="{{item.PCG_ID==id?'curr':''}}" sn-tap="current=item,id=item.PCG_ID,this.bindScroll()">{{item.PCG_DESC}}</li>
+        </ul>
+        <div class="dropdown_btn"></div>
+    </div>
+
     <div sn-repeat="item in current.children">
         <div class="sp_all_banner" data-forward="/list?id={{item.PCG_ID}}"><img sn-src="{{item.PCG_IMG_URL}}" /></div>
         <div class="sp_all_list_wrap">
             <ul class="sp_all_list">
                 <li class="sp_all_list_item" sn-repeat="cate in item.children" data-forward="/list?id={{cate.PCG_ID}}">
-                    <img alt="{{cate.PCG_NAME}}" sn-src="{{cate.PCG_IMG_URL}}"
-                        /></a>
+                    <img alt="{{cate.PCG_NAME}}" sn-src="{{cate.PCG_IMG_URL}}" /></a>
                     <span>{{cate.PCG_NAME}}</span>
                 </li>
                 <li class="sp_all_list_item see_all" data-forward="/list?id={{item.PCG_ID}}">

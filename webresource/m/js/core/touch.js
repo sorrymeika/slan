@@ -219,8 +219,8 @@ var Touch = Event.mixin(function (el, options) {
                 changeY = changeY > 80 ? 80 : changeY < -80 ? -80 : changeY;
                 changeX = changeX > 80 ? 80 : changeX < -80 ? -80 : changeX;
 
-                distX = (changeX * Math.abs(changeX) / -4) * 1.5;
-                distY = (changeY * Math.abs(changeY) / -4) * 1.5;
+                distX = (changeX * Math.abs(changeX) / -4) * 1.3;
+                distY = (changeY * Math.abs(changeY) / -4) * 1.3;
 
                 duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 60;
             }
@@ -328,7 +328,7 @@ var Touch = Event.mixin(function (el, options) {
 
             }, 200, 'ease', function () {
                 self._stop();
-
+                
                 self.trigger('bounceBack');
             });
         },

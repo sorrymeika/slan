@@ -57,6 +57,7 @@
         "extend/matchMedia": "../webresource/m/js/extend/matchMedia",
         "extend/ortchange": "../webresource/m/js/extend/ortchange",
         "util": "../webresource/js/util",
+        "util/barcode": "../webresource/js/util/barcode",
         "util/md5": "../webresource/js/util/md5",
         "bridge": "../webresource/m/js/bridge",
         "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
@@ -80,8 +81,8 @@
         "widget/scroll": "../webresource/m/js/widget/scroll",
         "widget/tip": "../webresource/js/widget/tip",
         "widget/dialog": "../webresource/js/widget/dialog",
-        "util/barcode": "../webresource/js/util/barcode",
         "widget/loading": "../webresource/m/js/widget/loading",
+        "widget/offline": "../webresource/m/js/widget/offline",
         "widget/slider": "../webresource/m/js/widget/slider",
         "widget/selector": "../webresource/m/js/widget/selector",
         "anim/default": "../webresource/m/js/anim/default"

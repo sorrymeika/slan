@@ -20,7 +20,6 @@ Model.State.set({
 });
 
 var cartQtyApi = new api.CartQtyAPI({
-    $el: $(''),
     checkData: false,
     success: function (res) {
         Model.State.set({
@@ -197,14 +196,6 @@ module.exports = Activity.extend({
         self.user = userModel.get();
         self.$tabs = self.$('.hm_tab_con');
 
-        self.$tabs.on($.fx.transitionEnd, function () {
-            if (self.model.data.tab == 0 && self.slider) {
-                setTimeout(function () {
-                    self.slider._adjustWidth();
-                }, 400)
-            }
-        })
-
         sl.activity = self;
 
         var model = this.model = new ViewModel(this.$el, {
@@ -328,7 +319,7 @@ module.exports = Activity.extend({
                     self.slider = new Slider({
                         loop: true,
                         container: model.refs.topbanner,
-                        //autoLoop: 3000,
+                        autoLoop: 3000,
                         data: res.topbanner.data,
                         dots: true,
                         itemTemplate: '<img src="<%=src%>" data-forward="<%=url%>?from=%2f" />'
@@ -340,9 +331,7 @@ module.exports = Activity.extend({
                     useScroll: true
                 });
 
-                if (model.data.tab == 0) {
-                    self.scroll.get('.js_shop').imageLazyLoad();
-                }
+                self.scroll.get('.js_shop').imageLazyLoad();
 
                 this.showMoreMsg('别拉了，就这些<i class="ico_no_more"></i>');
             }
@@ -458,7 +447,7 @@ module.exports = Activity.extend({
         setInterval(function () {
             self.getUnreadMsg();
 
-        }, 10000);
+        }, 30000);
 
         this.listenTo($(this.model.refs.search), 'keydown', function (e) {
             if (e.keyCode == 13) {
@@ -669,6 +658,18 @@ module.exports = Activity.extend({
         this.setResult('ResetCart');
 
         this.guideSlider && this.guideSlider._adjustWidth();
+    },
+
+    onEnter: function () {
+        var self = this;
+
+        if (self.model.data.tab == 0) {
+            self.slider && setTimeout(function () {
+                self.slider._adjustWidth();
+            }, 400);
+
+            self.scroll.get('.js_shop').imageLazyLoad();
+        }
     },
 
     onPause: function () {

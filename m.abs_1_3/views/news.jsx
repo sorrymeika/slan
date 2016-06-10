@@ -132,8 +132,6 @@ A：使用优惠券订单，如非质量问题，不支持退货退款。<br/>
                                     .set({
                                         data: res.data
                                     });
-                                
-                                
                             }
                         } else {
                             sl.tip(res.msg);

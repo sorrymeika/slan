@@ -94,14 +94,7 @@
             "controller": "register",
             "template": "register"
         },
-        "/guide": {
-            "controller": "guide",
-            "template": "guide"
-        },
-        "/all": {
-            "controller": "shop/index",
-            "template": "shop/index"
-        },
+        "/all": "shop/all",
         "/list": {
             "controller": "shop/list",
             "template": "shop/list"

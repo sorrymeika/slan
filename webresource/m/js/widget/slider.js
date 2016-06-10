@@ -50,16 +50,24 @@
         });
 
         this.touch.on('start', function () {
+
+            this.maxX = self.scrollerW - self.wrapperW;
+            this.minX = 0;
+
             self.options.autoLoop && self.stopAutoLoop();
 
         }).on('move', function () {
             self.slider.style.webkitTransform = 'translate3d(' + this.x * -1 + 'px,' + this.y * -1 + 'px,0)';
 
-        }).on('end', function () {
+        }).on('end bounceBack', function (e) {
 
-            var index = this.isMoveLeft && this.x - this.startX > 0 ? options.index + 1 : !this.isMoveLeft && this.x - this.startX < 0 ? options.index - 1 : options.index;
+            if (e.type == 'end' && this.shouldBounceBack()) {
+                return;
+            }
 
-            self._toPage(options.loop ? index : index < 0 ? 0 : index >= self.length ? self.length - 1 : index, 250);
+            var index = e.type == 'bounceBack' ? options.index : this.isMoveLeft && this.x - this.startX > 0 ? options.index + 1 : !this.isMoveLeft && this.x - this.startX < 0 ? options.index - 1 : options.index;
+
+            self._toPage(options.loop ? index : index < 0 ? 0 : index >= self.length ? self.length - 1 : index, e.type == 'bounceBack' ? 0 : 250);
 
             if (self.options.autoLoop) {
                 self.startAutoLoop();
@@ -199,7 +207,7 @@
             this.$slider.prepend(this.render(data));
             this._adjust();
         },
-        
+
         shift: function () {
             this._data.shift();
             this.$slider.children(":first-child").remove();
