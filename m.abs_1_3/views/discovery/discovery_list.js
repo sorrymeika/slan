@@ -5,7 +5,7 @@ var Loading = require('widget/loading');
 var model = require('core/model');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
-var api = require("models/base");
+var api = require("models/api");
 var userModel = require('models/user');
 
 module.exports = Activity.extend({

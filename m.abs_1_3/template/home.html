@@ -49,22 +49,14 @@
         <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
             data-index="0">
             <div class="hm_shop">
-                <div class="hm_cate">
-                    <div class="hd" data-forward="/all">所有<br>商品</div>
-                    <div class="bd">
-                        <ul>
-                            <li data-forward="/all?id=1">出行</li>
-                            <li data-forward="/all?id=2">睡眠</li>
-                            <li data-forward="/all?id=3">美食</li>
-                            <li data-forward="/all?id=4">沐浴</li>
-                        </ul>
-                        <ul>
-                            <li data-forward="/all?id=5">休闲</li>
-                            <li data-forward="/all?id=6">家务</li>
-                            <li data-forward="/all?id=7">空间</li>
-                            <li data-forward="/all?id=8">儿童</li>
+                <div class="sp_all_cates">
+                    <div ref="cates">
+                        <ul style="width:{{window.innerWidth*2.1}}px;padding-right:20px;">
+                            <li class="cate0">首页</li>
+                            <li sn-repeat="item in categories" class="cate{{item.PCG_ID}}" data-forward="/all?id={{item.PCG_ID}}">{{item.PCG_NAME}}</li>
                         </ul>
                     </div>
+                    <div class="dropdown_btn" sn-tap="this.showCategories()"></div>
                 </div>
                 <div class="banner" ref="topbanner">
 
@@ -86,7 +78,9 @@
                         <ul class="hm_shop_list">
                             <li class="hm_shop_list_item" sn-repeat="prd in item.data" data-forward="/item/{{prd.PRD_ID}}?from={{encodeURIComponent('/')}}">
                                 <img data-src="{{prd.WPP_LIST_PIC}}" />
-                                <p class="price">￥{{prd.PRD_PRICE}} <del sn-display="{{prd.PRD_SPECIAL_FLAG}}">¥{{prd.PRD_MEMBER_PRICE}}</del></p>
+                                <p class="price">￥{{prd.PRD_PRICE}}
+                                    <del sn-display="{{prd.PRD_SPECIAL_FLAG}}">¥{{prd.PRD_MEMBER_PRICE}}</del>
+                                </p>
                                 <p class="name">{{prd.PRD_NAME}}</p>
                             </li>
                         </ul>
@@ -96,7 +90,9 @@
                 <ul class="sp_list">
                     <li sn-repeat="item in newproducts" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}">
                         <img src="{{item.WPP_LIST_PIC1}}" />
-                        <p class="price"><b>￥{{item.PRD_PRICE}}</b><del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del></p>
+                        <p class="price"><b>￥{{item.PRD_PRICE}}</b>
+                            <del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del>
+                        </p>
                         <p class="name">{{item.PRD_NAME}}</p>
                         <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销
                             <br>Sold Out</div>

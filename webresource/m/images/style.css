@@ -1,7 +1,9 @@
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; font-style: normal; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); list-style: none; box-sizing: border-box; }
 
-body, html { font-size: 1px; color: #333; width: 100%; overflow-x: hidden; font-family: Helvetica Neue,Helvetica,Arial,sans-serif; }
+body, html {  color: #333; width: 100%; overflow-x: hidden; font-family: Helvetica Neue,Helvetica,Arial,sans-serif; }
+html { font-size: 100px; }
 img { background: #e7e7e7 url(imgbg.png) center center no-repeat; background-size: 30% auto; }
+body{ font-size: 16px; }
 a { text-decoration: none; color: #333; }
 input { -webkit-appearance: none; outline: none; box-sizing: border-box; }
 
@@ -13,7 +15,7 @@ footer { position: absolute; bottom: 0px; left: 0px; width: 100%; z-index: 200; 
 .has_status_bar header { border-top: 20px solid #fff; border-top-style: solid; box-sizing: content-box !important; }
 .has_status_bar .main { top: 64px; }
 
-.viewport { font-size: 16px;position: absolute; overflow: hidden; width: 100%; background: #fff; bottom: 0px; top: 0px; right: 0; left: 0; z-index: 1;}
+.viewport { position: absolute; overflow: hidden; width: 100%; background: #fff; bottom: 0px; top: 0px; right: 0; left: 0; z-index: 1;}
 .view { position: absolute; width: 100%; top: 0; left: 0; bottom: 0; background: #fff; overflow: hidden; -webkit-box-shadow: -3px 2px 5px rgba(49,60,75,.35); box-shadow: -3px 2px 5px rgba(49,60,75,.35); }
 .view:before { display: block; content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; }
 .view.active { z-index: 4; }

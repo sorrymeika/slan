@@ -1,4 +1,4 @@
-var api = require('models/base');
+var api = require('models/api');
 var model = require('core/model');
 var Event = require('core/event');
 var util = require('util');
@@ -6,9 +6,6 @@ var $ = require('$');
 var State = model.State;
 
 var User = {
-    on: Event.on,
-    trigger: Event.trigger,
-    off: Event.off,
     get: function () {
         var user = State.get('user');
         if (!user) {
@@ -58,7 +55,6 @@ var User = {
 };
 
 var userApi = new api.API({
-    el: $(''),
     url: '/api/user/get',
     checkData: false,
 

@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     var Share = require('components/share');
     var Size = require('components/size');
     var animation = require('animation');
-    var api = require('models/base');
+    var api = require('models/api');
     var Slider = require('widget/slider');
 
     return Activity.extend({

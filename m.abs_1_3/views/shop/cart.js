@@ -8,7 +8,7 @@ define(function (require, exports, module) {
     var Promise = require('core/promise');
     var Scroll = require('widget/scroll');
     var animation = require('animation');
-    var api = require("models/base");
+    var api = require("models/api");
     var Deletion = require("components/deletion");
     var userModel = require("models/user");
 

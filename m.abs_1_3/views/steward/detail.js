@@ -7,7 +7,7 @@ define(function (require, exports, module) {
     var model = require('core/model');
     var Scroll = require('widget/scroll');
     var animation = require('animation');
-    var api = require('models/base');
+    var api = require('models/api');
 
     return Activity.extend({
         events: {

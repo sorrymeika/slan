@@ -8,7 +8,7 @@ define(function (require, exports, module) {
     var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var bridge = require('bridge');
-    var api = require('models/base');
+    var api = require('models/api');
 
     var IFRAME;
 

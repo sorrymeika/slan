@@ -1,6 +1,6 @@
 var $ = require('$');
 var model = require('core/model');
-var api = require("models/base");
+var api = require("models/api");
 var Scroll = require('widget/scroll');
 
 var Month = model.ViewModel.extend({

@@ -10,8 +10,10 @@
     </ul>
     <ul class="sp_list">
         <li sn-repeat="item in data" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}?from={{url}}">
-            <img src="{{item.WPP_LIST_PIC1}}"/>
-            <p class="price"><b>￥{{item.PRD_PRICE}}</b><del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del></p>
+            <img src="{{item.WPP_LIST_PIC1}}" />
+            <p class="price"><b>￥{{item.PRD_PRICE}}</b>
+                <del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del>
+            </p>
             <p class="name">{{item.PRD_NAME}}</p>
             <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销<br>Sold Out</div>
         </li>

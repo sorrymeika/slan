@@ -1,7 +1,7 @@
 var $ = require('$');
 var model = require('core/model');
 var Share = require('components/share');
-var api = require('models/base');
+var api = require('models/api');
 var userModel = require('models/user');
 
 var Month = model.ViewModel.extend({

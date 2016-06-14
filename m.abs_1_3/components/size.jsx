@@ -1,6 +1,6 @@
 var $ = require('$');
 var model = require('core/model');
-var api = require('models/base');
+var api = require('models/api');
 var util = require('util');
 var Scroll = require('widget/scroll');
 

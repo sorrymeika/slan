@@ -1,111 +1,186 @@
-define(function (require, exports, module) {
+var $ = require('$');
+var util = require('util');
+var Activity = require('activity');
+var Loading = require('widget/loading');
+var model = require('core/model');
+var Scroll = require('widget/scroll');
+var animation = require('animation');
+var api = require('models/api');
+var Category = require("models/category");
+var CpCategory = require("components/category");
 
-    var $ = require('$');
-    var util = require('util');
-    var Activity = require('activity');
-    var Loading = require('widget/loading');
-    var model = require('core/model');
-    var Scroll = require('widget/scroll');
-    var animation = require('animation');
-    var api = require('models/base');
+module.exports = Activity.extend({
+    events: {
+        'tap .js_bind:not(.disabled)': function () {
 
-    return Activity.extend({
-        events: {
-            'tap .js_bind:not(.disabled)': function () {
-
-            },
-            
-            'focus .js_search': function (e) { 
-                e.currentTarget.setAttribute('placeholder', '');
-            },
-            
-            'blur .js_search': function (e) { 
-                e.currentTarget.setAttribute('placeholder', '热门搜索：新月枕');
-            }
         },
 
-        onCreate: function () {
-            var self = this;
+        'focus .js_search': function (e) {
+            e.currentTarget.setAttribute('placeholder', '');
+        },
 
-            self.swipeRightBackAction = self.route.query.from || '/';
+        'blur .js_search': function (e) {
+            e.currentTarget.setAttribute('placeholder', '热门搜索：新月枕');
+        }
+    },
 
-            var $main = this.$('.main');
+    onCreate: function () {
+        var self = this;
 
-            Scroll.bind($main);
+        self.swipeRightBackAction = self.route.query.from || '/';
 
-            this.listenTo(this.$('.js_search'), 'keydown', function (e) {
-                if (e.keyCode == 13) {
-                    self.forward('/list?s=' + e.target.value + '&from=/all');
-                    e.preventDefault();
-                    return false;
+        var $main = this.$('.main');
+
+        Scroll.bind($main);
+
+
+        self.productSearchAPI = new api.ProductSearchAPI({
+            $el: self.$el,
+            $scroll: $main,
+            $content: $main,
+            check: false,
+            beforeSend: function () {
+                this.setUrl('/Prod/productlist')
+                    .setParam({
+                        orderbyStr: "PRD_ONLINE_DT",
+                        orderby: "desc",
+                        keycodes: ''
+                    });
+            },
+            KEY_PAGE: 'pages',
+            KEY_PAGESIZE: 'length',
+            MSG_NO_MORE: '别拉了，就这些<i class="ico_no_more"></i>',
+            pageSize: '10',
+            success: function (res) {
+                if (res.data.length == 10) res.total = (this.pageIndex + 1) * parseInt(this.pageSize)
+
+                self.model.set({
+                    data: res.data
+                });
+            },
+            append: function (res) {
+                if (res.data.length == 10) res.total = (this.pageIndex + 1) * parseInt(this.pageSize);
+
+                self.model.getModel('data').add(res.data);
+            }
+        });
+
+
+        this.listenTo(this.$('.js_search'), 'keydown', function (e) {
+            if (e.keyCode == 13) {
+                self.forward('/list?s=' + e.target.value + '&from=/all');
+                e.preventDefault();
+                return false;
+            }
+        });
+
+
+        this.model = new model.ViewModel(this.$el, {
+            back: self.swipeRightBackAction,
+            resource: 'http://appuser.abs.cn'
+        });
+
+        this.model.selectCate = function (e, item) {
+            typeof item == 'number' && (item = util.first(this.data.categories, function (cate) {
+                return cate.PCG_ID == item;
+            }));
+
+            this.set({
+                current: item,
+                id: item.PCG_ID,
+                currentSub: item.children[0]
+            });
+
+            this.refs.cates.scroll.scrollTo((item.PCG_ID - 1) * $(this.refs.cates).find(".curr").width(), 0, 200);
+
+            self.cpCategory.set({
+                current: item.PCG_ID
+            });
+
+
+            this.requestProd(e, item.PCG_ID);
+        }
+
+        this.model.showCategories = function () {
+            self.cpCategory.show();
+        }
+
+        this.model.selectSubCate = function (e, item) {
+            this.set("currentSub", item);
+            this.requestProd(e, item.PCG_ID);
+        }
+
+        this.model.requestProd = function (e, id) {
+
+            this.set("currentSearchId", id);
+
+            self.productSearchAPI.setParam({
+                pcgid: id
+
+            }).reload();
+        }
+
+        Scroll.bind(this.model.refs.cates, {
+            useScroll: true,
+            vScroll: false,
+            hScroll: true
+        });
+
+        Category.list(function (res) {
+
+            var cpCategory = new CpCategory({
+                data: res,
+                goto: function (e, id) {
+
+                    self.model.selectCate(null, id);
+
+                    cpCategory.hide();
                 }
             });
 
+            cpCategory.$el.appendTo('body');
 
-            this.model = new model.ViewModel(this.$el, {
-                back: self.swipeRightBackAction,
-                id: this.route.query.id||1,  
-                resource: 'http://appuser.abs.cn'
-            });
+            self.cpCategory = cpCategory;
 
-            this.model.subcates = function (item) {
+            self.setCategories(res);
+        });
 
-                return util.find(self.categories, function (a) {
-                    return a.PCG_PARENT_ID == item.PCG_ID;
-                });
-            }
 
-            this.model.bindScroll = function () {
-                Scroll.bind(self.$('.sp_all_list_wrap:not(.s_binded)').addClass('s_binded'), {
-                    vScroll: false,
-                    hScroll: true
-                });
-            }
+    },
 
-            var categories = util.store('categories');
-            categories && self.setCategories(categories);
+    setCategories: function (categories) {
+        var self = this;
+        this.categories = model.State.data.categories;
 
-            var cate = new api.CategoryAPI({
-                success: function (res) {
-                    util.store('categories', res.data);
+        var id = self.route.query.id || 1;
+        var current = util.first(categories, function (item) {
+            return item.PCG_ID == id;
+        });
+        var currentSub = current.children[0];
 
-                    self.setCategories(res.data);
-                },
-                $el: self.$el
-            });
-            cate.load();
-        },
+        this.model.set({
+            id: id,
+            categories: categories,
+            current: current,
+            currentSub: currentSub
+        });
 
-        setCategories: function (categories) {
-            var self = this;
-            this.categories = categories;
+        this.model.selectCate(null, current);
+    },
 
-            var list = util.find(categories, function (item) {
-                item.children = util.find(categories, function (sub) {
-                    return sub.PCG_PARENT_ID == item.PCG_ID
-                });
-                return item.PCG_DEPTH == 1;
-            });
-            
-            var id = self.route.query.id || 1;
+    onEnter: function () {
+        var self = this;
 
-            this.model.set({
-                id: id,
-                categories: list
-            }).set({
-                current: util.first(list, function (item) { 
-                    return item.PCG_ID == id;
-                }) 
-            });
-            console.log(list.length, self.model.data.categories.length)
-            this.model.bindScroll();
-        },
+        this.model.set({
+            id: this.route.query.id || 1,
+        });
 
-        onShow: function () {
-            var self = this;
-        },
+        self.productSearchAPI.setParam({
+            pcgid: self.model.data.id
 
-        onDestory: function () {
-        }
-    });
+        }).load();
+    },
+
+    onDestory: function () {
+    }
 });

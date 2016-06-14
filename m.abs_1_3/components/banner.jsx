@@ -1,6 +1,6 @@
 var $ = require('$');
 var model = require('core/model');
-var api = require('models/base');
+var api = require('models/api');
 var Size = require('components/size');
 var util = require('util');
 

@@ -9,8 +9,10 @@ var Scroll = require('../widget/scroll');
 var barcode = require('../util/barcode');
 var animation = require('animation');
 var Confirm = require("components/confirm");
-var api = require("models/base");
+var api = require("models/api");
 var userModel = require("models/user");
+var Category = require("models/category");
+var CpCategory = require("components/category");
 var ViewModel = Model.ViewModel;
 
 var Discovery = require('./discovery/discovery_index');
@@ -29,6 +31,8 @@ var cartQtyApi = new api.CartQtyAPI({
     error: function () {
     }
 });
+
+console.log(cartQtyApi);
 
 module.exports = Activity.extend({
     events: {
@@ -362,6 +366,42 @@ module.exports = Activity.extend({
                 self.scroll.get('.js_shop').imageLazyLoad();
             }
         })
+
+
+        Scroll.bind(model.refs.cates, {
+            useScroll: true,
+            vScroll: false,
+            hScroll: true
+        });
+
+        model.showCategories = function () {
+            self.cpCategory.show();
+        }
+
+        Category.request(function () {
+
+            Category.list(function (res) {
+
+                model.set({
+                    categories: res
+                });
+
+                var cpCategory = new CpCategory({
+                    data: res,
+                    goto: function (e, id) {
+                        self.forward("/all?id=" + id);
+                        cpCategory.hide();
+                    }
+                });
+
+                cpCategory.$el.appendTo('body');
+
+                self.cpCategory = cpCategory;
+
+                console.log(res);
+            });
+
+        });
 
         if (!util.store('IS_SHOW_GUIDE')) {
 

@@ -6,7 +6,7 @@ var model = require('core/model');
 var Scroll = require('widget/scroll');
 var Selector = require('widget/selector');
 var animation = require('animation');
-var api = require('models/base');
+var api = require('models/api');
 
 module.exports = Activity.extend({
     events: {

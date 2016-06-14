@@ -11,7 +11,7 @@ var Activ = require('components/activity');
 var FastBuy = require('components/fastbuy');
 var Package = require('components/package');
 var Banner = require('components/banner');
-var api = require("models/base");
+var api = require("models/api");
 
 module.exports = Activity.extend({
     events: {
