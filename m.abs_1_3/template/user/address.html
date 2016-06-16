@@ -4,10 +4,13 @@
 </header>
 <div class="main uc_address">
     <div class="uc_address_new js_add_address">添加新地址</div>
-    <ul class="uc_address_con">
+    <ul class="uc_address_con" ref="addressList">
         <li sn-repeat="item in data" class="{{item.MBA_DEFAULT_FLAG?'default':''}}{{item.AddressID==addressId?' curr':''}}" sn-tap="this.forward(item.AddressID)">
-            <p class="hd"><span class="name">{{item.MBA_NAME}}</span><span class="mobi">{{item.MBA_MOBILE}}</span></p>
-            <p class="con">{{item.Province}}{{item.City}}{{item.Area}}{{item.MBA_FULL_ADDRESS}}</p>
+            <div class="uc_addresslist__listitem_con js_delete_item">
+                <p class="hd"><span class="name">{{item.MBA_NAME}}</span><span class="mobi">{{item.MBA_MOBILE}}</span></p>
+                <p class="con">{{item.Province}}{{item.City}}{{item.Area}}{{item.MBA_FULL_ADDRESS}}</p>
+            </div>
+            <i class="js_delete" data-id="{{item.AddressID}}"></i>
         </li>
     </ul>
 </div>

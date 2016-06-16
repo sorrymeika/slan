@@ -9,11 +9,13 @@ define(function (require, exports, module) {
 
     var Activity = Page.extend({
         toggleAnim: 'def',
+        defBackUrl: '/',
 
         initialize: function () {
-            this.on('Create', this.onHtmlLoad);
-            this.on('Show', this._onShow);
-            this.on('Destroy', this._onDestroy);
+            this.on('Create', this.onHtmlLoad)
+                .on('Start', this.onStart)
+                .on('Show', this._onShow)
+                .on('Destroy', this._onDestroy);
 
             Page.prototype.initialize.apply(this, arguments);
         },
@@ -21,11 +23,8 @@ define(function (require, exports, module) {
         onHtmlLoad: function () {
             var that = this;
 
-            if (!that.swipeRightBackAction) {
-                var $btnBack = that.$('header [data-back]');
-                if ($btnBack.length) {
-                    that.swipeRightBackAction = $btnBack.attr('data-back') || '/';
-                }
+            if (that.swipeRightBackAction === undefined) {
+                that.swipeRightBackAction = that.query.from || that.referrer || that.defBackUrl;
             }
             that._scrolls = Scroll.bind(that.$('.scrollview'));
             that._isShowed = false;
@@ -33,6 +32,9 @@ define(function (require, exports, module) {
 
         _onShow: function () {
             this.onLoad && this.onLoad();
+            if (!this._isShowed) {
+                this.trigger('Start');
+            }
 
             if (!this._isShowed || this.isForward) {
                 this.trigger('Enter');
@@ -180,12 +182,12 @@ define(function (require, exports, module) {
             return dialog;
         },
 
-        forward: function (url, duration, toggleAnim) {
-            this.application.forward(url, duration, toggleAnim);
+        forward: function (url, options) {
+            this.application.forward(url, options);
         },
 
-        back: function (url, duration, toggleAnim) {
-            this.application.back(url, duration, toggleAnim);
+        back: function (url, options) {
+            this.application.back(url, options);
         }
     });
 

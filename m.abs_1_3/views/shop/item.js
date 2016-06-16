@@ -11,12 +11,25 @@ define(function (require, exports, module) {
     var animation = require('animation');
     var api = require('models/api');
     var Slider = require('widget/slider');
+    var userModel = require('models/user');
 
     return Activity.extend({
         events: {
             'tap .js_buy:not(.disabled)': function () {
                 var self = this;
-                this.size.show();
+
+                if (self.model.data.colorSpec.length == 1) {
+                    if (self.user) {
+                        this.size.confirm();
+
+                    } else {
+                        self.forward('/login');
+                    }
+
+                } else {
+                    this.size.show();
+                }
+
             },
             'tap .js_share': function () {
                 this.share.show();
@@ -36,15 +49,25 @@ define(function (require, exports, module) {
 
             Scroll.bind($main);
 
-            self.user = util.store('user');
+            self.user = userModel.get();
 
             self.model = new model.ViewModel(self.$el, {
                 back: self.swipeRightBackAction,
                 title: '床品',
                 id: self.route.data.id,
                 user: self.user,
+                isLogin: !!self.user,
                 url: encodeURIComponent(self.route.url),
                 qty: 1
+            });
+
+            self.onResult("Login", function () {
+                self.user = userModel.get();
+
+                self.model.set({
+                    isLogin: true,
+                    user: userModel.get()
+                })
             });
 
             self.size = new Size();

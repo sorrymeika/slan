@@ -6,6 +6,7 @@ var model = require('core/model');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
+var Deletion = require("components/deletion");
 
 module.exports = Activity.extend({
     events: {
@@ -46,15 +47,52 @@ module.exports = Activity.extend({
                 pspcode: self.user.PSP_CODE
             },
             success: function (res) {
-                res.data.sort(function (a,b) {
+                res.data.sort(function (a, b) {
                     return a.AddressID > b.AddressID ? 1 : a.AddressID < b.AddressID ? -1 : 0;
                 });
-                
+
                 console.log(res.data);
-                
+
                 self.model.set({
                     data: res.data
                 });
+            }
+        });
+
+        self.deleteAddressApi = new api.DeleteAddressAPI({
+            $el: this.$el,
+            params: {
+                pspcode: self.user.PSP_CODE
+            },
+            checkData: false,
+            success: function (res) {
+                var id = this.params.mbaId;
+
+                self.model.getModel("data").remove(function (item) {
+                    return id == item.AddressID;
+                });
+            },
+            error: function (res) {
+                sl.tip(res.msg);
+            }
+        })
+
+        new Deletion({
+            el: self.model.refs.addressList,
+            children: '.js_delete_item',
+            width: 70,
+            events: {
+                '.js_delete': function (e) {
+                    var $target = $(e.currentTarget);
+                    var id = $target.data('id');
+
+                    console.log(id);
+
+                    self.deleteAddressApi.setParam({
+                        mbaId: id
+
+                    }).load();
+                }
             }
         });
     },

@@ -20,6 +20,7 @@ var Page = Component.extend({
         this.hash = route.hash;
         this.url = route.url;
         this.path = route.path;
+        this.referrer = route.referrer;
         this._query = this.query;
         this.query = $.extend({}, route.query);
     },
@@ -71,8 +72,7 @@ var Page = Component.extend({
 
         that.application = that.options.application;
 
-        that.on('Start', that.onStart)
-            .on('Resume', that.onResume)
+        that.on('Resume', that.onResume)
             .on('Show', that.onShow)
             .on('Show', that._statusChange)
             .on('Pause', that.onPause)
@@ -86,7 +86,6 @@ var Page = Component.extend({
         }
         promise.then(that.onCreate, that)
             .then(function () {
-                that.trigger('Start');
                 that.checkQuery();
             });
     },
@@ -99,7 +98,6 @@ var Page = Component.extend({
     onShow: noop,
 
     onStop: noop,
-    onRestart: noop,
 
     //离开动画结束时触发
     onPause: noop,
@@ -128,7 +126,8 @@ var Page = Component.extend({
             this.route.query[key] = val || '';
 
         var query = $.param(this.route.query);
-        location.hash = this.route.path + (query ? '?' + query : '');
+
+        this.application.navigate(this.route.path + (query ? '?' + query : ''));
     },
 
     _queryActions: {},

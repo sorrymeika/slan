@@ -301,8 +301,8 @@ define(function (require, exports, module) {
                         if (id) {
                             var data = $.extend(true, {}, self.model.data);
 
-                            self.model.getModel('data_baglist').remove(function (model) {
-                                return model.get('SPB_ID') == id;
+                            self.model.getModel('data_baglist').remove(function (item) {
+                                return item.SPB_ID == id;
                             });
 
                             self.cartDeleteApi.setParam({
@@ -333,8 +333,8 @@ define(function (require, exports, module) {
 
                     self.setResult('CartChange');
 
-                    self.model.getModel('data_baglist').remove(function (model) {
-                        return model.get('SPB_ID') == spbId;
+                    self.model.getModel('data_baglist').remove(function (item) {
+                        return item.SPB_ID == spbId;
                     });
 
                     self.cart.reload();

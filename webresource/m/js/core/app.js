@@ -210,6 +210,8 @@ var Application = Component.extend($.extend(appProto, {
         var that = this;
         //var preventEvents = 'tap click touchmove touchstart';
 
+        window.Application = this;
+
         that.el = that.$el[0];
         that.mask = that.$el.children('.screen');//.off(preventEvents).on(preventEvents, false);
 
@@ -237,6 +239,10 @@ var Application = Component.extend($.extend(appProto, {
                 that.back(that.history[that.history.length - 2]);
             }
         });
+    },
+
+    getCurrentActivity: function () {
+        return this._currentActivity;
     },
 
     start: function (delay) {
@@ -280,7 +286,7 @@ var Application = Component.extend($.extend(appProto, {
                 activity.$el.addClass('active');
                 activity.trigger('Appear').trigger('Show');
 
-                that.trigger('start');
+                that.trigger('Start');
                 that.queue.resolve();
             });
 

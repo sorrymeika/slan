@@ -99,7 +99,7 @@ header { background: #e65e5f; height: 44px; line-height: 44px; }
 .hm_chart { width: 170px; height: 170px; border-radius: 100%; background: #d42c2c; -webkit-box-shadow: inset 0px 0px 5px #333; margin: 24px auto 0 auto; overflow: hidden; position: relative; }
 .hm_chart_con { width: 130px; height: 130px; border-radius: 100%; background: #e24b43; margin: 20px; text-align: center; color: #fff; padding-top: .1px; z-index: 1000; position: relative;}
 .hm_chart_con .hd { margin-top: 22px; font-size: 12px; }
-.hm_chart_con .bd { margin-top: 9px; font-size: 7.10px; font-weight: 200; line-height: 1;}
+.hm_chart_con .bd { margin-top: 9px; font-size: 45px; font-weight: 200; line-height: 1;}
 .hm_chart_con .ft { margin-top: 7px; font-size: 14px; font-weight: 200;}
 .hm_chart_canvas { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
 .hm_chart_desc { text-align: center; font-size: 16px; margin-top: 12px; color: #fff; }
@@ -533,8 +533,8 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .my_nodata { margin-top: 50px; text-align: center; }
 .my_nodata .icon { width: 104px; height: 104px; position: relative; background: #ccc; border-radius: 50%; margin: 0 auto; }
 .my_nodata .icon:before { content: ''; display: block; top: 50%; left: 50%; margin: -37px 0 0 -37px; width: 75px; height: 75px; position: absolute; background: url(icon.png) no-repeat 0px -310px; background-size: 320px auto; }
-.my_nodata .text { text-align: center; margin: 25px 0 15px 0; font-size: 2.10px; color: #333; }
-.my_nodata .btn { text-align: center; margin: 0px auto; padding: 0px 25px; height: auto; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: #666; font-size: 2.10px; }
+.my_nodata .text { text-align: center; margin: 25px 0 15px 0; font-size: 12px; color: #333; }
+.my_nodata .btn { text-align: center; margin: 0px auto; padding: 0px 25px; height: auto; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: #666; font-size: 12px; }
 .mypoint .my_nodata .icon:before { background-position-x: -75px; }
 .uc_coupon .my_nodata .icon:before { background-position-x: -150px; }
 .uc_coupon .my_nodata { margin-top: 90px; }
@@ -793,22 +793,17 @@ $p:2;
 	position: relative; background: #fff; margin-top: 17px; height: 50px; line-height: 50px; font-size: 14px; padding-left: 10px;
 	&:after { @extend .ex_arrow; }
 }
-.uc_address_con {
-	margin-top: 32px; background-color: #fff;
-	li {
-		padding: 19px 35px 14px 14px;border-top: .5px solid #ddd;border-bottom: .5px solid #ddd; position: relative;
-		.hd {
-			font-size: 14px;
-			.mobi { float: right; }
-		}
-		.con { font-size: 12px; margin-top: 5px; }
-		&.default:after { @extend .ex_check; }
-		&.curr { 
-			background: #e65e5f; color:#fff;
-			&.default:after { background-position: -270px -30px; }
-		}
-	}
-}
+.uc_address_con { margin-top: 32px; background-color: #fff; }
+.uc_address_con li { border-bottom: .5px solid #ddd; position: relative;}
+.uc_address_con li .hd { font-size: 14px; .mobi { float: right; } }
+.uc_address_con li .con { font-size: 12px; margin-top: 5px; }
+.uc_address_con li.default .uc_addresslist__listitem_con:after { @extend .ex_check; }
+.uc_address_con li.curr .uc_addresslist__listitem_con { background: #e65e5f; color:#fff; }
+.uc_address_con li.curr.default .uc_addresslist__listitem_con:after { background-position: -270px -30px; }
+.uc_address_con li > i { display: block; width: 70px; text-align: center; background: #e65e5f; position: absolute; right: 0; bottom: 0; top: 0; color: #fff; font-size: 16px; z-index: 1; }
+.uc_address_con li > i:after { position: absolute; display: block; content: "删除"; top: 50%; left:0; line-height: 20px; height: 20px; margin: -10px 0 0 20px; }
+.uc_addresslist__listitem_con { padding: 19px 35px 14px 14px;background: #fff; position: relative; z-index: 2; }
+
 .uc_addaddress {
 	padding-top: 17px;
 	ul { background: #fff; }
@@ -1153,9 +1148,9 @@ $p:2;
 .ico_no_more { @extend .ex_icon; background-position: -300px 0px; width:14px;height:14px;margin-left: 3px; vertical-align: -2px; }
 
 .discovery_index { padding-top: 13px;  }
-.disc_nav { display: -webkit-box; text-align: center; }
-.disc_nav li { -webkit-box-flex: 1;width:0px; }
-.disc_nav li p { border-radius: 4px; padding-top: 15px;margin: 0 auto; width: 67px; height: 67px; background: #e04447; position: relative; overflow: hidden; }
+.disc_nav { text-align: center; overflow: hidden; }
+.disc_nav li { float: left; width:.67rem;height: .67rem; margin: 0 .01rem 0 .1rem; overflow: hidden; border-radius: 50%; }
+.disc_nav li p { border-radius: 4px; padding-top: 15px;margin: 0 auto; width:.67rem;height: .67rem; background: #e04447; position: relative; overflow: hidden; }
 .disc_nav li p em {  margin: 0 auto; width: 40px; display: block; color: #fff;z-index: 1; position: relative;}
 .disc_nav li p img { border-radius: 4px; position: absolute; top: 0; left: 0;width:100%; height:100%; display:block;z-index: 0; }
 

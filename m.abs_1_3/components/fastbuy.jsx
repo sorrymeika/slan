@@ -27,11 +27,11 @@ var Month = model.ViewModel.extend({
         <h1>FLASH SALE</h1>
         每周一上午10:00准点开抢
     </div></div>,
-	
-	goto: function(e, item) {
-		var self=this;
-		
-		self.view.forward('/item/'+item.PRD_ID+"?from="+encodeURIComponent(self.view.route.url));
+
+	goto: function (e, item) {
+		var self = this;
+
+		self.view.forward('/item/' + item.PRD_ID + "?from=" + encodeURIComponent(self.view.route.url));
 
 		/*
 		self.cartAddAPI.setParam({
@@ -41,73 +41,71 @@ var Month = model.ViewModel.extend({
 		*/
 		console.log(item)
 	},
-	
-	timeDiff: function(dateFrom,dateTo) {
-		if (+dateFrom>Date.now()||time) return '';
-		
-		var time=(+dateTo)-Date.now();
-        
-        if (time<0)
+
+	timeDiff: function (dateFrom, dateTo) {
+		if (+dateFrom > Date.now() || time) return '';
+
+		var time = (+dateTo) - Date.now();
+
+        if (time < 0)
             return '-';
-        
-		var days=parseInt(time/(24*60*60*1000));
-        
-		time=time%(24*60*60*1000);
-        
-		var hours=parseInt(time/(60*60*1000));
-        
-		time=time%(60*60*1000);
-		var minutes=parseInt(time/(60*1000));
-		time=time%(60*1000);
-		var secends=parseInt(time/(1000));
-		time=time%(1000);
-		
-		return (days?days+'天 ':'')+util.pad(hours)+":"+util.pad(minutes)+":"+util.pad(secends);
+
+		var days = parseInt(time / (24 * 60 * 60 * 1000));
+
+		time = time % (24 * 60 * 60 * 1000);
+
+		var hours = parseInt(time / (60 * 60 * 1000));
+
+		time = time % (60 * 60 * 1000);
+		var minutes = parseInt(time / (60 * 1000));
+		time = time % (60 * 1000);
+		var secends = parseInt(time / (1000));
+		time = time % (1000);
+
+		return (days ? days + '天 ' : '') + util.pad(hours) + ":" + util.pad(minutes) + ":" + util.pad(secends);
 	},
-	
-	initialize: function() {
-		var self=this;
-		
-		self.user=util.store('user');
-		
+
+	initialize: function () {
+		var self = this;
+
 		self.set({
 			url: encodeURIComponent(location.hash)
 		});
-        
-        var now=new Date();
+
+        var now = new Date();
         var startDt;
-        if (now.getDay()!=1) {
-            startDt=new Date(Date.now()-(now.getDay()-1)*24*60*60*1000);
+        if (now.getDay() != 1) {
+            startDt = new Date(Date.now() - (now.getDay() - 1) * 24 * 60 * 60 * 1000);
         } else {
-            startDt=now;
+            startDt = now;
         }
-        var endDt=new Date((+startDt)+7*24*60*60*1000);
-		
-		var dataAPI=new api.FastBuyAPI({
+        var endDt = new Date((+startDt) + 7 * 24 * 60 * 60 * 1000);
+
+		var dataAPI = new api.FastBuyAPI({
 			$el: self.$el,
             checkData: false,
 			params: {
-				startdt: util.formatDate(startDt,'yyyy-MM-dd 00:00:00'),
-				enddt: util.formatDate(endDt,'yyyy-MM-dd 23:59:59')
+				startdt: util.formatDate(startDt, 'yyyy-MM-dd 00:00:00'),
+				enddt: util.formatDate(endDt, 'yyyy-MM-dd 23:59:59')
 			},
-			success: function(res){
-				var result=[];
-				for (var i=0;i<res.data.length;i++) {
-					var item=res.data[i];
-					var prod=item.V_PRODUCT1;
-					var time=eval("new "+item.flp_start_time.replace(/\//g,''));
-					var endTime=eval("new "+item.flp_end_time.replace(/\//g,''));
-					var strTime=util.formatDate(time);
-					var strEndTime=util.formatDate(endTime);
-                    
-                    if (+time>Date.now()){
+			success: function (res) {
+				var result = [];
+				for (var i = 0; i < res.data.length; i++) {
+					var item = res.data[i];
+					var prod = item.V_PRODUCT1;
+					var time = eval("new " + item.flp_start_time.replace(/\//g, ''));
+					var endTime = eval("new " + item.flp_end_time.replace(/\//g, ''));
+					var strTime = util.formatDate(time);
+					var strEndTime = util.formatDate(endTime);
+
+                    if (+time > Date.now()) {
                         continue;
                     }
-					
-					var data=util.first(result,function(compare){
-						return compare.strTime==strTime&&compare.strEndTime==strEndTime;
+
+					var data = util.first(result, function (compare) {
+						return compare.strTime == strTime && compare.strEndTime == strEndTime;
 					});
-					var prodInfo= {
+					var prodInfo = {
 						PRD_ID: prod.PRD_ID,
 						WPP_LIST_PIC: prod.WPP_LIST_PIC,
 						PRD_NAME: prod.PRD_NAME,
@@ -118,51 +116,35 @@ var Month = model.ViewModel.extend({
 					}
 					if (data) {
 						data.data.push(prodInfo);
-						
+
 					} else {
 						result.push({
 							strTime: strTime,
 							strEndTime: strEndTime,
-							timeLeft:self.timeDiff(time,endTime),
+							timeLeft: self.timeDiff(time, endTime),
 							time: time,
 							endTime: endTime,
 							data: [prodInfo]
 						});
 					}
-                    
+
 				}
-				
-				setInterval(function(){
-					self.getModel('data').each(function(model,i){
+
+				setInterval(function () {
+					self.getModel('data').each(function (model, i) {
 						model.set({
-							timeLeft:self.timeDiff(model.data.time,model.data.endTime),
+							timeLeft: self.timeDiff(model.data.time, model.data.endTime),
 						})
 					});
-					
-				},1000);
-				
+
+				}, 1000);
+
 				self.set({
 					data: result
 				});
 			}
 		});
 		dataAPI.load();
-		
-		self.cartAddAPI = new api.CartAddAPI({
-			$el: self.$el,
-			checkData: false,
-			check: false,
-			params: {
-				pspcode: self.user.PSP_CODE
-			},
-			success: function (res) {
-				if (res.success) {
-					sl.tip('加入购物车成功！');
-				}
-			},
-			complete: function () {
-			}
-		});
 	}
 });
 

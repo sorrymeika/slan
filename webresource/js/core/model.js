@@ -648,6 +648,12 @@
         this.add(data);
 
     }, {
+            _triggerChangeEvent: function () {
+                if (!this._silent) {
+                    this.root._triggerChangeEvent(this.key, this)
+                        ._triggerChangeEvent(this.key + '/length', this);
+                }
+            },
             each: function (fn) {
                 for (var i = 0; i < this.models.length; i++) {
                     if (fn.call(this, this.models[i], i) === false) break;
@@ -661,39 +667,31 @@
                     }
                 }
                 return null;
+            },
+            add: function (data) {
+                var model;
+                var length;
+                var changes = [];
+
+                if (!$.isArray(data)) {
+                    data = [data];
+                }
+
+                for (var i = 0, dataLen = data.length; i < dataLen; i++) {
+                    var dataItem = data[i];
+                    length = this.models.length;
+                    model = new Model(this, length, dataItem);
+                    this.models.push(model);
+                    changes.push(model);
+
+                    this.trigger('add', model);
+                }
+
+                this.root.trigger('change:' + this.eventName + '/add', this, changes);
+
+                this._triggerChangeEvent();
             }
         });
-
-    Collection.prototype.add = function (data) {
-        var model;
-        var length;
-        var changes = [];
-
-        if (!$.isArray(data)) {
-            data = [data];
-        }
-
-        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
-            var dataItem = data[i];
-            length = this.models.length;
-            model = new Model(this, length, dataItem);
-            this.models.push(model);
-            changes.push(model);
-
-            this.trigger('add', model);
-        }
-
-        this.root.trigger('change:' + this.eventName + '/add', this, changes);
-
-        this._triggerChangeEvent();
-    }
-
-    Collection.prototype._triggerChangeEvent = function () {
-        if (!this._silent) {
-            this.root._triggerChangeEvent(this.key, this)
-                ._triggerChangeEvent(this.key + '/length', this);
-        }
-    }
 
     Collection.prototype.remove = function (start, count) {
         var models;
@@ -701,7 +699,7 @@
         if (typeof start == 'function') {
             models = [];
             for (var i = this.models.length - 1; i >= 0; i--) {
-                if (start.call(this, this.models[i], i)) {
+                if (start.call(this, this.data[i], i)) {
                     models.push(this.models.splice(i, 1)[0]);
                     this.data.splice(i, 1);
                 }

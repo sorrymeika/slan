@@ -73,14 +73,14 @@ module.exports = Activity.extend({
         self.selector = new Selector({
             options: [{
                 template: '<li><%=PRV_ABBR%></li>',
-                onChange: function (e, i, data) {
+                onChange: function (i, data) {
                     self.city.setParam({
                         prvId: data.PRV_ID || 0
                     }).load();
                 }
             }, {
                     template: '<li><%=CTY_ABBR%></li>',
-                    onChange: function (e, i, data) {
+                    onChange: function (i, data) {
                         self.region.setParam({
                             ctyId: data.CTY_ID || 0
                         }).load();

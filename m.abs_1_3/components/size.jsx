@@ -3,6 +3,7 @@ var model = require('core/model');
 var api = require('models/api');
 var util = require('util');
 var Scroll = require('widget/scroll');
+var userModel = require('models/user');
 
 var Month = model.ViewModel.extend({
 	el: <div class="pd_size_wrap js_size {{isShowSize?'':'out'}}" style="display:none" sn-tap="this.tap()">
@@ -106,6 +107,12 @@ var Month = model.ViewModel.extend({
 		var item = util.first(colorSpec, function (item) {
 			return item.PRD_SPEC == data.PRD_SPEC && item.PRD_COLOR == data.PRD_COLOR;
 		});
+		var user = userModel.get();
+
+		if (!user) {
+			Application.forward("/login?success=" + encodeURIComponent(Application.getCurrentActivity().url));
+			return;
+		}
 
 		if (this.data.type == 'package') {
 			this.data.confirm(item, this.data.PST_ID, self.get('qty'));
@@ -120,6 +127,7 @@ var Month = model.ViewModel.extend({
             }
 
 			self.cartAddAPI.setParam({
+				pspcode: self.user.PSP_CODE,
 				prd: item.PRD_ID,
 				qty: self.get('qty')
 
@@ -169,12 +177,9 @@ var Month = model.ViewModel.extend({
 				}
 				self.$('.js_buy').addClass('disabled');
 			},
-			params: {
-				pspcode: self.user.PSP_CODE
-			},
 			success: function (res) {
 				if (res.success) {
-                    sl.activity.setResult('CartChange');
+                    Application.getCurrentActivity().setResult('CartChange');
 
 					sl.tip('加入购物车成功！');
 					self.hide();

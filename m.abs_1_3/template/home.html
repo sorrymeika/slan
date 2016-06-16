@@ -13,8 +13,8 @@
             </ul>
         </div>
     </div>
-    <header sn-display="{{isLogin}}">
-        <div class="head_menu" sn-display="{{bottomTab==4}}" data-forward="/settings"></div>
+    <header sn-display="{{!isStart||isLogin}}">
+        <div class="head_menu" sn-display="{{bottomTab==4}}" data-forward="{{isLogin?'/settings':'/login'}}"></div>
         <ul class="head_tab" sn-display="{{bottomTab==0}}">
             <li class="{{tab==0?'curr':''}}">去购物</li>
             <li class="{{tab==1?'curr':''}}">会员卡</li>
@@ -24,13 +24,13 @@
             <input type="search" placeholder="搜索专题" ref="search" />
         </form>
         <div class="head_title" style="display:{{bottomTab!=0&&bottomTab!=2?'block':'none'}}">{{bottomTab==1?'查找店铺':bottomTab==2?"发现":bottomTab==3?"消息":"我"}}</div>
-        <div class="head_msg" data-forward="/cart">
+        <div class="head_msg" data-forward="{{isLogin?'/cart':'/login'}}">
             <i sn-display="{{$state.cartQty!=0}}">{{$state.cartQty}}</i>
         </div>
-        <div class="head_all" sn-tap="this.showSearch()" sn-display="{{tab==1&&bottomTab==0}}">
+        <div class="head_all" sn-tap="this.showSearch()" sn-display="{{tab==0&&bottomTab==0}}">
         </div>
     </header>
-    <div sn-display="{{!isLogin}}" style="position:absolute;z-index: 1000;right:0;left:0;top:0;bottom:0;">
+    <div sn-display="{{isStart&&!isLogin}}" style="position:absolute;z-index: 1000;right:0;left:0;top:0;bottom:0;">
         <div class="home_mask"></div>
         <div class="home_text" data-forward="/login">
             <h1></h1>
@@ -44,7 +44,7 @@
             <img src="images/launch2.jpg" class="launch_hide" />
         </div>
     </div>
-    <div sn-display="{{isLogin}}">
+    <div sn-display="{{!isStart||isLogin}}">
 
         <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
             data-index="0">
@@ -233,7 +233,7 @@
             </div>
         </div>
     </div>
-    <ul class="footer" sn-display="{{isLogin}}">
+    <ul class="footer" sn-display="{{!isStart||isLogin}}">
         <li class="curr">首页</li>
         <li>附近门店</li>
         <li></li>
@@ -245,7 +245,7 @@
     <div class="open_msg" style="display:none">
         <div class="msg_bd" sn-html="{{message}}"></div>
     </div>
-    <div class="home_tip_mask" sn-display="{{isLogin&&showTipStep==1}}"></div>
+    <div class="home_tip_mask" sn-display="{{(!isStart||isLogin)&&showTipStep==1}}"></div>
 </div>
 <div class="hm_guide" sn-display="{{showGuide}}">
 

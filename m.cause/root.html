@@ -11,21 +11,39 @@
         .viewport.applaunch {
             background: url(images/launch.jpg) no-repeat center top;
             background-size: auto 100%;
+            opacity: 0;
+            -webkit-transition: opacity 1500ms ease 0ms;
         }
     </style>
     @(style)
+    <script>
+        function adjustPx() {
+            document.documentElement.style.fontSize = window.innerWidth*100/320+'px';
+        }
+        adjustPx();
+    </script>
 </head>
 
 <body>
-    <script src="@(debug?'seajs/sea.js':'slan.m.js')?v@(Date.now())"></script>
-    @if(debug){
+    <div class="viewport applaunch js_applaunch"></div>
+    <script>
+        (function() {
+            var launch = document.querySelector('.js_applaunch');
+            var launchImage=localStorage.getItem("LAUNCH_IMAGE");
+            if (launchImage){
+                launch.style.backgroundImage='url('+launchImage+')';
+            }
+            launch.offsetHeight;
+            launch.style.opacity = 1;
+        })();
+    </script>
+    <script src="@(debug?'seajs/sea.js':'slan.m.js')?v@(Date.now())"></script> @if(debug){
     <script src="zepto.js"></script>
     <script src="extend/fx.js"></script>
     <script src="extend/touch.js"></script>
     <script src="extend/matchMedia.js"></script>
     <script src="extend/ortchange.js"></script>
-    <script src="anim/default.js"></script>
-    }
+    <script src="anim/default.js"></script> }
     <script>
         seajs.config({
             alias: {
@@ -41,6 +59,8 @@
             sl.buildVersion=@(Date.now());
             sl.isInApp=util.isInApp=!!matchUA;
             sl.appVersion=matchUA?matchUA[1]:'1.2.0';
+
+            $(window).on('ortchange',adjustPx);
             
             function loadResourceMapping(){
                resourceMappingLoader.reload();
@@ -88,7 +108,8 @@
                         });
                     });
 
-                    new App().mapRoute(routes).start();
+                    new App().mapRoute(routes).start(sl.isInApp?2000:0);
+
                 }
             });
             

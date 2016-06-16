@@ -32,12 +32,17 @@ var cartQtyApi = new api.CartQtyAPI({
     }
 });
 
-console.log(cartQtyApi);
-
 module.exports = Activity.extend({
     events: {
         'tap .head_tab li': function (e) {
-            this.model.set('tab', $(e.target).index());
+            var index = $(e.target).index();
+
+            if (index == 1 && !this.model.data.isLogin) {
+                this.forward('/login');
+                return;
+            }
+
+            this.model.set('tab', index);
         },
         'tap .home_tip_mask': function (e) {
             util.store('showTipStep', 2);
@@ -62,11 +67,6 @@ module.exports = Activity.extend({
             var index = $target.index();
 
             if (!$target.hasClass('curr')) {
-                $target.addClass('curr').siblings('.curr').removeClass('curr');
-
-                this.model.set({
-                    bottomTab: index
-                });
 
                 if (index == 1) {
                     if (!this.model.data.baiduMap) {
@@ -78,32 +78,47 @@ module.exports = Activity.extend({
                         self.$baiduMap[0].src = bridge.url("/baiduMap.html?v3#longitude=" + res.longitude + "&latitude=" + res.latitude);
                     });
 
-                } else if (index == 2) {
-                    if (!self.discovery) {
-                        self.discovery = new Discovery();
+                } else {
 
-                        self.discovery.$el.appendTo(self.model.refs.discovery)
+                    if (!this.model.data.isLogin) {
+                        this.forward('/login');
+                        return;
                     }
-                } else if (index == 3) {
 
-                    if (!self.recDiscovery) {
-                        self.recDiscovery = new api.RecDiscoveryAPI({
-                            $el: self.model.refs.messages,
-                            success: function (res) {
-                                console.log(res);
+                    if (index == 2) {
 
-                                self.model.set({
-                                    rec: res.data
-                                })
-                            },
+                        if (!self.discovery) {
+                            self.discovery = new Discovery();
 
-                            error: function () {
-                            }
-                        });
+                            self.discovery.$el.appendTo(self.model.refs.discovery)
+                        }
 
-                        self.recDiscovery.load();
+                    } else if (index == 3) {
+
+                        if (!self.recDiscovery) {
+                            self.recDiscovery = new api.RecDiscoveryAPI({
+                                $el: self.model.refs.messages,
+                                success: function (res) {
+                                    console.log(res);
+
+                                    self.model.set({
+                                        rec: res.data
+                                    })
+                                },
+
+                                error: function () {
+                                }
+                            });
+
+                            self.recDiscovery.load();
+                        }
                     }
                 }
+
+                $target.addClass('curr').siblings('.curr').removeClass('curr');
+                this.model.set({
+                    bottomTab: index
+                });
             }
         },
         'touchstart .hm_tab_con': function (e) {
@@ -112,7 +127,7 @@ module.exports = Activity.extend({
             this.pointY = this.startY = e.touches[0].pageY;
             this.pointX = this.startX = e.touches[0].pageX;
 
-            this.isTouchStop = false;
+            this.isTouchStop = !this.model.data.isLogin;
             this.isTouchStart = false;
             this.isTouchMoved = false;
 
@@ -122,12 +137,13 @@ module.exports = Activity.extend({
         'touchmove .hm_tab_con': function (e) {
             var self = this,
                 pointX = e.touches[0].pageX,
-                pointY = e.touches[0].pageY;
-
-            var deltaX = self.startX - pointX,
+                pointY = e.touches[0].pageY,
+                deltaX = self.startX - pointX,
                 deltaY = self.startY - pointY;
 
             if (!self.isTouchStart) {
+                if (self.isTouchStop) return;
+
                 var isDirectionX = Math.abs(deltaX) > 0 && Math.abs(deltaX) > Math.abs(deltaY);
 
                 if (isDirectionX) {
@@ -207,7 +223,7 @@ module.exports = Activity.extend({
             titleClass: 'head_title',
             isOffline: false,
             isLogin: !!self.user,
-            isFirstOpen: util.store('isFirstOpen') === null,
+            isStart: self.query.start == 1,
             msg: 0,
             tab: 0,
             bottomTab: 0,
@@ -718,10 +734,9 @@ module.exports = Activity.extend({
     onQueryChange: function () {
         if (this.query.tab) {
             this.$('.footer li:nth-child(1)').trigger('tap');
-            this.model.set({
-                tab: this.query.tab
-            });
+            this.model.set({ tab: 0 });
         }
+        this.model.set({ isStart: this.query.start == 1 });
     },
 
     onDestory: function () {

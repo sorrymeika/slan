@@ -35,13 +35,15 @@
 <body>
     <div class="viewport applaunch js_global_launch"></div>
     <script>
-        var launch = document.querySelector('.js_global_launch');
-        var launchImage=localStorage.getItem("LAUNCH_IMAGE");
-        if (launchImage){
-            launch.style.backgroundImage='url('+launchImage+')';
-        }
-        launch.offsetHeight;
-        launch.style.opacity = 1;
+        (function() {
+            var launch = document.querySelector('.js_global_launch');
+            var launchImage=localStorage.getItem("LAUNCH_IMAGE");
+            if (launchImage){
+                launch.style.backgroundImage='url('+launchImage+')';
+            }
+            launch.offsetHeight;
+            launch.style.opacity = 1;
+        })();
     </script>
     <script src="@(debug?'seajs/sea.js':'slan.m.js')?v@(Date.now())"></script> @if(debug){
     <script src="zepto.js"></script>

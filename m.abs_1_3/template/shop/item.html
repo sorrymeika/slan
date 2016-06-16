@@ -39,7 +39,7 @@
         </div>
     </div>
     <footer class="pd_buy">
-        <b class="btn_cart" data-forward="/cart?from={{url}}"><i sn-display="$state.cartQty!=0">{{$state.cartQty}}</i></b>
+        <b class="btn_cart" data-forward="{{(isLogin?'/cart?from=':'/login?success=')+url}}"><i sn-display="$state.cartQty!=0">{{$state.cartQty}}</i></b>
         <b class="btn_buy {{data.PRD_NUM==0?'sold_out':'js_buy'}}">{{data.PRD_NUM==0?'商品已售罄':'加入购物车'}}</b>
     </footer>
 </div>

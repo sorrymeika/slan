@@ -3,7 +3,7 @@
     <div class="head_title">{{title}}</div>
 </header>
 <div class="main uc_coupon">
-    <div class="uc_coupon_help" style="font-size:3rem;margin-top:15px;" data-forward="/news/coupon?from=/coupon">使用规则</div>
+    <div class="uc_coupon_help" style="font-size:15px;margin-top:15px;" data-forward="/news/coupon?from=/coupon">使用规则</div>
     <div class="uc_coupon_get">
         <input type="text" sn-model="code" placeholder="请输入券码" />
         <b class="btn" sn-tap="this.couponApi.load()">我要领券</b>
@@ -13,10 +13,11 @@
         <li class="{{isOverdue?'curr':''}}" sn-tap="isOverdue=true">免邮卡</li>
     </ul>
     <ul class="uc_coupon_list js_not_overdue" sn-display="{{!isOverdue}}">
-        <li sn-repeat="item in data" class="{{(item.VCA_VCT_ID == 4 ? 'free' : item.VCA_VCT_ID == 2 ? 'vct2' : item.VCA_VCT_ID == 5 ? 'vct5' : '') + (item.IsOverdue ? ' dis' : '')}}" sn-tap="this.goTo(item)">
+        <li sn-repeat="item in data" class="{{(item.VCA_VCT_ID == 4 ? 'free' : item.VCA_VCT_ID == 2 ? 'vct2' : item.VCA_VCT_ID == 5 ? 'vct5' : '') + (item.IsOverdue ? ' dis' : '')}}"
+            sn-tap="this.goTo(item)">
             <div class="price">{{util.currency(item.VCA_DEDUCT_AMOUNT,'')}}</div>
             <div class="name">{{item.VCA_VCT_ID==4?'免邮卡':item.VCA_NAME}}</div>
-            <div class="time">有效期:{{item.IsOverdue?'已过期':(util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(item.CSV_END_DT,'yyyy/MM/dd'))}}</div>    
+            <div class="time">有效期:{{item.IsOverdue?'已过期':(util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(item.CSV_END_DT,'yyyy/MM/dd'))}}</div>
             <div class="share" sn-tap="this.share(item)">
                 <i>赠送</i>
             </div>
