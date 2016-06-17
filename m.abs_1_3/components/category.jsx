@@ -8,6 +8,7 @@ var Month = model.ViewModel.extend({
 		<div class="cate_popup_hd">全部分类</div>
 		<div class="cate_popup_bd">
 			<ul class="cate_popup_list">
+				<li class="cate0" sn-tap="this.home()">首页</li>
 				<li sn-repeat="item in data" class="{{item.PCG_ID==current?'curr ':''}} cate{{item.PCG_ID}}" sn-tap="goto(item.PCG_ID)">{{ item.PCG_NAME }}</li>
 			</ul>
 		</div>
@@ -21,6 +22,11 @@ var Month = model.ViewModel.extend({
 				self.hide();
 			}
 		});
+	},
+
+	home: function () {
+		this.$el.hide();
+		Application.back('/');
 	},
 
 	show: function () {

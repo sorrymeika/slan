@@ -106,10 +106,13 @@
         this.parent = parent;
         this.root = parent.root;
         this._elements = {};
+        this._initSet = true;
 
         this.set(data);
-    }
 
+        this._initSet = false;
+    }
+    var eventCount = 0;
     var ModelProto = {
         getModel: function (key) {
             if (typeof key == 'string' && key.indexOf('.') != -1) {
@@ -237,18 +240,20 @@
                     } else {
                         model[attr] = value;
 
-                        !this.root._initSet && this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr);
+                        !this.root._initSet && (!this._initSet || !(this.parent instanceof Collection)) && this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr);
                     }
                 }
             }
 
-            !this.root._initSet && this._triggerChangeEvent(this.key);
+            !this.root._initSet && (!this._initSet || !(this.parent instanceof Collection)) && this._triggerChangeEvent(this.key);
 
             return self;
         },
 
         _triggerChangeEvent: function (eventName, model) {
             var self = this;
+
+            eventCount++;
 
             eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
             !model && (model = this);
@@ -1183,8 +1188,6 @@
                     var args = [e];
                     var argName;
                     var argNames = eventCode.split(':');
-
-                    console.log(argNames);
 
                     for (var i = 0; i < argNames.length; i++) {
                         var attr = argNames[i];

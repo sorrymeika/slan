@@ -64,7 +64,7 @@ exports.EditAddressAPI = ShopAPI.extend({
     url: '/api/user/editaddress',
     params: {
         pspcode: 0,
-        edittype: 2,//编辑类型：1.新增 2.修改
+        edittype: 2, //编辑类型：1.新增 2.修改
         mbaId: 0,
         mbaName: '',
         mbaMobile: 0,
@@ -141,7 +141,7 @@ exports.CreateOrderAPI = ShopAPI.extend({
         pay_type: 1, //（支付方式  RPayType 具体id到时候定）,
         coupon: '', //（优惠券券号）,
         points: 0, //(积分数 100抵1块钱)
-        freecoupon: ''//（免邮券券号）
+        freecoupon: '' //（免邮券券号）
     }
 });
 

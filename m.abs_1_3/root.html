@@ -11,22 +11,14 @@
     <title></title>
     @(style)
     <style>
-        .viewport.applaunch {
-            background: url(images/launch101.jpg) no-repeat center top;
-            background-size: auto 100%;
-            opacity: 0;
-            -webkit-transition: opacity 1500ms ease 0ms;
-        }
-        
-        @@media screen and (max-height: 480px) {
-            .viewport.applaunch {
-                background-image: url(images/launch101_480.jpg);
-            }
-        }
+.viewport.applaunch { background: url(images/launch101.jpg) no-repeat center top; background-size: auto 100%; opacity: 0; -webkit-transition: opacity 1500ms ease 0ms; }
+@@media screen and (max-height: 480px) {
+    .viewport.applaunch { background-image: url(images/launch101_480.jpg); }
+}
     </style>
     <script>
         function adjustPx() {
-            document.documentElement.style.fontSize = window.innerWidth*100/320+'px';
+            document.documentElement.style.fontSize = window.innerWidth * 100 / 320 + 'px';
         }
         adjustPx();
     </script>
@@ -37,9 +29,9 @@
     <script>
         (function() {
             var launch = document.querySelector('.js_global_launch');
-            var launchImage=localStorage.getItem("LAUNCH_IMAGE");
-            if (launchImage){
-                launch.style.backgroundImage='url('+launchImage+')';
+            var launchImage = localStorage.getItem("LAUNCH_IMAGE");
+            if (launchImage) {
+                launch.style.backgroundImage = 'url(' + launchImage + ')';
             }
             launch.offsetHeight;
             launch.style.opacity = 1;
@@ -60,20 +52,20 @@
                 'activity': 'core/activity'
             }
         });
-        seajs.use(['$','util','core/app','bridge','widget/loading','widget/offline'],function($,util,App,bridge,Loading,Offline) {
-            var matchUA=navigator.userAgent.match(/SLApp ([0-9\.]+)/);
-            sl.isDebug=@debug;
-            sl.buildVersion=@(Date.now());
-            sl.isInApp=util.isInApp=!!matchUA;
-            sl.appVersion=matchUA?matchUA[1]:'1.3.0';
+        seajs.use(['$', 'util', 'core/app', 'bridge', 'widget/loading', 'widget/offline'], function($, util, App, bridge, Loading, Offline) {
+            var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
+            sl.isDebug = @debug;
+            sl.buildVersion = @(Date.now());
+            sl.isInApp = util.isInApp = !!matchUA;
+            sl.appVersion = matchUA ? matchUA[1] : '1.3.0';
 
-            $(window).on('ortchange',adjustPx);
-            
-            function loadResourceMapping(){
-               loading.reload();
+            $(window).on('ortchange', adjustPx);
+
+            function loadResourceMapping() {
+                loading.reload();
             }
-            
-            var loading=new Loading({
+
+            var loading = new Loading({
                 url: bridge.url('/api/settings/resourceMapping'),
                 params: {
                     v: sl.appVersion
@@ -81,49 +73,49 @@
                 timeout: 5000,
                 checkData: false,
                 $el: $('body'),
-                error: function(){
+                error: function() {
                     Offline.getInstance().show(loadResourceMapping);
 
                 },
-                success: function(res){
+                success: function(res) {
                     Offline.getInstance().hide();
-                    
-                    var resourceMapping=res.data;
-                    var routes=$.extend(@(JSON.stringify(routes)),res.routes||{});
-                    var combineMapping=@(JSON.stringify(resourceMapping));
 
-                    seajs.on('fetch', function (emitData) {
-                        @if (!debug) {
+                    var resourceMapping = res.data;
+                    var routes = $.extend(@(JSON.stringify(routes)), res.routes || {});
+                    var combineMapping = @(JSON.stringify(resourceMapping));
+
+                    seajs.on('fetch', function(emitData) {
+                        @if(!debug) {
                             var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
-                            
-                            if (resourceMapping&&resourceMapping[id]) {
+
+                            if (resourceMapping && resourceMapping[id]) {
                                 emitData.requestUri = resourceMapping[id];
-                                
+
                             } else if (combineMapping) {
                                 for (var key in combineMapping) {
                                     if (combineMapping[key].indexOf(id) != -1) {
-                                        emitData.requestUri = resourceMapping&&resourceMapping[key] ? resourceMapping[key] : seajs.resolve(key);
+                                        emitData.requestUri = resourceMapping && resourceMapping[key] ? resourceMapping[key] : seajs.resolve(key);
                                         break;
                                     }
                                 }
                             }
                         }
                     });
-                    seajs.on("error", function(errorData){
-                        errorData.pause=true;
-                        
-                        Offline.getInstance().show(function(){
+                    seajs.on("error", function(errorData) {
+                        errorData.pause = true;
+
+                        Offline.getInstance().show(function() {
                             this.hide();
-                            seajs.request(errorData.uri,errorData.callback);
+                            seajs.request(errorData.uri, errorData.callback);
                         });
                     });
 
-                    new App().mapRoute(routes).start(sl.isInApp?2000:0);
+                    new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
                 }
 
             });
             loadResourceMapping();
-            
+
         });
     </script>
 </body>

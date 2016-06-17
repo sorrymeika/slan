@@ -6,7 +6,7 @@
     "updateApi": "http://127.0.0.1:5559/proxy2",
     "proxy": {
         "/proxy1/*": "appuser2.abs.cn",
-        "/proxy/*": "testappapi-1-2-0.abs.cn",
+        "/proxy/*": "testappapi-1-3-0.abs.cn",
         "/proxy2/*": "testappversion.abs.cn"
     },
     "css": [
@@ -29,12 +29,12 @@
     "env": {
         "production": {
             "api": "http://appuser.abs.cn",
-            "shopApi": "http://appapi-1-2-0.abs.cn",
+            "shopApi": "http://appapi-1-3-0.abs.cn",
             "updateApi": "http://appversion.abs.cn"
         },
         "test": {
             "api": "http://appuser2.abs.cn",
-            "shopApi": "http://testappapi-1-2-0.abs.cn",
+            "shopApi": "http://testappapi-1-3-0.abs.cn",
             "updateApi": "http://testappversion.abs.cn"
         },
         "debug": {

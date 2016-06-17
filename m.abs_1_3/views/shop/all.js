@@ -33,7 +33,6 @@ module.exports = Activity.extend({
 
         Scroll.bind($main);
 
-
         self.productSearchAPI = new api.ProductSearchAPI({
             $el: self.$el,
             $scroll: $main,
@@ -120,6 +119,14 @@ module.exports = Activity.extend({
             }).reload();
         }
 
+        this.model.set({
+            test: {
+                aaa: 1
+
+            }
+
+        })
+
         Scroll.bind(this.model.refs.cates, {
             useScroll: true,
             vScroll: false,
@@ -144,7 +151,10 @@ module.exports = Activity.extend({
 
             self.setCategories(res);
         });
+    },
 
+    onStart: function (params) {
+        var self = this;
 
     },
 
