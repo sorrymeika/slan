@@ -71,6 +71,8 @@ var bindBackGesture = function (application) {
             return;
         }
         that.width = window.innerWidth;
+        that.minX = that.width * -1;
+        that.maxX = 0;
 
         var currentActivity = application._currentActivity;
         var isSwipeLeft = that.isSwipeLeft = deltaX > 0;
@@ -331,7 +333,12 @@ var Application = Component.extend($.extend(appProto, {
             return;
         }
 
-        route.referrer = currentActivity.url;
+        route.isForward = isForward;
+
+        if (isForward) {
+            route.referrer = currentActivity.url;
+            route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
+        }
 
         that.get(route, function (activity) {
             that._currentActivity = activity;
@@ -346,13 +353,6 @@ var Application = Component.extend($.extend(appProto, {
             var ease = 'cubic-bezier(.34,.86,.54,.99)',
                 anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim),
                 anim;
-
-            activity.isForward = isForward;
-
-            if (isForward) {
-                activity.referrer = currentActivity.url;
-                activity.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
-            }
 
             var finish = function () {
                 activity._enterAnimationEnd();

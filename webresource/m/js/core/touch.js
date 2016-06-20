@@ -194,6 +194,8 @@ var Touch = Event.mixin(function (el, options) {
             }
 
             if (self.shouldBounceBack()) {
+
+                console.log('shouldBounceBack', this.x, this.maxX);
                 self.bounceBack();
                 return;
             }
@@ -328,7 +330,7 @@ var Touch = Event.mixin(function (el, options) {
 
             }, 200, 'ease', function () {
                 self._stop();
-                
+
                 self.trigger('bounceBack');
             });
         },
@@ -342,7 +344,7 @@ var Touch = Event.mixin(function (el, options) {
             y = self.options.enableVertical ?
                 y >= this.maxY ? this.maxY : y <= this.minY ? this.minY : y
                 : self.y;
-                
+
             if (!duration) {
                 self.x = x;
                 self.y = y;

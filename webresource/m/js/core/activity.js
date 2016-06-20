@@ -23,9 +23,9 @@ define(function (require, exports, module) {
             self._promise = promise;
             self.className = self.el.className;
 
-            self._setRoute(self.options.route);
-
             self.application = self.options.application;
+
+            self._setRoute(self.options.route);
 
             self.on('Create', self.onHtmlLoad)
                 .on('Show', self._onShow)
@@ -51,14 +51,19 @@ define(function (require, exports, module) {
         },
 
         _setRoute: function (route) {
-
             this.route = route;
             this.hash = route.hash;
             this.url = route.url;
             this.path = route.path;
+            this.isForward = route.isForward;
             this.referrer = route.referrer;
+            this.referrerDir = route.referrerDir;
             this._query = this.query;
             this.query = $.extend({}, route.query);
+
+            if (!this.swipeRightBackActionDisabled) {
+                this.swipeRightBackAction = this.query.from || this.referrer || this.defBackUrl;
+            }
         },
 
         loadTemplate: function () {
@@ -103,9 +108,6 @@ define(function (require, exports, module) {
         onHtmlLoad: function () {
             var self = this;
 
-            if (self.swipeRightBackAction === undefined) {
-                self.swipeRightBackAction = self.query.from || self.referrer || self.defBackUrl;
-            }
             self._scrolls = Scroll.bind(self.$('.scrollview'));
             self._isShowed = false;
         },
