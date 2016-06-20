@@ -52,7 +52,6 @@ define(function (require, exports, module) {
             self.user = userModel.get();
 
             self.model = new model.ViewModel(self.$el, {
-                back: self.swipeRightBackAction,
                 title: '床品',
                 id: self.route.data.id,
                 user: self.user,
@@ -186,6 +185,10 @@ define(function (require, exports, module) {
 
         onShow: function () {
             var self = this;
+
+            self.model.set({
+                back: self.swipeRightBackAction
+            });
         },
 
         onDestory: function () {

@@ -16,6 +16,52 @@ define(function (require, exports, module) {
         toggleAnim: 'def',
         defBackUrl: '/',
 
+        _referrer: function (route) {
+            this.isForward = route.isForward;
+
+            if (route.isForward) {
+                var currActivity,
+                    prevRoute = route,
+                    prevActivity = this;
+
+                while ((currActivity = prevRoute.prevActivity) && (prevActivity = currActivity.route.prevActivity) && prevRoute) {
+                    if (prevActivity == this) {
+                        currActivity.route.prevActivity = this.route.prevActivity;
+                        currActivity.referrer = currActivity.route.referrer = this.referrer;
+                        currActivity.referrerDir = currActivity.route.referrerDir = this.referrerDir;
+                        currActivity.swipeRightBackAction = this.swipeRightBackAction;
+                        break;
+                    }
+                    prevRoute = prevActivity.route;
+                }
+
+                this.referrer = route.referrer;
+                this.referrerDir = route.referrerDir;
+
+                console.log(this.referrer);
+            }
+
+            if (!this.swipeActionDisabled) {
+                backUrl = route.query.from || this.referrer || this.defBackUrl;
+
+                getUrlPath(backUrl) != route.path.toLowerCase() && (this.swipeRightBackAction = backUrl);
+            }
+            return this;
+        },
+
+        _setRoute: function (route) {
+            var backUrl;
+
+            this.route = route;
+            this.hash = route.hash;
+            this.url = route.url;
+            this.path = route.path;
+            this._query = this.query;
+            this.query = $.extend({}, route.query);
+
+            return this;
+        },
+
         initialize: function () {
             var self = this,
                 promise = Promise.resolve();
@@ -25,9 +71,9 @@ define(function (require, exports, module) {
 
             self.application = self.options.application;
 
-            self._setRoute(self.options.route);
-
-            self.on('Create', self.onHtmlLoad)
+            self._referrer(self.options.route)
+                ._setRoute(self.options.route)
+                .on('Create', self.onHtmlLoad)
                 .on('Show', self._onShow)
                 .on('Destroy', self._onDestroy)
                 .on('Pause', self._statusChange)
@@ -48,22 +94,6 @@ define(function (require, exports, module) {
                 .then(function () {
                     self.checkQuery();
                 });
-        },
-
-        _setRoute: function (route) {
-            this.route = route;
-            this.hash = route.hash;
-            this.url = route.url;
-            this.path = route.path;
-            this.isForward = route.isForward;
-            this.referrer = route.referrer;
-            this.referrerDir = route.referrerDir;
-            this._query = this.query;
-            this.query = $.extend({}, route.query);
-
-            if (!this.swipeRightBackActionDisabled) {
-                this.swipeRightBackAction = this.query.from || this.referrer || this.defBackUrl;
-            }
         },
 
         loadTemplate: function () {
@@ -162,9 +192,21 @@ define(function (require, exports, module) {
             this._status = e.type;
         },
 
+        compareUrl: function (url) {
+            return getUrlPath(url) === this.route.path.toLowerCase();
+        },
+
         then: function (fn) {
             this._promise.then(fn, this);
             return this;
+        },
+
+        forward: function (url, options) {
+            this.application.forward(url, options);
+        },
+
+        back: function (url, options) {
+            this.application.back(url, options);
         },
 
         queryString: function (key, val) {
@@ -235,34 +277,6 @@ define(function (require, exports, module) {
             return this;
         },
 
-        compareUrl: function (url) {
-            return getUrlPath(url) === this.route.path.toLowerCase();
-        },
-
-        isExiting: false,
-        _startExit: function () {
-            var self = this;
-            if (self.isExiting) return;
-            self.isExiting = true;
-            var application = self.application;
-            if (application.activeInput) {
-                application.activeInput.blur();
-                application.activeInput = null;
-            }
-            application.mask.show();
-            self.$el.removeClass('active');
-        },
-
-        _enterAnimationEnd: function () {
-            var self = this;
-            self.application.mask.hide();
-
-            self.isExiting = false;
-            self.then(function () {
-                self.$el.addClass('active');
-                self.trigger('Show');
-            });
-        },
 
         createIFrame: function ($container) {
             var $iframe = $('<iframe width="' + window.innerWidth + 'px" frameborder="0" />').appendTo($container);
@@ -373,12 +387,29 @@ define(function (require, exports, module) {
             return dialog;
         },
 
-        forward: function (url, options) {
-            this.application.forward(url, options);
+        isExiting: false,
+        _startExit: function () {
+            var self = this;
+            if (self.isExiting) return;
+            self.isExiting = true;
+            var application = self.application;
+            if (application.activeInput) {
+                application.activeInput.blur();
+                application.activeInput = null;
+            }
+            application.mask.show();
+            self.$el.removeClass('active');
         },
 
-        back: function (url, options) {
-            this.application.back(url, options);
+        _enterAnimationEnd: function () {
+            var self = this;
+            self.application.mask.hide();
+
+            self.isExiting = false;
+            self.then(function () {
+                self.$el.addClass('active');
+                self.trigger('Show');
+            });
         }
     });
 

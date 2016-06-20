@@ -14,6 +14,13 @@ var userModel = require('models/user');
 
 module.exports = Activity.extend({
     events: {
+        'tap [ref="back"]': function () {
+
+            console.log(this.swipeRightBackAction);
+
+            this.back(this.swipeRightBackAction);
+        },
+
         'tap .js_buy:not(.disabled)': function () {
             var self = this;
 
@@ -55,7 +62,6 @@ module.exports = Activity.extend({
         self.user = userModel.get();
 
         self.model = new model.ViewModel(self.$el, {
-            back: self.swipeRightBackAction,
             id: self.route.data.id,
             user: self.user,
             url: encodeURIComponent(self.route.url),

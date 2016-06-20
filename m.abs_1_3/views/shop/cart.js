@@ -277,7 +277,8 @@ define(function (require, exports, module) {
             self.user = userModel.get();
 
             self.model.set({
-                user: self.user
+                user: self.user,
+                back: self.swipeRightBackAction
             });
 
             self.cart.setParam({

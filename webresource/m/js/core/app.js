@@ -57,7 +57,10 @@ var bindBackGesture = function (application) {
         momentum: false
     });
 
-    touch.on('start', function () {
+    touch.on('beforestart', function () {
+        this.x = 0;
+
+    }).on('start', function () {
         var that = this,
             action,
             isForward,
@@ -110,6 +113,7 @@ var bindBackGesture = function (application) {
         } else {
             that.swiperPromise = null;
         }
+
     }).on('move', function (e) {
         var that = this,
             deltaX = that.deltaX;
@@ -121,50 +125,50 @@ var bindBackGesture = function (application) {
                 0 :
                 (Math.abs(deltaX) * 100 / that.width));
         });
-    })
-        .on('stop', function () {
-            var that = this;
 
-            that.isCancelSwipe = that.isMoveLeft !== that.isSwipeLeft || Math.abs(that.deltaX) <= 10;
+    }).on('stop', function () {
+        var that = this;
 
-            if (that.swiperPromise) {
-                that.swiperPromise.then(function () {
+        that.isCancelSwipe = that.isMoveLeft !== that.isSwipeLeft || Math.abs(that.deltaX) <= 10;
 
-                    application.queue.then([200, that.isCancelSwipe ? 0 : 100, function () {
-                        var activity = that.swipeActivity,
-                            currentActivity = application._currentActivity;
+        if (that.swiperPromise) {
+            that.swiperPromise.then(function () {
 
-                        if (that.isCancelSwipe) {
-                            currentActivity.isPrepareExitAnimation = false;
-                            currentActivity.$el.addClass('active');
-                            that.needRemove && activity.$el.remove();
-                            application.mask.hide();
+                application.queue.then([200, that.isCancelSwipe ? 0 : 100, function () {
+                    var activity = that.swipeActivity,
+                        currentActivity = application._currentActivity;
 
+                    if (that.isCancelSwipe) {
+                        currentActivity.isPrepareExitAnimation = false;
+                        currentActivity.$el.addClass('active');
+                        that.needRemove && activity.$el.remove();
+                        application.mask.hide();
+
+                    } else {
+                        activity.isForward = that.isSwipeOpen;
+
+                        application._currentActivity = that.swipeActivity;
+                        application.navigate(activity.url, that.isSwipeOpen);
+
+                        activity._enterAnimationEnd();
+
+                        if (that.isSwipeOpen) {
+                            activity.referrer = currentActivity.url;
+                            activity.referrerDir = that.isSwipeLeft ? "Right" : "Left";
+                            currentActivity.trigger('Pause');
                         } else {
-                            activity.isForward = that.isSwipeOpen;
-
-                            application._currentActivity = that.swipeActivity;
-                            application.navigate(activity.url, that.isSwipeOpen);
-
-                            activity._enterAnimationEnd();
-
-                            if (that.isSwipeOpen) {
-                                activity.referrer = currentActivity.url;
-                                activity.referrerDir = that.isSwipeLeft ? "Right" : "Left";
-                                currentActivity.trigger('Pause');
-                            } else {
-                                currentActivity.destroy();
-                            }
+                            currentActivity.destroy();
                         }
-                        application.queue.resolve();
+                    }
+                    application.queue.resolve();
 
-                    }], that.swiper.animate, that.swiper);
+                }], that.swiper.animate, that.swiper);
 
-                    that.swiperPromise = null;
-                    that.swiper = null;
-                });
-            }
-        });
+                that.swiperPromise = null;
+                that.swiper = null;
+            });
+        }
+    });
 };
 
 var Application = Component.extend($.extend(appProto, {
@@ -262,6 +266,7 @@ var Application = Component.extend($.extend(appProto, {
             }, delay);
 
             delay = new Promise();
+
         } else {
             $el.appendTo(document.body);
         }
@@ -336,6 +341,7 @@ var Application = Component.extend($.extend(appProto, {
         route.isForward = isForward;
 
         if (isForward) {
+            route.prevActivity = currentActivity;
             route.referrer = currentActivity.url;
             route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
         }

@@ -75,6 +75,8 @@
                 });
 
             } else {
+                activity._referrer(route);
+
                 callback.call(that, activity, route);
             }
         },

@@ -26,6 +26,7 @@ var Touch = Event.mixin(function (el, options) {
     this.delegate('touchstart', self.options.children, self._start)
         .delegate('touchmove', self.options.children, self._move)
         .delegate('touchend', self.options.children, self._end);
+
 }, {
         minDelta: 0,
         minX: 0,
@@ -76,6 +77,10 @@ var Touch = Event.mixin(function (el, options) {
             self.isClickStopMomentum = self._stopMomentum();
 
             self.timestamp = Date.now();
+
+            self.trigger(new Event('beforestart', {
+                currentTarget: e.currentTarget
+            }));
         },
 
         _move: function (e) {

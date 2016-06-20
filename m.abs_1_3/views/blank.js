@@ -8,7 +8,8 @@ var animation = require('animation');
 
 module.exports = Activity.extend({
     events: {
-        'tap .js_bind:not(.disabled)': function () {
+        'tap [ref="back"]': function () {
+            this.back(this.swipeRightBackAction);
         }
     },
 
@@ -16,7 +17,6 @@ module.exports = Activity.extend({
         var self = this;
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
             title: '标题'
         });
 

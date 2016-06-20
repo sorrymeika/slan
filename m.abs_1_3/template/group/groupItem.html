@@ -1,6 +1,6 @@
 ﻿<div class="pd_item_wrap">
     <header class="header_trans">
-        <div class="head_back" data-back="{{back}}"></div>
+        <div class="head_back" ref="back"></div>
         <div class="head_right">
             <a class="head_call" href="tel:4008205077"></a>
             <div class="head_share js_share" sn-if="{{Share_Flag}}"></div>
@@ -39,7 +39,7 @@
         </div>
     </div>
     <footer class="pd_buy gp_item__action">
-        <b class="btn_cart" data-forward="{{'/cart?from='+url}}"><i sn-display="$state.cartQty!=0">{{$state.cartQty}}</i></b>
+        <b class="btn_cart" data-forward="/cart"><i sn-display="$state.cartQty!=0">{{$state.cartQty}}</i></b>
         <b class="btn_single {{data.PRD_NUM==0?'sold_out':''}}" data-forward="/item/{{data.PRD_ID}}"><em>¥{{data.PRD_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':'单独购买'}}</b>
         <b class="btn_buy {{data.PRD_NUM==0?'sold_out':'js_buy'}}"><em>{{'¥'+GPP_Obj.GPP_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':(GPP_Obj.GPP_QTY+'人团')}}</b>
     </footer>
