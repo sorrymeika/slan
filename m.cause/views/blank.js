@@ -2,35 +2,31 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
-var vm = require('core/model');
+var model = require('core/model');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 
 module.exports = Activity.extend({
     events: {
-        'tap .js_bind:not(.disabled)': function() {
+        'tap [ref="back"]': function () {
+            this.back(this.swipeRightBackAction);
         }
     },
 
-    defBackUrl: '/',
-
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || self.defBackUrl;
-
-        self.model = new vm.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+        self.model = new model.ViewModel(this.$el, {
             title: '标题'
         });
 
         Scroll.bind(self.model.refs.main);
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestory: function() {
+    onDestory: function () {
     }
 });
