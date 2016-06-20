@@ -1,36 +1,123 @@
 define(function (require, exports, module) {
 
-    var Page = require('./page'),
-        util = require('util'),
+    var util = require('util'),
+        Promise = require('./promise'),
         Scroll = require('widget/scroll'),
+        Component = require('./component'),
         bridge = require('bridge'),
         Dialog = require('widget/dialog'),
-        slice = Array.prototype.slice;
+        slice = Array.prototype.slice,
+        indexOf = util.indexOf,
+        getUrlPath = util.getPath;
 
-    var Activity = Page.extend({
+    var Activity = Component.extend({
+        el: '<div class="view"></div>',
+
         toggleAnim: 'def',
         defBackUrl: '/',
 
         initialize: function () {
-            this.on('Create', this.onHtmlLoad)
-                .on('Start', this.onStart)
-                .on('Show', this._onShow)
-                .on('Destroy', this._onDestroy);
+            var self = this,
+                promise = Promise.resolve();
 
-            Page.prototype.initialize.apply(this, arguments);
+            self._promise = promise;
+            self.className = self.el.className;
+
+            self._setRoute(self.options.route);
+
+            self.application = self.options.application;
+
+            self.on('Create', self.onHtmlLoad)
+                .on('Show', self._onShow)
+                .on('Destroy', self._onDestroy)
+                .on('Pause', self._statusChange)
+                .on('QueryChange', self.checkQuery);
+
+            self.onStart && self.on('Start', self.onStart);
+            self.onResume && self.on('Resume', self.onResume);
+            self.onShow && self.on('Show', self.onShow);
+            self.onPause && self.on('Pause', self.onPause);
+            self.onQueryChange && self.on('QueryChange', self.onQueryChange);
+
+            if (!self.$el.data('path')) {
+                self.$el.data('url', self.url).data('path', self.path);
+                promise.then(self.loadTemplate, self);
+            }
+
+            promise.then(self.onCreate, self)
+                .then(function () {
+                    self.checkQuery();
+                });
         },
+
+        _setRoute: function (route) {
+
+            this.route = route;
+            this.hash = route.hash;
+            this.url = route.url;
+            this.path = route.path;
+            this.referrer = route.referrer;
+            this._query = this.query;
+            this.query = $.extend({}, route.query);
+        },
+
+        loadTemplate: function () {
+
+            var self = this,
+                count = 1,
+                callback = function () {
+                    count--;
+                    if (count == 0) {
+                        self.$el.html(self.razor.html(self.data)).appendTo(self.application.$el);
+                        self.trigger("Create");
+                        self._promise.resolve();
+                    }
+                };
+
+            if (self.route.api) {
+                count++;
+                $.ajax({
+                    url: self.route.api,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (res) {
+                        self.data = res;
+                        callback(res);
+                    },
+                    error: function (xhr) {
+                        callback({ success: false, content: xhr.responseText });
+                    }
+                });
+            }
+
+            seajs.use(self.route.template, function (razor) {
+                self.razor = razor;
+                callback();
+            });
+
+            return self._promise;
+        },
+
+        onCreate: util.noop,
 
         onHtmlLoad: function () {
-            var that = this;
+            var self = this;
 
-            if (that.swipeRightBackAction === undefined) {
-                that.swipeRightBackAction = that.query.from || that.referrer || that.defBackUrl;
+            if (self.swipeRightBackAction === undefined) {
+                self.swipeRightBackAction = self.query.from || self.referrer || self.defBackUrl;
             }
-            that._scrolls = Scroll.bind(that.$('.scrollview'));
-            that._isShowed = false;
+            self._scrolls = Scroll.bind(self.$('.scrollview'));
+            self._isShowed = false;
         },
 
-        _onShow: function () {
+        onStart: null,
+
+        //进入动画结束时触发
+        onShow: null,
+
+        _onShow: function (e) {
+            this._statusChange(e);
+
             this.onLoad && this.onLoad();
             if (!this._isShowed) {
                 this.trigger('Start');
@@ -43,33 +130,135 @@ define(function (require, exports, module) {
             this._isShowed = true;
         },
 
+        //离开动画结束时触发
+        onPause: null,
+
+        onResume: null,
+
+        onStop: null,
+
+        onQueryChange: null,
+
+        onResult: function (event, fn) {
+            return this.listenTo(this.application, event, fn);
+        },
+
+        setResult: function () {
+            this.application.trigger.apply(this.application, arguments);
+            return this;
+        },
+
         _onDestroy: function () {
             if (this._scrolls) this._scrolls.destory();
             this.application.remove(this.url);
         },
 
+        _statusChange: function (e) {
+            if (this._status == 'Pause') {
+                this.trigger('Resume');
+            }
+            this._status = e.type;
+        },
+
+        then: function (fn) {
+            this._promise.then(fn, this);
+            return this;
+        },
+
+        queryString: function (key, val) {
+            if (typeof val === 'undefined')
+                return this.route.query[key];
+
+            else if (val === null || val === false || val === '')
+                delete this.route.query[key];
+            else
+                this.route.query[key] = val || '';
+
+            var query = $.param(this.route.query);
+
+            this.application.navigate(this.route.path + (query ? '?' + query : ''));
+        },
+
+        _queryActions: {},
+        checkQuery: function () {
+            var self = this;
+            var query = self.query;
+            var prevQueries = self._query;
+            var actionName;
+
+            $.each(self._queryActions, function (name, option) {
+                actionName = query[name] || '';
+
+                if ((actionName && !prevQueries) || (prevQueries && actionName != prevQueries[name])) {
+                    var action = option.map[actionName];
+                    if (!action.exec) {
+                        action.fn.apply(option.ctx);
+                    } else {
+                        action.exec = false;
+                    }
+                }
+            });
+        },
+
+        bindQueryAction: function (name, ctx, fnMap) {
+            var self = this;
+            var newFn;
+            var map = {};
+            var option = {
+                ctx: ctx,
+                map: map
+            };
+
+            $.each(fnMap, function (key, functionName) {
+                var functionName = fnMap[key];
+                var fn = ctx[functionName];
+                var action = {
+                    fn: fn,
+                    exec: false
+                };
+
+                map[key] = action;
+
+                ctx[functionName] = function () {
+                    fn.apply(ctx, arguments);
+
+                    if (self.queryString(name) != key) {
+                        action.exec = true;
+                        self.queryString(name, key);
+                    }
+                }
+            });
+
+            this._queryActions[name] = option;
+            return this;
+        },
+
+        compareUrl: function (url) {
+            return getUrlPath(url) === this.route.path.toLowerCase();
+        },
+
         isExiting: false,
         _startExit: function () {
-            var that = this;
-            if (that.isExiting) return;
-            that.isExiting = true;
-            var application = that.application;
+            var self = this;
+            if (self.isExiting) return;
+            self.isExiting = true;
+            var application = self.application;
             if (application.activeInput) {
                 application.activeInput.blur();
                 application.activeInput = null;
             }
             application.mask.show();
-            that.$el.removeClass('active');
+            self.$el.removeClass('active');
         },
 
         _enterAnimationEnd: function () {
-            var that = this;
-            that.application.mask.hide();
+            var self = this;
+            self.application.mask.hide();
 
-            that.isExiting = false;
-            that.then(function () {
-                that.$el.addClass('active');
-                that.trigger('Show');
+            self.isExiting = false;
+            self.then(function () {
+                self.$el.addClass('active');
+                self.trigger('Show');
             });
         },
 
@@ -173,9 +362,9 @@ define(function (require, exports, module) {
         },
 
         createDialog: function (name, options) {
-            var that = this;
+            var self = this;
             var dialog = new Dialog(options);
-            that.bindQueryAction(name, dialog, {
+            self.bindQueryAction(name, dialog, {
                 show: 'show',
                 "": 'hide'
             });

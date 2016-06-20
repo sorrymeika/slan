@@ -46,8 +46,7 @@
     </div>
     <div sn-display="{{!isStart||isLogin}}">
 
-        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
-            data-index="0">
+        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}" data-index="0">
             <div class="hm_shop">
                 <div class="sp_all_cates">
                     <div ref="cates">
@@ -61,17 +60,16 @@
                 <div class="banner" ref="topbanner">
 
                 </div>
-                <ul class="hm_shop_cate">
-                    <li data-forward="/list?type=new&from=%2f"><i></i>新品<br>上市</li>
-                    <li data-forward="/news/activity2"><i></i>最热<br>商品</li>
-                    <li data-forward="/news/fastbuy?from=%2f"><i></i>周一<br>闪购</li>
-                    <li data-forward="/news/activity3"><i></i>APP<br>专享</li>
+                <ul class="hm_shop__nav">
+                    <li data-forward="/all"><i></i>全部分类</li>
+                    <li data-forward="/list?type=new&from=%2f"><i></i>新品上市</li>
+                    <li data-forward="/news/fastbuy?from=%2f"><i></i>周一闪购</li>
+                    <li data-forward="/group"><i></i>来拼团吧</li>
                 </ul>
                 <div sn-repeat="item in activity">
                     <div sn-if="{{item.type==1}}" class="hm_shop_banner">
                         <ul>
-                            <li><img sn-repeat="img in item.data" data-src="{{img.src}}" data-forward="{{img.url}}?from=%2f"
-                                /></li>
+                            <li><img sn-repeat="img in item.data" data-src="{{img.src}}" data-forward="{{img.url}}?from=%2f" /></li>
                         </ul>
                     </div>
                     <div sn-if="{{item.type==2&&item.data.length}}" class="hm_shop_scroll js_shop_scroll" style="padding-right:10px;">
@@ -102,8 +100,7 @@
             </div>
         </div>
 
-        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}"
-            data-index="1">
+        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}" data-index="1">
             <div class="hm_chart_wrap">
                 <div class="hm_chart">
                     <div class="hm_chart_con" sn-tap="chartType=1" sn-display="{{chartType==0}}">

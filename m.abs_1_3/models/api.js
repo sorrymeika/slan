@@ -465,3 +465,31 @@ exports.AppIconAPI = ShopAPI.extend({
         id: 2
     }
 });
+
+//拼团
+exports.GroupListAPI = ShopAPI.extend({
+    url: '/api/prod/grouppurchaselist'
+});
+exports.GroupAPI = ShopAPI.extend({
+    url: '/api/prod/grouppurchasebyid',
+    params: {
+        pspcode: '',
+        gppid: 0
+    }
+});
+exports.GroupShareAPI = ShopAPI.extend({
+    url: '/api/prod/getlppid',
+    params: {
+        pspcode: '',
+        gppid: 0
+    }
+});
+
+exports.GroupAddToCartAPI = ShopAPI.extend({
+    url: '/api/shop/addgppbag',
+    params: {
+        pspcode: '',
+        prdid: 0,
+        lppid: 0
+    }
+});

@@ -376,12 +376,14 @@ define(function (require, exports, module) {
                 error: function (res) {
                     sl.tip(res.msg);
 
-                    self.model.getModel('data_baglist').find(function (item) {
+                    self.model.getModel('data_baglist').first(function (item) {
                         return item.SPB_ID == self.modifySpbId;
 
                     }).set({
                         SPB_QTY: this.originQty
                     });
+
+                    this.$input.val(this.originQty);
                 },
                 complete: function () {
                     isModifying = false;
@@ -397,7 +399,8 @@ define(function (require, exports, module) {
                 self.modifySpbId = item.SPB_ID;
 
                 $.extend(self.cartModifyApi, {
-                    originQty: origin
+                    originQty: origin,
+                    $input: $(e.currentTarget)
 
                 }).setParam({
                     pspcode: self.user.PSP_CODE,

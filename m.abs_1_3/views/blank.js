@@ -12,12 +12,8 @@ module.exports = Activity.extend({
         }
     },
 
-    defBackUrl: '/',
-
     onCreate: function () {
         var self = this;
-
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || self.defBackUrl;
 
         self.model = new model.ViewModel(this.$el, {
             back: self.swipeRightBackAction,

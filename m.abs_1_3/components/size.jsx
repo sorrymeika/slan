@@ -88,7 +88,6 @@ var Month = model.ViewModel.extend({
             if (item.WPP_LIST_PIC !== undefined) {
                 this.set("data.WPP_LIST_PIC", item.WPP_LIST_PIC);
             }
-
         }
         this.trigger("SizeChange", item);
     },
@@ -117,6 +116,10 @@ var Month = model.ViewModel.extend({
 		if (this.data.type == 'package') {
 			this.data.confirm(item, this.data.PST_ID, self.get('qty'));
 
+		} else if (this.data.type == 'group') {
+
+			this.data.confirm(item, item.PRD_ID, self.get('qty'));
+
 		} else {
 
             self.set({ data: item });
@@ -138,6 +141,7 @@ var Month = model.ViewModel.extend({
 		this.set({
 			isShowSize: false
 		});
+
 	},
 
 	tap: function (e) {

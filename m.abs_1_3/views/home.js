@@ -404,6 +404,7 @@ module.exports = Activity.extend({
 
                 var cpCategory = new CpCategory({
                     data: res,
+                    isHome: true,
                     goto: function (e, id) {
                         cpCategory.hide();
                         self.forward("/all?id=" + id);

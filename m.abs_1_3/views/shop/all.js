@@ -96,7 +96,6 @@ module.exports = Activity.extend({
                 current: item.PCG_ID
             });
 
-
             this.requestProd(e, item.PCG_ID);
         }
 
@@ -118,14 +117,6 @@ module.exports = Activity.extend({
 
             }).reload();
         }
-
-        this.model.set({
-            test: {
-                aaa: 1
-
-            }
-
-        })
 
         Scroll.bind(this.model.refs.cates, {
             useScroll: true,

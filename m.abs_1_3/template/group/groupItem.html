@@ -1,0 +1,46 @@
+﻿<div class="pd_item_wrap">
+    <header class="header_trans">
+        <div class="head_back" data-back="{{back}}"></div>
+        <div class="head_right">
+            <a class="head_call" href="tel:4008205077"></a>
+            <div class="head_share js_share" sn-if="{{Share_Flag}}"></div>
+        </div>
+    </header>
+    <div class="main pd_item" ref="main">
+        <div class="pd_slider{{data.PRD_NUM<=0?' sold_out':''}}" ref="image">
+        </div>
+        <div class="pd_info_wrap">
+            <div class="pd_info">
+                <h1>{{data.PRD_NAME}}</h1>
+                <p class="price">{{data.PRD_PRICE}}</p>
+                <del class="ori_price" sn-display="{{data.PRD_PRICE<data.PRD_MEMBER_PRICE}}">¥{{data.PRD_MEMBER_PRICE}}</del>
+                <p class="pd_code">
+                    <span class="code">商品编码 {{data.PRD_CODE}}</span>
+                    <span class="sale">销售 {{data.PSV_QTY}} 件</span>
+                </p>
+                <p class="pd_code" style="padding:5px 0;" sn-html="{{data.PRH_DESC}}"></p>
+            </div>
+        </div>
+        <ul class="pd_sign">
+            <li>满99包邮</li>
+            <li>30天退换货保障</li>
+        </ul>
+        <div class="pd_select_plus" sn-display="{{Package.PPG_ID}}" data-forward="/news/package{{Package.PPG_ID}}?from={{url}}">
+            {{Package.PPG_NAME}}
+        </div>
+        <div class="pd_select_size js_select_size">
+            选择 尺码 颜色分类
+        </div>
+
+        <div class="pd_jump_detail" data-forward="/detail/{{data.PRD_ID}}"><b>图文详情</b><em>建议在WIFI情况下查看</em></div>
+        <div class="pd_help">
+            如果您有任何疑问，欢迎联系我们的客服。
+            <br> 联系热线：400-820-5077 周一至周日 9:00-19:00
+        </div>
+    </div>
+    <footer class="pd_buy gp_item__action">
+        <b class="btn_cart" data-forward="{{'/cart?from='+url}}"><i sn-display="$state.cartQty!=0">{{$state.cartQty}}</i></b>
+        <b class="btn_single {{data.PRD_NUM==0?'sold_out':''}}" data-forward="/item/{{data.PRD_ID}}"><em>¥{{data.PRD_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':'单独购买'}}</b>
+        <b class="btn_buy {{data.PRD_NUM==0?'sold_out':'js_buy'}}"><em>{{'¥'+GPP_Obj.GPP_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':(GPP_Obj.GPP_QTY+'人团')}}</b>
+    </footer>
+</div>

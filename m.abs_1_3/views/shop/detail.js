@@ -15,7 +15,6 @@ module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
-        self.swipeRightBackAction = self.route.query.from || ('/item/' + self.route.data.id);
 
         self.model = new model.ViewModel(this.$el, {
             back: self.swipeRightBackAction,

@@ -5,6 +5,8 @@
         View = require('./view'),
         Route = require('./route');
 
+    require('widget/tip');
+
     var getPath = util.getPath;
 
     var Master = {

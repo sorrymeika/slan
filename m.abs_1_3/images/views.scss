@@ -114,23 +114,8 @@ header { background: #e65e5f; height: 44px; line-height: 44px; }
 .hm_chart_list li em { display: block; font-size: 24px; margin-top: 2px; font-weight: lighter; }
 .hm_tab_con { -webkit-transition: -webkit-transform 200ms ease-out 0ms; }
 .hm_tab_con+.hm_tab_con{ -webkit-transform: translate(100%,0px); }
-.hm_cards { overflow: hidden; margin-top: 10px; margin-bottom: 20px; }
-.hm_cards li { width: 45%; height: 70px; background: #fff; margin: 7px 0 0 3.3%; position: relative; float: left; border-radius: 6px; }
-.hm_cards li i { display: block; position: absolute; width: 45px; height: 45px; top: 50%; margin: -22px 0 0 8px; background: #e8ba2e; border-radius: 50%; }
-.hm_cards li i:before { content: ''; display: block; width: 40px; height: 40px; background: url(icon.png) no-repeat -280px -150px; background-size: 320px auto; margin: 2px; }
-.hm_cards li p { margin: 3px 0 0 60px; font-size: 12px; z-index: 1; position: relative; }
-.hm_cards li i + p { margin-top: 22px; }
-.hm_cards li:nth-child(2) i, .hm_shop_cate li:nth-child(2) i { background: #4db2d9; }
-.hm_cards li:nth-child(2) i:before, .hm_shop_cate li:nth-child(2) i:before { background-position: -200px -190px; margin-left: 1px; }
-.hm_cards li:nth-child(3) i, .hm_shop_cate li:nth-child(3) i { background: #d10b16; }
-.hm_cards li:nth-child(3) i:before, .hm_shop_cate li:nth-child(3) i:before { background-position: -280px -190px; margin-left: 1px; }
-.hm_cards li:nth-child(4) i, .hm_shop_cate li:nth-child(4) i { background: #ea6233; }
-.hm_cards li:nth-child(4) i:before, .hm_shop_cate li:nth-child(4) i:before { background-position: -240px -150px; }
 
-.hm_cards li:after { content: ''; display: block; position: absolute; right: 0; bottom: 8px; background: url(home_flag.png) no-repeat 0px 0px; background-size: 85px auto; width: 85px; height: 20px; z-index: 0; }
-.hm_cards li:nth-child(2):after { background-position-y: -20px; }
-.hm_cards li:nth-child(3):after { background-position-y: -40px; }
-.hm_cards li:nth-child(4):after { background-position-y: -60px; }
+
 canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; margin-left: -95px; }
 
 /*去购物*/
@@ -153,10 +138,18 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
     }
 }
 .hm_shop { color: #333; padding-bottom: 1px; }
-.hm_shop_cate { display: -webkit-box; margin-top: 10px; }
-.hm_shop_cate li { -webkit-box-flex: 1; text-align: center; font-size: 12px; line-height: 1; }
-.hm_shop_cate li i { display: block; width: 45px; height: 45px; background: #e8ba2e; margin: 0 auto 5px auto; border-radius: 4px; padding-top: 1px; }
-.hm_shop_cate li i:before { content: ''; display: block; width: 40px; height: 40px; margin: 1px auto 0 auto; background: url(icon.png) no-repeat -280px -150px; background-size: 320px auto; }
+
+.hm_shop__nav { display: -webkit-box; margin-top: 10px; }
+.hm_shop__nav li { -webkit-box-flex: 1; text-align: center; font-size: 12px; line-height: 1; }
+.hm_shop__nav li i { display: block; width: 45px; height: 45px; background: #4db2d9; margin: 0 auto 5px auto; border-radius: 4px; padding-top: 1px; }
+.hm_shop__nav li i:before { content: ''; display: block; width: 40px; height: 40px; margin: 1px auto 0 auto; background: url(icon.png) no-repeat -200px -190px; background-size: 320px auto; }
+.hm_shop__nav li:nth-child(2) i { background: #e8ba2e; }
+.hm_shop__nav li:nth-child(2) i:before { background-position: -280px -150px; margin-left: 1px; }
+.hm_shop__nav li:nth-child(3) i { background: #d10b16; }
+.hm_shop__nav li:nth-child(3) i:before { background-position: -280px -190px; margin-left: 1px; }
+.hm_shop__nav li:nth-child(4) i { background: #ea6233; }
+.hm_shop__nav li:nth-child(4) i:before { background-position: -240px -150px; }
+
 .hm_shop_banner {
     margin-top: 10px;
     ul { display: -webkit-box; }
@@ -211,6 +204,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_all_cates .cate9:before,.cate_popup_list .cate9:before { background-position-x: -125px; }
 
 .cate_popup_list li:before { -webkit-transform: scale(2); vertical-align: 5px; margin-right: 12px; }
+.cate_popup_list li.noicon:before { display: none; }
 
 .cp_category_mask { @extend .cp_share_mask; -webkit-transition: all 400ms ease-out 0ms; background: transparent !important; }
 .cate_popup_hd { margin-top: 44px; background: #eee; height: 40px; line-height: 40px; padding-left: 8px; }
@@ -286,6 +280,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .pd_buy .btn_cart:before { display: block; content: ''; background: url(icon.png) no-repeat -30px -30px; background-size: 320px auto; width: 30px; height: 30px; margin: 10px 0 0 10px; }
 .pd_buy .btn_cart i { display: block; position: absolute; background: #e65e5f; color: #fff; text-align: center; border-radius: 50%; width: 9px; height: 9px; left: 33px; top: 12px; font-size: 1.10px; line-height: 9px; }
 .pd_buy .btn_buy { display: block; -webkit-box-flex: 1; background: #e65e5f; color: #fff; }
+.pd_buy .btn_single { background: #c00; display: block; color: #fff; padding: 0 10px; }
 
 .pd_size_wrap { position: absolute; top: 0px; left: 0; z-index: 300; width: 100%; height: 100%; background: rgba(0, 0, 0, .3); -webkit-transition: all 300ms ease-out 0ms; }
 .pd_size_wrap.out { background: rgba(0, 0, 0, 0); }
@@ -350,7 +345,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .ct_list_item_con .qty .minus, .ct_list_item_con .qty .plus { display: block; text-align: center; width: 20px; }
 .ct_list_item_con .ft { text-align: right; padding-right: 8px; }
 .ct_list_item_con .ft b { display: block; color: #e65e5f; font-size: 16px; }
-.ct_list_item_con .ft del { display: block; font-size: 2.616px; margin-top: 5px; color: #666; }
+.ct_list_item_con .ft del { display: block; font-size: 12px; margin-top: 5px; color: #666; }
 .ct_list_info { margin-top: 10px; background: #fff; border-top: 1px solid #f0f0f0; }
 .ct_list_info li { height: 45px; line-height: 45px; padding-left: 15px; border-bottom: 1px solid #f0f0f0; overflow: hidden; padding-right: 8px; position: relative; }
 .ct_list_info li.link{

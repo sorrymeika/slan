@@ -19,7 +19,8 @@
     },
     "css": {
         "images/style.css": [
-            "images/views.css"
+            "images/views.css",
+            "images/group.css"
         ],
         "images/append.css": [
             "images/append.css"
@@ -29,7 +30,7 @@
         "./images"
     ],
     "route": {
-        "/":  "home",
+        "/": "home",
         "/about": {
             "controller": "about",
             "template": "about"
@@ -136,6 +137,8 @@
         "/discovery/{id:\\d+}": "discovery/discovery",
         "/discovery/list": "discovery/discovery_list",
         "/discovery/list/{id:\\d+}": "discovery/discovery_list",
-        "/discovery/comment/{id:\\d+}": "discovery/discovery_comment"        
+        "/discovery/comment/{id:\\d+}": "discovery/discovery_comment",
+        "/group": "group/groupList",
+        "/group/{id:\\d+}": "group/groupItem"
     }
 }

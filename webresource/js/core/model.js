@@ -156,7 +156,8 @@
                 model = self.model,
                 parent,
                 keys,
-                coverChild = false;
+                coverChild = false,
+                shouldTriggerEvent = !this.root._initSet && (!this._initSet || !(this.parent instanceof Collection));
 
             if (typeof cover != "boolean")
                 val = key, key = cover, cover = false;
@@ -174,7 +175,7 @@
 
                 this.data = val;
 
-                !this.root._initSet && this._triggerChangeEvent(this.key);
+                shouldTriggerEvent && this._triggerChangeEvent(this.key);
 
                 return this;
 
@@ -240,12 +241,12 @@
                     } else {
                         model[attr] = value;
 
-                        !this.root._initSet && (!this._initSet || !(this.parent instanceof Collection)) && this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr);
+                        shouldTriggerEvent && this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr);
                     }
                 }
             }
 
-            !this.root._initSet && (!this._initSet || !(this.parent instanceof Collection)) && this._triggerChangeEvent(this.key);
+            shouldTriggerEvent && this._triggerChangeEvent(this.key);
 
             return self;
         },
