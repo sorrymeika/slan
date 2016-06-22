@@ -15,6 +15,7 @@ define(function (require, exports, module) {
 
         toggleAnim: 'def',
         defBackUrl: '/',
+        autosetBackUrl: true,
 
         _referrer: function (route) {
             this.isForward = route.isForward;
@@ -37,11 +38,9 @@ define(function (require, exports, module) {
 
                 this.referrer = route.referrer;
                 this.referrerDir = route.referrerDir;
-
-                console.log(this.referrer);
             }
 
-            if (!this.swipeActionDisabled) {
+            if (this.autosetBackUrl) {
                 backUrl = route.query.from || this.referrer || this.defBackUrl;
 
                 getUrlPath(backUrl) != route.path.toLowerCase() && (this.swipeRightBackAction = backUrl);

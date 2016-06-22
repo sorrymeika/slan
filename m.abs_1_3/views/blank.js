@@ -4,11 +4,11 @@ var Activity = require('activity');
 var Loading = require('widget/loading');
 var model = require('core/model');
 var Scroll = require('widget/scroll');
-var animation = require('animation');
+var api = require('models/api');
 
 module.exports = Activity.extend({
     events: {
-        'tap [ref="back"]': function () {
+        'tap .js_back': function () {
             this.back(this.swipeRightBackAction);
         }
     },

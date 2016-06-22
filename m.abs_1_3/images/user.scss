@@ -1,0 +1,21 @@
+﻿.uc_order__wrap .sp_buy_hd { margin-bottom: 10px; }
+.uc_order__wrap .sp_buy_hd:after { display: none; }
+
+.uc_order__prod_listitem { background: #fff; border-top: .5px solid #ddd; display: -webkit-box; }
+.uc_order__prod_listitem img { display: block; width: 60px; height: 60px; margin: 10px; }
+.uc_order__prod_listitem .con { -webkit-box-flex: 1; overflow: hidden; }
+.uc_order__prod_listitem h2 { font-size: .8em; margin-top: 10px; font-weight: normal; }
+.uc_order__prod_listitem h3 { font-size: .7em; font-weight: normal; margin-top: 8px; }
+.uc_order__prod_listitem h4 { font-size: .7em; font-weight: normal; margin-top: 2px; }
+.uc_order__prod_listitem .priceinfo { margin: 20px 10px 0 0; text-align: right; }
+.uc_order__prod_listitem .priceinfo span { display: block; }
+.uc_order__prod_listitem .priceinfo .price { font-size: .9em; color: #000; }
+.uc_order__prod_listitem .priceinfo .qty { color: #999; font-size: .8em; }
+
+.uc_order__footer { padding-right: 10px; }
+.uc_order__footer .btn { padding: 0 10px; }
+.uc_order__footer .btn_dark { background: #ccc; }
+
+.uc_express__info { background: #fff; padding: 10px 0 10px 20px; line-height: 25px; }
+.uc_express__info span { color: #666; }
+.uc_express__info ~ .express_list { margin-bottom: 10px; }

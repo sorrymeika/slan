@@ -25,6 +25,18 @@
                 <li class="ico_wxpay{{payType==2?' checked':''}}" sn-tap="payType=2">微信支付</li>
             </ul>
         </div>
+        <div class="sp_buy_bd">
+            <div class="hd">是否需要发票</div>
+            <div class="sp_buy__inv_required">
+                <ol class="checkboxlist">
+                    <li class="{{!requireInv?'checked':''}}" sn-tap="requireInv=0">不需要</li>
+                    <li class="{{requireInv?'checked':''}}" sn-tap="requireInv=1">需要</li>
+                </ol>
+                <div class="inputs" sn-display="requireInv">
+                    <input type="text" sn-model="invTitle" value="{{invTitle}}" />
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <footer class="sp_buy_action">

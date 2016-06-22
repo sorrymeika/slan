@@ -20,7 +20,8 @@
     "css": {
         "images/style.css": [
             "images/views.css",
-            "images/group.css"
+            "images/group.css",
+            "images/user.css"
         ],
         "images/append.css": [
             "images/append.css"
@@ -139,6 +140,7 @@
         "/discovery/list/{id:\\d+}": "discovery/discovery_list",
         "/discovery/comment/{id:\\d+}": "discovery/discovery_comment",
         "/group": "group/groupList",
-        "/group/{id:\\d+}": "group/groupItem"
+        "/group/{id:\\d+}": "group/groupItem",
+        "/user/express/{code:\\w+}": "user/express"
     }
 }

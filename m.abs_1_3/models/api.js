@@ -493,3 +493,4 @@ exports.GroupAddToCartAPI = ShopAPI.extend({
         lppid: 0
     }
 });
+

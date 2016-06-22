@@ -1,0 +1,16 @@
+﻿<header>
+    <div class="head_back js_back"></div>
+    <div class="head_title">{{title}}</div>
+</header>
+<div ref="main" class="main">
+    <div class="uc_express__info">
+        <div class="info"><span>快递公司：</span>{{data.EXP_NAME}}</div>
+        <div class="info"><span>运单号：</span>{{data.EXP_CODE}}</div>
+    </div>
+    <dl class="express_list">
+        <dd sn-repeat="express in data.data">
+            <p>{{util.formatDate(express.EXP_DT)}}</p>
+            <p>{{express.EXP_STATE_DETAIL}}</p>
+        </dd>
+    </dl>
+</div>

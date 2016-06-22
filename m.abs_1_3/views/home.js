@@ -264,13 +264,16 @@ module.exports = Activity.extend({
         }
 
         self.appIconAPI = new api.AppIconAPI({
-            $el: $(''),
             checkData: false,
             params: {
                 id: 2
             },
             success: function (res) {
                 console.log(res);
+
+                self.model.set({
+                    icons: res.data
+                });
             }
         });
 

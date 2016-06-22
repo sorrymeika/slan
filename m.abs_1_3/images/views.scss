@@ -1,9 +1,15 @@
-﻿.icon { content: ''; display: block; background: url(icon.png) no-repeat 0px 0px; background-size: 320px auto; width: 30px; height: 30px; }
+﻿$p:2;
+@mixin icon($x:0px, $y:0px,$width:30px,$height:30px, $img:"icon.png", $display: inline-block) { content: ''; display: $display; background: url($img) no-repeat $x $y; background-size: 320px auto; width: $width; height: $height; }
+
+.icon { content: ''; display: block; background: url(icon.png) no-repeat 0px 0px; background-size: 320px auto; width: 30px; height: 30px; }
 
 header { background: #e65e5f; height: 44px; line-height: 44px; }
 .has_status_bar header { border-top-color: #e65e5f; }
 
 .refreshing { background: transparent; color: #333; }
+
+.checkboxlist li:before { @include icon(-240px,-30px); vertical-align: middle; -webkit-transform: scale(.8); }
+.checkboxlist .checked:before { background-position: -210px -30px; }
 
 .footer_discovery_ico { position: absolute; bottom: 2px; left: 50%; margin-left: -34px; z-index: 999; width: 132px; height: 132px; border: 1px solid #ccc; background: #fff; border-radius: 50%; -webkit-transform: scale(0.5); -webkit-transform-origin: 0% 100%; }
 .footer { position: absolute; bottom: 0px; width: 100%; height: 50px; border-top: .5px solid #ccc; background: #fff; z-index: 1000; display: -webkit-box; text-align: center; color: #666; -webkit-user-select: none; -webkit-touch-callout: none; }
@@ -277,7 +283,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .pd_help { margin-top: 15px; padding-left: 10px; height: 55px; display: -webkit-box; -webkit-box-align: center; font-size: 10px; background: #fff; }
 .pd_buy { height: 48px; line-height: 48px; display: -webkit-box; text-align: center; }
 .pd_buy .btn_cart { display: block; width: 135px; background: #fff; position: relative; }
-.pd_buy .btn_cart:before { display: block; content: ''; background: url(icon.png) no-repeat -30px -30px; background-size: 320px auto; width: 30px; height: 30px; margin: 10px 0 0 10px; }
+.pd_buy .btn_cart:before { display: block; content: ''; background: url(icon.png) no-repeat -40px -190px; background-size: 320px auto; width: 30px; height: 30px; margin: 10px 0 0 10px; }
 .pd_buy .btn_cart i { display: block; position: absolute; background: #e65e5f; color: #fff; text-align: center; border-radius: 50%; width: 9px; height: 9px; left: 33px; top: 12px; font-size: 1.10px; line-height: 9px; }
 .pd_buy .btn_buy { display: block; -webkit-box-flex: 1; background: #e65e5f; color: #fff; }
 .pd_buy .btn_single { background: #c00; display: block; color: #fff; padding: 0 10px; }
@@ -382,9 +388,17 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .ico_wxpay:before { background-position: -240px 0px; }
 .ico_alipay.checked:after,.ico_wxpay.checked:after { @extend .icon; background-position: -210px -30px; float: right; margin-top: 7px; -webkit-transform: scale(.8); }
 
+.sp_buy__inv_required .checkboxlist { display: -webkit-box; border-top: 1px solid #ddd; }
+.sp_buy__inv_required .checkboxlist li { -webkit-box-flex: 1; height: 46px; line-height: 46px; padding-left: 15px; }
+.sp_buy__inv_required .inputs { height: 46px; border-top: 1px solid #ddd; display: -webkit-box; }
+.sp_buy__inv_required .inputs:before { content: '抬头：'; display: block; margin-left: 15px; line-height: 46px; }
+.sp_buy__inv_required .inputs input { height: 42px; border: 0; display: block; }
+
 /*我*/
-.hm_my_card { background: -webkit-gradient(linear, 100% 33%, 100% 79%, from(#e04447), to(#ea6333)); color: #fff; padding: 15px 20px; }
+.hm_my_card { position: relative; background: -webkit-gradient(linear, 100% 33%, 100% 79%, from(#e04447), to(#ea6333)); color: #fff; padding: 15px 20px; }
 .hm_my_card .vip_name { font-size: 18px; }
+.hm_my_card .user_rights { display: block; position: absolute; right: 10px; top: 10px; color: #fff; }
+.hm_my_card .user_rights:before { @include icon(-300px,-120px,16px,16px); vertical-align: -2px; margin-right: 4px; }
 .hm_my_card .energy { font-size: 12px; margin-top: 17px; }
 .hm_my_card .energy span { font-size: 24px; font-weight: lighter; margin-left: 5px; }
 .hm_my_card .energy_bar { margin-top: 10px; background: #d42c2c; -webkit-box-shadow: inset 0px 0px 4px #9d2020; height: 10px; width: 100%; border-radius: 6px; overflow: hidden; }
@@ -697,8 +711,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_coupon_list li.free .name { font-size: 2em; color: #fff; margin: 30px 0 0 120px; height: auto; }
 .uc_coupon_list li.free .time { margin-left: 30px; margin-top: 7px; }
 
-$p:2;
-@mixin icon($x:0px, $y:0px,$width:30px,$height:30px, $img:"icon.png", $display: inline-block) { content: ''; display: $display; background: url($img) no-repeat $x $y; background-size: 320px auto; width: $width; height: $height; }
+
 .ex_icon { @include icon(); }
 .ex_arrow { position: absolute; right: 10px; width: 11px; height: 11px; content: ''; border-top: 1px solid #ccc; border-right: 1px solid #ccc; -webkit-transform: rotate(45deg); top: 50%; margin-top: -5px; }
 .ex_check{ @extend .ex_icon; position: absolute; top: 50%; margin: -15px 0 0 0; right: 2px; background-position: -210px -30px; }
@@ -876,9 +889,8 @@ $p:2;
 .co_share_user .hd:after { content: ''; display: block; border-bottom: 1px solid #999; position: absolute; top: 50%; left: 5%; width: 90%; z-index: -1; }
 .co_share_user .con { padding: 20px 5%; color: #999; line-height: 1.4; }
 
+
 /*------append-------*/
-
-
 .stw_list_item .thumb {
     position: relative;
     i{ display: block; position: absolute; background: #e65e5f; color: #fff; border-radius: 50%; height: 14px; line-height: 14px; text-align: center; font-size: 10px; width: 14px; top: 0px; right: 0px; }
@@ -1099,8 +1111,6 @@ $p:2;
 
 .btn_cart { overflow: hidden; }
 
-
-
 .banner {
     width: 100%; padding-top: 10px;
     img { width: 100%; }
@@ -1186,7 +1196,6 @@ $p:2;
 .disc_bottom ul li:last-child { border-right: 0; }
 
 .ct_coupon_list li .name { height: auto; }
-.pd_buy .btn_cart:before { background: url(icon.png) no-repeat -40px -190px; background-size: 320px auto; }
 .footer { border-top: 0; }
 .head_all:before { background-image: url(icon.png); }
 .searchwrap { z-index: 1001; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff; }

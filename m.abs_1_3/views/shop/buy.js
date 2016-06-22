@@ -120,7 +120,9 @@ define(function (require, exports, module) {
 
                     this.setParam({
                         mba_id: address.AddressID,
-                        pay_type: self.model.get('payType')
+                        pay_type: self.model.get('payType'),
+                        inv_flag: self.model.get('requireInv'),
+                        inv_title: self.model.get('invTitle')
                     });
                 },
                 checkData: false,

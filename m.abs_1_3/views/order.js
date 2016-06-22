@@ -68,6 +68,20 @@ module.exports = Activity.extend({
             payType: 1
         });
 
+        self.model.cancelOrder = function (e, order) {
+
+            self.confirm('你确定取消订单吗？', function () {
+                self.cancelOrderApi.setParam({
+                    purcode: order.PUR_CODE
+
+                }).load();
+            });
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        console.log(self.referrer)
+
         self.orderApi = new api.OrderAPI({
             $el: self.$el,
             params: {
@@ -82,7 +96,7 @@ module.exports = Activity.extend({
                     data: res.data
                 })
 
-                if (res.data.PUR_PAS_ID == 2) {
+                if (self.referrer != '/myorder' && res.data.PUR_PAS_ID == 2) {
                     self.forward("/news/order" + self.route.query.id);
                 }
             }
@@ -104,6 +118,26 @@ module.exports = Activity.extend({
                     self.forward("/news/order" + self.route.data.id);
                     self.model.set('data.PUR_PAS_ID', 2);
                 }
+            }
+        });
+
+        self.cancelOrderApi = new api.CancelOrderAPI({
+            $el: this.$el,
+            checkData: false,
+            params: {
+                pspcode: self.user.PSP_CODE
+            },
+            success: function (res) {
+                if (res.success) {
+                    sl.tip('订单已成功取消');
+                    self.orderApi.reload();
+
+                    //通知更新优惠券数量
+                    self.setResult("UserChange");
+                }
+            },
+            error: function (res) {
+                sl.tip(res.msg);
             }
         });
 
