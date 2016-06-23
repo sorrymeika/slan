@@ -279,6 +279,21 @@ module.exports = Activity.extend({
 
         self.appIconAPI.load();
 
+
+        
+        self.hotSearchAPI = new api.HotSearchAPI({
+            checkData: false,
+            success: function (res) {
+
+                self.model.set({
+                    hotSearch: res.data
+                });
+            }
+        });
+
+        self.hotSearchAPI.load();
+
+
         var update = new api.UpdateAPI({
             checkData: false,
             params: {
@@ -345,7 +360,7 @@ module.exports = Activity.extend({
                         autoLoop: 3000,
                         data: res.topbanner.data,
                         dots: true,
-                        itemTemplate: '<img src="<%=src%>" data-forward="<%=url%>?from=%2f" />'
+                        itemTemplate: '<img data-src="<%=src%>" data-forward="<%=url%>?from=%2f" />'
                     });
 
                 Scroll.bind(self.$('.js_shop_scroll:not(.s_binded)').addClass('s_binded'), {

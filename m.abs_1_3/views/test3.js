@@ -133,7 +133,7 @@
             return typeof re == 'string' ? source_text.substr(i, re.length) == re : re.test(source_text.substr(i));
         }
 
-        console.log(source_text)
+        //console.log(source_text)
 
         for (; ;) {
             prevCh = ch;

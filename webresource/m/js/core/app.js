@@ -57,7 +57,7 @@ var bindBackGesture = function (application) {
         momentum: false
     });
 
-    touch.on('beforestart', function () {
+    touch.on('beforestart', function (e) {
         this.x = 0;
 
     }).on('start', function () {
@@ -274,7 +274,7 @@ var Application = Component.extend($.extend(appProto, {
         that.$el = $(that.el);
 
         if (bridge.hasStatusBar) {
-            that.$el.addClass('has_status_bar');
+            $('body').addClass('has_status_bar');
         }
 
         that.hash = hash = trimHash(hash);

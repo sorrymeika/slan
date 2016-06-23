@@ -28,7 +28,7 @@ var Category = {
         };
 
         if (!categories && !(categories = util.store('categories'))) {
-            categoryAPI.request(fn);
+            categoryAPI.load(fn);
         } else {
             fn(null, categories);
         }

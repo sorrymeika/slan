@@ -63,7 +63,7 @@ var Touch = Event.mixin(function (el, options) {
             self.pointX = self.startPointX = self.sx = point.pageX;
             self.pointY = self.startPointY = self.sy = point.pageY;
 
-            self.isTouchStop = false;
+            self.isTouchStop = !!e.isHoldScroll;
             self.isTouchStart = false;
             self.isTouchMoved = false;
 
@@ -79,12 +79,13 @@ var Touch = Event.mixin(function (el, options) {
             self.timestamp = Date.now();
 
             self.trigger(new Event('beforestart', {
-                currentTarget: e.currentTarget
+                currentTarget: e.currentTarget,
+                isHoldScroll: e.isHoldScroll
             }));
         },
 
         _move: function (e) {
-            if (this.isTouchStop) return;
+            if (this.isTouchStop || e.isHoldScroll && (this.isTouchStop = true)) return;
 
             var self = this,
                 point = e.touches[0],
@@ -333,7 +334,7 @@ var Touch = Event.mixin(function (el, options) {
 
                 self.trigger('move');
 
-            }, 200, 'ease', function () {
+            }, 300, 'ease', function () {
                 self._stop();
 
                 self.trigger('bounceBack');

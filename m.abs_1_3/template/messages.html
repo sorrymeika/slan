@@ -8,6 +8,6 @@
             <h2>{{item.MSG_TITLE}}</h2>
             <h3>{{util.formatDate(item.LPM_START_DT,'yyyy.MM.dd')}}</h3>
         </div>
-        <div class="bd" sn-html="item.MSG_CONTENT"></div>
+        <div class="{{item.MSG_CONTENT.indexOf('<img')!=-1?' img':'bd'}}" sn-html="item.MSG_CONTENT"></div>
     </div>
 </div>

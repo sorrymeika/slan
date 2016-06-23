@@ -5,6 +5,8 @@
         View = require('./view'),
         Route = require('./route');
 
+    var Event = require('./event');
+
     require('widget/tip');
 
     var getPath = util.getPath;
@@ -13,7 +15,26 @@
         checkQueryString: function (activity, route) {
             if (activity.route.url != route.url) {
                 activity._setRoute(route);
-                activity.trigger('QueryChange');
+
+                var diff = {};
+                var before;
+
+                for (var key in activity.query) {
+                    if (!(key in activity._query)) {
+                        activity._query[key] = undefined;
+                    }
+                }
+                for (var key in activity._query) {
+                    before = activity._query[key];
+
+                    if (before != activity.query[key]) {
+                        diff[key] = before;
+                    }
+                }
+
+                activity.trigger(new Event('QueryChange', {
+                    data: diff
+                }));
             }
         },
 

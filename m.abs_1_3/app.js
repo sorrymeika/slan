@@ -114,6 +114,8 @@ exports.startWebServer = function (config) {
 
     config.resourceMapping = {};
 
+    app.use('/dest', express.static(config.dest));
+
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
             res.send(html);
@@ -227,7 +229,6 @@ exports.startWebServer = function (config) {
         });
     });
 
-    app.use('/dest', express.static(config.dest));
 
     for (var key in config.proxy) {
         var proxy = config.proxy[key].split(':');

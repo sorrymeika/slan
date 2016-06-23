@@ -12,9 +12,11 @@
             "components/fastbuy": null,
             "components/package": null,
             "components/banner": null,
+            "components/category": null,
             "models/api": null,
             "models/user": null,
-            "models/discovery": null
+            "models/discovery": null,
+            "models/category": null
         }
     },
     "css": {

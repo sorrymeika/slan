@@ -80,7 +80,7 @@ module.exports = Activity.extend({
         });
 
         this.model.selectCate = function (e, item) {
-            typeof item == 'number' && (item = util.first(this.data.categories, function (cate) {
+            typeof item !== 'object' && (item = util.first(this.data.categories, function (cate) {
                 return cate.PCG_ID == item;
             }));
 
@@ -124,6 +124,9 @@ module.exports = Activity.extend({
             hScroll: true
         });
 
+        console.profile('cate')
+        console.time('cate')
+
         Category.list(function (res) {
 
             var cpCategory = new CpCategory({
@@ -142,6 +145,10 @@ module.exports = Activity.extend({
 
             self.setCategories(res);
         });
+
+        console.profileEnd()
+        console.timeEnd('cate')
+        
     },
 
     onStart: function (params) {
@@ -166,20 +173,18 @@ module.exports = Activity.extend({
             currentSub: currentSub
         });
 
-        this.model.selectCate(null, current);
+        self.model.selectCate(null, current);
+    },
+
+    onQueryChange: function (e) {
+        if ('id' in e.data) {
+            this.model.selectCate(null, this.query.id);
+        }
     },
 
     onEnter: function () {
         var self = this;
 
-        this.model.set({
-            id: this.route.query.id || 1,
-        });
-
-        self.productSearchAPI.setParam({
-            pcgid: self.model.data.id
-
-        }).load();
     },
 
     onDestory: function () {

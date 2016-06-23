@@ -37,16 +37,13 @@ ss\n\n\n\
         }\
         \
     }");
-            console.log(res);
-
             //$main.html(res);
-
         });
 
 
 
-        var now = Date.now();
-        console.log(now);
+        console.time('test');
+        console.profile('test');
 
         var data = {
             back: self.swipeRightBackAction,
@@ -104,7 +101,8 @@ ss\n\n\n\
 
         self.model.set(data);
 
-        console.log(Date.now() - now)
+        console.timeEnd('test');
+        console.profileEnd('test');
 
     },
 

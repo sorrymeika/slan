@@ -466,6 +466,11 @@ exports.AppIconAPI = ShopAPI.extend({
     }
 });
 
+exports.HotSearchAPI = ShopAPI.extend({
+    url: '/api/system/gethotkey',
+    checkData: false
+});
+
 //拼团
 exports.GroupListAPI = ShopAPI.extend({
     url: '/api/prod/grouppurchaselist'

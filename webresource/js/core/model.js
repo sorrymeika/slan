@@ -5,6 +5,8 @@
         Event = require('./event'),
         Component = require('./component');
 
+    var toString = {}.toString;
+
     var eventsCache = [];
     var changeEventsTimer;
     var elementId = 0;
@@ -98,7 +100,7 @@
             throw new Error('Model\'s parent mast be Collection or Model');
         }
 
-        this.type = $.isPlainObject(data) ? 'object' : 'value';
+        this.type = typeof data == 'object' ? 'object' : 'value';
         parent.data[key] = this.data = this.type == 'object' ? $.extend({}, data) : data;
 
         this._key = key;
@@ -106,13 +108,12 @@
         this.parent = parent;
         this.root = parent.root;
         this._elements = {};
-        this._initSet = true;
 
+        this._collectionItemInitSet = this.parent instanceof Collection;
         this.set(data);
+        this._collectionItemInitSet = false;
 
-        this._initSet = false;
     }
-    var eventCount = 0;
     var ModelProto = {
         getModel: function (key) {
             if (typeof key == 'string' && key.indexOf('.') != -1) {
@@ -140,8 +141,19 @@
             return key == 'this' ? this : key == '' ? this.data : this.model[key];
         },
         get: function (key) {
-            var model = this.getModel(key);
-            return (model instanceof Model || model instanceof Collection) ? model.data : model;
+            if (typeof key == 'string' && key.indexOf('.') != -1) {
+                key = key.split('.');
+            }
+            if ($.isArray(key)) {
+                var data = this.data;
+
+                for (var i = key[0] == 'this' ? 1 : 0, len = key.length; i < len; i++) {
+                    if (!(data = data[key[i]]))
+                        return null;
+                }
+                return data;
+            }
+            return key == 'this' ? this : key == '' ? this.data : this.data[key];
         },
 
         cover: function (key, val) {
@@ -157,12 +169,12 @@
                 parent,
                 keys,
                 coverChild = false,
-                shouldTriggerEvent = !this.root._initSet && (!this._initSet || !(this.parent instanceof Collection));
+                shouldTriggerEvent = !this.root._initSet && !this._collectionItemInitSet;
 
             if (typeof cover != "boolean")
                 val = key, key = cover, cover = false;
 
-            if ($.isPlainObject(key)) {
+            if (typeof key == 'object') {
                 attrs = key;
             } else if (key === null) {
                 !cover && (cover = true);
@@ -175,7 +187,7 @@
 
                 this.data = val;
 
-                shouldTriggerEvent && this._triggerChangeEvent(this.key);
+                shouldTriggerEvent && this.root._triggerChangeEvent(this.key, this);
 
                 return this;
 
@@ -211,11 +223,15 @@
                 }
             }
 
-            $.extend(true, this.data, attrs);
+            for (var key in attrs) {
+                this.data[key] = attrs[key];
+            }
+            var eventName;
 
             for (var attr in attrs) {
                 origin = model[attr];
                 value = attrs[attr];
+                eventName = this.key ? this.key + '/' + attr : attr;
 
                 if (origin !== value) {
 
@@ -232,71 +248,26 @@
                         }
                         origin.set(value);
 
-                    } else if ($.isPlainObject(value)) {
-                        model[attr] = new Model(this, attr, value);
-
-                    } else if ($.isArray(value)) {
-                        model[attr] = new Collection(this, attr, value);
-
                     } else {
-                        model[attr] = value;
-
-                        shouldTriggerEvent && this._triggerChangeEvent(this.key ? this.key + '/' + attr : attr);
+                        switch (toString.call(value)) {
+                            case '[object Object]':
+                                model[attr] = new Model(this, attr, value);
+                                break;
+                            case '[object Array]':
+                                model[attr] = new Collection(this, attr, value);
+                                break;
+                            default:
+                                model[attr] = value;
+                                shouldTriggerEvent && this.root._triggerChangeEvent(eventName, this);
+                                break;
+                        }
                     }
                 }
             }
 
-            shouldTriggerEvent && this._triggerChangeEvent(this.key);
+            shouldTriggerEvent && this.root._triggerChangeEvent(this.key, this);
 
             return self;
-        },
-
-        _triggerChangeEvent: function (eventName, model) {
-            var self = this;
-
-            eventCount++;
-
-            eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
-            !model && (model = this);
-
-            if (util.indexOf(eventsCache, function (evt) {
-
-                return evt[0] == self.root && evt[1] == eventName && evt[2] == model;
-
-            }) == -1) {
-
-                eventsCache.push([this.root, eventName, model]);
-            }
-
-            if (!changeEventsTimer) {
-                changeEventsTimer = setTimeout(function () {
-                    var now = Date.now();
-
-                    var roots = [];
-
-                    for (var evt, cachedRoot, i = 0, n = eventsCache.length; i < n; i++) {
-                        evt = eventsCache[i];
-                        cachedRoot = evt[0];
-                        cachedRoot.trigger(evt[1], evt[2]);
-
-                        if (roots.indexOf(cachedRoot) === -1) {
-                            roots.push(cachedRoot);
-                        }
-                    }
-
-                    eventsCache.length = 0;
-                    changeEventsTimer = null;
-
-                    roots.forEach(function (root) {
-                        root.trigger("viewDidUpdate");
-                    });
-
-                    //console.log(Date.now() - now);
-
-                }, 0);
-            }
-
-            return this;
         },
 
         reset: function () {
@@ -328,7 +299,6 @@
             return false;
         },
 
-
         under: function (parent) {
             for (var model = this.parent; model != null && parent != model; model = model.parent) {
                 if (model instanceof Collection) {
@@ -348,7 +318,134 @@
 
     Event.mixin(Model, ModelProto);
 
-    var Repeat = function (options) {
+    var Collection = Event.mixin(function (parent, attr, data) {
+
+        this.models = [];
+
+        this.parent = parent;
+        this.key = parent.key ? (parent.key + "." + attr) : attr;
+        this._key = attr;
+        this.eventName = this.key.replace(/\./g, '/')
+
+        this.root = parent.root;
+
+        this.data = [];
+        parent.data[attr] = this.data;
+
+        this.add(data);
+
+    }, {
+            _triggerChangeEvent: function () {
+                if (!this._silent) {
+                    this.root._triggerChangeEvent(this.key, this)
+                        ._triggerChangeEvent(this.key + '/length', this);
+                }
+            },
+
+            get: function (i) {
+                return this.models[i];
+            },
+            set: function (data) {
+                this._silent = true;
+
+                if (!data || data.length == 0) {
+                    this.clear();
+
+                } else {
+                    var modelsLen = this.models.length;
+
+                    if (data.length < modelsLen) {
+                        this.remove(data.length, modelsLen - data.length)
+                    }
+
+                    var i = 0;
+                    this.each(function (model) {
+                        model.set(true, data[i]);
+                        i++;
+                    });
+
+                    this.add(i == 0 ? data : data.slice(i, data.length));
+                }
+                this._silent = false;
+
+                this._triggerChangeEvent();
+
+                return this;
+            },
+            each: function (fn) {
+                for (var i = 0; i < this.models.length; i++) {
+                    if (fn.call(this, this.models[i], i) === false) break;
+                }
+                return this;
+            },
+            first: function (fn) {
+                for (var i = 0; i < this.models.length; i++) {
+                    if (fn.call(this, this.data[i], i)) {
+                        return this.models[i];
+                    }
+                }
+                return null;
+            },
+            add: function (data) {
+                var model;
+                var length;
+                var changes = [];
+
+                if (!$.isArray(data)) {
+                    data = [data];
+                }
+
+                for (var i = 0, dataLen = data.length; i < dataLen; i++) {
+                    var dataItem = data[i];
+                    length = this.models.length;
+                    model = new Model(this, length, dataItem);
+                    this.models.push(model);
+                    changes.push(model);
+
+                    this.trigger('add', model);
+                }
+
+                this.root.trigger('change:' + this.eventName + '/add', this, changes);
+
+                this._triggerChangeEvent();
+            },
+            remove: function (start, count) {
+                var models;
+
+                if (typeof start == 'function') {
+                    models = [];
+                    for (var i = this.models.length - 1; i >= 0; i--) {
+                        if (start.call(this, this.data[i], i)) {
+                            models.push(this.models.splice(i, 1)[0]);
+                            this.data.splice(i, 1);
+                        }
+                    }
+
+                } else {
+                    if (!count) count = 1;
+
+                    models = this.models.splice(start, count);
+                    this.data.splice(start, count);
+                }
+
+                this._triggerChangeEvent();
+                this.trigger('remove', models);
+
+                this.root.trigger('change:' + this.eventName + '/remove', this, models);
+            },
+
+            clear: function (data) {
+                var models = this.models.slice();
+                this.models.length = this.data.length = 0;
+                this._triggerChangeEvent();
+
+                this.root.trigger('change:' + this.eventName + '/remove', this, models);
+            }
+        });
+
+
+
+    function Repeat(options) {
         $.extend(this, options);
 
         var self = this;
@@ -387,7 +484,6 @@
                         item.update();
                     }
                 }
-
             });
         }
 
@@ -443,7 +539,7 @@
         hasAdd && snRepeat.update();
     }
 
-    var SNRepeat = function (repeat, replacement, referenceModel) {
+    function SNRepeat(repeat, replacement, referenceModel) {
         var self = this;
 
         this.replacement = replacement;
@@ -637,138 +733,13 @@
         }
     }
 
-    var Collection = Event.mixin(function (parent, attr, data) {
-
-        this.models = [];
-
-        this.parent = parent;
-        this.key = parent.key ? (parent.key + "." + attr) : attr;
-        this._key = attr;
-        this.eventName = this.key.replace(/\./g, '/')
-
-        this.root = parent.root;
-
-        this.data = [];
-        parent.data[attr] = this.data;
-
-        this.add(data);
-
-    }, {
-            _triggerChangeEvent: function () {
-                if (!this._silent) {
-                    this.root._triggerChangeEvent(this.key, this)
-                        ._triggerChangeEvent(this.key + '/length', this);
-                }
-            },
-            each: function (fn) {
-                for (var i = 0; i < this.models.length; i++) {
-                    if (fn.call(this, this.models[i], i) === false) break;
-                }
-                return this;
-            },
-            first: function (fn) {
-                for (var i = 0; i < this.models.length; i++) {
-                    if (fn.call(this, this.data[i], i)) {
-                        return this.models[i];
-                    }
-                }
-                return null;
-            },
-            add: function (data) {
-                var model;
-                var length;
-                var changes = [];
-
-                if (!$.isArray(data)) {
-                    data = [data];
-                }
-
-                for (var i = 0, dataLen = data.length; i < dataLen; i++) {
-                    var dataItem = data[i];
-                    length = this.models.length;
-                    model = new Model(this, length, dataItem);
-                    this.models.push(model);
-                    changes.push(model);
-
-                    this.trigger('add', model);
-                }
-
-                this.root.trigger('change:' + this.eventName + '/add', this, changes);
-
-                this._triggerChangeEvent();
-            }
-        });
-
-    Collection.prototype.remove = function (start, count) {
-        var models;
-
-        if (typeof start == 'function') {
-            models = [];
-            for (var i = this.models.length - 1; i >= 0; i--) {
-                if (start.call(this, this.data[i], i)) {
-                    models.push(this.models.splice(i, 1)[0]);
-                    this.data.splice(i, 1);
-                }
-            }
-
-        } else {
-            if (!count) count = 1;
-
-            models = this.models.splice(start, count);
-            this.data.splice(start, count);
-        }
-
-        this._triggerChangeEvent();
-        this.trigger('remove', models);
-
-        this.root.trigger('change:' + this.eventName + '/remove', this, models);
-    }
-
-    Collection.prototype.clear = function (data) {
-        var models = this.models.slice();
-        this.models.length = this.data.length = 0;
-        this._triggerChangeEvent();
-
-        this.root.trigger('change:' + this.eventName + '/remove', this, models);
-    }
-
-    Collection.prototype.set = function (data) {
-        this._silent = true;
-
-        if (!data || data.length == 0) {
-            this.clear();
-
-        } else {
-            var modelsLen = this.models.length;
-
-            if (data.length < modelsLen) {
-                this.remove(data.length, modelsLen - data.length)
-            }
-
-            var i = 0;
-            this.each(function (model) {
-                model.set(true, data[i]);
-                i++;
-            });
-
-            this.add(i == 0 ? data : data.slice(i, data.length));
-        }
-        this._silent = false;
-
-        this._triggerChangeEvent();
-
-        return this;
-    }
-
-    Collection.prototype.get = function (i) {
-        return this.models[i];
-    }
-
-    var ViewModel = function (el, data) {
+    function ViewModel(el, data) {
         if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
             data = el, el = this.el;
 
         this.cid = util.guid();
+
+        this.eventsCache = {};
 
         this.data = $.extend({}, data);
         this.model = {};
@@ -900,6 +871,7 @@
         },
 
         _render: function (el, attribute) {
+
             var self = this;
             if (el.bindings) {
                 var attrs;
@@ -956,6 +928,17 @@
                         case 'checked':
                         case 'selected':
                             (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
+                            break;
+                        case 'src':
+                        case 'sn-src':
+                            var $el = $(el).one('load error', function () {
+                                $el.animate({
+                                    opacity: 1
+                                }, 200);
+                            }).css({
+                                opacity: 0
+
+                            }).attr({ src: val });
                             break;
                         default:
                             el.setAttribute(attr, val);
@@ -1036,6 +1019,40 @@
             var model = this._getByEl(el, name);
 
             model.set(model == this || model == self.$state ? name : name.replace(/^[^\.]+\./, ''), value);
+        },
+
+        _triggerChangeEvent: function (eventName, model) {
+            var self = this;
+
+            !model && (model = this);
+
+            eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
+
+            var eventsCache = self.eventsCache[eventName] || (self.eventsCache[eventName] = []);
+
+            (eventsCache.indexOf(model) == -1) && eventsCache.push(model);
+
+            if (!self.changeEventsTimer) {
+                self.changeEventsTimer = setTimeout(function () {
+                    var now = Date.now();
+                    var roots = [];
+
+                    for (var key in self.eventsCache) {
+
+                        eventsCache = self.eventsCache[key];
+
+                        for (var i = 0, n = eventsCache.length; i < n; i++)
+                            self.trigger(key, eventsCache[i]);
+                    }
+
+                    self.eventsCache = {};
+                    self.changeEventsTimer = null;
+                    self.trigger("viewDidUpdate");
+
+                }, 0);
+            }
+
+            return this;
         },
 
         upperRepeatEl: function (el, fn, ret) {
@@ -1219,6 +1236,7 @@
             for (var i = 0, len = elements.length; i < len; i++) {
                 self._render(elements[i]);
             }
+
             return this;
         }
 

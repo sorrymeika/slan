@@ -11,6 +11,10 @@
             <ul class="searchlist">
                 <li sn-repeat="item in searchHistory" sn-tap="this.search(item)">{{item}}</li>
             </ul>
+            <div class="searchhistory">热门搜索</div>
+            <ul class="searchlist">
+                <li sn-repeat="item in hotSearch" sn-tap="this.search(item)">{{item}}</li>
+            </ul>
         </div>
     </div>
     <header sn-display="{{!isStart||isLogin}}">
@@ -87,7 +91,7 @@
 
                 <ul class="sp_list">
                     <li sn-repeat="item in newproducts" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}">
-                        <img src="{{item.WPP_LIST_PIC1}}" />
+                        <img data-src="{{item.WPP_LIST_PIC1}}" />
                         <p class="price"><b>￥{{item.PRD_PRICE}}</b>
                             <del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del>
                         </p>
@@ -136,21 +140,8 @@
                 <div class="mobile">{{user.Mobile}}</div>
             </div>
             <ul class="hm_cards">
-                <li data-forward="/list?type=new&from=%2f"><i></i>
-                    <p>NEW ARRIVAL</p>
-                    <p>新品上市</p>
-                </li>
-                <li data-forward="/news/activity2"><i></i>
-                    <p>BEST BUYS</p>
-                    <p>最热商品</p>
-                </li>
-                <li data-forward="/news/fastbuy?from=%2f"><i></i>
-                    <p>FLASH SALE</p>
-                    <p>周一闪购</p>
-                </li>
-                <li data-forward="/news/activity3"><i></i>
-                    <p>APP ONLY</p>
-                    <p>APP专享</p>
+                <li sn-repeat="item in icons" data-forward="{{item.WAI_URL}}">
+                    <img sn-src="{{item.WAI_PIC}}" />
                 </li>
             </ul>
         </div>
@@ -170,7 +161,7 @@
                     <div class="hd">更多态度</div>
                     <ul class="disc_list">
                         <li sn-repeat="item in rec" data-forward="/discovery/{{item.DCV_ID}}">
-                            <img src="{{item.DCV_REC_PIC}}" />
+                            <img sn-src="{{item.DCV_REC_PIC}}" />
                             <em class="see">点击查看</em>
                         </li>
                     </ul>

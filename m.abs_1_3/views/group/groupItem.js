@@ -17,12 +17,17 @@ module.exports = Activity.extend({
         'tap [ref="back"]': function () {
 
             console.log(this.swipeRightBackAction);
-
             this.back(this.swipeRightBackAction);
         },
 
         'tap .js_buy:not(.disabled)': function () {
             var self = this;
+
+            if (!self.model.data.canBuy) {
+                sl.tip(self.model.data.tip);
+                this.share.show();
+                return;
+            }
 
             if (self.model.data.colorSpec.length == 1) {
                 if (self.user) {
@@ -65,7 +70,8 @@ module.exports = Activity.extend({
             id: self.route.data.id,
             user: self.user,
             url: encodeURIComponent(self.route.url),
-            qty: 1
+            qty: 1,
+            tip: '分享后才能购买哦'
         });
 
         Scroll.bind(self.model.refs.main);
@@ -83,13 +89,20 @@ module.exports = Activity.extend({
         self.size = new Size({
             type: 'group',
             confirm: function (item, prdId, qty) {
-                self.groupAddToCartAPI.setParam({
-                    pspcode: self.user.PSP_CODE,
-                    prdid: prdId,
-                    lppid: self.model.data.LPP_ID,
-                    qty: qty || 1
 
-                }).load();
+                if (self.model.data.canBuy) {
+                    self.groupAddToCartAPI.setParam({
+                        pspcode: self.user.PSP_CODE,
+                        prdid: prdId,
+                        lppid: self.model.data.LPP_ID,
+                        qty: qty || 1
+
+                    }).load();
+
+                } else {
+                    sl.tip(self.model.data.tip);
+                    self.share.show();
+                }
 
                 self.size.hide();
             }
@@ -157,7 +170,9 @@ module.exports = Activity.extend({
                     console.log(res);
 
                     self.model.set({
-                        LPP_ID: res.data.LPP_ID
+                        LPP_ID: res.data.LPP_ID,
+                        canBuy: res.isbuy,
+                        tip: res.sharemsg
                     });
 
                     self.share = new Share({
