@@ -53,6 +53,14 @@
             pickColor: function (f) {
                 hybrid('pickColor', f);
             },
+            system: {
+                info: function (callback) {
+                    hybrid('system', {
+                        type: 'info'
+
+                    }, callback);
+                }
+            },
             getDeviceToken: function (f) {
                 hybrid('getDeviceToken', f);
             },

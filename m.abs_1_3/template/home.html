@@ -50,110 +50,112 @@
     </div>
     <div sn-display="{{!isStart||isLogin}}">
 
-        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}" data-index="0">
-            <div class="hm_shop">
-                <div class="sp_all_cates">
-                    <div ref="cates">
-                        <ul style="width:{{window.innerWidth*2.1}}px;padding-right:20px;">
-                            <li class="cate0 curr">首页</li>
-                            <li sn-repeat="item in categories" class="cate{{item.PCG_ID}}" data-forward="/all?id={{item.PCG_ID}}">{{item.PCG_NAME}}</li>
-                        </ul>
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;-webkit-transform:translate({{bottomTab==0?'0px':'100%'}},0px)">
+
+            <div class="main js_shop hm_tab_con" style="-webkit-transform:translate3d({{tab==0?0:-100}}%,0%,0);" data-index="0">
+                <div class="hm_shop">
+                    <div class="sp_all_cates">
+                        <div ref="cates">
+                            <ul style="width:{{window.innerWidth*2.1}}px;padding-right:20px;">
+                                <li class="cate0 curr">首页</li>
+                                <li sn-repeat="item in categories" class="cate{{item.PCG_ID}}" data-forward="/all?id={{item.PCG_ID}}">{{item.PCG_NAME}}</li>
+                            </ul>
+                        </div>
+                        <div class="dropdown_btn" sn-tap="this.showCategories()"></div>
                     </div>
-                    <div class="dropdown_btn" sn-tap="this.showCategories()"></div>
-                </div>
-                <div class="banner" ref="topbanner">
+                    <div class="banner" ref="topbanner">
+
+                    </div>
+                    <ul class="hm_shop__nav">
+                        <li data-forward="/all"><i></i>全部分类</li>
+                        <li data-forward="/list?type=new&from=%2f"><i></i>新品上市</li>
+                        <li data-forward="/news/fastbuy?from=%2f"><i></i>周一闪购</li>
+                        <li data-forward="/group"><i></i>来拼团吧</li>
+                    </ul>
+                    <div sn-repeat="item in activity">
+                        <div sn-if="{{item.type==1}}" class="hm_shop_banner">
+                            <ul>
+                                <li><img sn-repeat="img in item.data" data-src="{{img.src}}" data-forward="{{img.url}}?from=%2f" /></li>
+                            </ul>
+                        </div>
+                        <div sn-if="{{item.type==2&&item.data.length}}" class="hm_shop_scroll js_shop_scroll" style="padding-right:10px;">
+                            <ul class="hm_shop_list">
+                                <li class="hm_shop_list_item" sn-repeat="prd in item.data" data-forward="/item/{{prd.PRD_ID}}?from={{encodeURIComponent('/')}}">
+                                    <img data-src="{{prd.WPP_LIST_PIC}}" />
+                                    <p class="price">￥{{prd.PRD_PRICE}}
+                                        <del sn-display="{{prd.PRD_SPECIAL_FLAG}}">¥{{prd.PRD_MEMBER_PRICE}}</del>
+                                    </p>
+                                    <p class="name">{{prd.PRD_NAME}}</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <ul class="sp_list">
+                        <li sn-repeat="item in newproducts" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}">
+                            <img data-src="{{item.WPP_LIST_PIC1}}" />
+                            <p class="price"><b>￥{{item.PRD_PRICE}}</b>
+                                <del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del>
+                            </p>
+                            <p class="name">{{item.PRD_NAME}}</p>
+                            <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销
+                                <br>Sold Out</div>
+                        </li>
+                    </ul>
 
                 </div>
-                <ul class="hm_shop__nav">
-                    <li data-forward="/all"><i></i>全部分类</li>
-                    <li data-forward="/list?type=new&from=%2f"><i></i>新品上市</li>
-                    <li data-forward="/news/fastbuy?from=%2f"><i></i>周一闪购</li>
-                    <li data-forward="/group"><i></i>来拼团吧</li>
-                </ul>
-                <div sn-repeat="item in activity">
-                    <div sn-if="{{item.type==1}}" class="hm_shop_banner">
-                        <ul>
-                            <li><img sn-repeat="img in item.data" data-src="{{img.src}}" data-forward="{{img.url}}?from=%2f" /></li>
-                        </ul>
-                    </div>
-                    <div sn-if="{{item.type==2&&item.data.length}}" class="hm_shop_scroll js_shop_scroll" style="padding-right:10px;">
-                        <ul class="hm_shop_list">
-                            <li class="hm_shop_list_item" sn-repeat="prd in item.data" data-forward="/item/{{prd.PRD_ID}}?from={{encodeURIComponent('/')}}">
-                                <img data-src="{{prd.WPP_LIST_PIC}}" />
-                                <p class="price">￥{{prd.PRD_PRICE}}
-                                    <del sn-display="{{prd.PRD_SPECIAL_FLAG}}">¥{{prd.PRD_MEMBER_PRICE}}</del>
-                                </p>
-                                <p class="name">{{prd.PRD_NAME}}</p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+            </div>
 
-                <ul class="sp_list">
-                    <li sn-repeat="item in newproducts" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}">
-                        <img data-src="{{item.WPP_LIST_PIC1}}" />
-                        <p class="price"><b>￥{{item.PRD_PRICE}}</b>
-                            <del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del>
-                        </p>
-                        <p class="name">{{item.PRD_NAME}}</p>
-                        <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销
-                            <br>Sold Out</div>
+            <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);" data-index="1">
+                <div class="hm_chart_wrap">
+                    <div class="hm_chart">
+                        <div class="hm_chart_con" sn-tap="chartType=1" sn-display="{{chartType==0}}">
+                            <div class="hd">当前活力值</div>
+                            <div class="bd">{{util.formatMoney(energyAnimNum)}}</div>
+                            <div class="ft">目标 {{util.formatMoney(levelAmounts)}}</div>
+                        </div>
+                        <div class="hm_chart_con" sn-tap="chartType=2" sn-display="{{chartType==1}}">
+                            <div class="hd">我的月礼</div>
+                            <div class="bd">{{user.FreeMonths}}</div>
+                        </div>
+                        <div class="hm_chart_con" sn-tap="chartType=3" sn-display="{{chartType==2}}">
+                            <div class="hd">我的卡券</div>
+                            <div class="bd">{{user.FreeCouponsCount+user.CouponsCount}}</div>
+                        </div>
+                        <div class="hm_chart_con" sn-tap="chartType=0" sn-display="{{chartType==3}}">
+                            <div class="hd">积分钱包</div>
+                            <div class="bd">{{user.Points}}</div>
+                        </div>
+                        <canvas class="hm_chart_canvas js_canvas"></canvas>
+                    </div>
+                    <div class="hm_chart_desc">{{vipName}}</div>
+                    <div class="hm_steward_link" data-forward="/steward">您现在拥有<em>{{user.StewardNum}}</em>条爱管家记录啦！</div>
+                    <ul class="hm_chart_list">
+                        <li data-forward="/month"><i>我的月礼</i><em>{{user.FreeMonths}}</em></li>
+                        <li data-forward="/coupon"><i>我的卡券</i><em>{{user.FreeCouponsCount+user.CouponsCount}}</em></li>
+                        <li data-forward="/mypoint"><i>积分钱包</i><em>{{user.Points}}</em></li>
+                    </ul>
+                </div>
+                <div class="hm_my_barcode">
+                    <div class="barcode" sn-html="{{barcode}}">
+                    </div>
+                    <div class="mobile">{{user.Mobile}}</div>
+                </div>
+                <ul class="hm_cards">
+                    <li sn-repeat="item in icons" data-forward="{{item.WAI_URL}}">
+                        <img sn-src="{{item.WAI_PIC}}" />
                     </li>
                 </ul>
-
             </div>
         </div>
-
-        <div ref="home" class="main hm_tab_con js_usescroll {{isLogin?'':'isnotlogin'}}" style="-webkit-transform:translate3d({{tab==1?0:100}}%,0%,0);display:{{bottomTab==0?'block':'none'}}" data-index="1">
-            <div class="hm_chart_wrap">
-                <div class="hm_chart">
-                    <div class="hm_chart_con" sn-tap="chartType=1" sn-display="{{chartType==0}}">
-                        <div class="hd">当前活力值</div>
-                        <div class="bd">{{util.formatMoney(energyAnimNum)}}</div>
-                        <div class="ft">目标 {{util.formatMoney(levelAmounts)}}</div>
-                    </div>
-                    <div class="hm_chart_con" sn-tap="chartType=2" sn-display="{{chartType==1}}">
-                        <div class="hd">我的月礼</div>
-                        <div class="bd">{{user.FreeMonths}}</div>
-                    </div>
-                    <div class="hm_chart_con" sn-tap="chartType=3" sn-display="{{chartType==2}}">
-                        <div class="hd">我的卡券</div>
-                        <div class="bd">{{user.FreeCouponsCount+user.CouponsCount}}</div>
-                    </div>
-                    <div class="hm_chart_con" sn-tap="chartType=0" sn-display="{{chartType==3}}">
-                        <div class="hd">积分钱包</div>
-                        <div class="bd">{{user.Points}}</div>
-                    </div>
-                    <canvas class="hm_chart_canvas js_canvas"></canvas>
-                </div>
-                <div class="hm_chart_desc">{{vipName}}</div>
-                <div class="hm_steward_link" data-forward="/steward">您现在拥有<em>{{user.StewardNum}}</em>条爱管家记录啦！</div>
-                <ul class="hm_chart_list">
-                    <li data-forward="/month"><i>我的月礼</i><em>{{user.FreeMonths}}</em></li>
-                    <li data-forward="/coupon"><i>我的卡券</i><em>{{user.FreeCouponsCount+user.CouponsCount}}</em></li>
-                    <li data-forward="/mypoint"><i>积分钱包</i><em>{{user.Points}}</em></li>
-                </ul>
-            </div>
-            <div class="hm_my_barcode">
-                <div class="barcode" sn-html="{{barcode}}">
-                </div>
-                <div class="mobile">{{user.Mobile}}</div>
-            </div>
-            <ul class="hm_cards">
-                <li sn-repeat="item in icons" data-forward="{{item.WAI_URL}}">
-                    <img sn-src="{{item.WAI_PIC}}" />
-                </li>
-            </ul>
-        </div>
-
-        <div class="main" style="display:{{bottomTab==1?'block':'none'}}">
+        <div class="main" style="-webkit-transform:translate({{bottomTab==1?'0px':'100%'}},0px)">
             <div class="baiduMap" sn-html="{{baiduMap}}">
             </div>
         </div>
-        <div ref="discovery" class="main" style="display:{{bottomTab==2?'block':'none'}}">
+        <div ref="discovery" class="main" style="-webkit-transform:translate({{bottomTab==2?'0px':'100%'}},0px)">
 
         </div>
-        <div ref="messages" class="main hm_msg" style="display:{{bottomTab==3?'block':'none'}}">
+        <div ref="messages" class="main hm_msg" style="-webkit-transform:translate({{bottomTab==3?'0px':'100%'}},0px)">
             <div style="overflow:hidden">
                 <div class="hm_msg_list" data-forward="/messages">通知<i sn-display="{{msg_count!=0}}">{{msg_count}}</i></div>
                 <div class="hm_msg_service" data-forward="/news/100">联系客服</div>
@@ -170,7 +172,7 @@
             </div>
 
         </div>
-        <div class="main" style="display:{{bottomTab==4?'block':'none'}}" data-index="3">
+        <div class="main" style="-webkit-transform:translate({{bottomTab==4?'0px':'100%'}},0px)" data-index="3">
             <div class="hm_my_card">
                 <div class="user_rights" data-forward="/news/201">会员权益</div>
                 <div class="vip_name">{{vipName}}</div>

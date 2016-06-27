@@ -34,20 +34,11 @@ var User = {
     request: function (callback, ivcode) {
         var self = this;
         var user = this.get();
-        var recordVersion = util.store('recordVersionTime');
-
-        if (!recordVersion || Date.now() - recordVersion > 24 * 60 * 60 * 1000) {
-            recordVersion = 1;
-            util.store('recordVersionTime', Date.now());
-        } else {
-            recordVersion = 0;
-        }
 
         userApi.setParam({
             UserID: user.ID,
             Auth: user.Auth,
-            ivcode: ivcode ? ivcode : '',
-            recordVersion: recordVersion
+            ivcode: ivcode ? ivcode : ''
 
         }).load(callback);
         return this;

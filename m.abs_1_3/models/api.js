@@ -499,3 +499,14 @@ exports.GroupAddToCartAPI = ShopAPI.extend({
     }
 });
 
+exports.HistoryRecord = ShopAPI.extend({
+    checkData: false,
+    check: false,
+    url: '/api/user/versionhis',
+    params: {
+        "pspid": 0,
+        "appversion": '',
+        "device": '',
+        "deviceversion": ''
+    }
+});

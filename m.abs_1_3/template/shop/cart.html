@@ -18,6 +18,7 @@
                     <b class="price">￥{{Math.round(item.SPB_AMOUNT*100)/100}}</b>
                     <del sn-display="{{item.SPB_AMOUNT>item.PRD_MEMBER_PRICE*(item.SPB_QTY||1)}}">￥{{Math.round(item.PRD_MEMBER_PRICE*(item.SPB_QTY||1)*100)/100}}</del>
                 </div>
+                <div class="icon-clear js_delete_icon" data-id="{{item.SPB_ID}}"></div>
             </div>
             <i class="js_delete" data-id="{{item.SPB_ID}}"></i>
         </li>

@@ -6,6 +6,7 @@ var model = require('core/model');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
+var userModel = require("models/user");
 
 module.exports = Activity.extend({
     events: {
@@ -36,7 +37,6 @@ module.exports = Activity.extend({
                     data: res.data
                 })
             }
-
         });
 
         self.groupListAPI.load();
@@ -44,6 +44,12 @@ module.exports = Activity.extend({
 
     onShow: function () {
         var self = this;
+
+        self.user = userModel.get();
+
+        self.model.set({
+            isLogin: !!self.user
+        })
     },
 
     onDestory: function () {

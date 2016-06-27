@@ -290,36 +290,43 @@ define(function (require, exports, module) {
         initDeletion: function () {
             var self = this;
 
+            var del = function (e) {
+                var $target = $(e.currentTarget);
+                var id = $target.data('id');
+
+                if (id) {
+                    var data = $.extend(true, {}, self.model.data);
+
+                    self.model.getModel('data_baglist').remove(function (item) {
+                        return item.SPB_ID == id;
+                    });
+
+                    self.cartDeleteApi.setParam({
+                        spbId: id
+
+                    }).load();
+                } else {
+                    self.cartDeletePackageAPI.setParam({
+                        wacid: $target.data('wacid'),
+                        ppgid: $target.data('ppgid'),
+                        groupid: $target.data('groupid')
+
+                    }).load();
+                }
+            }
+
+            this.listen('tap .js_delete_icon', function (e) {
+                this.confirm('确认要移除该商品吗？', function () {
+                    del(e);
+                })
+            })
+
             new Deletion({
                 el: self.$('.ct_list_wrap'),
                 children: '.js_delete_item',
                 width: 70,
                 events: {
-                    '.js_delete': function (e) {
-                        var $target = $(e.currentTarget);
-                        var id = $target.data('id');
-
-                        if (id) {
-                            var data = $.extend(true, {}, self.model.data);
-
-                            self.model.getModel('data_baglist').remove(function (item) {
-                                return item.SPB_ID == id;
-                            });
-
-                            self.cartDeleteApi.setParam({
-                                spbId: id
-
-                            }).load();
-                        } else {
-                            self.cartDeletePackageAPI.setParam({
-                                wacid: $target.data('wacid'),
-                                ppgid: $target.data('ppgid'),
-                                groupid: $target.data('groupid')
-
-                            }).load();
-                        }
-
-                    }
+                    '.js_delete': del
                 }
             });
 

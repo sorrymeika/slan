@@ -148,6 +148,7 @@ module.exports = Activity.extend({
 
                 self.model.set({
                     GPP_Obj: data.GPP_Obj,
+                    LPP_LSP_QTY: data.LPP_LSP_QTY,
                     Share_Flag: data.Share_Flag,
                     PRD_ID_LIST: data.PRD_ID_LIST
                 });

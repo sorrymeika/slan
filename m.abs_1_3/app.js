@@ -255,6 +255,8 @@ for (var i = 2, arg, length = argv.length; i < length; i++) {
 //打包
 if (args.build) {
     exports.loadConfig(function (err, config) {
+        console.log("start:", util.formatDate(new Date()));
+
         _.extend(config, config.env[args.build === true ? 'production' : args.build], {
             debug: false
         });

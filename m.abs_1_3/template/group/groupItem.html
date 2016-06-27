@@ -33,6 +33,10 @@
         </div>
 
         <div class="pd_jump_detail" data-forward="/detail/{{data.PRD_ID}}"><b>图文详情</b><em>建议在WIFI情况下查看</em></div>
+
+        <div class="gp_item__rules" sn-html="{{GPP_Obj.GPP_CONTENT}}">
+
+        </div>
         <div class="pd_help">
             如果您有任何疑问，欢迎联系我们的客服。
             <br> 联系热线：400-820-5077 周一至周日 9:00-19:00
@@ -41,6 +45,6 @@
     <footer class="pd_buy gp_item__action">
         <b class="btn_cart" data-forward="/cart"><i sn-display="$state.cartQty!=0">{{$state.cartQty}}</i></b>
         <b class="btn_single {{data.PRD_NUM==0?'sold_out':''}}" data-forward="/item/{{data.PRD_ID}}"><em>¥{{data.PRD_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':'单独购买'}}</b>
-        <b class="btn_buy {{data.PRD_NUM==0?'sold_out':'js_buy'}}"><em>{{'¥'+GPP_Obj.GPP_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':(GPP_Obj.GPP_QTY+'人团')}}</b>
+        <b class="btn_buy {{data.PRD_NUM==0?'sold_out':'js_buy'}}"><em>{{'¥'+GPP_Obj.GPP_PRICE}}</em>{{data.PRD_NUM==0?'商品已售罄':(LPP_LSP_QTY==0?GPP_Obj.GPP_QTY+'人团':LPP_LSP_QTY&lt;GPP_Obj.GPP_QTY?'还差'+(GPP_Obj.GPP_QTY-LPP_LSP_QTY)+'人成团':'拼团价购买')}}</b>
     </footer>
 </div>

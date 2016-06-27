@@ -6,12 +6,12 @@
     <div class="gp_list__wrap">
         <ul class="gp_list__list">
             <li class="gp_list__listitem" sn-repeat="item in data">
-                <p class="img" data-forward="/group/{{item.GPP_ID}}">
+                <p class="img" data-forward="{{isLogin?'/group/'+item.GPP_ID:'/login'}}">
                     <img sn-src="{{item.GPP_IMG}}">
                     <span class="name">{{item.GPP_NAME}}</span>
                 </p>
                 <p class="action">
-                    <b class="btn_detail" data-forward="/group/{{item.GPP_ID}}"><i>{{item.GPP_QTY}}人团</i><span class="price">¥{{item.GPP_PRICE}}</span><span class="go">去开团</span></b>
+                    <b class="btn_detail" data-forward="{{isLogin?'/group/'+item.GPP_ID:'/login'}}"><i>{{item.GPP_QTY}}人团</i><span class="price">¥{{item.GPP_PRICE}}</span><span class="go">去开团</span></b>
                     <b class="btn_single" data-forward="/item/{{item.PRD_ID}}">单独购买</b>
                 </p>
             </li>

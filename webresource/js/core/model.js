@@ -1160,7 +1160,6 @@
                                         }).replace(rset, 'this._setByEl(e.currentTarget,"$1",$2)');
 
                                         var code = 'function(e,model,global){var el=e.currentTarget;' + withData(repeat, content) + "}";
-
                                         child.setAttribute(attr, self.compile(code));
 
                                     } else {

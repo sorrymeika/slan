@@ -11,6 +11,7 @@
     nativeKeys = Object.keys
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
+var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 
 if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
@@ -44,6 +45,23 @@ var util = {
     },
     guid: function () {
         return ++guid;
+    },
+
+    uuid: function () {
+        var chars = CHARS, uuid = '', rnd = 0, r;
+        for (var i = 0; i < 36; i++) {
+            if (i == 8 || i == 13 || i == 18 || i == 23) {
+                uuid += '-';
+            } else if (i == 14) {
+                uuid += '4';
+            } else {
+                if (rnd <= 0x02) rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
+                r = rnd & 0xf;
+                rnd = rnd >> 4;
+                uuid += chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+            }
+        }
+        return uuid;
     },
 
     isFalse: function (value) {

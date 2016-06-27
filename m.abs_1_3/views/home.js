@@ -32,6 +32,33 @@ var cartQtyApi = new api.CartQtyAPI({
     }
 });
 
+var recordVersion = util.store('recordVersionTime');
+
+if (!recordVersion || Date.now() - recordVersion > 24 * 60 * 60 * 1000) {
+    util.store('recordVersionTime', Date.now());
+
+    var historyRecord = new api.HistoryRecord({
+        success: function (res) {
+            console.log(res);
+        },
+        error: function () {
+        }
+    });
+    var user = userModel.get();
+
+    bridge.system.info(function (res) {
+
+        historyRecord.setParam({
+            pspid: user ? user.ID : 0,
+            appversion: sl.appVersion,
+            device: res.deviceName,
+            deviceversion: (util.ios ? "IOS" : "Android") + util.osVertion,
+            uuid: res.uuid
+
+        }).load();
+    });
+}
+
 module.exports = Activity.extend({
     events: {
         'tap .head_tab li': function (e) {
@@ -70,8 +97,10 @@ module.exports = Activity.extend({
 
                 if (index == 1) {
                     if (!this.model.data.baiduMap) {
-                        this.model.set('baiduMap', '<iframe class="js_baidu_map" src="' + bridge.url("/baiduMap.html?v4") + '" frameborder="0" ></iframe>');
-                        this.$baiduMap = this.$('.js_baidu_map').css({ width: window.innerWidth, height: window.innerHeight - 47 - 44 - (util.isInApp ? 20 : 0) });
+                        this.model.set('baiduMap', '<iframe class="js_baidu_map" src="' + bridge.url("/baiduMap.html?v4") + '" frameborder="0" ></iframe>').one('viewDidUpdate', function () {
+                            self.$baiduMap = self.$('.js_baidu_map').css({ width: window.innerWidth, height: window.innerHeight - 47 - 44 - (util.isInApp ? 20 : 0) });
+                        });
+
                     }
 
                     bridge.getLocation(function (res) {
@@ -237,13 +266,16 @@ module.exports = Activity.extend({
             searchHistory: util.store("searchHistory")
         });
 
-        model.showSearch = function () {
+        model.showSearch = function (e) {
             this.set({
                 isShowSearch: true
             });
             $(this.refs.searchwrap).show();
 
             this.refs.searchText.focus();
+
+            e.preventDefault();
+            e.stopPropagation();
         }
 
         model.clearSearch = function () {
@@ -279,8 +311,6 @@ module.exports = Activity.extend({
 
         self.appIconAPI.load();
 
-
-        
         self.hotSearchAPI = new api.HotSearchAPI({
             checkData: false,
             success: function (res) {
@@ -292,7 +322,6 @@ module.exports = Activity.extend({
         });
 
         self.hotSearchAPI.load();
-
 
         var update = new api.UpdateAPI({
             checkData: false,
@@ -358,7 +387,7 @@ module.exports = Activity.extend({
                         loop: true,
                         container: model.refs.topbanner,
                         autoLoop: 3000,
-                        data: res.topbanner.data,
+                        data: res.topbanner.data || [],
                         dots: true,
                         itemTemplate: '<img data-src="<%=src%>" data-forward="<%=url%>?from=%2f" />'
                     });
@@ -369,7 +398,7 @@ module.exports = Activity.extend({
                     useScroll: true
                 });
 
-                self.scroll.get('.js_shop').imageLazyLoad();
+                self.scroll && self.scroll.get('.js_shop').imageLazyLoad();
 
                 this.showMoreMsg('别拉了，就这些<i class="ico_no_more"></i>');
             }
@@ -444,7 +473,8 @@ module.exports = Activity.extend({
 
             model.set('showGuide', true);
 
-            this.guideSlider = new Slider(self.$('.hm_guide'), {
+            this.guideSlider = new Slider({
+                container: self.$('.hm_guide'),
                 itemTemplate: '<img class="guide<%=id%>" src="http://appuser.abs.cn/dest1.2.0/images/guide<%=id%>.jpg" />',
                 data: [{
                     id: 0
@@ -711,7 +741,7 @@ module.exports = Activity.extend({
         var load = function (token) {
 
             userModel.setParam({
-                IMEI: !token ? 'CAN_NOT_GET' : (typeof token == 'string' ? token : token.imei)
+                IMEI: !token ? 'CAN_NOT_GET' : (typeof token == 'string' ? token : token.token)
             });
             self.requestUser();
         }
@@ -732,7 +762,11 @@ module.exports = Activity.extend({
 
         this.setResult('ResetCart');
 
-        this.guideSlider && this.guideSlider._adjustWidth();
+        setTimeout(function () {
+            self.guideSlider && self.guideSlider._adjustWidth();
+
+        }, 0)
+
     },
 
     onEnter: function () {
@@ -743,7 +777,7 @@ module.exports = Activity.extend({
                 self.slider._adjustWidth();
             }, 400);
 
-            self.scroll.get('.js_shop').imageLazyLoad();
+            self.scroll && self.scroll.get('.js_shop').imageLazyLoad();
         }
     },
 
