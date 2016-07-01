@@ -80,6 +80,11 @@ module.exports = Activity.extend({
         });
 
         this.model.selectCate = function (e, item) {
+            if (typeof item == 'string' && !/^\d+$/.test(item)) {
+                self.forward(item);
+                return;
+            }
+
             typeof item !== 'object' && (item = util.first(this.data.categories, function (cate) {
                 return cate.PCG_ID == item;
             }));
@@ -127,7 +132,10 @@ module.exports = Activity.extend({
         console.profile('cate')
         console.time('cate')
 
-        Category.list(function (res) {
+        Category.list(function (res, navs) {
+
+            console.log('navs', navs)
+            console.log('categories', res)
 
             var cpCategory = new CpCategory({
                 data: res,
@@ -143,12 +151,12 @@ module.exports = Activity.extend({
 
             self.cpCategory = cpCategory;
 
-            self.setCategories(res);
+            self.setCategories(res, navs);
         });
 
         console.profileEnd()
         console.timeEnd('cate')
-        
+
     },
 
     onStart: function (params) {
@@ -156,7 +164,7 @@ module.exports = Activity.extend({
 
     },
 
-    setCategories: function (categories) {
+    setCategories: function (categories, navs) {
         var self = this;
         this.categories = model.State.data.categories;
 
@@ -169,6 +177,7 @@ module.exports = Activity.extend({
         this.model.set({
             id: id,
             categories: categories,
+            navs: navs,
             current: current,
             currentSub: currentSub
         });

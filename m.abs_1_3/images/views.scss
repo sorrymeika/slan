@@ -216,7 +216,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_all_cates .cate9:before,.cate_popup_list .cate9:before { background-position-x: -125px; }
 
 .cate_popup_list li:before { -webkit-transform: scale(2); vertical-align: 5px; margin-right: 12px; }
-.cate_popup_list li.noicon:before { display: none; }
+.cate_popup_list li.noicon:before,.sp_all_cates li.noicon:before { display: none; }
 
 .cp_category_mask { @extend .cp_share_mask; -webkit-transition: all 400ms ease-out 0ms; background: transparent !important; }
 .cate_popup_hd { margin-top: 44px; background: #eee; height: 40px; line-height: 40px; padding-left: 8px; }

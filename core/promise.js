@@ -161,7 +161,7 @@ Promise.prototype = {
 
                 argsList.forEach(function (args, j) {
 
-                    callback.apply(this, [j, args]);
+                    callback.call(this, j, args);
                 });
 
                 return self;

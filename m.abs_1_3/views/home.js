@@ -445,6 +445,10 @@ module.exports = Activity.extend({
 
             Category.list(function (res) {
 
+                res = util.find(res, function (item) {
+                    return item.children;
+                })
+
                 model.set({
                     categories: res
                 });

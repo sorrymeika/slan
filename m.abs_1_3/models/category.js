@@ -7,6 +7,7 @@ var State = model.State;
 var categoryAPI = new api.CategoryAPI({
     success: function (res) {
         util.store('categories', res.data);
+        util.store('navs', res.data2);
     },
     error: function () {
 
@@ -19,23 +20,26 @@ var Category = {
     get: function (callback) {
 
         var categories = State.data.categories;
-        var fn = function (err, categories) {
+        var fn = function (categories, navs) {
 
             State.set({
-                categories: categories
+                categories: categories,
+                navs: navs
             });
-            callback(categories);
+            callback(categories, navs);
         };
 
         if (!categories && !(categories = util.store('categories'))) {
-            categoryAPI.load(fn);
+            categoryAPI.load(function (err, res) {
+                fn(res.data, res.data2);
+            });
         } else {
-            fn(null, categories);
+            fn(categories, util.store('navs'));
         }
     },
 
     list: function (callback) {
-        this.get(function (categories) {
+        this.get(function (categories, navs) {
 
             var list = util.find(categories, function (item) {
                 item.children = util.find(categories, function (sub) {
@@ -50,7 +54,7 @@ var Category = {
                 return item.PCG_DEPTH == 1;
             });
 
-            callback(list);
+            callback(list, navs);
         });
     },
 

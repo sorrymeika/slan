@@ -108,8 +108,14 @@ var firstExistentFile = function (paths, files, callback) {
     if (typeof files == 'function') {
         callback = files, files = null;
     }
+    if (typeof paths == 'string') {
+        paths = [paths];
+    }
     var reads;
     if (files) {
+        if (typeof files == 'string') {
+            files = [files];
+        }
         reads = []
         for (var i = 0; i < paths.length; i++) {
             for (var j = 0; j < files.length; j++) {
