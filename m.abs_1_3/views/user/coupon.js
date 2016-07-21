@@ -1,4 +1,4 @@
-define(function(require, exports, module) {
+define(function (require, exports, module) {
 
     var $ = require('$');
     var util = require('util');
@@ -11,16 +11,16 @@ define(function(require, exports, module) {
     var api = require('models/api');
     var Share = require('components/share')
 
-    var cardAnimation = function(items) {
+    var cardAnimation = function (items) {
         if (!items.length) return;
 
         var count = items.length;
         var index = count - 1;
         items.parent().css({ height: 100 * count });
-        items.each(function(j, item) {
+        items.each(function (j, item) {
             item.style.zIndex = j;
         });
-        setTimeout(function() {
+        setTimeout(function () {
             var next = arguments.callee;
             var item = items.eq(index);
             var msec;
@@ -33,8 +33,8 @@ define(function(require, exports, module) {
                 msec = 300;
             }
 
-            setTimeout((function(i) {
-                return function() {
+            setTimeout((function (i) {
+                return function () {
                     item.animate({
                         opacity: 1,
                         translate: '0px,' + 100 * i + 'px'
@@ -54,7 +54,7 @@ define(function(require, exports, module) {
 
     return Activity.extend({
         events: {
-            'tap .coupon_tip': function() {
+            'tap .coupon_tip': function () {
                 util.store('showTipStep', 3);
                 this.model.set({
                     showTipStep: 3
@@ -64,7 +64,7 @@ define(function(require, exports, module) {
 
         swipeRightBackAction: '/',
 
-        onCreate: function() {
+        onCreate: function () {
             var self = this;
 
             var $main = this.$('.main');
@@ -80,7 +80,7 @@ define(function(require, exports, module) {
                 showTipStep: util.store('showTipStep')
             });
 
-            this.model.goTo = function(e, item) {
+            this.model.goTo = function (e, item) {
                 if (item.LVP_PRD_ID) {
                     self.forward("/item/" + item.LVP_PRD_ID + "?from=" + encodeURIComponent(self.route.url));
                 }
@@ -89,7 +89,7 @@ define(function(require, exports, module) {
             this.model.couponApi = new api.CouponAPI({
                 $el: this.$el,
                 checkData: false,
-                beforeSend: function() {
+                beforeSend: function () {
                     var code = self.model.get('code');
 
                     if (!code) {
@@ -103,7 +103,7 @@ define(function(require, exports, module) {
                 params: {
                     pspcode: self.user.PSP_CODE
                 },
-                success: function(res) {
+                success: function (res) {
                     if (res.success) {
                         sl.tip('领取成功');
                         self.loading.reload();
@@ -112,7 +112,7 @@ define(function(require, exports, module) {
                         sl.tip(res.msg);
                     }
                 },
-                error: function(res) {
+                error: function (res) {
                     sl.tip(res.msg);
                 }
             });
@@ -123,10 +123,10 @@ define(function(require, exports, module) {
                 params: {
                     pspcode: self.user.PSP_CODE
                 },
-                success: function(res) {
+                success: function (res) {
                     console.log(res);
                 },
-                error: function(res) {
+                error: function (res) {
                     console.log(res);
                 }
             });
@@ -134,7 +134,7 @@ define(function(require, exports, module) {
             self.share = new Share({
                 head: '分享这张优惠券'
             });
-            self.share.callback = function(res) {
+            self.share.callback = function (res) {
                 if (!res.success) {
                     sl.tip(res.msg);
                 } else {
@@ -145,21 +145,21 @@ define(function(require, exports, module) {
 
             self.share.$el.appendTo(self.$el);
 
-            this.model.share = function(e, item) {
+            this.model.share = function (e, item) {
                 self.couponStatusApi.setParam({
                     id: item.CSV_ID,
                     UserID: self.user.ID,
                     Auth: self.user.Auth
 
-                }).load(function(err, res) {
+                }).load(function (err, res) {
                     if (!err && res.success) {
                         if (res.overdue) {
                             return;
                         }
                         self.share.set({
                             linkURL: res.url,
-                            title: 'ABS优惠券分享',
-                            description: 'ABS优惠券分享'
+                            title: '两情相悦就送券！',
+                            description: item.VCA_NAME
 
                         }).show();
                     } else {
@@ -178,9 +178,9 @@ define(function(require, exports, module) {
                 $el: this.$el,
                 check: false,
                 checkData: false,
-                success: function(res) {
+                success: function (res) {
                     if (res.closeNumber) {
-                        self.confirm("您有" + res.closeNumber + '张优惠券马上就要过期啦，<br>尽快使用哦', function() {
+                        self.confirm("您有" + res.closeNumber + '张优惠券马上就要过期啦，<br>尽快使用哦', function () {
                         });
                     }
 
@@ -189,19 +189,19 @@ define(function(require, exports, module) {
                         self.model.set("data1", []);
                     }
                     else {
-                        var data = util.find(res.data, function(item) {
+                        var data = util.find(res.data, function (item) {
                             return item.VCA_VCT_ID != 4;
                         });
 
-                        data.sort(function(a, b) {
+                        data.sort(function (a, b) {
                             return a.IsOverdue && !b.IsOverdue ? 1 : !a.IsOverdue && b.IsOverdue ? -1 : a.CSV_END_DT > b.CSV_END_DT ? 1 : a.CSV_END_DT == b.CSV_END_DT ? 0 : -1;
                         });
                         self.model.set("data", data);
 
-                        var data1 = util.find(res.data, function(item) {
+                        var data1 = util.find(res.data, function (item) {
                             return item.VCA_VCT_ID == 4;
                         });
-                        data1.sort(function(a, b) {
+                        data1.sort(function (a, b) {
                             return a.IsOverdue && !b.IsOverdue ? 1 : !a.IsOverdue && b.IsOverdue ? -1 : a.CSV_END_DT > b.CSV_END_DT ? 1 : a.CSV_END_DT == b.CSV_END_DT ? 0 : -1;
                         });
 
@@ -212,7 +212,7 @@ define(function(require, exports, module) {
                 }
             });
 
-            self.model.on('change:isOverdue', function() {
+            self.model.on('change:isOverdue', function () {
                 if (self.model.data.isOverdue) {
                     self.showItemsWithAnim();
                 }
@@ -220,14 +220,14 @@ define(function(require, exports, module) {
 
         },
 
-        showItemsWithAnim: function() {
+        showItemsWithAnim: function () {
             var self = this;
             var $items = self.$(self.model.data.isOverdue ? '.js_overdue' : '.js_not_overdue').children('li');
 
             cardAnimation($items);
         },
 
-        onShow: function() {
+        onShow: function () {
             var self = this;
 
             self.user = util.store('user');
@@ -243,7 +243,7 @@ define(function(require, exports, module) {
             }
         },
 
-        onDestory: function() {
+        onDestory: function () {
         }
     });
 });

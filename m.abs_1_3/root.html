@@ -85,7 +85,7 @@
                     var combineMapping = @(JSON.stringify(resourceMapping));
 
                     seajs.on('fetch', function(emitData) {
-                        @if(!debug) {
+                        @if(!debug&&!useLocal) {
                             var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
                             if (resourceMapping && resourceMapping[id]) {

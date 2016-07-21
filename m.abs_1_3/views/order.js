@@ -11,48 +11,54 @@ var bridge = require('bridge');
 
 module.exports = Activity.extend({
     events: {
-        'tap .js_pay:not(.disabled)': function () {
+        'tap .js_pay:not(.disabled)': function() {
             var self = this;
             var order = this.model.get('data');
 
             self.orderApi.showLoading();
 
-            setTimeout(function () {
+            setTimeout(function() {
                 self.orderApi.hideLoading();
             }, 3000);
 
             self.checkStatus();
 
-            if (this.model.get('payType') == 1) {
-                //bridge.openInApp(api.API.prototype.baseUri + '/AlipayDirect/Pay/' + order.PUR_ID + "?UserID=" + self.user.ID + "&Auth=" + self.user.Auth);
+            switch (this.model.get('payType')) {
 
-                bridge.ali({
-                    type: 'pay',
-                    spUrl: api.API.prototype.baseUri + '/AlipayApp/Pay',
-                    orderCode: order.PUR_CODE
+                case 1:
+                    //bridge.openInApp(api.API.prototype.baseUri + '/AlipayDirect/Pay/' + order.PUR_ID + "?UserID=" + self.user.ID + "&Auth=" + self.user.Auth);
 
-                }, function (res) {
-                    sl.tip(res.msg);
-                    self.orderApi.hideLoading();
-                });
+                    bridge.ali({
+                        type: 'pay',
+                        spUrl: api.API.prototype.baseUri + '/AlipayApp/Pay',
+                        orderCode: order.PUR_CODE
 
-            } else {
+                    }, function(res) {
+                        sl.tip(res.msg);
+                        self.orderApi.hideLoading();
+                    });
 
-                bridge.wx({
-                    type: 'pay',
-                    spUrl: api.API.prototype.baseUri + '/api/shop/wxcreateorder',
-                    orderCode: order.PUR_CODE,
-                    orderName: 'ABS商品',
-                    orderPrice: order.PUR_AMOUNT
-                }, function (res) {
-                    sl.tip(res.msg);
-                    self.orderApi.hideLoading();
-                });
+                    break;
+                case 2:
+                    bridge.wx({
+                        type: 'pay',
+                        spUrl: api.API.prototype.baseUri + '/api/shop/wxcreateorder',
+                        orderCode: order.PUR_CODE,
+                        orderName: 'ABS商品',
+                        orderPrice: order.PUR_AMOUNT
+                    }, function(res) {
+                        sl.tip(res.msg);
+                        self.orderApi.hideLoading();
+                    });
+                    break;
+                case 3:
+                    bridge.cmbpay(api.API.prototype.baseUri + "/api/cmbpay/pay?orderCode=" + order.PUR_CODE);
+                    break;
             }
         }
     },
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
         var $main = self.$('.main');
 
@@ -68,9 +74,9 @@ module.exports = Activity.extend({
             payType: 1
         });
 
-        self.model.cancelOrder = function (e, order) {
+        self.model.cancelOrder = function(e, order) {
 
-            self.confirm('你确定取消订单吗？', function () {
+            self.confirm('你确定取消订单吗？', function() {
                 self.cancelOrderApi.setParam({
                     purcode: order.PUR_CODE
 
@@ -89,7 +95,7 @@ module.exports = Activity.extend({
                 UserID: self.user.ID,
                 Auth: self.user.Auth
             },
-            success: function (res) {
+            success: function(res) {
                 console.log(res);
 
                 self.model.set({
@@ -97,7 +103,7 @@ module.exports = Activity.extend({
                 })
 
                 if (self.referrer != '/myorder' && res.data.PUR_PAS_ID == 2) {
-                    self.forward("/news/order" + self.route.query.id);
+                    self.forward("/news/order" + self.route.data.id);
                 }
             }
         });
@@ -108,9 +114,9 @@ module.exports = Activity.extend({
             $el: this.$el,
             check: false,
             checkData: false,
-            success: function (res) {
+            success: function(res) {
                 if (res.status != 2) {
-                    self.timer = setTimeout(function () {
+                    self.timer = setTimeout(function() {
                         self.checkStatus();
                     }, 2000);
 
@@ -127,7 +133,7 @@ module.exports = Activity.extend({
             params: {
                 pspcode: self.user.PSP_CODE
             },
-            success: function (res) {
+            success: function(res) {
                 if (res.success) {
                     sl.tip('订单已成功取消');
                     self.orderApi.reload();
@@ -136,7 +142,7 @@ module.exports = Activity.extend({
                     self.setResult("UserChange");
                 }
             },
-            error: function (res) {
+            error: function(res) {
                 sl.tip(res.msg);
             }
         });
@@ -146,7 +152,7 @@ module.exports = Activity.extend({
         }
     },
 
-    checkStatus: function () {
+    checkStatus: function() {
         var self = this;
 
         self.timer && clearTimeout(self.timer);
@@ -157,11 +163,11 @@ module.exports = Activity.extend({
         }).load();
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         self.timer && clearTimeout(self.timer);
     }
 });

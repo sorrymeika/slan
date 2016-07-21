@@ -56,9 +56,9 @@
                 <div class="hm_shop">
                     <div class="sp_all_cates">
                         <div ref="cates">
-                            <ul style="width:{{window.innerWidth*2.1}}px;padding-right:20px;">
+                            <ul style="width:{{(navs.length+1)*.73}}rem;padding-right:30px;">
                                 <li class="cate0 curr">首页</li>
-                                <li sn-repeat="item in categories" class="cate{{item.PCG_ID}}" data-forward="/all?id={{item.PCG_ID}}">{{item.PCG_NAME}}</li>
+                                <li sn-repeat="item in navs" class="{{!item.LPE_URL?'cate'+item.LPE_PCG_ID:'noicon'}}" data-forward="{{!item.LPE_URL?'/all?id='+item.LPE_PCG_ID:item.LPE_URL}}">{{item.LPE_PCG_NAME}}</li>
                             </ul>
                         </div>
                         <div class="dropdown_btn" sn-tap="this.showCategories()"></div>

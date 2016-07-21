@@ -1,0 +1,8 @@
+﻿@{
+
+    CMBCHINALib.FirmClient fc = new CMBCHINALib.FirmClient();
+    string keyPath = Request.PhysicalApplicationPath + System.Configuration.ConfigurationManager.AppSettings["cmbKeyPath"];
+    int result = fc.exCheckInfoFromBank(keyPath, Server.UrlDecode(Request.QueryString.ToString()));
+
+    Output.Write(result + Server.UrlDecode(Request.QueryString.ToString()));
+}

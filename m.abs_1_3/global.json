@@ -1,5 +1,6 @@
 {
     "debug": true,
+    "useLocal": false,
     "dest": "./dest",
     "api": "http://127.0.0.1:5559/proxy1",
     "shopApi": "http://127.0.0.1:5559/proxy",
@@ -38,9 +39,10 @@
             "updateApi": "http://testappversion.abs.cn"
         },
         "debug": {
-            "api": "http://10.0.79.244:5559/proxy1",
-            "shopApi": "http://10.0.79.244:5559/proxy",
-            "updateApi": "http://testappversion.abs.cn"
+            "api": "http://appuser2.abs.cn",
+            "shopApi": "http://testappapi-1-3-0.abs.cn",
+            "updateApi": "http://testappversion.abs.cn",
+            "useLocal": true
         },
         "dev": {
             "api": "http://127.0.0.1:5559/proxy1",

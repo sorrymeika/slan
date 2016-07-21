@@ -123,7 +123,7 @@ define(function (require, exports, module) {
                     self.share = new Share({
                         head: '分享商品至',
                         title: res.data.PRD_NAME,
-                        linkURL: 'http://m.abs.cn/single/' + res.data.PRD_ID + '.html',
+                        linkURL: !res.data.FLASH_FLAG ? 'http://m.abs.cn/single/' + res.data.PRD_ID + '.html' : res.flpurl,
                         description: res.data.PRD_NAME,
                         image: "http://www.absimg.com/media/H5/app/logo.jpg"
                     });

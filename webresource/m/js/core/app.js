@@ -60,6 +60,10 @@ var bindBackGesture = function (application) {
     touch.on('beforestart', function (e) {
         this.x = 0;
 
+        if (this._isInAnim) {
+            this.stop();
+        }
+
     }).on('start', function () {
         var that = this,
             action,
@@ -82,8 +86,8 @@ var bindBackGesture = function (application) {
 
         that.swiper = null;
 
-        action = isSwipeLeft ? (currentActivity.swipeLeftForwardAction ? (isForward = true, currentActivity.swipeLeftForwardAction) : (isForward = false, currentActivity.swipeLeftBackAction))
-            : (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeRightBackAction));
+        action = isSwipeLeft ? (currentActivity.swipeLeftForwardAction ? (isForward = true, currentActivity.swipeLeftForwardAction) : (isForward = false, currentActivity.swipeLeftBackAction)) :
+            (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeRightBackAction));
 
         if (!action) {
             if (isSwipeLeft && currentActivity.referrerDir == "Left") {
@@ -134,9 +138,13 @@ var bindBackGesture = function (application) {
         if (that.swiperPromise) {
             that.swiperPromise.then(function () {
 
+                that._isInAnim = true;
+
                 application.queue.then([200, that.isCancelSwipe ? 0 : 100, function () {
                     var activity = that.swipeActivity,
                         currentActivity = application._currentActivity;
+
+                    that._isInAnim = false;
 
                     if (that.isCancelSwipe) {
                         currentActivity.isPrepareExitAnimation = false;
@@ -206,9 +214,7 @@ var Application = Component.extend($.extend(appProto, {
         }
     },
 
-    el: <div class="viewport">
-        <div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div>
-    </div>,
+    el: '<div class="viewport"><div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div></div>',
 
     backGesture: true,
 
@@ -219,7 +225,7 @@ var Application = Component.extend($.extend(appProto, {
         window.Application = this;
 
         that.el = that.$el[0];
-        that.mask = that.$el.children('.screen');//.off(preventEvents).on(preventEvents, false);
+        that.mask = that.$el.children('.screen'); //.off(preventEvents).on(preventEvents, false);
 
         that.history = [];
 
@@ -319,7 +325,9 @@ var Application = Component.extend($.extend(appProto, {
             });
         });
 
-        $win.one('load', function () { if (!location.hash) location.hash = '/'; });
+        $win.one('load', function () {
+            if (!location.hash) location.hash = '/';
+        });
     },
 
     _toggle: function (route, options, callback) {
@@ -374,7 +382,7 @@ var Application = Component.extend($.extend(appProto, {
                 anim.el.css(animation.transform(anim.start).css).animate(animation.transform(anim.css).css, duration, ease);
             }
 
-            setTimeout(finish, duration + 48);
+            setTimeout(finish, duration + 300);
 
             //anim.finish = finish;
             //animation.parallel(anims);
