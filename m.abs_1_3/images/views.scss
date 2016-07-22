@@ -238,7 +238,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_all_catelist_subcate_item { float: left; margin: .1rem 0 0 .14rem; width: .6rem; overflow: hidden; text-align: center; }
 .sp_all_catelist_subcate_item p { z-index: 2; width: .6rem; height: .6rem; position: relative; overflow: hidden; border-radius: 50%; }
 .sp_all_catelist_subcate_item img { height: .6rem; position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); }
-.sp_all_catelist_subcate_item span { font-size: 12px; }
+.sp_all_catelist_subcate_item span { font-size: 12px; height: 14px; overflow: hidden; display: block; }
 .sp_all_catelist_subcate_item.curr { color: #e04447; }
 .sp_all_catelist_subcate_item.more p { background: #eee; text-align: center; line-height: .6rem; }
 .sp_all_catelist_subcate_item.more p:before,.sp_all_catelist_subcate_item.more p:after,.sp_all_catelist_subcate_item.more p i { content: ''; display: inline-block; width: .06rem; height: .06rem; background: #333; border-radius: 50%; text-align: center; margin: 0 2px; }
