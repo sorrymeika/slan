@@ -98,15 +98,14 @@ module.exports = Activity.extend({
                     sl.tip(res.msg);
                 else {
                     util.store('ivcode', res.ivcode || null);
+                    util.store('user', res.data);
 
                     var backUrl = self.route.query.success || self.swipeRightBackAction;
 
-                    userModel.set(res.data).request(function () {
-                        self.back(backUrl);
-                        setTimeout(function () {
-                            self.setResult("Login");
-                        }, 0);
-                    });
+                    self.back(backUrl == '/' ? backUrl + '?tab=1' : backUrl);
+                    setTimeout(function () {
+                        self.setResult("Login");
+                    }, 0);
                 }
             },
             error: function (res) {
@@ -141,6 +140,16 @@ module.exports = Activity.extend({
 
         self.$valid = this.$('.js_valid');
         self.validTimeout();
+    },
+
+    onShow: function () {
+        if (this.swipeRightBackAction == '/') {
+            this.swipeRightBackAction = this.swipeRightBackAction + '?tab=1';
+
+            this.model.set({
+                back: this.swipeRightBackAction
+            })
+        }
     },
 
     onDestory: function () {

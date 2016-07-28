@@ -34,7 +34,7 @@ define(function (require, exports, module) {
                         if (userModel.get()) {
                             userModel.set(null);
                             self.setResult("Logout");
-                            self.back('/');
+                            self.back('/?tab=1');
                         } else {
                             self.forward('/login');
                         }

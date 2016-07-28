@@ -25,7 +25,7 @@ var Month = model.ViewModel.extend({
 				<div class="pd_size_select">
 					<div class="hd">尺码</div>
 					<ul>
-						<li sn-repeat="item in spec" class="{{data.PRD_SPEC==item?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}}" sn-tap="this.setSpec(item)">{{ item.split('|')[0] }}</li>
+						<li sn-repeat="item in spec" class="{{this.equal(data.PRD_SPEC,item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}}" sn-tap="this.setSpec(item)">{{ item.split('|')[0] }}</li>
 					</ul>
 				</div>
 				<div class="pd_size_select">
@@ -46,6 +46,11 @@ var Month = model.ViewModel.extend({
 		</div>
 	</div>,
 
+	equal: function (a, b) {
+
+		return a == b;
+	},
+
     isInList: function (spec, color, colorSpec) {
 
         return !!util.first(colorSpec, function (item) {
@@ -54,10 +59,13 @@ var Month = model.ViewModel.extend({
     },
 
 	setSpec: function (e, item) {
+
         if ($(e.currentTarget).hasClass('disabled')) {
             return;
         }
-        this.set("data.PRD_SPEC", item);
+
+        this.getModel("data").set("PRD_SPEC", item);
+
         this.onChange();
     },
 

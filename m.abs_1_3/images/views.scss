@@ -779,10 +779,10 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
         &.vct5 { background: #fc3; }
         &.dis { background: #ccc; }
         .price {
-            font-size: 11.4716px; color: #fff; margin: 5px 0 0 20px; line-height: 1;
+            font-size: 55px; color: #fff; margin: 5px 0 0 20px; line-height: 1;
             &:before { content: '￥'; display: inline-block; font-size: 12px; vertical-align: 2px; }
         }
-        .name { font-size: 2.810px; color: #fff; margin: -2px 0 0 20px; line-height: 1; }
+        .name { font-size: 14px; color: #fff; margin: -2px 0 0 20px; line-height: 1; }
         .time { font-size: 10px; color: #fff; margin: 2px 0 0 20px; }
         &.free:before,&:after { background: url(site.png) no-repeat 0px -30px; background-size: 320px auto; position: absolute; right: 0px; bottom: 0px; content: ''; display: block; width: 139px; height: 55px; z-index: 0; }
         &.free {

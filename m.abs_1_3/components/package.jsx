@@ -128,6 +128,45 @@ var Month = model.ViewModel.extend({
 		}
 		
 		product.PRD_SPEC=product.PRD_DISPLAY_SPEC;
+
+		self.size = new Size({
+			btn: '选择商品',
+			
+			confirm: function(item,pstId,qty){
+				
+				self.getModel('data').each(function(model,i){
+					var ppsModel=model.get('PPS_Model');
+					
+					if (ppsModel.PST_ID==pstId){
+						var max=ppsModel.PST_OPTIONAL_QTY;
+						var list= model.get('list');
+						list=list?[].concat(list):[];
+						
+						var count=0;
+						for (var j=0;j<list.length;j++) {
+							count+=list[j].qty;
+						}
+												
+						if (count+qty>max){
+							sl.tip('您选择的商品数量超过该组指定数量');
+							return false;
+						}
+						list.push($.extend({},item,{ qty: qty }));
+							
+						model.set({
+							list: list
+						});
+						return false;
+					}
+				});
+				
+				self.refreshQty();
+				
+				self.size.hide();
+			}
+		});
+        
+		self.size.$el.appendTo($('body'));
 		
 		self.size.set({
 			PST_ID: item.PPS_Model.PST_ID,
@@ -185,53 +224,12 @@ var Month = model.ViewModel.extend({
 			url: encodeURIComponent(location.hash)
 		});
 		
-		self.size = new Size({
-			
-			btn: '选择商品',
-			
-			confirm: function(item,pstId,qty){
-				
-				self.getModel('data').each(function(model,i){
-					var ppsModel=model.get('PPS_Model');
-					
-					if (ppsModel.PST_ID==pstId){
-						var max=ppsModel.PST_OPTIONAL_QTY;
-						var list= model.get('list');
-						list=list?[].concat(list):[];
-						
-						var count=0;
-						for (var j=0;j<list.length;j++) {
-							count+=list[j].qty;
-						}
-												
-						if (count+qty>max){
-							sl.tip('您选择的商品数量超过该组指定数量');
-							return false;
-						}
-						list.push($.extend({},item,{ qty: qty }));
-							
-						model.set({
-							list: list
-						});
-						return false;
-					}
-				});
-				
-				self.refreshQty();
-				
-				self.size.hide();
-			}
-		});
-        
-		self.size.$el.appendTo($('body'));
-		
 		var dataAPI=new api.PackageAPI({
 			$el: self.$('.sp_package'),
 			params: {
 				id: this.data.id
 			},
 			success: function(res){
-				console.log(res.data);
 				var data=res.data[0];
 				
 				self.set({

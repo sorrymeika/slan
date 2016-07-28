@@ -1,4 +1,4 @@
-﻿define(function(require, exports, module) {
+﻿define(function (require, exports, module) {
     var $ = require('$'),
         util = require('util'),
         Base = require('./base'),
@@ -23,7 +23,7 @@
     var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
     var rthis = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
 
-    var withData = function(repeat, content) {
+    var withData = function (repeat, content) {
         var code = 'var $el=$(el),root=model.root,$data=$.extend({},global,root.data,{$state:root.$state.data}';
         if (repeat) {
             code += ',{';
@@ -47,7 +47,7 @@
         return code;
     }
 
-    var isNull = function(str) {
+    var isNull = function (str) {
         var arr = str.split('.');
         var result = [];
         var code = '';
@@ -62,7 +62,7 @@
         return '((' + code + ')?typeof ' + str + '==="function"?' + str + '():' + str + ':"")';
     }
 
-    var eachElement = function(el, fn, extend) {
+    var eachElement = function (el, fn, extend) {
 
         var childNodes = el.length ? el : [el];
 
@@ -77,10 +77,10 @@
     }
 
     var Filters = {
-        contains: function(source, keywords) {
+        contains: function (source, keywords) {
             return source.indexOf(keywords) != -1;
         },
-        like: function(source, keywords) {
+        like: function (source, keywords) {
             source = source.toLowerCase();
             keywords = keywords.toLowerCase();
             return source.indexOf(keywords) != -1 || keywords.indexOf(source) != -1;
@@ -88,7 +88,7 @@
         util: util
     };
 
-    var Model = function(parent, key, data) {
+    var Model = function (parent, key, data) {
 
         if (parent instanceof Model) {
             this.key = parent.key ? parent.key + '.' + key : key;
@@ -115,7 +115,7 @@
 
     }
     var ModelProto = {
-        getModel: function(key) {
+        getModel: function (key) {
             if (typeof key == 'string' && key.indexOf('.') != -1) {
                 key = key.split('.');
             }
@@ -140,7 +140,7 @@
             }
             return key == 'this' ? this : key == '' ? this.data : this.model[key];
         },
-        get: function(key) {
+        get: function (key) {
             if (typeof key == 'string' && key.indexOf('.') != -1) {
                 key = key.split('.');
             }
@@ -156,11 +156,16 @@
             return key == 'this' ? this : key == '' ? this.data : this.data[key];
         },
 
-        cover: function(key, val) {
+        cover: function (key, val) {
             return this.set(true, key, val);
         },
 
-        set: function(cover, key, val) {
+        _fixParentData: function () {
+            var parent = this.parent;
+            parent.data[(parent instanceof Collection) ? parent.models.indexOf(this) : this._key] = this.data;
+        },
+
+        set: function (cover, key, val) {
             var self = this,
                 origin,
                 changed,
@@ -183,9 +188,8 @@
             } else if (typeof val == 'undefined') {
                 val = key, key = '', parent = this.parent;
 
-                parent.data[(parent instanceof Collection) ? parent.models.indexOf(this) : this._key] = val;
-
                 this.data = val;
+                this._fixParentData();
 
                 shouldTriggerEvent && this.root._triggerChangeEvent(this.key, this);
 
@@ -193,6 +197,7 @@
 
             } else {
                 keys = key.split('.');
+
                 if (keys.length > 1) {
                     var lastKey = keys.pop();
                     for (var i = 0, len = keys.length; i < len; i++) {
@@ -213,7 +218,7 @@
                     (attrs = {})[key] = val;
                 }
             }
-            if (!$.isPlainObject(this.data)) this.data = {};
+            if (!$.isPlainObject(this.data)) this.data = {}, this._fixParentData();
 
             if (cover) {
                 for (var attr in this.data) {
@@ -236,7 +241,9 @@
                 if (origin !== value) {
 
                     if (origin instanceof Model) {
+
                         value === null || value === undefined ? origin.reset() : origin.set(coverChild, value);
+                        this.data[attr] = origin.data;
 
                     } else if (origin instanceof Collection) {
                         if (!$.isArray(value)) {
@@ -247,8 +254,10 @@
                             }
                         }
                         origin.set(value);
+                        this.data[attr] = origin.data;
 
                     } else {
+
                         switch (toString.call(value)) {
                             case '[object Object]':
                                 model[attr] = new Model(this, attr, value);
@@ -270,7 +279,7 @@
             return self;
         },
 
-        reset: function() {
+        reset: function () {
 
             var data = {};
             for (var attr in this.data) {
@@ -278,7 +287,7 @@
             }
             this.set(data);
         },
-        closest: function(key) {
+        closest: function (key) {
             var res;
             for (var parent = this.parent; parent != null; parent = parent.parent) {
                 res = typeof key == 'function' ? key(parent) : (parent.key == key ? 1 : 0);
@@ -289,7 +298,7 @@
                 }
             }
         },
-        contains: function(model, excludeCollection) {
+        contains: function (model, excludeCollection) {
             for (model = model.parent; model != null; model = model.parent) {
                 if (model == this) {
                     return true;
@@ -299,7 +308,7 @@
             return false;
         },
 
-        under: function(parent) {
+        under: function (parent) {
             for (var model = this.parent; model != null && parent != model; model = model.parent) {
                 if (model instanceof Collection) {
                     return false;
@@ -308,7 +317,7 @@
             return true;
         },
 
-        _pushNode: function(source, node) {
+        _pushNode: function (source, node) {
             var id = source.snElementId || (source.snElementId = ++elementId);
 
             (this._elements[id] || (this._elements[id] = [])).push(node);
@@ -318,7 +327,7 @@
 
     Event.mixin(Model, ModelProto);
 
-    var Collection = Event.mixin(function(parent, attr, data) {
+    var Collection = Event.mixin(function (parent, attr, data) {
 
         this.models = [];
 
@@ -335,113 +344,113 @@
         this.add(data);
 
     }, {
-        _triggerChangeEvent: function() {
-            if (!this._silent) {
-                this.root._triggerChangeEvent(this.key, this)
-                    ._triggerChangeEvent(this.key + '/length', this);
-            }
-        },
-
-        get: function(i) {
-            return this.models[i];
-        },
-        set: function(data) {
-            this._silent = true;
-
-            if (!data || data.length == 0) {
-                this.clear();
-
-            } else {
-                var modelsLen = this.models.length;
-
-                if (data.length < modelsLen) {
-                    this.remove(data.length, modelsLen - data.length)
+            _triggerChangeEvent: function () {
+                if (!this._silent) {
+                    this.root._triggerChangeEvent(this.key, this)
+                        ._triggerChangeEvent(this.key + '/length', this);
                 }
+            },
 
-                var i = 0;
-                this.each(function(model) {
-                    model.set(true, data[i]);
-                    i++;
-                });
+            get: function (i) {
+                return this.models[i];
+            },
+            set: function (data) {
+                this._silent = true;
 
-                this.add(i == 0 ? data : data.slice(i, data.length));
-            }
-            this._silent = false;
+                if (!data || data.length == 0) {
+                    this.clear();
 
-            this._triggerChangeEvent();
+                } else {
+                    var modelsLen = this.models.length;
 
-            return this;
-        },
-        each: function(fn) {
-            for (var i = 0; i < this.models.length; i++) {
-                if (fn.call(this, this.models[i], i) === false) break;
-            }
-            return this;
-        },
-        first: function(fn) {
-            for (var i = 0; i < this.models.length; i++) {
-                if (fn.call(this, this.data[i], i)) {
-                    return this.models[i];
+                    if (data.length < modelsLen) {
+                        this.remove(data.length, modelsLen - data.length)
+                    }
+
+                    var i = 0;
+                    this.each(function (model) {
+                        model.set(true, data[i]);
+                        i++;
+                    });
+
+                    this.add(i == 0 ? data : data.slice(i, data.length));
                 }
-            }
-            return null;
-        },
-        add: function(data) {
-            var model;
-            var length;
-            var changes = [];
+                this._silent = false;
 
-            if (!$.isArray(data)) {
-                data = [data];
-            }
+                this._triggerChangeEvent();
 
-            for (var i = 0, dataLen = data.length; i < dataLen; i++) {
-                var dataItem = data[i];
-                length = this.models.length;
-                model = new Model(this, length, dataItem);
-                this.models.push(model);
-                changes.push(model);
-
-                this.trigger('add', model);
-            }
-
-            this.root.trigger('change:' + this.eventName + '/add', this, changes);
-
-            this._triggerChangeEvent();
-        },
-        remove: function(start, count) {
-            var models;
-
-            if (typeof start == 'function') {
-                models = [];
-                for (var i = this.models.length - 1; i >= 0; i--) {
-                    if (start.call(this, this.data[i], i)) {
-                        models.push(this.models.splice(i, 1)[0]);
-                        this.data.splice(i, 1);
+                return this;
+            },
+            each: function (fn) {
+                for (var i = 0; i < this.models.length; i++) {
+                    if (fn.call(this, this.models[i], i) === false) break;
+                }
+                return this;
+            },
+            first: function (fn) {
+                for (var i = 0; i < this.models.length; i++) {
+                    if (fn.call(this, this.data[i], i)) {
+                        return this.models[i];
                     }
                 }
+                return null;
+            },
+            add: function (data) {
+                var model;
+                var length;
+                var changes = [];
 
-            } else {
-                if (!count) count = 1;
+                if (!$.isArray(data)) {
+                    data = [data];
+                }
 
-                models = this.models.splice(start, count);
-                this.data.splice(start, count);
+                for (var i = 0, dataLen = data.length; i < dataLen; i++) {
+                    var dataItem = data[i];
+                    length = this.models.length;
+                    model = new Model(this, length, dataItem);
+                    this.models.push(model);
+                    changes.push(model);
+
+                    this.trigger('add', model);
+                }
+
+                this.root.trigger('change:' + this.eventName + '/add', this, changes);
+
+                this._triggerChangeEvent();
+            },
+            remove: function (start, count) {
+                var models;
+
+                if (typeof start == 'function') {
+                    models = [];
+                    for (var i = this.models.length - 1; i >= 0; i--) {
+                        if (start.call(this, this.data[i], i)) {
+                            models.push(this.models.splice(i, 1)[0]);
+                            this.data.splice(i, 1);
+                        }
+                    }
+
+                } else {
+                    if (!count) count = 1;
+
+                    models = this.models.splice(start, count);
+                    this.data.splice(start, count);
+                }
+
+                this._triggerChangeEvent();
+                this.trigger('remove', models);
+
+                this.root.trigger('change:' + this.eventName + '/remove', this, models);
+            },
+
+            clear: function (data) {
+                var models = this.models.slice();
+                this.models.length = this.data.length = 0;
+                this._triggerChangeEvent();
+
+                this.root.trigger('change:' + this.eventName + '/remove', this, models);
             }
-
-            this._triggerChangeEvent();
-            this.trigger('remove', models);
-
-            this.root.trigger('change:' + this.eventName + '/remove', this, models);
-        },
-
-        clear: function(data) {
-            var models = this.models.slice();
-            this.models.length = this.data.length = 0;
-            this._triggerChangeEvent();
-
-            this.root.trigger('change:' + this.eventName + '/remove', this, models);
-        }
-    });
+        });
 
 
 
@@ -472,7 +481,7 @@
         this.snRepeats = [];
 
         if (this.filters) {
-            this.filter = this.viewModel._compile('{{' + this.filters + '}}', this, function(e, model) {
+            this.filter = this.viewModel._compile('{{' + this.filters + '}}', this, function (e, model) {
                 var now = Date.now();
 
                 var isUnderRoot = model.under();
@@ -491,7 +500,7 @@
 
         this.syncModels = [];
 
-        this.viewModel.on(eventName + '/add', function(e, collection, models) {
+        this.viewModel.on(eventName + '/add', function (e, collection, models) {
 
             self.syncModels = self.syncModels.concat(models);
 
@@ -503,12 +512,12 @@
                 }
             }
 
-        }).on(eventName + '/remove', function(e, collection, models) {
+        }).on(eventName + '/remove', function (e, collection, models) {
             for (var i = 0; i < models.length; i++) {
                 var model = models[i];
 
                 for (var j = self.snRepeats.length - 1; j >= 0; j--) {
-                    self.snRepeats[j].remove(function(item) {
+                    self.snRepeats[j].remove(function (item) {
                         return item.model == model;
                     });
                 }
@@ -521,7 +530,7 @@
         });
     }
 
-    Repeat.prototype.append = function(options) {
+    Repeat.prototype.append = function (options) {
         var self = this;
         var snRepeat = new SNRepeat(this, options.replacement, options.model);
         var hasAdd = false;
@@ -553,12 +562,12 @@
 
     SNRepeat.prototype = {
 
-        collection: function() {
+        collection: function () {
             return this.referenceModel.model[this.repeat.key];
         },
 
-        _removeEl: function(el) {
-            eachElement($(el).remove(), function(node, i) {
+        _removeEl: function (el) {
+            eachElement($(el).remove(), function (node, i) {
                 if (node._origin) {
                     var elements = node._origin._elements;
                     for (var i = elements.length - 1; i >= 0; i--) {
@@ -571,7 +580,7 @@
             });
         },
 
-        update: function() {
+        update: function () {
 
             var fragment = document.createDocumentFragment();
             var list = this.elements;
@@ -581,7 +590,7 @@
             var parentNode = this.replacement.parentNode;
 
             if (orderBy) {
-                list.sort(function(a, b) {
+                list.sort(function (a, b) {
                     a = a.model.data[orderBy];
                     b = b.model.data[orderBy];
                     return a > b ? 1 : a < b ? -1 : 0;
@@ -632,7 +641,7 @@
             if (fragment.childNodes.length) parentNode.insertBefore(fragment, this.replacement);
         },
 
-        cloneNode: function(el, model, parentNode, repeatNode) {
+        cloneNode: function (el, model, parentNode, repeatNode) {
             var node = el.cloneNode(false);
             var len;
 
@@ -668,7 +677,7 @@
                     if (model) {
                         (node._origin = el._origin)._elements.push(node);
 
-                        model.root.upperRepeatEl(node, function(elem) {
+                        model.root.upperRepeatEl(node, function (elem) {
 
                             elem.snModel._pushNode(el._origin, node);
 
@@ -689,7 +698,7 @@
             return node;
         },
 
-        each: function(fn, callback, reverse) {
+        each: function (fn, callback, reverse) {
             if (typeof callback !== 'function') reverse = callback, callback = null;
             for (var len = this.elements.length - 1, i = len; i >= 0; i--) {
                 var index = reverse ? i : (len - i);
@@ -700,7 +709,7 @@
             callback && callback.call(this);
             return this;
         },
-        remove: function(start, count) {
+        remove: function (start, count) {
             var self = this;
             if (typeof start == 'function') {
                 for (var i = this.elements.length - 1; i >= 0; i--) {
@@ -711,25 +720,25 @@
                     }
                 }
             } else {
-                this.elements.splice(start, count || 1).forEach(function(item) {
+                this.elements.splice(start, count || 1).forEach(function (item) {
                     self._removeEl(item.el);
                 });
             }
             return this;
         },
-        add: function(models) {
+        add: function (models) {
             var self = this;
-            ($.isArray(models) ? models : [models]).forEach(function(model) {
+            ($.isArray(models) ? models : [models]).forEach(function (model) {
                 self.elements.push({
                     model: model
                 });
             })
             return this;
         },
-        clear: function() {
-            return this.each(function(i, item) {
+        clear: function () {
+            return this.each(function (i, item) {
                 el.parentNode.removeChild(item.el);
-            }, function() {
+            }, function () {
                 this.elements.length = 0;
 
             }, true);
@@ -769,20 +778,20 @@
 
         initialize: util.noop,
 
-        setState: function(cover, key, value) {
+        setState: function (cover, key, value) {
             this.$state.set(cover, key, value);
             return this;
         },
 
-        getState: function(key) {
+        getState: function (key) {
             return this.$state.get(key);
         },
 
-        endRender: function(callback) {
+        endRender: function (callback) {
             return this.one('viewDidUpdate', callback);
         },
 
-        compile: function(code) {
+        compile: function (code) {
             var index = this._fns.indexOf(code);
             if (index == -1)
                 this._fns.push(code), index = this._fns.length - 1;
@@ -790,61 +799,61 @@
             return (this.fns.length + index);
         },
 
-        _compile: function(expression, repeat, listen) {
+        _compile: function (expression, repeat, listen) {
 
             var self = this;
             var variables;
 
             var content = 'try{return \'' +
                 expression
-                .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
-                .replace(rmatch, function(match, exp) {
-                    return '\'+(' + exp.replace(/\\\\/g, '\\').replace(/\\'/g, '\'').replace(rvar, function(match, prefix, name) {
-                        if (!name) {
-                            if (match.indexOf('var ') == 0) {
-                                return match.replace(/var\s+([^\=]+)=/, function(match, $0) {
-                                    variables = (variables || []).concat($0.split(','));
-                                    return $0 + '=';
-                                });
+                    .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
+                    .replace(rmatch, function (match, exp) {
+                        return '\'+(' + exp.replace(/\\\\/g, '\\').replace(/\\'/g, '\'').replace(rvar, function (match, prefix, name) {
+                            if (!name) {
+                                if (match.indexOf('var ') == 0) {
+                                    return match.replace(/var\s+([^\=]+)=/, function (match, $0) {
+                                        variables = (variables || []).concat($0.split(','));
+                                        return $0 + '=';
+                                    });
+                                }
+                                return match;
                             }
-                            return match;
-                        }
 
-                        var attrs = name.split('.');
-                        var alias = attrs[0];
+                            var attrs = name.split('.');
+                            var alias = attrs[0];
 
-                        if (alias == "$state") {
-                            self.$state.on('change:' + name.replace('$state.', '').replace(/\./g, '/'), listen);
-                            return prefix + isNull(name);
+                            if (alias == "$state") {
+                                self.$state.on('change:' + name.replace('$state.', '').replace(/\./g, '/'), listen);
+                                return prefix + isNull(name);
 
-                        } else if (!alias || Filters[alias] || snGlobal.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(name)) {
+                            } else if (!alias || Filters[alias] || snGlobal.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(name)) {
 
-                            return prefix + name;
-                        }
-                        var loopIndex;
+                                return prefix + name;
+                            }
+                            var loopIndex;
 
-                        if (repeat) {
-                            for (var rp = repeat; rp != null; rp = rp.parent) {
-                                if (alias == rp.alias) {
-                                    attrs[0] = rp.collectionName + '^child';
-                                    break;
+                            if (repeat) {
+                                for (var rp = repeat; rp != null; rp = rp.parent) {
+                                    if (alias == rp.alias) {
+                                        attrs[0] = rp.collectionName + '^child';
+                                        break;
 
-                                } else if (alias == rp.indexAlias) {
-                                    loopIndex = rp;
-                                    break;
+                                    } else if (alias == rp.indexAlias) {
+                                        loopIndex = rp;
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        var eventName = (loopIndex ?
-                            loopIndex.collectionName + '/' + loopIndex.alias + '/' + loopIndex.indexAlias :
-                            attrs.join('/').replace(/\./g, '/'));
+                            var eventName = (loopIndex ?
+                                loopIndex.collectionName + '/' + loopIndex.alias + '/' + loopIndex.indexAlias :
+                                attrs.join('/').replace(/\./g, '/'));
 
-                        self.on('change:' + eventName, listen);
+                            self.on('change:' + eventName, listen);
 
-                        return prefix + isNull(name);
-                    }) + ')+\'';
-                }) +
+                            return prefix + isNull(name);
+                        }) + ')+\'';
+                    }) +
                 '\';}catch(e){return \'\';}';
 
             var code = 'function(global,model,el){' +
@@ -854,7 +863,7 @@
             return this.compile(code);
         },
 
-        call: function(id, arg0, arg1, arg2, arg3) {
+        call: function (id, arg0, arg1, arg2, arg3) {
             var fn = this.fns[id];
 
             switch (arguments.length) {
@@ -873,7 +882,7 @@
             }
         },
 
-        _render: function(el, attribute) {
+        _render: function (el, attribute) {
 
             var self = this;
             if (el.bindings) {
@@ -930,11 +939,11 @@
                             break;
                         case 'checked':
                         case 'selected':
-                            (el[attr] = !!val) ? el.setAttribute(attr, attr): el.removeAttribute(attr);
+                            (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
                             break;
                         case 'src':
                         case 'sn-src':
-                            var $el = $(el).one('load error', function() {
+                            var $el = $(el).one('load error', function () {
                                 $el.animate({
                                     opacity: 1
                                 }, 200);
@@ -953,19 +962,19 @@
             }
         },
 
-        _renderEls: function(elements, attr) {
+        _renderEls: function (elements, attr) {
             for (var i = 0, n = elements && elements.length; i < n; i++) {
                 this._render(elements[i], attr);
             }
 
         },
-        _bindAttr: function(node, attr, expression, repeat) {
+        _bindAttr: function (node, attr, expression, repeat) {
             var self = this;
             var elements;
 
             if (!rmatch.test(expression)) return;
 
-            (node.bindings || (node._elements = [], node.bindings = {}))[attr] = self._compile(expression, repeat, function(e, model) {
+            (node.bindings || (node._elements = [], node.bindings = {}))[attr] = self._compile(expression, repeat, function (e, model) {
                 if (!repeat) {
                     self._render(node, attr);
 
@@ -993,13 +1002,13 @@
             });
         },
 
-        _closestByEl: function(el) {
-            return this.upperRepeatEl(el, function(el) {
+        _closestByEl: function (el) {
+            return this.upperRepeatEl(el, function (el) {
                 return el.snModel;
             });
         },
 
-        _getByEl: function(el, name) {
+        _getByEl: function (el, name) {
             var self = this;
             var attrs = name.split('.');
             var alias = attrs[0];
@@ -1009,24 +1018,24 @@
             } else if (alias == "$state")
                 return self.$state;
 
-            return this.upperRepeatEl(el, function(el) {
+            return this.upperRepeatEl(el, function (el) {
                 if (el.snRepeat.repeat.alias == alias)
                     return el.snModel;
             });
         },
-        _getVal: function(model, name) {
+        _getVal: function (model, name) {
             var model = model == this || model instanceof Model ? model : this._getByEl(model, name);
 
             return model.get(model == this ? name : name.replace(/^[^\.]+\./, ''));
         },
 
-        _setByEl: function(el, name, value) {
+        _setByEl: function (el, name, value) {
             var model = this._getByEl(el, name);
 
             model.set(model == this || model == self.$state ? name : name.replace(/^[^\.]+\./, ''), value);
         },
 
-        _triggerChangeEvent: function(eventName, model) {
+        _triggerChangeEvent: function (eventName, model) {
             var self = this;
 
             !model && (model = this);
@@ -1038,7 +1047,7 @@
             (eventsCache.indexOf(model) == -1) && eventsCache.push(model);
 
             if (!self.changeEventsTimer) {
-                self.changeEventsTimer = setTimeout(function() {
+                self.changeEventsTimer = setTimeout(function () {
                     var now = Date.now();
                     var roots = [];
 
@@ -1060,7 +1069,7 @@
             return this;
         },
 
-        upperRepeatEl: function(el, fn, ret) {
+        upperRepeatEl: function (el, fn, ret) {
 
             while (el) {
                 if (el.snRepeatNode)
@@ -1078,12 +1087,12 @@
             return ret === undefined ? this : ret;
         },
 
-        bind: function(el) {
+        bind: function (el) {
             var self = this;
             var elements = [];
             var snModelName = 'sn-' + self.cid + 'model';
 
-            var $el = $(el).on('input change blur', '[' + snModelName + ']', function(e) {
+            var $el = $(el).on('input change blur', '[' + snModelName + ']', function (e) {
                 var target = e.currentTarget;
                 var name = target.getAttribute(snModelName);
 
@@ -1092,7 +1101,7 @@
 
             self.$el = !self.$el ? $el : self.$el.add($el);
 
-            eachElement($el, function(child, i, extendRepeat) {
+            eachElement($el, function (child, i, extendRepeat) {
                 if (child.snViewModel) return false;
 
                 if (child.nodeType == 1) {
@@ -1159,7 +1168,7 @@
                                     attr = "sn-" + self.cid + attr;
 
                                     if (rset.test(val) || rthis.test(val)) {
-                                        var content = val.replace(rthis, function(match, $1, $2) {
+                                        var content = val.replace(rthis, function (match, $1, $2) {
                                             return $1 + "e" + ($2 ? ',' : '') + $2 + ")";
 
                                         }).replace(rset, 'this._setByEl(e.currentTarget,"$1",$2)');
@@ -1187,13 +1196,13 @@
                 }
             });
 
-            $el.each(function() {
+            $el.each(function () {
                 this.snViewModel = self.cid;
                 this.model = self;
             })
 
             //事件处理
-            var _handleEvent = function(e) {
+            var _handleEvent = function (e) {
                 var target = e.currentTarget;
                 var eventCode = target.getAttribute('sn-' + self.cid + e.type);
                 var fn;
