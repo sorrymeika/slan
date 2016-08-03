@@ -96,7 +96,9 @@ module.exports = Activity.extend({
 
             if (!$target.hasClass('curr')) {
 
-                if (index == 1) {
+                if (index == 0) {
+
+                } else if (index == 1) {
                     if (!this.model.data.baiduMap) {
                         this.model.set('baiduMap', '<iframe class="js_baidu_map" src="' + bridge.url("/baiduMap.html?v4") + '" frameborder="0" ></iframe>').one('viewDidUpdate', function () {
                             self.$baiduMap = self.$('.js_baidu_map').css({
@@ -537,12 +539,14 @@ module.exports = Activity.extend({
         }, 3200);
 
         self.onResult("Login", function () {
-            self.user = userModel.get();
+            var user = self.user = userModel.get();
 
-            model.set({
+            self.model.set({
+                isLogin: true,
                 isOffline: false,
-                user: self.user
+                user: user
             });
+
             self.doWhenLogin();
 
         }).onResult("UserChange", function () {
@@ -550,10 +554,13 @@ module.exports = Activity.extend({
 
         }).onResult("Logout", function () {
             self.user = null;
+            userModel.set(null);
             model.set({
                 isLogin: false,
                 user: null
             });
+            self.$('.footer li:nth-child(1)').trigger('tap');
+
         }).onResult('CartChange', function () {
 
             self.getCartQty();
@@ -622,11 +629,15 @@ module.exports = Activity.extend({
                 self.model.set('isOffline', true);
                 return;
             }
+            res.data.ID = res.data.UserID;
+
             userModel.set(res.data);
 
-            self.user = userModel.get();
+            var user = self.user = userModel.get();
 
             self.model.set({
+                barcode: barcode.code93(user.Mobile).replace(/0/g, '<em></em>').replace(/1/g, '<i></i>'),
+                isLogin: true,
                 isOffline: false,
                 user: self.user
             });
@@ -642,6 +653,24 @@ module.exports = Activity.extend({
                 self.showMessageDialog(res.vdpMessage);
                 //util.store('ivcode', null);
             }
+
+            util.isInApp && bridge.getDeviceToken(function (token) {
+
+                if (token) {
+                    new API({
+                        params: {
+                            UserID: user.ID,
+                            Auth: user.Auth,
+                            IMEI: !token ? 'CAN_NOT_GET' : (typeof token == 'string' ? token : token.token)
+                        },
+                        url: '/api/user/deviceToken',
+                        success: function () { },
+                        error: function () { }
+
+                    }).load();
+                }
+            });
+
         }, util.store('ivcode') || '0000');
     },
 
@@ -741,22 +770,11 @@ module.exports = Activity.extend({
 
     doWhenLogin: function () {
         var self = this;
-        var user = userModel.get();
 
-        self.model.set({
-            barcode: barcode.code93(user.Mobile).replace(/0/g, '<em></em>').replace(/1/g, '<i></i>'),
-            isLogin: true
+        userModel.setParam({
+            IMEI: ""
         });
-
-        var load = function (token) {
-
-            userModel.setParam({
-                IMEI: !token ? 'CAN_NOT_GET' : (typeof token == 'string' ? token : token.token)
-            });
-            self.requestUser();
-        }
-
-        util.isInApp ? bridge.getDeviceToken(load) : load();
+        self.requestUser();
     },
 
     onLoad: function () {
@@ -794,6 +812,7 @@ module.exports = Activity.extend({
     onPause: function () { },
 
     onQueryChange: function () {
+
         if (this.query.tab) {
             this.$('.footer li:nth-child(1)').trigger('tap');
             this.model.set({

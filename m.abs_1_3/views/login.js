@@ -98,7 +98,7 @@ module.exports = Activity.extend({
                     sl.tip(res.msg);
                 else {
                     util.store('ivcode', res.ivcode || null);
-                    util.store('user', res.data);
+                    userModel.set(res.data);
 
                     var backUrl = self.route.query.success || self.swipeRightBackAction;
 
