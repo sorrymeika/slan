@@ -31,12 +31,14 @@
         "production": {
             "api": "http://appuser.abs.cn",
             "shopApi": "http://appapi-1-3-0.abs.cn",
-            "updateApi": "http://appversion.abs.cn"
+            "updateApi": "http://appversion.abs.cn",
+            "useLocal": true
         },
         "test": {
             "api": "http://appuser2.abs.cn",
             "shopApi": "http://testappapi-1-3-0.abs.cn",
-            "updateApi": "http://testappversion.abs.cn"
+            "updateApi": "http://testappversion.abs.cn",
+            "useLocal": true
         },
         "debug": {
             "api": "http://appuser2.abs.cn",
