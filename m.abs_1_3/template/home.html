@@ -31,7 +31,7 @@
         <div class="head_msg" data-forward="{{isLogin?'/cart':'/login'}}">
             <i sn-display="{{$state.cartQty!=0}}">{{$state.cartQty}}</i>
         </div>
-        <div class="head_all" sn-tap="this.showSearch()" sn-display="{{tab==0&&bottomTab==0}}">
+        <div class="head_all" sn-click="this.showSearch()" sn-display="{{tab==0&&bottomTab==0}}">
         </div>
     </header>
     <div sn-display="{{isStart&&!isLogin}}" style="position:absolute;z-index: 1000;right:0;left:0;top:0;bottom:0;">

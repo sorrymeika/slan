@@ -130,7 +130,9 @@ var Month = model.ViewModel.extend({
 
 		} else {
 
-            self.set({ data: item });
+			for (var key in item) {
+                //self.set("data." + key, item["key"]);
+			}
 
             if (item.PRD_NUM === 0) {
                 sl.tip('该商品已售罄');
@@ -191,7 +193,7 @@ var Month = model.ViewModel.extend({
 			},
 			success: function (res) {
 				if (res.success) {
-                    //Application.getCurrentActivity().setResult('CartChange');
+                    Application.getCurrentActivity().setResult('CartChange');
 
 					sl.tip('加入购物车成功！');
 					self.hide();
