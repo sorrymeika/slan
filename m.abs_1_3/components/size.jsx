@@ -111,9 +111,9 @@ var Month = model.ViewModel.extend({
 		var self = this;
 		var colorSpec = self.get('colorSpec');
 		var data = self.get('data');
-		var item = util.first(colorSpec, function (item) {
+		var item = $.extend({}, util.first(colorSpec, function (item) {
 			return item.PRD_SPEC == data.PRD_SPEC && item.PRD_COLOR == data.PRD_COLOR;
-		});
+		}));
 		var user = userModel.get();
 
 		if (!user) {
@@ -191,7 +191,7 @@ var Month = model.ViewModel.extend({
 			},
 			success: function (res) {
 				if (res.success) {
-                    Application.getCurrentActivity().setResult('CartChange');
+                    //Application.getCurrentActivity().setResult('CartChange');
 
 					sl.tip('加入购物车成功！');
 					self.hide();
