@@ -132,6 +132,11 @@ define(function (require, exports, module) {
                     colorAndSpec.setParam({
                         id: res.data.PRD_PRH_ID
                     }).load();
+                },
+                error: function (res) {
+                    sl.tip(res.msg || res.data);
+
+                    self.back(self.query.from || self.referrer);
                 }
             });
             product.load();

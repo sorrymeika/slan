@@ -202,7 +202,8 @@ module.exports = Activity.extend({
 
                 self.size.set({
                     qty: 1,
-                    data: res.data
+                    specialPrice: self.model.get('GPP_Obj.GPP_PRICE'),
+                    data: $.extend({}, res.data)
                 });
 
                 if (!res.prhpic) {
