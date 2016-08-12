@@ -88,7 +88,7 @@ var Month = model.ViewModel.extend({
 
         if (item) {
             if (item.PRD_PRICE !== undefined) {
-                this.set("data.PRD_PRICE", item.PRD_PRICE);
+                this.set("data.PRD_PRICE", this.get('specialPrice') || item.PRD_PRICE);
             }
             if (item.PRD_NUM !== undefined) {
                 this.set("data.PRD_NUM", item.PRD_NUM);

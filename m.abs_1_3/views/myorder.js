@@ -39,7 +39,8 @@ define(function (require, exports, module) {
                 url: encodeURIComponent(this.route.url),
                 title: '我买到的',
                 currentType: 0,
-                isLoading: true
+                isLoading: true,
+                isShowShare: true
             });
 
             this.wxPayApi = new api.WxPayAPI({
@@ -57,6 +58,20 @@ define(function (require, exports, module) {
                 error: function () {
                 }
             });
+
+            var orderShareAPI = new api.OrderShareAPI({
+                $el: this.$el,
+                checkData: false,
+                success: function (res) {
+
+                },
+                error: function (res) {
+                    this.model.set({
+                        isShowShare: false
+                    });
+                }
+            });
+            orderShareAPI.load();
 
             $.extend(this.model, {
                 select: function (e, type) {

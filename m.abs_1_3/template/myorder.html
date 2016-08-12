@@ -33,7 +33,7 @@
             <div class="ft">
                 总价：<span>{{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}}</span>
                 <b class="btn_sml" sn-display="{{item.XPU_EXPRESS_CODE}}" sn-tap="this.showExpress(item,model)">查看物流</b>
-                <b class="btn_sml" sn-display="{{item.PUR_PAS_ID==2&&item.isShowShare}}" data-forward="/news/order{{item.PUR_ID}}?from={{url}}">分享有惊喜</b>
+                <b class="btn_sml" sn-display="{{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}}" data-forward="/news/order{{item.PUR_ID}}?from={{url}}">分享有惊喜</b>
                 <b class="btn_sml" sn-display="{{item.PUS_DESC=='待付款'}}">立即付款</b>
                 <b class="btn_sml btn_dark" sn-display="{{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}}"
                     sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</b>

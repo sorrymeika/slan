@@ -201,6 +201,7 @@ module.exports = Activity.extend({
                 });
 
                 self.size.set({
+                    specialPrice: self.model.get('GPP_Obj.GPP_PRICE'),
                     qty: 1,
                     data: res.data
                 });
