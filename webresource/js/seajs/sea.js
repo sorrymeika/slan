@@ -1,7 +1,7 @@
 /**
  * Sea.js 2.2.3 | seajs.org/LICENSE.md
  */
-(function(global, undefined) {
+(function (global, undefined) {
 
     // Avoid conflicting when `sea.js` is loaded multiple times
     if (global.seajs) {
@@ -21,7 +21,7 @@
      */
 
     function isType(type) {
-        return function(obj) {
+        return function (obj) {
             return {}.toString.call(obj) == "[object " + type + "]"
         }
     }
@@ -44,7 +44,7 @@
     var events = data.events = {}
 
     // Bind event
-    seajs.on = function(name, callback) {
+    seajs.on = function (name, callback) {
         var list = events[name] || (events[name] = [])
         list.push(callback)
         return seajs
@@ -53,7 +53,7 @@
     // Remove event. If `callback` is undefined, remove all callbacks for the
     // event. If `event` and `callback` are both undefined, remove all callbacks
     // for all events
-    seajs.off = function(name, callback) {
+    seajs.off = function (name, callback) {
         // Remove *all* events
         if (!(name || callback)) {
             events = data.events = {}
@@ -79,7 +79,7 @@
 
     // Emit event, firing all bound callbacks. Callbacks receive the same
     // arguments as `emit` does, apart from the event name
-    var emit = seajs.emit = function(name, data) {
+    var emit = seajs.emit = function (name, data) {
         var list = events[name], fn
 
         if (list) {
@@ -167,7 +167,7 @@
         var vars = data.vars
 
         if (vars && id.indexOf("{") > -1) {
-            id = id.replace(VARS_RE, function(m, key) {
+            id = id.replace(VARS_RE, function (m, key) {
                 return isString(vars[key]) ? vars[key] : m
             })
         }
@@ -326,9 +326,6 @@
         }
         else {
             node.async = true
-            //<--debug
-            //url += '?v' + Date.now();
-            //debug-->
             node.src = url
         }
 
@@ -351,7 +348,7 @@
 
         // for Old WebKit and Old Firefox
         if (isCSS && (isOldWebKit || !supportOnload)) {
-            setTimeout(function() {
+            setTimeout(function () {
                 pollCss(node, callback)
             }, 1) // Begin after node insertion
             return
@@ -359,17 +356,17 @@
 
         if (supportOnload) {
             node.onload = onload
-            node.onerror = function() {
+            node.onerror = function () {
                 var errorData = { uri: url, node: node, callback: callback, isCSS: isCSS };
                 seajs.emit("error", errorData);
                 if (errorData.pause) {
-                    callback = function() { }
+                    callback = function () { }
                 }
                 onload();
             }
         }
         else {
-            node.onreadystatechange = function() {
+            node.onreadystatechange = function () {
                 if (/loaded|complete/.test(node.readyState)) {
                     onload()
                 }
@@ -418,7 +415,7 @@
             }
         }
 
-        setTimeout(function() {
+        setTimeout(function () {
             if (isLoaded) {
                 // Place callback here to give time for style rendering
                 callback()
@@ -474,7 +471,7 @@
         //requireRe = new RegExp("\\b" + m[1] + "\\s*\\(\\s*([\"'])(.+?)\\1\\s*\\)", 'g');
 
         code.replace(SLASH_RE, "")
-            .replace(REQUIRE_RE, function(m, m1, m2) {
+            .replace(REQUIRE_RE, function (m, m1, m2) {
                 if (m2) {
                     ret.push(m2)
                 }
@@ -525,7 +522,7 @@
     }
 
     // Resolve module.dependencies
-    Module.prototype.resolve = function() {
+    Module.prototype.resolve = function () {
         var mod = this
         var ids = mod.dependencies
         var uris = []
@@ -537,7 +534,7 @@
     }
 
     // Load module.dependencies and fire onload when all done
-    Module.prototype.load = function() {
+    Module.prototype.load = function () {
         var mod = this
 
         // If the module is being loaded, just wait it onload call
@@ -595,7 +592,7 @@
     }
 
     // Call this method when module is loaded
-    Module.prototype.onload = function() {
+    Module.prototype.onload = function () {
         var mod = this
         mod.status = STATUS.LOADED
 
@@ -623,7 +620,7 @@
     }
 
     // Fetch a module
-    Module.prototype.fetch = function(requestCache) {
+    Module.prototype.fetch = function (requestCache) {
         var mod = this
         var uri = mod.uri
 
@@ -685,7 +682,7 @@
     }
 
     // Execute a module
-    Module.prototype.exec = function() {
+    Module.prototype.exec = function () {
         var mod = this
 
 
@@ -705,11 +702,11 @@
             return Module.get(require.resolve(id)).exec()
         }
 
-        require.resolve = function(id) {
+        require.resolve = function (id) {
             return Module.resolve(id, uri)
         }
 
-        require.async = function(ids, callback) {
+        require.async = function (ids, callback) {
             Module.use(ids, callback, uri + "_async_" + cid())
             return require
         }
@@ -738,7 +735,7 @@
     }
 
     // Resolve id to uri
-    Module.resolve = function(id, refUri) {
+    Module.resolve = function (id, refUri) {
         // Emit `resolve` event for plugins such as text plugin
         var emitData = { id: id, refUri: refUri }
         emit("resolve", emitData)
@@ -747,7 +744,7 @@
     }
 
     // Define a module
-    Module.define = function(id, deps, factory) {
+    Module.define = function (id, deps, factory) {
         var argsLen = arguments.length
 
         // define(factory)
@@ -802,7 +799,7 @@
     }
 
     // Save meta data to cachedMods
-    Module.save = function(uri, meta) {
+    Module.save = function (uri, meta) {
         var mod = Module.get(uri)
 
         // Do NOT override already saved modules
@@ -811,22 +808,32 @@
             mod.dependencies = meta.deps || []
             mod.factory = meta.factory
             mod.status = STATUS.SAVED
-            
+
         } else if (meta.factory) {
-            mod.factory = meta.factory;
+
+            // Exec factory
+            var factory = meta.factory
+
+            var exports = isFunction(factory) ?
+                factory(require, mod.exports = {}, mod) :
+                factory
+
+            if (exports !== undefined) {
+                mod.exports = exports
+            }
         }
     }
 
     // Get an existed module or create a new one
-    Module.get = function(uri, deps) {
+    Module.get = function (uri, deps) {
         return cachedMods[uri] || (cachedMods[uri] = new Module(uri, deps))
     }
 
     // Use function is equal to load a anonymous module
-    Module.use = function(ids, callback, uri) {
+    Module.use = function (ids, callback, uri) {
         var mod = Module.get(uri, isArray(ids) ? ids : [ids])
 
-        mod.callback = function() {
+        mod.callback = function () {
             var exports = []
             var uris = mod.resolve()
 
@@ -845,12 +852,12 @@
     }
 
     // Load preload modules before all other modules
-    Module.preload = function(callback) {
+    Module.preload = function (callback) {
         var preloadMods = data.preload
         var len = preloadMods.length
 
         if (len) {
-            Module.use(preloadMods, function() {
+            Module.use(preloadMods, function () {
                 // Remove the loaded preload modules
                 preloadMods.splice(0, len)
 
@@ -866,8 +873,8 @@
 
     // Public API
 
-    seajs.use = function(ids, callback) {
-        Module.preload(function() {
+    seajs.use = function (ids, callback) {
+        Module.preload(function () {
             Module.use(ids, callback, data.cwd + "_use_" + cid())
         })
         return seajs
@@ -883,7 +890,7 @@
     data.fetchedList = fetchedList
     data.cid = cid
 
-    seajs.require = function(id) {
+    seajs.require = function (id) {
         var mod = Module.get(Module.resolve(id))
         if (mod.status < STATUS.EXECUTING) {
             mod.onload()
@@ -917,7 +924,7 @@
     //data.crossorigin = undefined
 
     // Modules that are needed to load before all other modules
-    data.preload = (function() {
+    data.preload = (function () {
         var plugins = []
 
         // Convert `seajs-xxx` to `seajs-xxx=1`
@@ -928,7 +935,7 @@
         str += " " + doc.cookie
 
         // Exclude seajs-xxx=0
-        str.replace(/(seajs-\w+)=1/g, function(m, name) {
+        str.replace(/(seajs-\w+)=1/g, function (m, name) {
             plugins.push(name)
         })
 
@@ -941,7 +948,7 @@
     // data.map - An array containing rules to map module uri
     // data.debug - Debug mode. The default value is false
 
-    seajs.config = function(configData) {
+    seajs.config = function (configData) {
 
         for (var key in configData) {
             var curr = configData[key]
@@ -976,4 +983,4 @@
         return seajs
     }
 
-})(this);
+})(window);
