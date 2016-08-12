@@ -66,7 +66,7 @@ define(function (require, exports, module) {
 
                 },
                 error: function (res) {
-                    this.model.set({
+                    self.model.set({
                         isShowShare: false
                     });
                 }
