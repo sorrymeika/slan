@@ -803,24 +803,11 @@
         var mod = Module.get(uri)
 
         // Do NOT override already saved modules
-        if (mod.status < STATUS.SAVED) {
+        if (mod.status < STATUS.SAVED || meta.factory) {
             mod.id = meta.id || uri
             mod.dependencies = meta.deps || []
             mod.factory = meta.factory
             mod.status = STATUS.SAVED
-
-        } else if (meta.factory) {
-
-            // Exec factory
-            var factory = meta.factory
-
-            var exports = isFunction(factory) ?
-                factory(require, mod.exports = {}, mod) :
-                factory
-
-            if (exports !== undefined) {
-                mod.exports = exports
-            }
         }
     }
 
