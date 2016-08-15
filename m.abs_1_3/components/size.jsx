@@ -96,6 +96,7 @@ var Month = model.ViewModel.extend({
             if (item.WPP_LIST_PIC !== undefined) {
                 this.set("data.WPP_LIST_PIC", item.WPP_LIST_PIC);
             }
+			this.set("data.PRD_ID", item.PRD_ID);
         }
         this.trigger("SizeChange", item);
     },
@@ -129,10 +130,6 @@ var Month = model.ViewModel.extend({
 			this.data.confirm(item, item.PRD_ID, self.get('qty'));
 
 		} else {
-
-			for (var key in item) {
-                //self.set("data." + key, item["key"]);
-			}
 
             if (item.PRD_NUM === 0) {
                 sl.tip('该商品已售罄');
