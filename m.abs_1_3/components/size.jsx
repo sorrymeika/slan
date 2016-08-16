@@ -12,7 +12,7 @@ var Month = model.ViewModel.extend({
 			<div class="base_info">
 				<div class="img"><img src="{{data.WPP_LIST_PIC||data.WPP_M_PIC}}" /></div>
 				<div class="info">
-					<h2 class="price">¥{{ data.PRD_PRICE }}</h2>
+					<h2 class="price">¥{{ specialPrice||data.PRD_PRICE }}</h2>
 					<div class="qty">库存{{ data.PRD_NUM }}件</div>
 					<p class="other">
 						<em>选择</em>
@@ -88,7 +88,7 @@ var Month = model.ViewModel.extend({
 
         if (item) {
             if (item.PRD_PRICE !== undefined) {
-                this.set("data.PRD_PRICE", self.get('specialPrice') || item.PRD_PRICE);
+                this.set("data.PRD_PRICE", item.PRD_PRICE);
             }
             if (item.PRD_NUM !== undefined) {
                 this.set("data.PRD_NUM", item.PRD_NUM);
