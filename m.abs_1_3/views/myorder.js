@@ -20,7 +20,7 @@ define(function (require, exports, module) {
                 }
             },
             'tap .btn_go': function () {
-                self.back('/all');
+                self.back('/');
             }
         },
 
