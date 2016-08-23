@@ -259,16 +259,26 @@ module.exports = Activity.extend({
         var makeLog = function () {
             var hash = trimHash(location.hash);
 
+            bridge.system.info(function (res) {
+                var image = new Image();
+                var deviceversion = (util.ios ? "IOS" : "Android") + util.osVersion;
+
+                image.src = api.ShopAPI.prototype.baseUri + "/api/system/addpagests?pspcode=" + (self.user ? self.user.PSP_CODE : '') + "&pageurl=" + encodeURIComponent(hash) + "&appversion=" + sl.appVersion + "&uuid=" + res.uuid + "&deviceversion=" + deviceversion;
+            });
+        }
+        makeLog();
+        $(window).on('hashchange', makeLog)
+
+        $('.viewport').on('touchstart', function (e) {
+            var hash = trimHash(location.hash);
 
             bridge.system.info(function (res) {
                 var image = new Image();
                 var deviceversion = (util.ios ? "IOS" : "Android") + util.osVersion;
 
-                image.src = api.ShopAPI.prototype.baseUri + "/api/system/addpagests?pspcode=" + (self.user ? self.user.PSP_CODE : '') + "&pageurl=" + encodeURIComponent(hash) + "&appversion=" + sl.appVersion + "&uuid=" + res.uuid + "&deviceversion=" + deviceversion + "&ip=";
+                image.src = api.ShopAPI.prototype.baseUri + "/api/system/addpagests?pspcode=" + (self.user ? self.user.PSP_CODE : '') + "&pageurl=" + encodeURIComponent(hash) + "&appversion=" + sl.appVersion + "&uuid=" + res.uuid + "&deviceversion=" + deviceversion + "&coordx=" + e.touches[0].pageX + "&coordy=" + e.touches[0].pageY;
             });
-        }
-        makeLog();
-        $(window).on('hashchange', makeLog)
+        });
 
         var model = this.model = new ViewModel(this.$el, {
             menu: 'head_menu',

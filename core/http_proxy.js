@@ -14,6 +14,8 @@ module.exports = function (host, port, replace) {
             headers: _.extend({}, request.headers, { host: host + ":" + port })
         };
 
+        console.log(url);
+
         var req = http.request(options, function (res) {
             response.set(res.headers);
             response.set('Access-Control-Allow-Credentials', true);

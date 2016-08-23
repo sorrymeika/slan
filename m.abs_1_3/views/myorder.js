@@ -20,7 +20,7 @@ define(function (require, exports, module) {
                 }
             },
             'tap .btn_go': function () {
-                this.back('/');
+                this.back('/?tab=1');
             }
         },
 
