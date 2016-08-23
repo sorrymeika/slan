@@ -1,4 +1,4 @@
-﻿define(function(require, exports, module) {
+﻿define(function (require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
@@ -6,18 +6,18 @@
         ios = util.ios,
         isAndroid = util.android,
         slice = Array.prototype.slice,
-        blankFn = function() {},
+        blankFn = function () { },
         $win = $(window),
         baseUrl = $('meta[name="api-base-url"]').attr('content'),
         hybridFunctions = {};
 
     window.hybridFunctions = hybridFunctions;
 
-    window.trigger = function() {
+    window.trigger = function () {
         $.fn.trigger.apply($win, arguments);
     };
 
-    window.callJS = function(data) {
+    window.callJS = function (data) {
         $win.trigger(data.method, data.params);
     }
 
@@ -30,71 +30,71 @@
             ios: ios,
             versionName: isAndroid ? '1.0' : "1.0",
             exec: hybrid,
-            tip: function(msg) {
+            tip: function (msg) {
                 hybrid('tip', msg + "");
             },
-            openInApp: function(url) {
+            openInApp: function (url) {
                 hybrid('openInApp', url + '');
             },
-            open: function(url) {
+            open: function (url) {
                 hybrid('open', url + '');
             },
 
             //@url = "http://xx.xxx.com/cmbpay/{orderid}#跳转招行支付的地址"
-            cmbpay: function(url) {
+            cmbpay: function (url) {
                 hybrid('cmbpay', url + '');
             },
 
-            pickImage: function(callback) {
+            pickImage: function (callback) {
                 hybrid('pickImage', callback);
             },
-            takePhoto: function(f) {
-                setTimeout(function() {
+            takePhoto: function (f) {
+                setTimeout(function () {
                     hybrid('takePhoto', f);
                 }, 0);
             },
-            queryThumbnailList: function(f) {
+            queryThumbnailList: function (f) {
                 hybrid('queryThumbnailList', f);
             },
-            pickColor: function(f) {
+            pickColor: function (f) {
                 hybrid('pickColor', f);
             },
             system: {
-                info: function(callback) {
+                info: function (callback) {
                     hybrid('system', {
                         type: 'info'
 
                     }, callback);
                 }
             },
-            getDeviceToken: function(callback) {
+            getDeviceToken: function (callback) {
                 hybrid('getDeviceToken', callback);
             },
 
             //@callback = function({longitude,latitude})
-            getLocation: function(callback) {
+            getLocation: function (callback) {
                 hybrid('getLocation', callback);
             },
-            alipay: function(data, f) {
+            alipay: function (data, f) {
                 hybrid('pay', data, f);
             },
-            wx: function(data, f) {
+            wx: function (data, f) {
                 hybrid('wx', data, f);
             },
-            ali: function(data, f) {
+            ali: function (data, f) {
                 hybrid('ali', data, f);
             },
-            qq: function(data, f) {
+            qq: function (data, f) {
                 hybrid('qq', data, f);
             },
-            share: function() {
+            share: function () {
                 hybrid('share');
             },
             isDevelopment: navigator.platform == "Win32" || navigator.platform == "Win64",
-            url: function(url) {
+            url: function (url) {
                 return /^http\:\/\//.test(url) ? url : (baseUrl + url);
             },
-            post: function(url, data, files, callback) {
+            post: function (url, data, files, callback) {
                 callback = typeof files === 'function' ? files : callback;
                 files = typeof files === 'function' ? null : files;
 
@@ -104,10 +104,10 @@
                     data: data
                 }, callback);
             },
-            exit: function() {
+            exit: function () {
                 hybrid('exit');
             },
-            update: function(updateUrl, versionName, f) {
+            update: function (updateUrl, versionName, f) {
 
                 if (isAndroid) {
                     hybrid('updateApp', {
@@ -138,13 +138,20 @@
             hybridReturn = "hybridCallback" + (++guid);
 
             data.callback = hybridReturn;
-            hybridFunctions[hybridReturn] = function() {
+            hybridFunctions[hybridReturn] = function () {
                 hybridCallback.apply(null, arguments);
                 delete hybridFunctions[hybridReturn];
             };
         }
+
+        console.log(data);
+
         if (bridge.isInApp)
             alert('slapp://' + JSON.stringify(data));
+
+        else if (data.method == 'system' && data.params.type == "info") {
+            hybridFunctions[data.callback]({});
+        }
     }
 
     bridge.hasStatusBar = bridge.isInApp && util.ios && util.osVersion >= 7;

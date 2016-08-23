@@ -17,6 +17,8 @@ var ViewModel = Model.ViewModel;
 
 var Discovery = require('./discovery/discovery_index');
 
+var trimHash = require('core/route').trimHash;
+
 Model.State.set({
     cartQty: 0
 });
@@ -253,6 +255,20 @@ module.exports = Activity.extend({
         self.$tabs = self.$('.hm_tab_con');
 
         sl.activity = self;
+
+        var makeLog = function () {
+            var hash = trimHash(location.hash);
+
+
+            bridge.system.info(function (res) {
+                var image = new Image();
+                var deviceversion = (util.ios ? "IOS" : "Android") + util.osVersion;
+
+                image.src = api.ShopAPI.prototype.baseUri + "/api/system/addpagests?pspcode=" + (self.user ? self.user.PSP_CODE : '') + "&pageurl=" + encodeURIComponent(hash) + "&appversion=" + sl.appVersion + "&uuid=" + res.uuid + "&deviceversion=" + deviceversion + "&ip=";
+            });
+        }
+        makeLog();
+        $(window).on('hashchange', makeLog)
 
         var model = this.model = new ViewModel(this.$el, {
             menu: 'head_menu',
