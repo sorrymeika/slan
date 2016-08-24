@@ -1,7 +1,7 @@
 {
     "debug": true,
     "dest": "./dest",
-    "api": "http://10.0.76.217:6006",
+    "api": "http://127.0.0.1:6006",
     "proxy": {
         "/proxy/*": "testappapi-1-2-0.abs.cn"
     },
