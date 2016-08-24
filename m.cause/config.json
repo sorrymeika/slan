@@ -1,8 +1,6 @@
 {
     "root": "/",
-    "js": {
-        
-    },
+    "js": {},
     "css": {
         "images/style.css": [
             "images/views.css"
