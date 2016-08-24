@@ -47,7 +47,7 @@ mvvm前端框架
 * `images`图片文件夹，打包后会将该文件夹下的图片移动到dest文件夹
 * `combine`js文件合并配置
 
-```json
+```js
 {
     //将./components/share.js,./components/api.js合并为components.js
     "components": {
