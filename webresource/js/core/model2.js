@@ -1,4 +1,4 @@
-﻿
+
 var $ = require('$'),
     util = require('util'),
     Base = require('./base'),
@@ -30,14 +30,14 @@ var withData = function (repeat, content) {
         for (var parent = repeat.parent, current = repeat; parent != null; current = parent, parent = parent.parent) {
             code += parent.alias + ':' + (current.isChild ? 'model.closest(\'' + parent.collectionName + '^child\').data' : 'root.upperRepeatEl(el,function(el){ if (el.snRepeat.repeat.alias == "' + parent.alias + '") return el.snModel.data; },null)') + ',';
 
-            if (parent.indexAlias) {
-                code += parent.indexAlias + ':function(){ for (var node=el;node!=null;node=node.parentNode) { if (node.snIndexAlias=="' + parent.indexAlias + '") return node.snIndex } return ""},';
+            if (parent.loopIndexAlias) {
+                code += parent.loopIndexAlias + ':function(){ for (var node=el;node!=null;node=node.parentNode) { if (node.snIndexAlias=="' + parent.loopIndexAlias + '") return node.snIndex } return ""},';
             }
         }
         code += repeat.alias + ':model.data';
 
-        if (repeat.indexAlias) {
-            code += ',' + repeat.indexAlias + ':function(){ for (var node=el;node!=null;node=node.parentNode) { if (node.snIndexAlias=="' + repeat.indexAlias + '") return node.snIndex }return ""}';
+        if (repeat.loopIndexAlias) {
+            code += ',' + repeat.loopIndexAlias + ':function(){ for (var node=el;node!=null;node=node.parentNode) { if (node.snIndexAlias=="' + repeat.loopIndexAlias + '") return node.snIndex }return ""}';
         }
         code += '}';
     }
@@ -47,7 +47,7 @@ var withData = function (repeat, content) {
     return code;
 }
 
-var isNull = function (str) {
+var genNullCheckJs = function (str) {
     var arr = str.split('.');
     var result = [];
     var code = '';
@@ -62,19 +62,24 @@ var isNull = function (str) {
     return '((' + code + ')?typeof ' + str + '==="function"?' + str + '():' + str + ':"")';
 }
 
-var eachElement = function (el, fn, extend) {
+function everyElement(el, fn, transfer) {
+    if (el.length) {
+        for (var i = 0, len = el.length; i < len; i++) {
+            everyElement(el[i], fn, transfer);
+        }
+        return;
+    }
 
-    var childNodes = el.length ? el : [el];
+    var flag = fn(el, transfer);
 
-    for (var i = 0, len = childNodes.length; i < len; i++) {
-        var child = childNodes[i];
-        var nextExtend = fn(child, i, extend);
+    if (flag !== false && el.nodeType == 1 && el.childNodes.length) {
 
-        if (nextExtend !== false && child.nodeType == 1 && child.childNodes.length) {
-            eachElement(child.childNodes, fn, nextExtend);
+        for (var i = 0, len = el.childNodes.length; i < len; i++) {
+            everyElement(el.childNodes[i], fn, flag || transfer);
         }
     }
 }
+
 
 var Filters = {
     contains: function (source, keywords) {
@@ -331,29 +336,26 @@ var Collection = Event.mixin(function (parent, attr, data) {
 
     this.models = [];
 
+    this.cid = util.guid();
+
     this.parent = parent;
     this.key = parent.key ? (parent.key + "." + attr) : attr;
     this._key = attr;
-    this.eventName = this.key.replace(/\./g, '/')
 
     this.root = parent.root;
 
     this.data = [];
     parent.data[attr] = this.data;
 
+    var repeatSources = this.root.getRepeatSources(this.key);
+
     this.add(data);
 
 }, {
-        _triggerChangeEvent: function () {
-            if (!this._silent) {
-                this.root._triggerChangeEvent(this.key, this)
-                    ._triggerChangeEvent(this.key + '/length', this);
-            }
-        },
-
         get: function (i) {
             return this.models[i];
         },
+
         set: function (data) {
             this._silent = true;
 
@@ -410,13 +412,8 @@ var Collection = Event.mixin(function (parent, attr, data) {
                 model = new Model(this, length, dataItem);
                 this.models.push(model);
                 changes.push(model);
-
-                this.trigger('add', model);
             }
 
-            this.root.trigger('change:' + this.eventName + '/add', this, changes);
-
-            this._triggerChangeEvent();
         },
         remove: function (start, count) {
             var models;
@@ -453,15 +450,28 @@ var Collection = Event.mixin(function (parent, attr, data) {
     });
 
 
-
-function Repeat(options) {
-    $.extend(this, options);
-
+function RepeatSource(el, parent) {
     var self = this;
-    var attrs = this.collectionName.split('.');
-    var parent = this.parent;
+    var attrRepeat = el.getAttribute('sn-repeat');
+    var match = attrRepeat.match(rrepeat);
+    var collectionName = match[3];
+    var attrs = collectionName.split('.');
 
+    var options = {
+        filters: match[4],
+        orderBy: match[5]
+    };
+    this.alias = match[1];
+    this.loopIndexAlias = match[2];
     this.key = attrs[attrs.length - 1];
+    this.parent = parent;
+    this.source = el;
+
+    var replacement = document.createComment(collectionName);
+    replacement.repeat = this;
+    el.parentNode.replaceChild(replacement, el);
+
+    this.replacement = replacement;
 
     while (parent) {
         if (parent.alias == attrs[0]) {
@@ -472,113 +482,22 @@ function Repeat(options) {
         }
         parent = parent.parent;
     }
-
-    var replacement = document.createComment(this.collectionName);
-
-    replacement.repeat = this;
-    this.replacement = replacement;
-    this.el.parentNode.replaceChild(replacement, this.el);
-    this.snRepeats = [];
-
-    if (this.filters) {
-        this.filter = this.viewModel._compile('{{' + this.filters + '}}', this, function (e, model) {
-            var now = Date.now();
-
-            var isUnderRoot = model.under();
-
-            for (var i = 0; i < self.snRepeats.length; i++) {
-                var item = self.snRepeats[i];
-
-                if (isUnderRoot || model == item.referenceModel || model.under(item.referenceModel) || model.under(item.collection()) || model.contains(item.referenceModel)) {
-                    item.update();
-                }
-            }
-        });
-    }
-
-    var eventName = "change:" + this.collectionName.replace(/\./g, '/');
-
-    this.syncModels = [];
-
-    this.viewModel.on(eventName + '/add', function (e, collection, models) {
-
-        self.syncModels = self.syncModels.concat(models);
-
-        for (var i = 0; i < self.snRepeats.length; i++) {
-            var snRepeat = self.snRepeats[i];
-
-            if (!self.isChild || collection.parent == snRepeat.referenceModel) {
-                snRepeat.add(models).update();
-            }
-        }
-
-    }).on(eventName + '/remove', function (e, collection, models) {
-        for (var i = 0; i < models.length; i++) {
-            var model = models[i];
-
-            for (var j = self.snRepeats.length - 1; j >= 0; j--) {
-                self.snRepeats[j].remove(function (item) {
-                    return item.model == model;
-                });
-            }
-            for (var j = self.syncModels.length - 1; j >= 0; j--) {
-                if (self.syncModels[j] == model)
-                    self.syncModels.splice(j, 1);
-            }
-        }
-
-    });
 }
 
-Repeat.prototype.append = function (options) {
-    var self = this;
-    var snRepeat = new SNRepeat(this, options.replacement, options.model);
-    var hasAdd = false;
-
-    self.snRepeats.push(snRepeat);
-
-    for (var i = 0; i < self.syncModels.length; i++) {
-        var model = self.syncModels[i];
-        if (!self.isChild || model.parent.parent == snRepeat.referenceModel) {
-            snRepeat.add(model);
-            hasAdd = true;
-        }
-    }
-
-    hasAdd && snRepeat.update();
+RepeatSource.isRepeatNode = function (node) {
+    return el.getAttribute('sn-repeat');
 }
 
-function SNRepeat(repeat, replacement, referenceModel) {
+function RepeatHolder(holderElement, collection) {
     var self = this;
 
-    this.replacement = replacement;
-    this.repeat = repeat;
-    this.referenceModel = referenceModel;
-
-    replacement.ownSnRepeat = this;
+    this.holderElement = holderElement;
+    this.collection = collection;
 
     this.elements = [];
 }
 
-SNRepeat.prototype = {
-
-    collection: function () {
-        return this.referenceModel.model[this.repeat.key];
-    },
-
-    _removeEl: function (el) {
-        eachElement($(el).remove(), function (node, i) {
-            if (node._origin) {
-                var elements = node._origin._elements;
-                for (var i = elements.length - 1; i >= 0; i--) {
-                    if (elements[i] == node) {
-                        elements.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-        });
-    },
+RepeatHolder.prototype = {
 
     update: function () {
 
@@ -601,7 +520,7 @@ SNRepeat.prototype = {
         var changedEls = [];
 
         this.elIndex = 0;
-        this.replacement.snIndexAlias = repeat.indexAlias;
+        this.replacement.snIndexAlias = repeat.loopIndexAlias;
 
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
@@ -623,7 +542,7 @@ SNRepeat.prototype = {
                 }
                 prevEl = el;
 
-                if (repeat.indexAlias && el.snIndex !== this.elIndex) {
+                if (repeat.loopIndexAlias && el.snIndex !== this.elIndex) {
                     el.snIndex = this.elIndex;
                     changedEls.push(el);
                 }
@@ -635,7 +554,7 @@ SNRepeat.prototype = {
         }
 
         if (changedEls.length) {
-            root._triggerChangeEvent(repeat.collectionName + '/' + repeat.alias + '/' + repeat.indexAlias, changedEls);
+            root._triggerChangeEvent(repeat.collectionName + '/' + repeat.alias + '/' + repeat.loopIndexAlias, changedEls);
         }
 
         if (fragment.childNodes.length) parentNode.insertBefore(fragment, this.replacement);
@@ -647,7 +566,7 @@ SNRepeat.prototype = {
 
         if (el == this.el) {
             node.snIndex = this.elIndex;
-            node.snIndexAlias = this.repeat.indexAlias;
+            node.snIndexAlias = this.repeat.loopIndexAlias;
             node.snRepeat = this;
             node.snModel = model;
             node.snReplacement = this.replacement;
@@ -774,298 +693,19 @@ function ViewModel(el, data) {
 }
 
 ViewModel.prototype = $.extend(Object.create(Model.prototype), {
-    key: '',
 
-    initialize: util.noop,
-
-    setState: function (cover, key, value) {
-        this.$state.set(cover, key, value);
-        return this;
-    },
-
-    getState: function (key) {
-        return this.$state.get(key);
-    },
-
-    endRender: function (callback) {
-        return this.one('viewDidUpdate', callback);
-    },
-
-    compile: function (code) {
-        var index = this._fns.indexOf(code);
-        if (index == -1)
-            this._fns.push(code), index = this._fns.length - 1;
-
-        return (this.fns.length + index);
-    },
-
-    _compile: function (expression, repeat, listen) {
-
-        var self = this;
-        var variables;
-
-        var content = 'try{return \'' +
-            expression
-                .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
-                .replace(rmatch, function (match, exp) {
-                    return '\'+(' + exp.replace(/\\\\/g, '\\').replace(/\\'/g, '\'').replace(rvar, function (match, prefix, name) {
-                        if (!name) {
-                            if (match.indexOf('var ') == 0) {
-                                return match.replace(/var\s+([^\=]+)=/, function (match, $0) {
-                                    variables = (variables || []).concat($0.split(','));
-                                    return $0 + '=';
-                                });
-                            }
-                            return match;
-                        }
-
-                        var attrs = name.split('.');
-                        var alias = attrs[0];
-
-                        if (alias == "$state") {
-                            self.$state.on('change:' + name.replace('$state.', '').replace(/\./g, '/'), listen);
-                            return prefix + isNull(name);
-
-                        } else if (!alias || Filters[alias] || snGlobal.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(name)) {
-
-                            return prefix + name;
-                        }
-                        var loopIndex;
-
-                        if (repeat) {
-                            for (var rp = repeat; rp != null; rp = rp.parent) {
-                                if (alias == rp.alias) {
-                                    attrs[0] = rp.collectionName + '^child';
-                                    break;
-
-                                } else if (alias == rp.indexAlias) {
-                                    loopIndex = rp;
-                                    break;
-                                }
-                            }
-                        }
-
-                        var eventName = (loopIndex ?
-                            loopIndex.collectionName + '/' + loopIndex.alias + '/' + loopIndex.indexAlias :
-                            attrs.join('/').replace(/\./g, '/'));
-
-                        self.on('change:' + eventName, listen);
-
-                        return prefix + isNull(name);
-                    }) + ')+\'';
-                }) +
-            '\';}catch(e){return \'\';}';
-
-        var code = 'function(global,model,el){' +
-            withData(repeat, (variables && variables.length ? 'var ' + variables.join(',') + ';' : '') + content.replace('return \'\'+', 'return ').replace(/\+\'\'/g, '')) +
-            '}';
-
-        return this.compile(code);
-    },
-
-    _render: function (el, attribute) {
-
-        var self = this;
-        if (el.bindings) {
-            var attrs;
-            if (attribute)
-                (attrs = {})[attribute] = el.bindings[attribute];
-            else
-                attrs = el.bindings;
-
-            for (var attr in attrs) {
-                var val = self.fns[attrs[attr]].call(self, Filters, self._closestByEl(el), el);
-
-                switch (attr) {
-                    case 'textContent':
-                        if (el.textContent !== val + '') {
-                            el.textContent = val;
-                        }
-                        break;
-                    case 'value':
-                        if (el.tagName == 'INPUT' || el.tagName == 'SELECT' || el.tagName == 'TEXTAREA') {
-                            if (el.value != val || el.value === '' && val === 0) {
-                                el.value = val;
-                            }
-                        } else
-                            el.setAttribute(attr, val);
-                        break;
-                    case 'html':
-                    case 'sn-html':
-                        el.innerHTML = val;
-                        break;
-                    case 'sn-if':
-                        if (util.isFalse(val)) {
-                            if (el.parentNode) {
-                                if (!el.snReplacement) {
-                                    el.snReplacement = document.createComment('if');
-                                    el.parentNode.insertBefore(el.snReplacement, el);
-                                }
-                                el.parentNode.removeChild(el);
-                            }
-
-                        } else {
-                            if (!el.parentNode) {
-                                el.snReplacement.parentNode.insertBefore(el, el.snReplacement);
-                            }
-                        }
-                        break;
-                    case 'display':
-                    case 'sn-display':
-                        el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
-                        break;
-                    case 'sn-style':
-                    case 'style':
-                        el.style.cssText += val;
-                        break;
-                    case 'checked':
-                    case 'selected':
-                        (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
-                        break;
-                    case 'src':
-                    case 'sn-src':
-                        var $el = $(el).one('load error', function () {
-                            $el.animate({
-                                opacity: 1
-                            }, 200);
-                        }).css({
-                            opacity: 0
-
-                        }).attr({
-                            src: val
-                        });
-                        break;
-                    default:
-                        el.setAttribute(attr, val);
-                        break;
-                }
-            }
-        }
-    },
-
-    _renderEls: function (elements, attr) {
-        for (var i = 0, n = elements && elements.length; i < n; i++) {
-            this._render(elements[i], attr);
-        }
+    twoWayBinding: function (el) {
 
     },
-    _bindAttr: function (node, attr, expression, repeat) {
-        var self = this;
-        var elements;
 
-        if (!rmatch.test(expression)) return;
-
-        (node.bindings || (node._elements = [], node.bindings = {}))[attr] = self._compile(expression, repeat, function (e, model) {
-            if (!repeat) {
-                self._render(node, attr);
-
-            } else if (model instanceof Model) {
-                elements = (model == self || model.under()) ? node._elements : model._elements[node.snElementId];
-
-                self._renderEls(elements);
-
-            } else if (model instanceof Collection) {
-                for (var i = 0, n = model.models.length; i < n; i++) {
-
-                    elements = model.models[i]._elements[node.snElementId];
-
-                    self._renderEls(elements);
-                }
-            } else if ($.isArray(model)) {
-                for (var el, i = 0, n = model.length; i < n; i++) {
-                    el = model[i];
-
-                    elements = el.snModel._elements[node.snElementId];
-
-                    self._renderEls(elements);
-                }
-            }
-        });
+    addRepeatSource: function (repeatSource) {
+        var repeatSources = this.repeatSources[repeatSource.collectionName];
+        !repeatSources && (repeatSources = []);
+        repeatSources.push(repeatSource);
     },
 
-    _closestByEl: function (el) {
-        return this.upperRepeatEl(el, function (el) {
-            return el.snModel;
-        });
-    },
-
-    _getByEl: function (el, name) {
-        var self = this;
-        var attrs = name.split('.');
-        var alias = attrs[0];
-
-        if (alias == 'this') {
-            return self;
-        } else if (alias == "$state")
-            return self.$state;
-
-        return this.upperRepeatEl(el, function (el) {
-            if (el.snRepeat.repeat.alias == alias)
-                return el.snModel;
-        });
-    },
-    _getVal: function (model, name) {
-        var model = model == this || model instanceof Model ? model : this._getByEl(model, name);
-
-        return model.get(model == this ? name : name.replace(/^[^\.]+\./, ''));
-    },
-
-    _setByEl: function (el, name, value) {
-        var model = this._getByEl(el, name);
-
-        model.set(model == this || model == self.$state ? name : name.replace(/^[^\.]+\./, ''), value);
-    },
-
-    _triggerChangeEvent: function (eventName, model) {
-        var self = this;
-
-        !model && (model = this);
-
-        eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
-
-        var eventsCache = self.eventsCache[eventName] || (self.eventsCache[eventName] = []);
-
-        (eventsCache.indexOf(model) == -1) && eventsCache.push(model);
-
-        if (!self.changeEventsTimer) {
-            self.changeEventsTimer = setTimeout(function () {
-                var now = Date.now();
-                var roots = [];
-
-                for (var key in self.eventsCache) {
-
-                    eventsCache = self.eventsCache[key];
-
-                    for (var i = 0, n = eventsCache.length; i < n; i++)
-                        self.trigger(key, eventsCache[i]);
-                }
-
-                self.eventsCache = {};
-                self.changeEventsTimer = null;
-                self.trigger("viewDidUpdate");
-
-            }, 0);
-        }
-
-        return this;
-    },
-
-    upperRepeatEl: function (el, fn, ret) {
-
-        while (el) {
-            if (el.snRepeatNode)
-                el = el.snRepeatNode;
-
-            if (el.snModel && el.snRepeat) {
-                if ((val = fn(el)) !== undefined) return val;
-
-                el = el.snReplacement;
-
-            } else
-                break;
-        }
-
-        return ret === undefined ? this : ret;
+    getRepeatSources: function (collectionName) {
+        return this.repeatSources[collectionName];
     },
 
     bind: function (el) {
@@ -1077,164 +717,34 @@ ViewModel.prototype = $.extend(Object.create(Model.prototype), {
             var target = e.currentTarget;
             var name = target.getAttribute(snModelName);
 
-            self._setByEl(target, name, target.value);
+            //self._setByEl(target, name, target.value);
+        });
+
+        everyElement($el, function (node, transferRepeatSource) {
+            if (node.snViewModel) return false;
+
+            self.twoWayBinding(node);
+
+            if (RepeatSource.isRepeatNode(node)) {
+                var repeatSource = new RepeatSource(node, transferRepeatSource);
+
+                self.addRepeatSource(repeatSource);
+
+                return repeatSource;
+
+            } else if (!transferRepeatSource) {
+                render(node);
+            }
         });
 
         self.$el = !self.$el ? $el : self.$el.add($el);
 
-        eachElement($el, function (child, i, extendRepeat) {
-            if (child.snViewModel) return false;
-
-            if (child.nodeType == 1) {
-                var repeat = child.getAttribute('sn-repeat');
-                if (repeat != null) {
-                    var match = repeat.match(rrepeat);
-                    var collectionName = match[3];
-                    var viewModel = collectionName.indexOf('$state') == 0 ? self.$state : self;
-                    repeat = new Repeat({
-                        root: self,
-                        viewModel: viewModel,
-                        parent: extendRepeat,
-                        alias: match[1],
-                        indexAlias: match[2],
-                        collectionName: collectionName,
-                        filters: match[4],
-                        orderBy: match[5],
-                        el: child
-                    });
-                    (viewModel.repeats[repeat.collectionName] || (viewModel.repeats[repeat.collectionName] = [])).push(repeat);
-
-                    if (!extendRepeat) {
-                        repeat.append({
-                            replacement: repeat.replacement,
-                            model: self
-                        });
-                    }
-
-                } else {
-                    repeat = extendRepeat;
-                }
-
-                for (var j = child.attributes.length - 1; j >= 0; j--) {
-                    var attr = child.attributes[j].name;
-                    var val = child.attributes[j].value;
-
-                    if (val) {
-                        if (attr == 'sn-error') {
-                            attr = 'onerror'
-                        } else if (attr == 'sn-src') {
-                            attr = 'src'
-                        }
-                        if (attr == "ref") {
-                            self.refs[val] = child;
-
-                        } else if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr.indexOf('sn-') != 0) {
-                            if (attr.indexOf('sn-') == 0 && val.indexOf("{{") == -1 && val.indexOf("}}") == -1) {
-                                val = '{{' + val + '}}';
-                            }
-                            self._bindAttr(child, attr, val, repeat);
-
-                        } else if (attr == 'sn-model') {
-                            child.removeAttribute(attr);
-                            child.setAttribute("sn-" + self.cid + "model", val);
-
-                        } else {
-                            var origAttr = attr;
-
-                            attr = attr.replace(/^sn-/, '');
-
-                            if (snEvents.indexOf(attr) != -1) {
-                                child.removeAttribute(origAttr);
-
-                                attr = "sn-" + self.cid + attr;
-
-                                if (rset.test(val) || rthis.test(val)) {
-                                    var content = val.replace(rthis, function (match, $1, $2) {
-                                        return $1 + "e" + ($2 ? ',' : '') + $2 + ")";
-
-                                    }).replace(rset, 'this._setByEl(e.currentTarget,"$1",$2)');
-
-                                    var code = 'function(e,model,global){var el=e.currentTarget;' + withData(repeat, content) + "}";
-                                    child.setAttribute(attr, self.compile(code));
-
-                                } else {
-                                    child.setAttribute(attr, val);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!repeat && child.bindings) {
-                    elements.push(child);
-                }
-                return repeat;
-
-            } else if (child.nodeType == 3) {
-                self._bindAttr(child, 'textContent', child.textContent, extendRepeat);
-                if (!extendRepeat && child.bindings) {
-                    elements.push(child);
-                }
-            }
-        });
-
-        $el.each(function () {
-            this.snViewModel = self.cid;
-            this.model = self;
-        })
-
-        //事件处理
-        var _handleEvent = function (e) {
-            var target = e.currentTarget;
-            var eventCode = target.getAttribute('sn-' + self.cid + e.type);
-            var fn;
-            var ctx;
-
-            if (eventCode == 'false') {
-                return false;
-
-            } else if (/^\d+$/.test(eventCode)) {
-                var model = self._closestByEl(target);
-                (model.root === self) && self.fns[eventCode].call(self, e, model, Filters);
-
-            } else {
-                var args = [e];
-                var argName;
-                var argNames = eventCode.split(':');
-
-                for (var i = 0; i < argNames.length; i++) {
-                    var attr = argNames[i];
-                    if (i == 0) {
-                        ctx = self._getByEl(target, attr);
-                        fn = self._getVal(ctx, attr);
-
-                        e.model = self._closestByEl(target, attr);
-
-                    } else {
-                        args.push(self._getVal(target, attr));
-                    }
-                }
-
-                fn.apply(ctx, args);
-            }
-        };
-
-        for (var i = 0, eventName, attr; i < snEvents.length; i++) {
-            eventName = snEvents[i] == 'transition-end' ? $.fx.transitionEnd : snEvents[i];
-            attr = '[sn-' + self.cid + snEvents[i] + ']';
-            $el.on(eventName, attr, _handleEvent).filter(attr).on(eventName, _handleEvent);
-        }
-
-        this.fns = this.fns.concat(window.eval('[' + this._fns.join(',') + ']'));
-        this._fns.length = 0;
-
-        for (var i = 0, len = elements.length; i < len; i++) {
-            self._render(elements[i]);
-        }
+        $el.each(function () { this.snViewModel = self; })
 
         return this;
     }
 
-}, util.pick(Component.prototype, ['$', 'undelegateEvents', 'listenTo', 'listen', 'destroy']));
+});
 
 ViewModel.extend = util.extend;
 

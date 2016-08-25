@@ -3,7 +3,7 @@
     <ul class="ct_list">
         <li sn-repeat="item in data_baglist" class="ct_list_item" data-id="{{item.SPB_ID}}">
             <div class="ct_list_item_con js_delete_item">
-                <img sn-src="{{item.PRD_PIC}}" data-forward="{{item.SPB_WAC_ID==10?'/group/'+item.SPB_GROUP:('/item/'+item.PRD_ID)}}" />
+                <img sn-src="{{item.ProductOBJ.WPP_LIST_PIC}}" data-forward="{{item.SPB_WAC_ID==10?'/group/'+item.SPB_GROUP:('/item/'+item.PRD_ID)}}" />
                 <div class="con">
                     <b class="name">{{item.PRD_NAME}}</b>
                     <p class="size">尺寸：{{item.PRD_SPEC.split('|')[0]}}</p>
