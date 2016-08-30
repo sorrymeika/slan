@@ -6,6 +6,7 @@ var $ = require('$'),
     Component = require('./component');
 
 var toString = {}.toString;
+var ArrayProto = Array.prototype;
 
 var eventsCache = [];
 var changeEventsTimer;
@@ -76,6 +77,33 @@ function everyElement(el, fn, transfer) {
 
         for (var i = 0, len = el.childNodes.length; i < len; i++) {
             everyElement(el.childNodes[i], fn, flag || transfer);
+        }
+    }
+}
+
+function eachElement(el, fn, transfer) {
+    if (el.length) {
+        for (var i = 0, len = el.length; i < len; i++) {
+            eachElement(el[i], fn, transfer);
+        }
+        return;
+    }
+    var stack = [];
+
+    while (el) {
+        fn(el, transfer);
+
+        if (el.firstChild) {
+            if (el.nextSibling) {
+                stack.push(el.nextSibling);
+            }
+            el = el.firstChild;
+
+        } else if (el.nextSibling) {
+            el = el.nextSibling;
+
+        } else {
+            el = stack.pop();
         }
     }
 }
@@ -328,7 +356,6 @@ var ModelProto = {
         (this._elements[id] || (this._elements[id] = [])).push(node);
     }
 }
-ModelProto.clear = ModelProto.reset;
 
 Event.mixin(Model, ModelProto);
 
@@ -347,17 +374,26 @@ var Collection = Event.mixin(function (parent, attr, data) {
     this.data = [];
     parent.data[attr] = this.data;
 
-    var repeatSources = this.root.getRepeatSources(this.key);
+    this.repeatSources = this.root.getRepeatSources(this.key);
 
     this.add(data);
-
 }, {
+        _change: function () {
+            this.repeatSources.forEach(function (repeatSource) {
+                if (repeatSource.isChild) {
+                    repeatSource.parent.repeatElements.update(repeatSource);
+
+                } else {
+                    repeatSource.repeatElements.update();
+                }
+            })
+        },
+
         get: function (i) {
             return this.models[i];
         },
 
         set: function (data) {
-            this._silent = true;
 
             if (!data || data.length == 0) {
                 this.clear();
@@ -377,10 +413,6 @@ var Collection = Event.mixin(function (parent, attr, data) {
 
                 this.add(i == 0 ? data : data.slice(i, data.length));
             }
-            this._silent = false;
-
-            this._triggerChangeEvent();
-
             return this;
         },
         each: function (fn) {
@@ -414,6 +446,8 @@ var Collection = Event.mixin(function (parent, attr, data) {
                 changes.push(model);
             }
 
+            this._change();
+
         },
         remove: function (start, count) {
             var models;
@@ -434,18 +468,14 @@ var Collection = Event.mixin(function (parent, attr, data) {
                 this.data.splice(start, count);
             }
 
-            this._triggerChangeEvent();
-            this.trigger('remove', models);
-
-            this.root.trigger('change:' + this.eventName + '/remove', this, models);
+            this._change();
         },
 
         clear: function (data) {
             var models = this.models.slice();
             this.models.length = this.data.length = 0;
-            this._triggerChangeEvent();
 
-            this.root.trigger('change:' + this.eventName + '/remove', this, models);
+            this._change();
         }
     });
 
@@ -466,9 +496,11 @@ function RepeatSource(el, parent) {
     this.key = attrs[attrs.length - 1];
     this.parent = parent;
     this.source = el;
+    this.children = [];
+    this.cid = util.guid();
 
     var replacement = document.createComment(collectionName);
-    replacement.repeat = this;
+    replacement.repeatSource = this;
     el.parentNode.replaceChild(replacement, el);
 
     this.replacement = replacement;
@@ -482,30 +514,38 @@ function RepeatSource(el, parent) {
         }
         parent = parent.parent;
     }
+
+    parent.appendChild(this);
 }
 
 RepeatSource.isRepeatNode = function (node) {
     return el.getAttribute('sn-repeat');
 }
 
-function RepeatHolder(holderElement, collection) {
-    var self = this;
-
-    this.holderElement = holderElement;
-    this.collection = collection;
-
-    this.elements = [];
+RepeatSource.prototype.appendChild = function (child) {
+    this.children.push(child);
 }
 
-RepeatHolder.prototype = {
+function RepeatElements(commentNode, source, collection) {
+    var self = this;
 
-    update: function () {
+    this.commentNode = commentNode;
+    this.cursor = 0;
+    this.source = source;
+    this.collection = collection;
+    this.length = collection.length;
+}
+
+RepeatElements.prototype = {
+
+    update: function (child) {
 
         var fragment = document.createDocumentFragment();
         var list = this.elements;
         var repeat = this.repeat;
         var orderBy = repeat.orderBy;
-        var root = this.referenceModel.root;
+        var root = this.collection.root;
+        var source = this.source;
         var parentNode = this.replacement.parentNode;
 
         if (orderBy) {
@@ -519,14 +559,14 @@ RepeatHolder.prototype = {
         var prevEl;
         var changedEls = [];
 
-        this.elIndex = 0;
+        this.index = 0;
         this.replacement.snIndexAlias = repeat.loopIndexAlias;
 
         for (var i = 0, len = list.length; i < len; i++) {
             var item = list[i];
             var el;
 
-            this.replacement.snIndex = this.elIndex;
+            this.replacement.snIndex = this.index;
 
             if (repeat.filter === undefined || root.fns[repeat.filter].call(root, Filters, item.model, this.replacement)) {
                 el = item.el ? item.el : (item.el = this.cloneNode(this.el || (this.el = this.cloneNode(repeat.el)), item.model));
@@ -542,75 +582,36 @@ RepeatHolder.prototype = {
                 }
                 prevEl = el;
 
-                if (repeat.loopIndexAlias && el.snIndex !== this.elIndex) {
-                    el.snIndex = this.elIndex;
+                if (repeat.loopIndexAlias && el.snIndex !== this.index) {
+                    el.snIndex = this.index;
                     changedEls.push(el);
                 }
-                this.elIndex++;
+                this.index++;
 
             } else if (item.el && item.el.parentNode) {
                 item.el.parentNode.removeChild(item.el);
             }
         }
 
-        if (changedEls.length) {
-            root._triggerChangeEvent(repeat.collectionName + '/' + repeat.alias + '/' + repeat.loopIndexAlias, changedEls);
-        }
-
         if (fragment.childNodes.length) parentNode.insertBefore(fragment, this.replacement);
     },
 
-    cloneNode: function (el, model, parentNode, repeatNode) {
+    cloneNode: function (el, model, parentNode) {
         var node = el.cloneNode(false);
         var len;
-
-        if (el == this.el) {
-            node.snIndex = this.elIndex;
-            node.snIndexAlias = this.repeat.loopIndexAlias;
-            node.snRepeat = this;
-            node.snModel = model;
-            node.snReplacement = this.replacement;
-            repeatNode = node;
-
-        } else {
-            node.snRepeatNode = repeatNode;
-        }
+        var repeatSource;
 
         if (parentNode) parentNode.appendChild(node);
 
-        //给repeat占位的CommentElement
-        if (el.nodeType == 8 && el.repeat) {
-            node.repeat = el.repeat;
-            if (model) {
-                el.repeat.append({
-                    replacement: node,
-                    model: model
-                });
-            }
+        //给repeat占位的CommentNode
+        if (el.nodeType == 8 && el.repeatSource) {
+            (this[this.cursor] || (this[this.cursor] = {}))[el.repeatSource.cid] = new RepeatElements(node, el.repeatSource);
 
         } else {
 
-            if (el.bindings) {
-                node.bindings = el.bindings;
-
-                if (model) {
-                    (node._origin = el._origin)._elements.push(node);
-
-                    model.root.upperRepeatEl(node, function (elem) {
-
-                        elem.snModel._pushNode(el._origin, node);
-
-                    })._render(node);
-
-                } else {
-                    //SNRepeat实例化时cloneNode执行
-                    node._origin = el;
-                }
-            }
-
             if (el.nodeType == 1 && (len = el.childNodes.length)) {
                 for (var i = 0; i < len; i++) {
-                    this.cloneNode(el.childNodes[i], model, node, repeatNode);
+                    this.cloneNode(el.childNodes[i], model, node);
                 }
             }
         }

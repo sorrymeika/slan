@@ -3,6 +3,7 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
 var model = require('core/model');
+var model2 = require('core/model2');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 
@@ -41,6 +42,7 @@ ss\n\n\n\
         });
 
 
+        return;
 
         console.time('test');
         console.profile('test');

@@ -22,7 +22,7 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
         
-        self.swipeRightBackAction = self.route.query.from || '/';
+        self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
 
         var id = self.route.data.id;
         var m = /(order|month|activity|package|fastbuy|banner|coupon){0,1}(\d*)/.exec(id);

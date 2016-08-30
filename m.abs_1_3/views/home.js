@@ -1,4 +1,4 @@
-﻿var $ = require('$');
+var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var bridge = require('bridge');
@@ -57,6 +57,47 @@ if (!recordVersion || Date.now() - recordVersion > 24 * 60 * 60 * 1000) {
 
         }).load();
     });
+}
+
+function eachElement(el, fn) {
+    if (el.length && el.nodeType !== 3) {
+        for (var i = 0, len = el.length; i < len; i++) {
+            eachElement(el[i], fn);
+        }
+        return;
+    }
+    var stack = [];
+
+    while (el) {
+        var flag = fn(el);
+
+        if (flag !== false && el.firstChild) {
+            if (el.nextSibling) {
+                stack.push(el.nextSibling);
+            }
+            el = el.firstChild;
+
+        } else if (el.nextSibling) {
+            el = el.nextSibling;
+
+        } else {
+            el = stack.pop();
+        }
+    }
+}
+
+var everyElement = function (el, fn) {
+
+    var childNodes = el.length ? el : [el];
+
+    for (var i = 0, len = childNodes.length; i < len; i++) {
+        var child = childNodes[i];
+        var nextExtend = fn(child, i);
+
+        if (nextExtend !== false && child.nodeType == 1 && child.childNodes.length) {
+            everyElement(child.childNodes, fn);
+        }
+    }
 }
 
 module.exports = Activity.extend({
@@ -384,7 +425,36 @@ module.exports = Activity.extend({
                     topbanner: res.topbanner
                 });
 
-                console.log(res.topbanner.data);
+                var count = 0;
+
+                function test(el) {
+                    count++;
+
+                    if (!el.snData) {
+                        el.snData = {};
+                    }
+
+                    if (self.model.get('xxx.xx.xx')) {
+
+                    }
+                }
+
+                console.time('everyElement');
+
+                everyElement(self.$el, test);
+                console.timeEnd('everyElement');
+
+                console.log(count);
+
+                count = 0;
+
+                console.time('eachElement');
+
+                eachElement(self.$el, test);
+                console.timeEnd('eachElement');
+
+                console.log(count);
+
 
                 if (self.slider)
                     self.slider.set(res.topbanner.data);
