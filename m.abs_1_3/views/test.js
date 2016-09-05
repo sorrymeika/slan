@@ -21,7 +21,31 @@ module.exports = Activity.extend({
 
         Scroll.bind($main);
 
+        model2.Global.set({
+            title: 'sssss',
+
+            list: [{
+                name: 'global.test.0'
+            }, {
+                    name: 'global.test.1'
+                }]
+        })
+
+        setTimeout(function () {
+            model2.Global.set({
+                title: 'aaaa'
+            });
+
+        }, 1000);
+
         new model2.ViewModel(this.$el, {
+
+            list: [{
+                name: 'list.test.0'
+            }, {
+                    name: 'list.test.1'
+                }],
+
             data: [{
                 name: '1234',
                 children: [{

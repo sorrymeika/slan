@@ -1,9 +1,7 @@
 
-var $ = require('$'),
-    util = require('util'),
-    Base = require('./base'),
-    Event = require('./event'),
-    Component = require('./component');
+var $ = require('$');
+var Base = require('./base');
+var util = require('util');
 
 var toString = {}.toString;
 var ArrayProto = Array.prototype;
@@ -13,7 +11,7 @@ var GlobalVariables = ['this', '$', 'Math', 'new', 'Date', 'encodeURIComponent',
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
-var rrepeat = /([a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
+var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
@@ -44,7 +42,7 @@ var valueCode = function (str, variables) {
     var alias = arr[0];
     var result = [];
     var code = '';
-    var gb = alias == '$global' ? arr.shift() : '$data';
+    var gb = '$data';
 
     if (!alias || alias in Filters || GlobalVariables.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(str)) {
         return str;
@@ -201,6 +199,26 @@ var ModelProto = {
         parent.data[(parent instanceof Collection) ? parent.models.indexOf(this) : this._key] = this.data;
     },
 
+    findByKey: function (key) {
+        var model = this.model;
+
+        for (var k in model) {
+            var mod = model[k];
+
+            if (mod && mod.key == key) {
+                return mod;
+            }
+            if (mod instanceof Model) {
+                mod = mod.findByKey(key);
+
+                if (mod)
+                    return mod;
+            }
+        }
+
+        return null;
+    },
+
     getModel: function (key) {
         if (typeof key == 'string' && key.indexOf('.') != -1) {
             key = key.split('.');
@@ -243,30 +261,6 @@ var ModelProto = {
         return key == 'this' ? this : key == '' ? this.data : this.data[key];
     },
 
-    findByKey: function (key) {
-        var model = this.model;
-
-        for (var k in model) {
-            var mod = model[k];
-
-            if (mod && mod.key == key) {
-                return mod;
-            }
-            if (mod instanceof Model) {
-                mod = mod.findByKey(key);
-
-                if (mod)
-                    return mod;
-            }
-        }
-
-        return null;
-    },
-
-    cover: function (key, val) {
-        return this.set(true, key, val);
-    },
-
     set: function (cover, key, val) {
         var self = this,
             origin,
@@ -276,8 +270,6 @@ var ModelProto = {
             parent,
             keys,
             coverChild = false;
-
-
 
         if (typeof cover != "boolean")
             val = key, key = cover, cover = false;
@@ -383,48 +375,15 @@ var ModelProto = {
     },
 
     reset: function () {
-
         var data = {};
         for (var attr in this.data) {
             data[attr] = null;
         }
         this.set(data);
-    },
-
-    closest: function (key) {
-        var res;
-        for (var parent = this.parent; parent != null; parent = parent.parent) {
-            res = typeof key == 'function' ? key(parent) : (parent.key == key ? 1 : 0);
-            if (res) {
-                return parent;
-            } else if (res === false) {
-                return null;
-            }
-        }
-    },
-
-    contains: function (model, excludeCollection) {
-        for (model = model.parent; model != null; model = model.parent) {
-            if (model == this) {
-                return true;
-            } else if (excludeCollection && model instanceof Collection)
-                return false;
-        }
-        return false;
-    },
-
-    under: function (parent) {
-        for (var model = this.parent; model != null && parent != model; model = model.parent) {
-            if (model instanceof Collection) {
-                return false;
-            }
-        }
-        return true;
     }
 }
 
 Model.prototype = ModelProto;
-
 
 var Collection = function (parent, attr, data) {
 
@@ -573,6 +532,9 @@ function RepeatSource(el, parent) {
     if (parentAlias == '$global') {
         this.isGlobal = true;
 
+        attrs.shift();
+        collectionKey = attrs.join('.');
+
     } else {
         this.isGlobal = false;
 
@@ -590,6 +552,8 @@ function RepeatSource(el, parent) {
     replacement.snIsGlobal = this.isGlobal || this.filterIsGlobal;
 
     this.collectionKey = collectionKey;
+
+    console.log(this)
 }
 
 RepeatSource.isRepeatNode = function (node) {
@@ -749,7 +713,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     formatData: function (snData) {
-        var data = Object.assign({}, Filters, this.data);
+        var data = Object.assign({
+            $global: this.$global.data
+
+        }, Filters, this.data);
 
         if (snData) {
             for (var key in snData) {
@@ -846,6 +813,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     }).attr({
                         src: val
                     });
+                    break;
+                case 'className':
+                    el.className = val;
                     break;
                 default:
                     el.setAttribute(attr, val);
@@ -1015,7 +985,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         });
 
-        this._nextTick = false;
+        this._nextTick = null;
     },
 
     bind: function (el) {
@@ -1071,12 +1041,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
 ViewModel.extend = util.extend;
 
-exports.Global = ViewModel.prototype.$global = new ViewModel();
-exports.ViewModel = ViewModel;
-exports.Filters = Filters;
+var Global = ViewModel.prototype.$global = new ViewModel();
 
-
-exports.Global.updateView = function () {
+Global.updateView = function () {
 
     eachElement(document.body, function (el) {
         if (el.snIsGlobal) {
@@ -1098,66 +1065,14 @@ exports.Global.updateView = function () {
                     model.updateElement(el);
                 }
             }
-
-
         }
     });
 
-}.bind(exports.Global)
+    this._nextTick = null;
+
+}.bind(Global);
 
 
-/*
-
-var model = new exports.ViewModel($('<div><div sn-repeat="item in data"><span>{{item.name}}</span><i sn-repeat="p in children">{{p.name}}</i></div></div>'), {
-    data: [{
-        name: '1234'
-    }, {
-            name: '2234'
-        }],
-
-    children: [{
-        name: 'aaa'
-    }]
-});
-    
-    this.model = new model.ViewModel($('<div><div sn-repeat="item in data"><span>{{item.name}}</span><i sn-repeat="p in item.children">{{p.name}}</i></div></div>'), {
-        data: [{
-            name: '1234',
-            children: [{
-                name: 'aaa'
-            }]
-        }]
-    });
-    this.model.$el.appendTo($('body'));
-    
-    
-    var data = {
-        data: []
-    }
-    
-    var data1={
-        name:'state',
-        data:[]
-    }
-
-    for (var i = 0; i < 10; i++) {
-        data.data.push({
-            id: i,
-            name: 'adsf' + i,
-            src: "http://" + i
-        });
-        
-        data1.data.push({
-            id: i,
-            name: 'adsf' + i,
-            src: "http://" + i
-        });
-    }
-
-    this.model = new model.ViewModel($(<div>{{$state.name}}</div>), data);
-        
-    this.model.setState(data1);
-
-    this.model.$el.appendTo($main.html(''));
-    return;
-*/
+exports.Filters = Filters;
+exports.ViewModel = ViewModel;
+exports.Global = Global;
