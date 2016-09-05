@@ -3,6 +3,7 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
 var model = require('core/model');
+var model2 = require('core/model2');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 
@@ -20,27 +21,45 @@ module.exports = Activity.extend({
 
         Scroll.bind($main);
 
-        seajs.use('views/test3', function (test3) {
+        model2.Global.set({
+            title: 'sssss',
 
-            var res = test3.css_beautify("   .bd    \n { padding-top: 4px/$p; ul { display: -webkit-box;\n margin-top: 5px; }\n\
-        li { -webkit-box-flex: 1; width: 0px; height: 80px; text-align: center; font-size: 14px; &:before { @include icon(0px, 0px, 104px/$p, 104px/$p, \"icon_share.png\", block); background-size: 416px/$p auto; margin: 0 auto 4px auto; }\
-            }\n//asdfsf\n/*爱管家\nasdf*/\n\
-        @for $i from 1 to 4 { li:nth-child(#{$i+1}):before { background-position: -104px/$p*$i 0px; }\
-            }\n\n\
-        }\n\
-        \
-        \
-        \
-ss\n\n\n\
-        \
-    .ft { .btn { display: block; line-height: 30px; height: 60px/$p; width: (550/640)*100%; font-size: 16px; background: #ccc; margin: 5px auto 0 auto; border-radius: 0;   }\
-        }\
-        \
-    }");
-            //$main.html(res);
+            list: [{
+                name: 'global.test.0'
+            }, {
+                    name: 'global.test.1'
+                }]
+        })
+
+        setTimeout(function () {
+            model2.Global.set({
+                title: 'aaaa'
+            });
+
+        }, 1000);
+
+        new model2.ViewModel(this.$el, {
+
+            list: [{
+                name: 'list.test.0'
+            }, {
+                    name: 'list.test.1'
+                }],
+
+            data: [{
+                name: '1234',
+                children: [{
+                    name: 'aaa'
+                }]
+            }, {
+                    name: '2234',
+                    children: [{
+                        name: 'bbb'
+                    }]
+                }]
         });
 
-
+        return;
 
         console.time('test');
         console.profile('test');
