@@ -299,6 +299,10 @@ module.exports = Activity.extend({
             searchHistory: util.store("searchHistory")
         });
 
+        model.test=function(e){
+            console.log(e);
+        }
+
         model.showSearch = function (e) {
             this.set({
                 isShowSearch: true

@@ -6,7 +6,19 @@ var util = require('util');
 var toString = {}.toString;
 var ArrayProto = Array.prototype;
 
-var snEvents = ['tap', 'click', 'change', 'focus', 'blur', 'transition-end'];
+var ModelEvents = {
+    tap: 'tap',
+    'long-tap': 'longTap',
+    'transition-end': $.fx.transitionEnd,
+    touchstart: 'touchstart',
+    touchend: 'touchend',
+    touchmove: 'touchmove',
+    click: 'click',
+    change: 'change',
+    input: 'input',
+    focus: 'focus',
+    blur: 'blur'
+};
 var GlobalVariables = ['this', '$', 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
@@ -552,8 +564,6 @@ function RepeatSource(el, parent) {
     replacement.snIsGlobal = this.isGlobal || this.filterIsGlobal;
 
     this.collectionKey = collectionKey;
-
-    console.log(this)
 }
 
 RepeatSource.isRepeatNode = function (node) {
@@ -682,23 +692,25 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     el.setAttribute("sn-" + self.cid + "model", val);
 
                 } else {
-
                     //处理事件绑定
                     var origAttr = attr;
 
                     attr = attr.replace(/^sn-/, '');
 
-                    if (snEvents.indexOf(attr) != -1) {
+                    var evt = ModelEvents[attr];
+
+                    if (evt) {
                         el.removeAttribute(origAttr);
 
-                        attr = "sn-" + self.cid + attr;
+                        attr = "sn-" + self.cid + evt;
 
                         if (rset.test(val) || rthis.test(val)) {
                             var content = val.replace(rthis, function (match, $1, $2) {
-                                return $1 + "e" + ($2 ? ',' : '') + $2 + ")";
+                                return $1 + $2 + ($2 ? ',e)' : 'e)');
 
                             }).replace(rset, 'this._updateElementData(e.currentTarget,"$1",$2)');
-                            var fid = self.getFunctionId(content);
+
+                            var fid = self.getFunctionId('{' + content + '}');
                             if (fid) {
                                 el.setAttribute(attr, fid.id);
                             }
@@ -754,8 +766,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             if (attrs[attr] === val) continue;
 
             attrs[attr] = val;
-
-            console.log('updateElement:', attr, val);
 
             switch (attr) {
                 case 'textContent':
@@ -1023,6 +1033,38 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 return nextSibling;
             }
         });
+
+        //事件处理
+        var handleEvent = function (e) {
+            if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
+                return;
+            }
+            var target = e.currentTarget;
+            var eventCode = target.getAttribute('sn-' + self.cid + e.type);
+            var fn;
+            var ctx;
+
+            if (eventCode == 'false') {
+                return false;
+
+            } else if (/^\d+$/.test(eventCode)) {
+
+                var snData = self.formatData(target.snData);
+
+                snData.e = e;
+
+                return self.fns[eventCode].call(self, snData);
+            }
+        };
+
+        for (var key in ModelEvents) {
+            var eventName = ModelEvents[key];
+            var attr = '[sn-' + self.cid + eventName + ']';
+
+            console.log(eventName, attr);
+
+            $el.on(eventName, attr, handleEvent);
+        }
 
         var fns = new Function('return [' + this._codes.join(',') + ']')();
 

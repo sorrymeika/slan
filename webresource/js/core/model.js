@@ -11,7 +11,14 @@
     var changeEventsTimer;
     var elementId = 0;
 
-    var snEvents = ['tap', 'click', 'change', 'focus', 'blur', 'transition-end'];
+    var snEvents = {
+        tap: 'tap',
+        click: 'click',
+        change: 'change',
+        focus: 'focus',
+        blur: 'blur',
+        'transition-end': $.fx.transitionEnd
+    };
     var snGlobal = ['this', '$', 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
 
     var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
@@ -1162,10 +1169,12 @@
 
                                 attr = attr.replace(/^sn-/, '');
 
-                                if (snEvents.indexOf(attr) != -1) {
+                                var evt = snEvents[attr];
+
+                                if (evt) {
                                     child.removeAttribute(origAttr);
 
-                                    attr = "sn-" + self.cid + attr;
+                                    attr = "sn-" + self.cid + "-" + evt;
 
                                     if (rset.test(val) || rthis.test(val)) {
                                         var content = val.replace(rthis, function (match, $1, $2) {
@@ -1203,8 +1212,12 @@
 
             //事件处理
             var _handleEvent = function (e) {
+                if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
+                    return;
+                }
+
                 var target = e.currentTarget;
-                var eventCode = target.getAttribute('sn-' + self.cid + e.type);
+                var eventCode = target.getAttribute('sn-' + self.cid + '-' + e.type);
                 var fn;
                 var ctx;
 
@@ -1237,10 +1250,10 @@
                 }
             };
 
-            for (var i = 0, eventName, attr; i < snEvents.length; i++) {
-                eventName = snEvents[i] == 'transition-end' ? $.fx.transitionEnd : snEvents[i];
-                attr = '[sn-' + self.cid + snEvents[i] + ']';
-                $el.on(eventName, attr, _handleEvent).filter(attr).on(eventName, _handleEvent);
+            for (var key in snEvents) {
+                var eventName = snEvents[key];
+                var attr = '[sn-' + self.cid + '-' + eventName + ']';
+                $el.on(eventName, attr, _handleEvent);
             }
 
             this.fns = this.fns.concat(window.eval('[' + this._fns.join(',') + ']'));
