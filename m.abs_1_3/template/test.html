@@ -6,6 +6,8 @@
     <div>
         <input sn-model='name' value='{name}' />
 
+        <div>{user.userName}|{user.userId}</div>
+
         <dl sn-repeat="item,i in data|filter:contains(item.name,name)">
             <dt sn-tap="this.test(1)">{item.name}|{i}</dt>
             <dd sn-repeat="p,j in item.children">{p.name}

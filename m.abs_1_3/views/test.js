@@ -36,9 +36,24 @@ module.exports = Activity.extend({
                 title: 'aaaa'
             });
 
+            user.set({
+                userName: '小白'
+            })
+
         }, 1000);
 
-        var m = new model2.ViewModel(this.$el, {
+        var user = new model2.Model({
+            userId: 1,
+            userName: '小红'
+        });
+
+        var m = new model2.Model(this.$el, {
+
+            user: user,
+
+            data1: {
+                aa: 11
+            },
 
             list: [{
                 name: 'list.test.0'

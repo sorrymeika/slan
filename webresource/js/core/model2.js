@@ -180,6 +180,11 @@ function genFunction(expression) {
 }
 
 
+function syncParentData(model) {
+    var parent = model.parent;
+    parent.data[(parent instanceof Collection) ? parent.models.indexOf(model) : model._key] = model.data;
+}
+
 var Model = function (parent, key, data) {
 
     if (parent instanceof Model) {
@@ -203,11 +208,8 @@ var Model = function (parent, key, data) {
     this.set(data);
 }
 
+
 var ModelProto = {
-    _fixParentData: function () {
-        var parent = this.parent;
-        parent.data[(parent instanceof Collection) ? parent.models.indexOf(this) : this._key] = this.data;
-    },
 
     findByKey: function (key) {
         var model = this.model;
@@ -297,7 +299,8 @@ var ModelProto = {
             val = key, key = '', parent = this.parent;
 
             this.data = val;
-            this._fixParentData();
+
+            syncParentData(this);
 
             return this;
 
@@ -324,32 +327,33 @@ var ModelProto = {
                 (attrs = {})[key] = val;
             }
         }
-        if (!$.isPlainObject(this.data)) this.data = {}, this._fixParentData();
+        if (!$.isPlainObject(this.data)) this.data = {}, syncParentData(this);
+
+        var data = this.data;
 
         if (cover) {
-            for (var attr in this.data) {
+            for (var attr in data) {
                 if (attrs[attr] === undefined) {
                     attrs[attr] = null;
                 }
             }
         }
 
-        for (var key in attrs) {
-            this.data[key] = attrs[key];
-        }
-        var eventName;
-
         for (var attr in attrs) {
             origin = model[attr];
             value = attrs[attr];
-            eventName = this.key ? this.key + '/' + attr : attr;
 
             if (origin !== value) {
+                if (origin === undefined && value instanceof ViewModel) {
+                    model[attr] = value;
+                    data[attr] = value.data;
 
-                if (origin instanceof Model) {
+                    (value.parents || (value.parents = [])).push(this.root);
+
+                } else if (origin instanceof Model) {
 
                     value === null || value === undefined ? origin.reset() : origin.set(coverChild, value);
-                    this.data[attr] = origin.data;
+                    data[attr] = origin.data;
 
                 } else if (origin instanceof Collection) {
                     if (!$.isArray(value)) {
@@ -360,21 +364,26 @@ var ModelProto = {
                         }
                     }
                     origin.set(value);
-                    this.data[attr] = origin.data;
+                    data[attr] = origin.data;
 
                 } else {
 
                     switch (toString.call(value)) {
                         case '[object Object]':
-                            model[attr] = new Model(this, attr, value);
+                            value = new Model(this, attr, value);
+                            data[attr] = value.data;
                             break;
+
                         case '[object Array]':
-                            model[attr] = new Collection(this, attr, value);
+                            value = new Collection(this, attr, value);
+                            data[attr] = value.data;
                             break;
+
                         default:
-                            model[attr] = value;
+                            data[attr] = model[attr] = value;
                             break;
                     }
+                    model[attr] = value;
                 }
             }
         }
@@ -1068,6 +1077,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var self = this;
 
         eachElement(this.$el, function (el) {
+            if (el.snViewModel && el.snViewModel != self) return false;
 
             if (el.nodeType == 8 && el.snRepeatSource) {
 
@@ -1078,7 +1088,13 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
 
         });
-        console.timeEnd('updateView')
+        console.timeEnd('updateView');
+
+        if (this.parents) {
+            this.parents.forEach(function (parent) {
+                !parent._nextTick && parent.updateView();
+            })
+        }
 
         this._nextTick = null;
         this.trigger('viewDidUpdate');
@@ -1139,5 +1155,5 @@ Global.updateView = (function () {
 
 
 exports.Filters = Filters;
-exports.ViewModel = ViewModel;
+exports.ViewModel = exports.Model = ViewModel;
 exports.Global = Global;
