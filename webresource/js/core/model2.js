@@ -2,9 +2,9 @@
 var $ = require('$');
 var Base = require('./base');
 var util = require('util');
+var Event = require('./event');
 
 var toString = {}.toString;
-var ArrayProto = Array.prototype;
 
 var ModelEvents = {
     tap: 'tap',
@@ -100,7 +100,6 @@ function eachElement(el, fn) {
     }
 }
 
-
 function cloneElement(el, fn) {
 
     eachElement(el, function (node) {
@@ -173,7 +172,6 @@ function genFunction(expression) {
     if (variables && variables.length) {
         content = 'var ' + variables.join(',') + ';' + content
     }
-
     return {
         isGlobal: isGlobal,
         code: content,
@@ -574,13 +572,19 @@ RepeatSource.prototype.appendChild = function (child) {
     this.children.push(child);
 }
 
+var viewModelList = [];
 
 function ViewModel(el, data) {
+    viewModelList.push(this);
+
     if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
         data = el, el = this.el;
 
     this.updateView = this.updateView.bind(this);
+    this._handleEvent = this._handleEvent.bind(this);
+
     this.cid = util.guid();
+    this.snModelKey = 'sn-' + this.cid + 'model';
 
     this.data = $.extend({}, data);
     this.model = {};
@@ -614,7 +618,85 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         model.set(attrs, value);
     },
 
+    //事件处理
+    _handleEvent: function (e) {
+        if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
+            return;
+        }
+        var target = e.currentTarget;
+        var eventCode = target.getAttribute('sn-' + this.cid + e.type);
+        var fn;
+        var ctx;
+
+        if (eventCode == 'false') {
+            return false;
+
+        } else if (/^\d+$/.test(eventCode)) {
+
+            var snData = this.formatData(target.snData);
+
+            snData.e = e;
+
+            return this.fns[eventCode].call(this, snData);
+        }
+    },
+
     initialize: util.noop,
+
+    bind: function (el) {
+        var self = this;
+        var elements = [];
+
+        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
+            var target = e.currentTarget;
+
+            self._updateElementData(target, target.getAttribute(self.snModelKey), target.value);
+        });
+
+        this._codes = [];
+
+        eachElement($el, function (node) {
+            if (node.snViewModel) return false;
+
+            self.twoWayBinding(node);
+
+            var parentRepeatSource;
+            for (var parentNode = node.parentNode; parentNode && !parentNode.snViewModel; parentNode = parentNode.parentNode) {
+                if (parentNode.snRepeatSource) {
+                    parentRepeatSource = parentNode.snRepeatSource;
+                    break;
+                }
+            }
+
+            if (RepeatSource.isRepeatNode(node)) {
+                var nextSibling = node.nextSibling;
+                var repeatSource = new RepeatSource(node, parentRepeatSource);
+
+                node.snRepeatSource = repeatSource;
+
+                return nextSibling;
+            }
+        });
+
+        for (var key in ModelEvents) {
+            var eventName = ModelEvents[key];
+            var attr = '[sn-' + self.cid + eventName + ']';
+
+            $el.on(eventName, attr, this._handleEvent);
+        }
+
+        var fns = new Function('return [' + this._codes.join(',') + ']')();
+
+        fns.forEach(function (fn) {
+            self.fns.push(fn);
+        });
+
+        self.$el = !self.$el ? $el : self.$el.add($el);
+
+        $el.each(function () { this.snViewModel = self; })
+
+        return this;
+    },
 
     getFunctionId: function (expression) {
         if (!expression) return null;
@@ -689,7 +771,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                 } else if (attr == 'sn-model') {
                     el.removeAttribute(attr);
-                    el.setAttribute("sn-" + self.cid + "model", val);
+                    el.setAttribute(self.snModelKey, val);
 
                 } else {
                     //处理事件绑定
@@ -981,6 +1063,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
     updateView: function () {
 
+        console.time('updateView')
+
         var self = this;
 
         eachElement(this.$el, function (el) {
@@ -994,125 +1078,64 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
 
         });
+        console.timeEnd('updateView')
 
         this._nextTick = null;
+        this.trigger('viewDidUpdate');
     },
 
-    bind: function (el) {
-        var self = this;
-        var elements = [];
-        var snModelName = 'sn-' + self.cid + 'model';
+    next: function (callback) {
+        return this.one('viewDidUpdate', callback);
+    },
 
-        var $el = $(el).on('input change blur', '[' + snModelName + ']', function (e) {
-            var target = e.currentTarget;
-
-            self._updateElementData(target, target.getAttribute(snModelName), target.value);
-        });
-
-        this._codes = [];
-
-        eachElement($el, function (node) {
-            if (node.snViewModel) return false;
-
-            self.twoWayBinding(node);
-
-            var parentRepeatSource;
-            for (var parentNode = node.parentNode; parentNode && !parentNode.snViewModel; parentNode = parentNode.parentNode) {
-                if (parentNode.snRepeatSource) {
-                    parentRepeatSource = parentNode.snRepeatSource;
-                    break;
-                }
-            }
-
-            if (RepeatSource.isRepeatNode(node)) {
-                var nextSibling = node.nextSibling;
-                var repeatSource = new RepeatSource(node, parentRepeatSource);
-
-                node.snRepeatSource = repeatSource;
-
-                return nextSibling;
-            }
-        });
-
-        //事件处理
-        var handleEvent = function (e) {
-            if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
-                return;
-            }
-            var target = e.currentTarget;
-            var eventCode = target.getAttribute('sn-' + self.cid + e.type);
-            var fn;
-            var ctx;
-
-            if (eventCode == 'false') {
-                return false;
-
-            } else if (/^\d+$/.test(eventCode)) {
-
-                var snData = self.formatData(target.snData);
-
-                snData.e = e;
-
-                return self.fns[eventCode].call(self, snData);
-            }
-        };
+    destory: function () {
+        this.$el.off('input change blur', '[' + this.snModelKey + ']');
 
         for (var key in ModelEvents) {
             var eventName = ModelEvents[key];
-            var attr = '[sn-' + self.cid + eventName + ']';
+            var attr = '[sn-' + this.cid + eventName + ']';
 
-            console.log(eventName, attr);
-
-            $el.on(eventName, attr, handleEvent);
+            this.$el.off(eventName, attr, this._handleEvent);
         }
 
-        var fns = new Function('return [' + this._codes.join(',') + ']')();
-
-        fns.forEach(function (fn) {
-            self.fns.push(fn);
-        });
-
-        self.$el = !self.$el ? $el : self.$el.add($el);
-
-        $el.each(function () { this.snViewModel = self; })
-
-        return this;
+        for (var i = 0, len = viewModelList.length; i < len; i++) {
+            if (viewModelList[i] == this) {
+                viewModelList.splice(i, 1);
+                break;
+            }
+        }
     }
 
 });
+
+Event.mixin(ViewModel);
 
 ViewModel.extend = util.extend;
 
 var Global = ViewModel.prototype.$global = new ViewModel();
 
-Global.updateView = function () {
+Global.updateView = (function () {
 
-    eachElement(document.body, function (el) {
-        if (el.snIsGlobal) {
+    viewModelList.forEach(function (viewModel) {
 
-            var model;
+        eachElement(viewModel.$el, function (el) {
+            if (el.snViewModel && el.snViewModel != viewModel) return false;
 
-            for (var parentNode = el; parentNode; parentNode = parentNode.parentNode) {
-                if (parentNode.snViewModel) {
-                    model = parentNode.snViewModel;
-                    break;
-                }
-            }
-
-            if (model) {
+            if (el.snIsGlobal) {
                 if (el.nodeType == 8 && el.snRepeatSource) {
-                    model.updateRepeatElement(el);
+                    viewModel.updateRepeatElement(el);
 
                 } else {
-                    model.updateElement(el);
+                    viewModel.updateElement(el);
                 }
             }
-        }
+        });
+
     });
 
     this._nextTick = null;
 
-}.bind(Global);
+}).bind(Global);
 
 
 exports.Filters = Filters;

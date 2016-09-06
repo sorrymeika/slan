@@ -1,4 +1,4 @@
-var $ = require('$');
+var Base = require('./base');
 
 var slice = [].slice,
     separator = /\s+/,
@@ -52,7 +52,7 @@ function Event(type, props) {
         return new Event(type, props);
     }
 
-    props && $.extend(this, props);
+    props && Object.assign(this, props);
     this.type = type;
 
     return this;
@@ -180,7 +180,7 @@ var event = {
 };
 
 Event.mixin = function (Fn, ext) {
-    $.extend(typeof Fn == 'function' ? Fn.prototype : Fn, event, ext);
+    Object.assign(typeof Fn == 'function' ? Fn.prototype : Fn, event, ext);
 
     return Fn;
 }
@@ -188,7 +188,7 @@ Event.mixin = function (Fn, ext) {
 Event.extend = function (Fn, ext) {
     Fn.prototype = Object.create(event);
 
-    ext && $.extend(Fn.prototype, ext);
+    ext && Object.assign(Fn.prototype, ext);
 
     return Fn;
 }

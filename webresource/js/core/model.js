@@ -794,7 +794,7 @@
             return this.$state.get(key);
         },
 
-        endRender: function (callback) {
+        next: function (callback) {
             return this.one('viewDidUpdate', callback);
         },
 

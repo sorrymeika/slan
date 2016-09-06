@@ -1,4 +1,4 @@
-﻿<header>
+<header>
     <div class="head_back" data-back="{back}"></div>
     <div class="head_title">{$global.title}</div>
 </header>
@@ -7,7 +7,7 @@
         <input sn-model='name' value='{name}' />
 
         <dl sn-repeat="item,i in data|filter:contains(item.name,name)">
-            <dt sn-tap="name=111">{item.name}|{i}</dt>
+            <dt sn-tap="this.test(1)">{item.name}|{i}</dt>
             <dd sn-repeat="p,j in item.children">{p.name}
                 <p>{p.id}|{j}</p>
                 <p>{p.content}</p>{item.name}

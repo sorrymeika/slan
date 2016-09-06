@@ -38,7 +38,7 @@ module.exports = Activity.extend({
 
         }, 1000);
 
-        new model2.ViewModel(this.$el, {
+        var m = new model2.ViewModel(this.$el, {
 
             list: [{
                 name: 'list.test.0'
@@ -58,6 +58,10 @@ module.exports = Activity.extend({
                     }]
                 }]
         });
+
+        m.test = function (a, e) {
+            console.log(a, e);
+        }
 
         return;
 
