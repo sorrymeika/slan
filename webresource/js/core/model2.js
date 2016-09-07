@@ -217,7 +217,7 @@ var ModelProto = {
         for (var k in model) {
             var mod = model[k];
 
-            if (mod && mod.key == key) {
+            if (mod && (mod.key == key || mod.keys && mod.keys.indexOf(key) != -1)) {
                 return mod;
             }
             if (mod instanceof Model) {
@@ -344,11 +344,15 @@ var ModelProto = {
             value = attrs[attr];
 
             if (origin !== value) {
-                if (origin === undefined && value instanceof ViewModel) {
+                if (origin === undefined && (value instanceof ViewModel || value instanceof Collection)) {
                     model[attr] = value;
                     data[attr] = value.data;
 
-                    (value.parents || (value.parents = [])).push(this.root);
+                    (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
+
+                    console.log(value.data);
+
+                    (value.root.parents || (value.root.parents = [])).push(this.root);
 
                 } else if (origin instanceof Model) {
 
@@ -404,7 +408,16 @@ var ModelProto = {
 
 Model.prototype = ModelProto;
 
+
 var Collection = function (parent, attr, data) {
+    if ($.isArray(parent)) {
+        data = parent;
+        parent = null;
+    }
+    if (!parent) {
+        parent = new ViewModel(false);
+        attr = '$list';
+    }
 
     this.models = [];
 
@@ -417,7 +430,7 @@ var Collection = function (parent, attr, data) {
     this.data = [];
     parent.data[attr] = this.data;
 
-    this.add(data);
+    data && this.add(data);
 }
 
 Collection.prototype = {
@@ -584,7 +597,7 @@ RepeatSource.prototype.appendChild = function (child) {
 var viewModelList = [];
 
 function ViewModel(el, data) {
-    viewModelList.push(this);
+    if (el !== false) viewModelList.push(this);
 
     if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
         data = el, el = this.el;
@@ -1157,3 +1170,12 @@ Global.updateView = (function () {
 exports.Filters = Filters;
 exports.ViewModel = exports.Model = ViewModel;
 exports.Global = Global;
+exports.Collection = Collection;
+
+exports.createModel = function (props) {
+    return Object.assign(new ViewModel, props)
+}
+
+exports.createCollection = function (props) {
+    return Object.assign(new Collection, props)
+}

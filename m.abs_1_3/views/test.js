@@ -40,6 +40,10 @@ module.exports = Activity.extend({
                 userName: '小白'
             })
 
+            colletion.get(0).set({
+                name: 'colletion.change.0'
+            })
+
         }, 1000);
 
         var user = new model2.Model({
@@ -47,7 +51,15 @@ module.exports = Activity.extend({
             userName: '小红'
         });
 
+        var colletion = new model2.Collection([{
+            name: 'colletion.0'
+        }, {
+                name: 'colletion.1'
+            }]);
+
         var m = new model2.Model(this.$el, {
+
+            colletion: colletion,
 
             user: user,
 
