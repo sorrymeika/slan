@@ -271,7 +271,7 @@ if (args.build) {
         });
 
         //合并js、css
-        config.resourceMapping = tools.combine(config.combine);
+        config.resourceMapping = tools.combine(config.js);
 
         //生成首页
         exports.createIndex(config, function (err, html) {

@@ -299,7 +299,7 @@ module.exports = Activity.extend({
             searchHistory: util.store("searchHistory")
         });
 
-        model.test=function(e){
+        model.test = function (e) {
             console.log(e);
         }
 
@@ -684,10 +684,11 @@ module.exports = Activity.extend({
                 //util.store('ivcode', null);
             }
 
+
             util.isInApp && bridge.getDeviceToken(function (token) {
 
                 if (token) {
-                    new API({
+                    new api.API({
                         params: {
                             UserID: user.ID,
                             Auth: user.Auth,
