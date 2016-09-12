@@ -348,9 +348,8 @@ var ModelProto = {
                     model[attr] = value;
                     data[attr] = value.data;
 
-                    (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
-
-                    console.log(value.data);
+                    if (value instanceof Collection)
+                        (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
 
                     (value.root.parents || (value.root.parents = [])).push(this.root);
 
