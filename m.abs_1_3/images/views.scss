@@ -1,6 +1,8 @@
 ﻿$p:2;
 @mixin icon($x:0px, $y:0px,$width:30px,$height:30px, $img:"icon.png", $display: inline-block) { content: ''; display: $display; background: url($img) no-repeat $x $y; background-size: 320px auto; width: $width; height: $height; }
 
+@import "./sprite.scss";
+
 .icon { content: ''; display: block; background: url(icon.png) no-repeat 0px 0px; background-size: 320px auto; width: 30px; height: 30px; }
 
 header { background: #e65e5f; height: 44px; line-height: 44px; }

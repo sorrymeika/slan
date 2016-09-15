@@ -11,6 +11,7 @@ var razor = require('../core/razor');
 var _ = require('underscore');
 var Tools = require('../tools/tools');
 var sass = require('node-sass');
+var sprity = require('sprity');
 
 var Util = require('util');
 var util = require('../core/util');
@@ -142,6 +143,10 @@ exports.startWebServer = function (config) {
             project.css[key] && project.css[key].forEach(function (file) {
                 requires.push(combinePath(project.root, file));
             });
+        }
+
+        if (project.sprite) {
+            sprity.create(project.sprite);
         }
 
         app.all((root && root != '.' ? "/" + root : '') + '/template/[\\S\\s]+.js', function (req, res, next) {

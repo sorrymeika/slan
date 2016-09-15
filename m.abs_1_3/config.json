@@ -29,6 +29,24 @@
             "images/append.css"
         ]
     },
+    "sprite": {
+        "src": "./sprite/**/*.{png,jpg}",
+        "style": "./sprite.scss",
+        "template": "./sprite/template.hbs",
+        "out": "./images",
+        "split": true,
+        "margin": 0,
+        "dimension": [
+            {
+                "ratio": 1,
+                "dpi": 72
+            },
+            {
+                "ratio": 2,
+                "dpi": 192
+            }
+        ]
+    },
     "images": [
         "./images"
     ],

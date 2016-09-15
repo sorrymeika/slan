@@ -1,0 +1,47 @@
+
+    .icons-abs:before,.icons-search:before,.icons-setting:before,.icons-person_curr:before,.icons-message:before,.icons-menu:before,.icons-person:before,.icons-cart:before,.icons-home_cur:before,.icons-location:before,.icons-group:before,.icons-flash:before,.icons-navhot:before,.icons-life:before,.icons {
+background-image: url('../images/sprite-icons.png');
+    }
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .icons-abs:before,.icons-search:before,.icons-setting:before,.icons-person_curr:before,.icons-message:before,.icons-menu:before,.icons-person:before,.icons-cart:before,.icons-home_cur:before,.icons-location:before,.icons-group:before,.icons-flash:before,.icons-navhot:before,.icons-life:before,.icons {
+background-image: url('../images/sprite-icons@2x.png');
+background-size: 120px/(2) 624px/(2);display:inline-block;font-size:0px;vertical-align:middle;
+    }
+}
+
+.icons-abs:before { background-position: 0px/(2) 0px/(2); width: 46px/(2); height: 18px/(2); }
+.icons-search:before { background-position: 0px/(2) 18px/(2); width: 30px/(2); height: 30px/(2); }
+.icons-setting:before { background-position: 0px/(2) 48px/(2); width: 36px/(2); height: 36px/(2); }
+.icons-person_curr:before { background-position: 0px/(2) 84px/(2); width: 40px/(2); height: 36px/(2); }
+.icons-message:before { background-position: 0px/(2) 120px/(2); width: 40px/(2); height: 36px/(2); }
+.icons-menu:before { background-position: 0px/(2) 156px/(2); width: 34px/(2); height: 36px/(2); }
+.icons-person:before { background-position: 0px/(2) 192px/(2); width: 40px/(2); height: 38px/(2); }
+.icons-cart:before { background-position: 0px/(2) 230px/(2); width: 44px/(2); height: 40px/(2); }
+.icons-home_cur:before { background-position: 0px/(2) 270px/(2); width: 46px/(2); height: 40px/(2); }
+.icons-location:before { background-position: 0px/(2) 310px/(2); width: 30px/(2); height: 42px/(2); }
+.icons-group:before { background-position: 0px/(2) 352px/(2); width: 49px/(2); height: 46px/(2); }
+.icons-flash:before { background-position: 0px/(2) 398px/(2); width: 48px/(2); height: 46px/(2); }
+.icons-navhot:before { background-position: 0px/(2) 444px/(2); width: 42px/(2); height: 60px/(2); }
+.icons-life:before { background-position: 0px/(2) 504px/(2); width: 120px/(2); height: 120px/(2); }
+
+    .user-complete:before,.user-send:before,.user-unpay:before,.user-unsend:before,.user-card:before,.user-group:before,.user-money:before,.user-order:before,.user-present:before,.user {
+background-image: url('../images/sprite-user.png');
+    }
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .user-complete:before,.user-send:before,.user-unpay:before,.user-unsend:before,.user-card:before,.user-group:before,.user-money:before,.user-order:before,.user-present:before,.user {
+background-image: url('../images/sprite-user@2x.png');
+background-size: 50px/(2) 410px/(2);display:inline-block;font-size:0px;vertical-align:middle;
+    }
+}
+
+.user-complete:before { background-position: 0px/(2) 0px/(2); width: 42px/(2); height: 40px/(2); }
+.user-send:before { background-position: 0px/(2) 40px/(2); width: 46px/(2); height: 40px/(2); }
+.user-unpay:before { background-position: 0px/(2) 80px/(2); width: 46px/(2); height: 40px/(2); }
+.user-unsend:before { background-position: 0px/(2) 120px/(2); width: 46px/(2); height: 40px/(2); }
+.user-card:before { background-position: 0px/(2) 160px/(2); width: 50px/(2); height: 50px/(2); }
+.user-group:before { background-position: 0px/(2) 210px/(2); width: 50px/(2); height: 50px/(2); }
+.user-money:before { background-position: 0px/(2) 260px/(2); width: 50px/(2); height: 50px/(2); }
+.user-order:before { background-position: 0px/(2) 310px/(2); width: 50px/(2); height: 50px/(2); }
+.user-present:before { background-position: 0px/(2) 360px/(2); width: 50px/(2); height: 50px/(2); }
