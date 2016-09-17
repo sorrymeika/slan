@@ -100,6 +100,22 @@ function eachElement(el, fn) {
     }
 }
 
+function updateView(viewModel, el) {
+    if (el.nodeType == 8 && el.snRepeatSource) {
+        viewModel.updateRepeatElement(el);
+
+    } else if (el.snIfOrigin) {
+        return el.snIfOrigin;
+
+    } else {
+        viewModel.updateElement(el);
+
+        if (el.snIf && !el.parentNode) {
+            return el.snIf.nextSibling;
+        }
+    }
+}
+
 function cloneElement(el, fn) {
 
     eachElement(el, function (node) {
@@ -761,6 +777,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     textContent: fid.id
                 };
                 el.snIsGlobal = fid.isGlobal;
+                el.textContent = '';
             }
             return;
         }
@@ -782,7 +799,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     if (attr.indexOf('sn-') == 0 && val.indexOf("{") == -1 && val.indexOf("}") == -1) {
                         val = '{' + val + '}';
                     }
-
                     var fid = self.getFunctionId(val);
 
                     if (fid) {
@@ -889,16 +905,17 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 case 'sn-if':
                     if (util.isFalse(val)) {
                         if (el.parentNode) {
-                            if (!el.snReplacement) {
-                                el.snReplacement = document.createComment('if');
-                                el.parentNode.insertBefore(el.snReplacement, el);
+                            if (!el.snIf) {
+                                var snIf = el.snIf = document.createComment('if');
+                                el.parentNode.insertBefore(snIf, el);
+                                snIf.snIfOrigin = el;
                             }
                             el.parentNode.removeChild(el);
                         }
 
                     } else {
                         if (!el.parentNode) {
-                            el.snReplacement.parentNode.insertBefore(el, el.snReplacement);
+                            el.snIf.parentNode.insertBefore(el, el.snIf);
                         }
                     }
                     break;
@@ -1083,7 +1100,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     updateView: function () {
-
         console.time('updateView')
 
         var self = this;
@@ -1091,15 +1107,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         eachElement(this.$el, function (el) {
             if (el.snViewModel && el.snViewModel != self) return false;
 
-            if (el.nodeType == 8 && el.snRepeatSource) {
-
-                self.updateRepeatElement(el);
-
-            } else if (el.snBinding) {
-                self.updateElement(el);
-            }
-
+            updateView(self, el);
         });
+
         console.timeEnd('updateView');
 
         if (this.parents) {
@@ -1142,6 +1152,8 @@ ViewModel.extend = util.extend;
 
 var Global = ViewModel.prototype.$global = new ViewModel();
 
+
+
 Global.updateView = (function () {
 
     viewModelList.forEach(function (viewModel) {
@@ -1150,12 +1162,7 @@ Global.updateView = (function () {
             if (el.snViewModel && el.snViewModel != viewModel) return false;
 
             if (el.snIsGlobal) {
-                if (el.nodeType == 8 && el.snRepeatSource) {
-                    viewModel.updateRepeatElement(el);
-
-                } else {
-                    viewModel.updateElement(el);
-                }
+                updateView(viewModel, el);
             }
         });
 
