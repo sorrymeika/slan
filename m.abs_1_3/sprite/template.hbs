@@ -10,12 +10,19 @@ background-image: url('{{escimage url}}');content:'';display:inline-block;font-s
 background-size: {{width}}px/({{ratio}}) {{height}}px/({{ratio}});
       {{/if}}
     }
+    {{#each ../layout.items}}.{{../../name}}-{{meta.name}}-rem:before,{{/each}}.{{../name}} {
+background-image: url('{{escimage url}}');content:'';display:inline-block;font-size:0px;vertical-align:middle;
+      {{#if dpi}}
+background-size: {{width}}rem/(100)/({{ratio}}) {{height}}rem/(100)/({{ratio}});
+      {{/if}}
+    }
     {{#if dpi}}
 }
     {{/if}}
   {{/each}}
 
   {{#each layout.items}}
+.{{../name}}-{{meta.name}}-rem:before { background-position: -{{x}}rem/(200) -{{y}}rem/(200); width: {{width}}rem/(200); height: {{height}}rem/(200); }
 .{{../name}}-{{meta.name}}:before { background-position: -{{x}}px/(2) -{{y}}px/(2); width: {{width}}px/(2); height: {{height}}px/(2); }
   {{/each}}
 {{/each}}

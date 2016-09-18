@@ -145,8 +145,12 @@ exports.startWebServer = function (config) {
             });
         }
 
-        if (project.sprite) {
-            sprity.create(project.sprite);
+        var sprite = project.sprite;
+        if (sprite) {
+            sprite.out = path.join(root, sprite.out);
+            sprite.src = path.join(root, sprite.src);
+            sprite.template = path.join(root, sprite.template);
+            sprity.create(sprite);
         }
 
         app.all((root && root != '.' ? "/" + root : '') + '/template/[\\S\\s]+.js', function (req, res, next) {

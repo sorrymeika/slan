@@ -84,7 +84,18 @@ function eachElement(el, fn) {
 
     while (el) {
         var flag = fn(el);
-        var nextSibling = flag && flag.nodeType ? flag : el.nextSibling;
+        var nextSibling;
+
+        if (flag && flag.nodeType) {
+            nextSibling = flag;
+
+        } else if (flag && flag.isBreak) {
+            nextSibling = flag.nextSibling;
+            flag = false;
+
+        } else {
+            nextSibling = el.nextSibling;
+        }
 
         if (flag !== false && el.firstChild) {
             if (nextSibling) {
@@ -111,7 +122,7 @@ function updateView(viewModel, el) {
         viewModel.updateElement(el);
 
         if (el.snIf && !el.parentNode) {
-            return el.snIf.nextSibling;
+            return { isBreak: true, nextSibling: el.snIf.nextSibling };
         }
     }
 }
@@ -1107,7 +1118,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         eachElement(this.$el, function (el) {
             if (el.snViewModel && el.snViewModel != self) return false;
 
-            updateView(self, el);
+            return updateView(self, el);
         });
 
         console.timeEnd('updateView');
@@ -1162,7 +1173,7 @@ Global.updateView = (function () {
             if (el.snViewModel && el.snViewModel != viewModel) return false;
 
             if (el.snIsGlobal) {
-                updateView(viewModel, el);
+                return updateView(viewModel, el);
             }
         });
 
