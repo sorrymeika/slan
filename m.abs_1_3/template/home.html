@@ -2,7 +2,7 @@
     <div class="searchwrap" ref="searchwrap" style="display:none">
         <header>
             <form class="head_search head_disc">
-                <em class="icons-search icon_cm"></em>
+                <em class="icon-search icon_cm"></em>
                 <input type="search" placeholder="热门搜索：新月枕" ref="searchText" />
             </form>
             <div class="head_right" sn-tap="this.hideSearch()">取消</div>
@@ -20,18 +20,18 @@
     </div>
     <header sn-display="{!isStart||isLogin}">
         <div class="head_left">
-            <em class="icons-location">
+            <em class="icon-location">
             </em>
         </div>
         <form class="head_search head_disc" sn-if="{bottomTab==2}">
             <input type="search" placeholder="搜索专题" ref="search" />
         </form>
         <div class="head_search head_search_holder" sn-click="this.showSearch()" sn-display="{tab==0&&bottomTab==0}">
-            <em class="icons-search icon_cm"></em>
+            <em class="icon-search icon_cm"></em>
         </div>
         <div class="head_title" style="display:none"></div>
         <div class="head_right" data-forward="{isLogin?'/cart':'/login'}">
-            <em class="icons-message head_msg">
+            <em class="icon-message head_msg">
                 <i sn-display="{msg_count!=0?'block':'none'}">{msg_count}</i>
             </em>
         </div>
@@ -65,10 +65,10 @@
                 <div class="banner" ref="topbanner">
                 </div>
                 <ul class="hm_shop__nav">
-                    <li data-forward="/all"><i class="icons-new icon_cm"></i>新品上市</li>
-                    <li data-forward="/list?type=new&from=%2f"><i class="icons-flash icon_cm"></i>周一闪购</li>
-                    <li data-forward="/news/fastbuy?from=%2f"><i class="icons-group icon_cm"></i>来拼团吧</li>
-                    <li data-forward="/group"><i class="icons-navhot icon_cm"></i>人气必入</li>
+                    <li data-forward="/all"><i class="icon-new icon_cm"></i>新品上市</li>
+                    <li data-forward="/list?type=new&from=%2f"><i class="icon-flash icon_cm"></i>周一闪购</li>
+                    <li data-forward="/news/fastbuy?from=%2f"><i class="icon-group icon_cm"></i>来拼团吧</li>
+                    <li data-forward="/group"><i class="icon-navhot icon_cm"></i>人气必入</li>
                 </ul>
                 <div sn-repeat="item in activity">
                     <div sn-if="{item.type==1}" class="hm_shop_banner">
@@ -182,11 +182,11 @@
         </div>
     </div>
     <ul class="footer" sn-display="{!isStart||isLogin}">
-        <li class="{bottomTab==0?'curr':''}" sn-tap="bottomTab=0"><em class="{bottomTab==0?'icons-home_cur':'icons-home'}"></em>首页</li>
-        <li data-forward="/all?id=1"><em class="icons-menu"></em>分类</li>
-        <li class="icons-life" sn-tap="this.showDiscovery()"></li>
-        <li><em class="icons-cart"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
-        <li><em class="icons-person"></em>我</li>
+        <li class="{bottomTab==0?'curr':''}" sn-tap="bottomTab=0"><em class="{bottomTab==0?'icon-home_cur':'icon-home'}"></em>首页</li>
+        <li data-forward="/all?id=1"><em class="icon-menu"></em>分类</li>
+        <li class="icon-life" sn-tap="this.showDiscovery()"></li>
+        <li><em class="icon-cart"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
+        <li><em class="icon-person"></em>我</li>
     </ul>
     <div class="footer_line"></div>
     <div class="footer_discovery_ico"></div>

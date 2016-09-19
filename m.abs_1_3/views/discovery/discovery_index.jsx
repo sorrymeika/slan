@@ -1,7 +1,7 @@
 var $ = require('$');
 var util = require('util');
 var Loading = require('widget/loading');
-var model = require('core/model');
+var model = require('core/model2');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require("models/api");
@@ -9,22 +9,22 @@ var discoveryModel = require("models/discovery");
 var userModel = require('models/user');
 var Confirm = require('components/confirm');
 
-module.exports = model.ViewModel.extend({
+module.exports = model.Model.extend({
     el: <div class="discovery_index">
         <ul class="disc_nav">
             <li><p><em>全部ALL</em></p></li>
-            <li sn-repeat="item in typeList"><p data-forward="/discovery/list/{{item.DCT_ID}}?name={{encodeURIComponent(item.DCT_DESC)}}"><em>{{ item.DCT_DESC }}</em><img src="{{item.DCT_PIC}}" /></p></li>
+            <li sn-repeat="item in typeList"><p data-forward="/discovery/list/{item.DCT_ID}?name={encodeURIComponent(item.DCT_DESC)}"><em>{ item.DCT_DESC }</em><img src="{item.DCT_PIC}" /></p></li>
         </ul>
         <ul class="disc_list">
-            <li sn-repeat="item in rec" data-forward="/discovery/{{item.DCV_ID}}">
-                <img src="{{item.DCV_REC_PIC}}" />
-                <p class="tit">{{ item.DCV_SUBTITLE }}</p>
-                <p class="desc" sn-html="{{item.DCV_REC_CONTENT}}"></p>
+            <li sn-repeat="item in rec" data-forward="/discovery/{item.DCV_ID}">
+                <img src="{item.DCV_REC_PIC}" />
+                <p class="tit">{ item.DCV_SUBTITLE }</p>
+                <p class="desc" sn-html="{item.DCV_REC_CONTENT}"></p>
             </li>
-            <li sn-repeat="item in data" data-forward="/discovery/{{item.DCV_ID}}">
-                <img src="{{item.DCV_SUBTITLE_PIC}}" />
-                <em class="see">{{ item.DCV_VIEW_QTY }}</em>
-                <em class="fav{{item.Like_Flag?' curr':''}}">{{ item.DCV_LIKE_QTY }}</em>
+            <li sn-repeat="item in data" data-forward="/discovery/{item.DCV_ID}">
+                <img src="{item.DCV_SUBTITLE_PIC}" />
+                <em class="see">{ item.DCV_VIEW_QTY }</em>
+                <em class="fav{item.Like_Flag?' curr':''}">{ item.DCV_LIKE_QTY }</em>
             </li>
         </ul>
     </div>,
@@ -36,7 +36,6 @@ module.exports = model.ViewModel.extend({
         self.set({
             typeList: util.store('DiscoverType')
         });
-
         var discoverTypeAPI = new api.DiscoverTypeAPI({
             showLoading: false,
 

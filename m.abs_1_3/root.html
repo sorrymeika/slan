@@ -60,32 +60,32 @@
             sl.appVersion = matchUA ? matchUA[1] : '1.3.1';
 
             $(window).on('ortchange', adjustPx);
+            @if(!debug && !useLocal) {
 
-            function loadResourceMapping() {
-                loading.reload();
-            }
+                function loadResourceMapping() {
+                    loading.reload();
+                }
 
-            var loading = new Loading({
-                url: bridge.url('/api/settings/resourceMapping'),
-                params: {
-                    v: sl.appVersion
-                },
-                timeout: 5000,
-                checkData: false,
-                $el: $('body'),
-                error: function() {
-                    Offline.getInstance().show(loadResourceMapping);
+                var loading = new Loading({
+                    url: bridge.url('/api/settings/resourceMapping'),
+                    params: {
+                        v: sl.appVersion
+                    },
+                    timeout: 5000,
+                    checkData: false,
+                    $el: $('body'),
+                    error: function() {
+                        Offline.getInstance().show(loadResourceMapping);
 
-                },
-                success: function(res) {
-                    Offline.getInstance().hide();
+                    },
+                    success: function(res) {
+                        Offline.getInstance().hide();
 
-                    var resourceMapping = res.data;
-                    var routes = $.extend(@(JSON.stringify(routes)), res.routes || {});
-                    var combineMapping = @(JSON.stringify(resourceMapping));
+                        var resourceMapping = res.data;
+                        var routes = $.extend(@(JSON.stringify(routes)), res.routes || {});
+                        var combineMapping = @(JSON.stringify(resourceMapping));
 
-                    seajs.on('fetch', function(emitData) {
-                        @if(!debug&&!useLocal) {
+                        seajs.on('fetch', function(emitData) {
                             var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
                             if (resourceMapping && resourceMapping[id]) {
@@ -99,22 +99,25 @@
                                     }
                                 }
                             }
-                        }
-                    });
-                    seajs.on("error", function(errorData) {
-                        errorData.pause = true;
-
-                        Offline.getInstance().show(function() {
-                            this.hide();
-                            seajs.request(errorData.uri, errorData.callback);
                         });
-                    });
+                        seajs.on("error", function(errorData) {
+                            errorData.pause = true;
 
-                    new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
-                }
+                            Offline.getInstance().show(function() {
+                                this.hide();
+                                seajs.request(errorData.uri, errorData.callback);
+                            });
+                        });
 
-            });
-            loadResourceMapping();
+                        new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
+                    }
+
+                });
+                loadResourceMapping();
+
+            } else {
+                new App().mapRoute(@(JSON.stringify(routes))).start(sl.isInApp ? 2000 : 0);
+            }
 
         });
     </script>

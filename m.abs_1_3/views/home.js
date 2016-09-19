@@ -146,7 +146,6 @@ module.exports = Activity.extend({
 
             if (!this.discovery) {
                 this.discovery = new Discovery();
-
                 this.discovery.$el.appendTo(this.model.refs.discovery)
             }
 

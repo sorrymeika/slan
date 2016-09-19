@@ -26,7 +26,7 @@ var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
 var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
-var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
+var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
 var rthis = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
 
 var Filters = {
@@ -81,6 +81,7 @@ function eachElement(el, fn) {
         return;
     }
     var stack = [];
+    var firstLoop = true;
 
     while (el) {
         var flag = fn(el);
@@ -93,9 +94,10 @@ function eachElement(el, fn) {
             nextSibling = flag.nextSibling;
             flag = false;
 
-        } else {
+        } else if (!firstLoop) {
             nextSibling = el.nextSibling;
         }
+        if (firstLoop) firstLoop = false;
 
         if (flag !== false && el.firstChild) {
             if (nextSibling) {
