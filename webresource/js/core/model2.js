@@ -118,7 +118,7 @@ function updateView(viewModel, el) {
         viewModel.updateRepeatElement(el);
 
     } else if (el.snIfOrigin) {
-        return el.snIfOrigin;
+        return { isBreak: true, nextSibling: el.snIfOrigin };
 
     } else {
         viewModel.updateElement(el);
@@ -928,7 +928,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                     } else {
                         if (!el.parentNode) {
-                            el.snIf.parentNode.insertBefore(el, el.snIf);
+                            el.snIf.nextSibling
+                                ? el.snIf.parentNode.insertBefore(el, el.snIf.nextSibling)
+                                : el.snIf.parentNode.appendChild(el);
                         }
                     }
                     break;
