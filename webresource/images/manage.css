@@ -75,8 +75,8 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .table td { border: 1px solid #cdcdcd; vertical-align: middle; text-align: left; padding: 5px 15px; line-height: 20px; }
 
 .datatable { font-size: 12px; border: 1px solid #cdcdcd; }
-.datatable th {  border: 1px solid #cdcdcd; background: #fff url(grid_header.png) repeat-x; height: 25px; }
-.datatable td {  border: 1px solid #cdcdcd; }
+.datatable th { border: 1px solid #cdcdcd; background: #fff url(grid_header.png) repeat-x; height: 25px; }
+.datatable td { border: 1px solid #cdcdcd; }
 
 .grid { font-size: 12px; border-top: 1px solid #cdcdcd; background: #fff url(grid_header.png) repeat-x; margin: 0px auto 0px auto; overflow: hidden; height: auto; width: 100%; border-collapse: collapse; }
 .grid_border_r, .grid_header_cont, .grid_body, .grid_child_non, .grid_child_con { clear: both; }
@@ -142,7 +142,7 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .contextmenu_con span { display: block; margin: 1px 4px; height: 0px; line-height: 0px; border-top: 1px solid #cdcdcd; border-bottom: 1px solid #fff; }
 
 .error_tip { background: #c00; color: #fff; margin: 0 0 0 5px; padding: 0 5px; }
-.right_tip { padding: 0 5px; color: #33CC33; font-family: 宋体; margin: 0 0 0 5px;}
+.right_tip { padding: 0 5px; color: #33CC33; font-family: 宋体; margin: 0 0 0 5px; }
 .msg_tip { background: #09f; color: #fff; margin: 0 0 0 5px; padding: 0 5px; }
 
 * html, * html body { _background-image: url(about:blank); _background-attachment: fixed; }
@@ -154,6 +154,16 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .dialog .action { text-align: right; margin-right: 20px; margin-bottom: 20px; }
 .dialog .form { margin-top: 10px; margin-bottom: 15px; }
 .dialog .form td { padding: 12px 0; }
+
+.cp_popup__mask { position: absolute; z-index: 2000; top: 0px; left: 0px; right: 0px; bottom: 0px; opacity: 0; display: none; -webkit-transition: all 300ms ease-out 0ms; background: rgba(0,0,0,.5); }
+.cp_popup__mask.show { display: block; opacity: 1; }
+.cp_popup__container { position: absolute; opacity: 0; top: 50%; left: 50%; width: 80%; -webkit-transform: translate(-50%,-50%) scale(.3,.3); -webkit-transform-origin: 50% 50%; -webkit-transition: all 300ms ease-out 0ms; background: #fff; min-height: 50px; z-index: 2001; border-radius: 6px; }
+.cp_popup__container.show{ opacity: 1; -webkit-transform: translate(-50%,-50%) scale(1); }
+.cp_popup__title { text-align: center; margin: 10px 10px 0 10px; font-weight: bold; }
+.cp_popup__desc { margin: 15px 15px 0 15px; line-height: 20px; }
+.cp_popup__action { text-align: center; margin: 15px 15px; display: -webkit-box; }
+.cp_popup__action .btn { color: #fff; border: 0px; height: 38px; margin: 0 8px; display: block; -webkit-box-flex: 1; font-size: 14px; }
+.cp_popup__action .btn_cancel { background: #9fa7a9; }
 
 .tab { margin: 0px 0 15px 0; border-bottom: 1px solid #ddd; }
 .tab a { padding: 6px 15px; background: #ddd; color: #666; display: inline-block; margin: 0px 5px 5px 5px; }

@@ -78,55 +78,6 @@ module.exports = Activity.extend({
             this.requestUser();
         },
 
-        'tap .footer li': function (e) {
-            var self = this;
-            var $target = $(e.currentTarget);
-            var index = $target.index();
-
-            return;
-
-            if (!$target.hasClass('curr')) {
-
-                if (index == 0) {
-
-                } else if (index == 1) {
-
-
-                } else {
-
-                    if (!this.model.data.isLogin) {
-                        this.forward('/login');
-                        return;
-                    }
-
-                    if (index == 2) {
-
-
-                    } else if (index == 3) {
-
-                        if (!self.recDiscovery) {
-                            self.recDiscovery = new api.RecDiscoveryAPI({
-                                $el: self.model.refs.messages,
-                                success: function (res) {
-                                    console.log(res);
-
-                                    self.model.set({
-                                        rec: res.data
-                                    })
-                                },
-
-                                error: function () { }
-                            });
-
-                            self.recDiscovery.load();
-                        }
-                    }
-                }
-
-                $target.addClass('curr').siblings('.curr').removeClass('curr');
-
-            }
-        },
         'tap .guide1': function () {
             this.model.set({
                 showGuide: false
@@ -223,7 +174,7 @@ module.exports = Activity.extend({
             msg: 0,
             tab: 0,
             msg_count: 0,
-            bottomTab: 0,
+            bottomTab: 4,
             chartType: 0,
             open: function () {
                 bridge.openInApp(self.user.OpenUrl || 'http://m.abs.cn');

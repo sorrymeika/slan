@@ -732,7 +732,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             var eventName = ModelEvents[key];
             var attr = '[sn-' + self.cid + eventName + ']';
 
-            $el.on(eventName, attr, this._handleEvent);
+            $el.on(eventName, attr, this._handleEvent)
+                .filter(attr)
+                .on(eventName, this._handleEvent);
         }
 
         var fns = new Function('return [' + this._codes.join(',') + ']')();

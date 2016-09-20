@@ -20,7 +20,9 @@
     </div>
     <header sn-display="{!isStart||isLogin}">
         <div class="head_left">
-            <em class="icon-location">
+            <em class="icon-location" sn-if="{bottomTab==0||bottomTab==1}">
+            </em>
+            <em class="icon-setting" sn-if="{bottomTab==4}" data-forward="/settings">
             </em>
         </div>
         <form class="head_search head_disc" sn-if="{bottomTab==2}">
@@ -130,6 +132,13 @@
 
         </div>
         <div class="main" style="-webkit-transform:translate({bottomTab==4?'0px':'100%'},0px)" data-index="3">
+            <div class="hm_user__base">
+                <div class="avatars"><img sn-src="{user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
+                <div class="name">{user.UserName}</div>
+                <div class="addr">收货地址<em class="icon_arrow"></em></div>
+            </div>
+            <div class="hm_user__card">
+            </div>
             <div class="hm_my_card">
                 <div class="user_rights" data-forward="/news/201">会员权益</div>
                 <div class="vip_name">{vipName}</div>
@@ -186,7 +195,7 @@
         <li data-forward="/all?id=1"><em class="icon-menu"></em>分类</li>
         <li class="icon-life" sn-tap="this.showDiscovery()"></li>
         <li><em class="icon-cart"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
-        <li><em class="icon-person"></em>我</li>
+        <li class="{bottomTab==4?'curr':''}" sn-tap="bottomTab=4"><em class="{bottomTab==4?'icon-person_cur':'icon-person'}"></em>我</li>
     </ul>
     <div class="footer_line"></div>
     <div class="footer_discovery_ico"></div>
