@@ -21,21 +21,19 @@
     },
     "css": {
         "css/style.css": [
-            "css/views.css",
-            "css/group.css",
-            "css/user.css"
+            "css/app.css"
         ],
         "css/append.css": [
             "css/append.css"
         ]
     },
     "sprite": {
-        "src": "./sprite/**/*.{png,jpg}",
+        "src": "./sprite",
         "style": "../css/sprite.scss",
         "template": "./sprite/template.hbs",
         "out": "./images",
         "split": true,
-        "margin": 0,
+        "margin": 1,
         "dimension": [
             {
                 "ratio": 1,

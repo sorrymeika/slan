@@ -31,10 +31,10 @@
         <div class="head_search head_search_holder" sn-click="this.showSearch()" sn-display="{tab==0&&bottomTab==0}">
             <em class="icon-search icon_cm"></em>
         </div>
-        <div class="head_title" style="display:none"></div>
+        <div class="head_title" sn-display="{bottomTab==4}" style="display:none"></div>
         <div class="head_right" data-forward="{isLogin?'/cart':'/login'}">
             <em class="icon-message head_msg">
-                <i sn-display="{msg_count!=0?'block':'none'}">{msg_count}</i>
+                <i sn-display="{$global.msg_count!=0?'block':'none'}">{$global.msg_count}</i>
             </em>
         </div>
     </header>
@@ -135,50 +135,35 @@
             <div class="hm_user__base">
                 <div class="avatars"><img sn-src="{user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
                 <div class="name">{user.UserName}</div>
-                <div class="addr">收货地址<em class="icon_arrow"></em></div>
+                <div class="addr" data-forward="/address">收货地址<em class="icon_arrow"></em></div>
             </div>
             <div class="hm_user__card">
+                <div class="icon-abs hd bottom_border"><span class="level">{vipName}</span>
+                    <span class="energy">活力值<em>{util.formatMoney(energy)}</em></span>
+                </div>
+                <div class="bottom_border">
+                    <div class="barcode" sn-html="{barcode}">
+                    </div>
+                </div>
+                <div class="rights" data-forward="/news/201">会员权益<em class="icon_arrow"></em></div>
             </div>
-            <div class="hm_my_card">
-                <div class="user_rights" data-forward="/news/201">会员权益</div>
-                <div class="vip_name">{vipName}</div>
-                <div class="energy">
-                    当前活力值<span>{util.formatMoney(energy)}</span>
-                </div>
-                <div class="energy_bar">
-                    <span style="width:{energyPercent}"></span>
-                </div>
-                <div class="energy_val">
-                    <div class="energy_val_from">{util.formatMoney(currentLevel)}</div>
-                    <div class="energy_val_to">{util.formatMoney(nextLevel)}</div>
-                </div>
+            <div class="hm_user__order top_bottom_line">
+                <div class="user-order bottom_border">我的订单<span class="allorder" data-forward="/myorder">查看全部订单</span></div>
+                <ul class="ordercates">
+                    <li class="user-unpay" data-forward="/myorder?state=1"><i>12</i><span>待付款</span></li>
+                    <li class="user-unsend" data-forward="/myorder?state=2"><i>1</i><span>待发货</span></li>
+                    <li class="user-send" data-forward="/myorder?state=3"><span>配送中</span></li>
+                    <li class="user-complete" data-forward="/myorder?state=4"><span>已完成</span></li>
+                </ul>
             </div>
-            <div class="hm_my_barcode">
-                <div class="barcode" sn-html="{barcode}">
-                </div>
-                <div class="mobile">{user.Mobile}</div>
-            </div>
-            <ul class="hm_my_list">
-                <li data-forward="/month">
-                    <b>我的月礼</b>
-                    <span><em>{user.FreeMonths}</em>个月</span>
-                </li>
-                <li data-forward="/coupon">
-                    <b>我的卡券</b>
-                    <span><em>{user.FreeCouponsCount+user.CouponsCount}</em>张</span>
-                </li>
-                <li data-forward="/mypoint">
-                    <b>积分钱包</b>
-                    <span><em>{user.Points}</em>分</span>
-                </li>
-                <li data-forward="/myorder">
-                    <b>购买记录</b>
-                    <span><em>{user.OrderCount}</em>条</span>
-                </li>
-                <li data-forward="/steward">
-                    <b>爱管家记录</b>
-                    <span><em>{user.StewardNum}</em>条</span>
-                </li>
+
+            <ul class="hm_user__other top_bottom_line">
+                <li class="user-gift bottom_border" data-forward="/month">我的月礼 <em class="note">{user.FreeMonths}个月</em></li>
+                <li class="user-card bottom_border" data-forward="/coupon">我的卡券 <em class="note">{user.FreeCouponsCount+user.CouponsCount}</em></li>
+                <li class="user-money" data-forward="/mypoint">积分钱包 <em class="note">{user.Points}积分</em></li>
+            </ul>
+            <ul class="hm_user__other top_bottom_line">
+                <li class="user-group" data-forward="/steward">爱管家记录 <em class="note">{user.StewardNum}条</em></li>
             </ul>
         </div>
         <div class="main js_offline" sn-display="{isOffline}">
@@ -190,15 +175,13 @@
             </div>
         </div>
     </div>
-    <ul class="footer" sn-display="{!isStart||isLogin}">
+    <ul class="footer top_border" sn-display="{!isStart||isLogin}">
         <li class="{bottomTab==0?'curr':''}" sn-tap="bottomTab=0"><em class="{bottomTab==0?'icon-home_cur':'icon-home'}"></em>首页</li>
         <li data-forward="/all?id=1"><em class="icon-menu"></em>分类</li>
-        <li class="icon-life" sn-tap="this.showDiscovery()"></li>
-        <li><em class="icon-cart"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
-        <li class="{bottomTab==4?'curr':''}" sn-tap="bottomTab=4"><em class="{bottomTab==4?'icon-person_cur':'icon-person'}"></em>我</li>
+        <li class="{bottomTab==2?'curr':''}" sn-tap="this.showDiscovery()"><em class="{bottomTab==2?'icon-life_cur':'icon-life'}"></em>会生活</li>
+        <li class="{bottomTab==3?'curr':''}"><em class="{bottomTab==3?'icon-cart_cur':'icon-cart'}"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
+        <li class="{bottomTab==4?'curr':''}" sn-tap="this.showMe()"><em class="{bottomTab==4?'icon-person_cur':'icon-person'}"></em>我</li>
     </ul>
-    <div class="footer_line"></div>
-    <div class="footer_discovery_ico"></div>
     <div class="open_msg" style="display:none">
         <div class="msg_bd" sn-html="{message}"></div>
     </div>

@@ -1,1 +1,20 @@
-$color: #D10B16
+$color: #D10B16;
+
+@mixin arrow($color:#fff,$size:10px) { position: relative; border-top: 2px solid $color; border-right: 2px solid $color; width: $size; height: $size; font-size: 0px; vertical-align: middle; -webkit-transform: rotate(45deg); display: inline-block; top: -1px; }
+
+@mixin border($color:#aaa) { content: ''; display: block; -webkit-transform: scale(.5); width: 200%; border-top: 1px solid $color; -webkit-transform-origin: left bottom; position: absolute; bottom: 0px; }
+
+.border_bottom {
+    position: relative;
+    &:after{ @include border(#ddd); }
+}
+
+.bottom_border,.top_border { background-image: url(../images/border-bottom.png); background-repeat: repeat-x; background-position: 0 bottom; background-size: auto 1px; }
+.top_border { background-position: 0 top; background-image: url(../images/border-top.png); }
+.right_border { background-image: url(../images/border-right.png); background-repeat: repeat-y; background-position: right 0; background-size: 1px auto; }
+.top_bottom_line { background-image: url(../images/border-bottom.png),url(../images/border-top.png); background-repeat: repeat-x,repeat-x; background-position: 0 bottom,0 top; background-size: auto 1px, auto 1px; }
+
+.icon_arrow { @include arrow(#fff,10px); }
+.icon_cm,.icon_vm { position: relative; }
+.icon_cm:before { position: absolute; display: block; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); transform: translate(-50%,-50%); }
+.icon_vm:before { position: absolute; display: block; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }

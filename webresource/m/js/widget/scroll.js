@@ -44,7 +44,7 @@ var _move = function (e) {
 
     var scrollView = self.scrollView;
 
-    if ((scrollView ? scrollView.y <= 0 : self.parentNode.scrollTop == 0) && deltaY > 0) {
+    if ((scrollView ? scrollView.touch.y <= 0 : self.parentNode.scrollTop == 0) && deltaY > 0) {
 
         self.isMoved = true;
         self.refreshAgain = true;

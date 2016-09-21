@@ -693,63 +693,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
     initialize: util.noop,
 
-    bind: function (el) {
-        var self = this;
-        var elements = [];
-
-        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
-            var target = e.currentTarget;
-
-            self._updateElementData(target, target.getAttribute(self.snModelKey), target.value);
-        });
-
-        this._codes = [];
-
-        eachElement($el, function (node) {
-            if (node.snViewModel) return false;
-
-            self.twoWayBinding(node);
-
-            var parentRepeatSource;
-            for (var parentNode = node.parentNode; parentNode && !parentNode.snViewModel; parentNode = parentNode.parentNode) {
-                if (parentNode.snRepeatSource) {
-                    parentRepeatSource = parentNode.snRepeatSource;
-                    break;
-                }
-            }
-
-            if (RepeatSource.isRepeatNode(node)) {
-                var nextSibling = node.nextSibling;
-                var repeatSource = new RepeatSource(node, parentRepeatSource);
-
-                node.snRepeatSource = repeatSource;
-
-                return nextSibling;
-            }
-        });
-
-        for (var key in ModelEvents) {
-            var eventName = ModelEvents[key];
-            var attr = '[sn-' + self.cid + eventName + ']';
-
-            $el.on(eventName, attr, this._handleEvent)
-                .filter(attr)
-                .on(eventName, this._handleEvent);
-        }
-
-        var fns = new Function('return [' + this._codes.join(',') + ']')();
-
-        fns.forEach(function (fn) {
-            self.fns.push(fn);
-        });
-
-        self.$el = !self.$el ? $el : self.$el.add($el);
-
-        $el.each(function () { this.snViewModel = self; })
-
-        return this;
-    },
-
     getFunctionId: function (expression) {
         if (!expression) return null;
 
@@ -1137,6 +1080,119 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         this._nextTick = null;
         this.trigger('viewDidUpdate');
+    },
+
+    bind: function (el) {
+        var self = this;
+        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
+            var target = e.currentTarget;
+
+            self._updateElementData(target, target.getAttribute(self.snModelKey), target.value);
+        });
+
+        this._bindElement($el);
+
+        self.$el = !self.$el ? $el : self.$el.add($el);
+
+        $el.each(function () { this.snViewModel = self; })
+
+        return this;
+    },
+
+    _bindElement: function ($el) {
+        var self = this;
+
+        this._codes = [];
+
+        eachElement($el, function (node) {
+            if (node.snViewModel) return false;
+
+            self.twoWayBinding(node);
+
+            var parentRepeatSource;
+            for (var parentNode = node.parentNode; parentNode && !parentNode.snViewModel; parentNode = parentNode.parentNode) {
+                if (parentNode.snRepeatSource) {
+                    parentRepeatSource = parentNode.snRepeatSource;
+                    break;
+                }
+            }
+
+            if (RepeatSource.isRepeatNode(node)) {
+                var nextSibling = node.nextSibling;
+                var repeatSource = new RepeatSource(node, parentRepeatSource);
+
+                node.snRepeatSource = repeatSource;
+
+                return nextSibling;
+            }
+        });
+
+        for (var key in ModelEvents) {
+            var eventName = ModelEvents[key];
+            var attr = '[sn-' + self.cid + eventName + ']';
+
+            $el.on(eventName, attr, this._handleEvent)
+                .filter(attr)
+                .on(eventName, this._handleEvent);
+        }
+
+        var fns = new Function('return [' + this._codes.join(',') + ']')();
+
+        fns.forEach(function (fn) {
+            self.fns.push(fn);
+        });
+    },
+
+    _bindNewNode: function (newNode) {
+
+        newNode = $(newNode);
+
+        newNode.each(function () {
+            if (this.snViewModel)
+                throw new Error("can not insert or append binded node!");
+        });
+
+        this._bindElement(newNode);
+
+        return newNode;
+    },
+
+    _checkOwnNode: function (node) {
+        if (typeof node == 'string') {
+            node = this.$el.find(node);
+
+            if (!node.length)
+                throw new Error('referenceNode must in model');
+
+        } else {
+
+            this.$el.each(function () {
+                if ($.contains(this, node))
+                    throw new Error('referenceNode must in model');
+            });
+        }
+        return node;
+    },
+    insertBefore: function (newNode, referenceNode) {
+
+        referenceNode = this._checkOwnNode(referenceNode);
+
+        return this._bindNewNode(newNode)
+            .insertBefore(referenceNode);
+    },
+
+    insertAfter: function (newNode, referenceNode) {
+        referenceNode = this._checkOwnNode(referenceNode);
+
+        return this._bindNewNode(newNode)
+            .insertAfter(referenceNode);
+    },
+
+    appendTo: function (newNode, parentNode) {
+        parentNode = this._checkOwnNode(parentNode);
+
+        return this._bindNewNode(newNode)
+            .appendTo(parentNode);
     },
 
     next: function (callback) {

@@ -1,10 +1,12 @@
-﻿var $ = require('$');
+var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var bridge = require('bridge');
 var Loading = require('../widget/loading');
 var Slider = require('../widget/slider');
-var Model = require('core/model2');
+var vm = require('core/model2');
+var Model = vm.Model;
+var Global = vm.Global;
 var Scroll = require('../widget/scroll');
 var barcode = require('../util/barcode');
 var animation = require('animation');
@@ -13,20 +15,20 @@ var api = require("models/api");
 var userModel = require("models/user");
 var Category = require("models/category");
 var CpCategory = require("components/category");
-var ViewModel = Model.ViewModel;
 
 var Discovery = require('./discovery/discovery_index');
 
 var trimHash = require('core/route').trimHash;
 
-Model.Global.set({
+Global.set({
+    msg_count: 0,
     cartQty: 0
 });
 
 var cartQtyApi = new api.CartQtyAPI({
     checkData: false,
     success: function (res) {
-        Model.Global.set({
+        Global.set({
             cartQty: res.data
         });
     },
@@ -165,7 +167,7 @@ module.exports = Activity.extend({
 
         this.startMakeLog();
 
-        var model = this.model = new ViewModel(this.$el, {
+        var model = this.model = new Model(this.$el, {
             menu: 'head_menu',
             titleClass: 'head_title',
             isOffline: false,
@@ -173,8 +175,7 @@ module.exports = Activity.extend({
             isStart: self.query.start == 1,
             msg: 0,
             tab: 0,
-            msg_count: 0,
-            bottomTab: 4,
+            bottomTab: 0,
             chartType: 0,
             open: function () {
                 bridge.openInApp(self.user.OpenUrl || 'http://m.abs.cn');
@@ -187,6 +188,17 @@ module.exports = Activity.extend({
 
         this.model.showDiscovery = this.showDiscovery.bind(this);
         this.model.showMap = this.showMap.bind(this);
+
+        this.model.showMe = function () {
+
+            if (this.data.isLogin) {
+                this.set({
+                    bottomTab: 4
+                });
+            } else {
+                self.forward('/login');
+            }
+        };
 
         model.showSearch = function (e) {
             this.set({
@@ -387,6 +399,7 @@ module.exports = Activity.extend({
         Scroll.bind(this.$('.main:not(.js_shop)'));
 
         this.scroll = Scroll.bind(this.$('.js_shop'), {
+            useScroll: true,
             refresh: function (resolve, reject) {
                 self.shopApi.load(function () {
                     resolve();
@@ -609,7 +622,7 @@ module.exports = Activity.extend({
 
             }, function (res) {
                 if (res.success) {
-                    self.model.set('msg_count', res.count);
+                    Global.set('msg_count', res.count)
                 }
 
             }, 'json');

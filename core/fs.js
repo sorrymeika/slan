@@ -164,3 +164,4 @@ exports.readFirstExistentFile = function (paths, files, callback) {
 };
 
 
+exports.mkdirs = fse.mkdirs;

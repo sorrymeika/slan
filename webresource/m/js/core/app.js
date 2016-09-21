@@ -1,23 +1,23 @@
-var $ = require('$'),
-    util = require('util'),
-    bridge = require('bridge'),
-    Base = require('./base'),
-    Component = require('./component'),
-    appProto = require('./appProto'),
-    animation = require('./animation'),
-    LinkList = require('./linklist'),
-    Promise = require('./promise'),
-    Touch = require('./touch'),
-    Route = require('./route'),
-    Activity = require('./activity');
+var $ = require('$');
+var util = require('util');
+var bridge = require('bridge');
+var Base = require('./base');
+var Component = require('./component');
+var appProto = require('./appProto');
+var animation = require('./animation');
+var LinkList = require('./linklist');
+var Promise = require('./promise');
+var Touch = require('./touch');
+var Route = require('./route');
+var Activity = require('./activity');
 
-var noop = util.noop,
-    lastIndexOf = util.lastIndexOf,
-    slice = Array.prototype.slice,
-    getPath = util.getPath,
-    trimHash = Route.trimHash;
+var noop = util.noop;
+var lastIndexOf = util.lastIndexOf;
+var slice = Array.prototype.slice;
+var getPath = util.getPath;
+var trimHash = Route.trimHash;
 
-var getToggleAnimation = function (isForward, currentActivity, activity, toggleAnim) {
+function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
     if (!toggleAnim) toggleAnim = (isForward ? activity : currentActivity).toggleAnim;
 
     var anim = require('anim/' + toggleAnim),
@@ -43,13 +43,13 @@ var getToggleAnimation = function (isForward, currentActivity, activity, toggleA
         }];
 }
 
-var adjustActivity = function (currentActivity, activity) {
+function adjustActivity(currentActivity, activity) {
     currentActivity._startExit();
     currentActivity.$el.siblings('.view:not([data-path="' + activity.path + '"])').hide();
     if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
-};
+}
 
-var bindBackGesture = function (application) {
+function bindBackGesture(application) {
 
     var touch = application.touch = new Touch(application.el, {
         enableVertical: false,
@@ -177,9 +177,9 @@ var bindBackGesture = function (application) {
             });
         }
     });
-};
+}
 
-var Application = Component.extend($.extend(appProto, {
+var Application = Component.extend(Object.assign(appProto, {
     events: {
         'tap,click a[href]:not(.js-link-default)': function (e) {
             var that = this;
@@ -336,7 +336,7 @@ var Application = Component.extend($.extend(appProto, {
             currentActivity = that._currentActivity,
             url = route.url,
             isForward = options.isForward,
-            duration = options.duration || 400;
+            duration = options.duration || 300;
 
         that.navigate(url, isForward);
 
@@ -364,11 +364,15 @@ var Application = Component.extend($.extend(appProto, {
                 activity.trigger('Appear');
             });
 
-            var ease = 'cubic-bezier(.34,.86,.54,.99)',
-                anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim),
-                anim;
+            var ease = 'cubic-bezier(.34,.86,.54,.99)';
+            var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
+            var anim;
 
+            var executedFinish = false;
             var finish = function () {
+                if (executedFinish) return;
+                executedFinish = true;
+
                 activity._enterAnimationEnd();
                 callback && callback(activity);
                 that.queue.resolve();
@@ -379,7 +383,8 @@ var Application = Component.extend($.extend(appProto, {
                 anim.ease = ease;
                 anim.duration = duration;
 
-                anim.el.css(animation.transform(anim.start).css).animate(animation.transform(anim.css).css, duration, ease);
+                anim.el.css(animation.transform(anim.start).css)
+                    .animate(animation.transform(anim.css).css, duration, ease, finish);
             }
 
             setTimeout(finish, duration + 300);

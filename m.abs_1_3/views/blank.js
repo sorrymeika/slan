@@ -2,25 +2,24 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
-var model = require('core/model');
+var model = require('core/model2');
 var Scroll = require('widget/scroll');
 var api = require('models/api');
 
 module.exports = Activity.extend({
-    events: {
-        'tap .js_back': function () {
-            this.back(this.swipeRightBackAction);
-        }
-    },
 
     onCreate: function () {
         var self = this;
 
-        self.model = new model.ViewModel(this.$el, {
+        this.model = new model.ViewModel(this.$el, {
             title: '标题'
         });
 
-        Scroll.bind(self.model.refs.main);
+        this.model.back = function () {
+            self.back(self.swipeRightBackAction);
+        }
+
+        Scroll.bind(this.model.refs.main);
     },
 
     onShow: function () {

@@ -1,14 +1,6 @@
 ﻿$p:2;
 @mixin icon($x:0px, $y:0px,$width:30px,$height:30px, $img:"../images/icon.png", $display: inline-block) { content: ''; display: $display; background: url($img) no-repeat $x $y; background-size: 320px auto; width: $width; height: $height; }
 
-@import "./global.scss";
-@import "./sprite.scss";
-
-.icon_arrow { position: relative; border-top: 2px solid #fff; border-right: 2px solid #fff; width: 10px; height: 10px; font-size: 0px; vertical-align: middle; -webkit-transform: rotate(45deg); display: inline-block; top: -1px; }
-.icon_cm,.icon_vm { position: relative; }
-.icon_cm:before { position: absolute; display: block; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); transform: translate(-50%,-50%); }
-.icon_vm:before { position: absolute; display: block; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
-
 .icon { content: ''; display: block; background: url(../images/icon.png) no-repeat 0px 0px; background-size: 320px auto; width: 30px; height: 30px; }
 
 header { background: $color; height: 44px; line-height: 44px; }
@@ -19,13 +11,11 @@ header { background: $color; height: 44px; line-height: 44px; }
 .checkboxlist li:before { @include icon(-240px,-30px); vertical-align: middle; -webkit-transform: scale(.8); }
 .checkboxlist .checked:before { background-position: -210px -30px; }
 
-.footer { position: absolute; bottom: 0px; width: 100%; height: 50px; border-top: .5px solid #ccc; background: #fff; z-index: 1000; display: -webkit-box; text-align: center; color: #666; -webkit-user-select: none; -webkit-touch-callout: none; }
+.footer { position: absolute; bottom: 0px; width: 100%; height: 50px; border-top: 0; background-color: #fff; z-index: 1000; display: -webkit-box; text-align: center; color: #666; -webkit-user-select: none; -webkit-touch-callout: none; }
 .footer_line { display: block; content: ''; position: absolute; width: 100%; bottom: 50px; left: 0; right: 0; border-top: 1px solid #ccc; -webkit-transform: scaleY(.5); z-index: 998; }
 .footer li { position: relative; width: 0px; -webkit-box-flex: 1; font-size: 10px; padding-top: 4px; }
 .footer li i { position: absolute; right: 25%; top: 5px; position: absolute; border-radius: 50%; background: $color; color: #fff; text-align: center; width: 12px; height: 12px; font-size: 10px; line-height: 12px; }
-.footer li.curr { color: $color; background-color: #fff; }
-.footer li:nth-child(3) { -webkit-box-flex: 1.2; padding-top: 0px; margin-top: -10px; z-index: 3; }
-.footer .icon-life:before { margin-top: -8px; }
+.footer li.curr { color: $color; }
 .footer li em { display: block; margin: 5px auto 3px auto; width: 23px; height: 20px; }
 
 .btn { background: $color; border-radius: 4px; }
@@ -51,7 +41,7 @@ header { background: $color; height: 44px; line-height: 44px; }
 .head_search input { text-align: center; -webkit-box-flex: 1; border-radius: 12px; color: #fff; display: block; border: 0px; background: #e04447; height: 100%; }
 .head_search input::-webkit-input-placeholder{ color: #fff; }
 
-.head_search .icon-search { display: block; width: 25px; }
+.head_search .icon-search { display: block; width: 25px; height: 25px; }
 
 .head_left+.head_search { margin-left: 40px; margin-right: 40px; }
 
@@ -164,7 +154,6 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .hm_shop_scroll { padding-bottom: 10px; }
 .hm_shop_scroll .price{ color: $color; }
 .hm_shop_scroll .price del { color: #999; }
-
 
 .hm_msg { padding-top: .1px; }
 .hm_msg_list,.hm_msg_service,.hm_msg_discovery .hd { margin: 5px 0 10px 0; height: 45px; line-height: 45px; font-size: 14px; background: #fff; border-bottom: .5px solid #bdbdbd; position: relative; }
@@ -395,38 +384,47 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_buy__inv_required .inputs input { height: 42px; border: 0; display: block; }
 
 /*我*/
-.hm_my_card { position: relative; background: -webkit-gradient(linear, 100% 33%, 100% 79%, from(#e04447), to(#ea6333)); color: #fff; padding: 15px 20px; }
-.hm_my_card .vip_name { font-size: 18px; }
-.hm_my_card .user_rights { display: block; position: absolute; right: 10px; top: 10px; color: #fff; }
-.hm_my_card .user_rights:before { @include icon(-300px,-120px,16px,16px); vertical-align: -2px; margin-right: 4px; }
-.hm_my_card .energy { font-size: 12px; margin-top: 17px; }
-.hm_my_card .energy span { font-size: 24px; font-weight: lighter; margin-left: 5px; }
-.hm_my_card .energy_bar { margin-top: 10px; background: #d42c2c; -webkit-box-shadow: inset 0px 0px 4px #9d2020; height: 10px; width: 100%; border-radius: 6px; overflow: hidden; }
-.hm_my_card .energy_bar span { display: block; background: #fff; height: 10px; border-radius: 6px; }
-.hm_my_card .energy_val { font-size: 12px; display: -webkit-box; margin-top: 8px; font-weight: 200; }
-.hm_my_card .energy_val .energy_val_to { text-align: right; -webkit-box-flex: 1; }
-.hm_my_barcode { background: #fff; overflow: hidden; padding-bottom: 10px; }
-.hm_my_barcode .mobile { margin-top: 6px; margin-bottom: 5px; text-align: center; font-weight: 200; }
-.barcode { height: 60px; width: 290px; display: -webkit-box; margin: 15px auto 0 auto; position: relative; left: 10px; }
-.barcode i, .barcode em { height: 100%; display: block; width: 2px; }
+.barcode { height: .6rem; width: 2.9rem; display: -webkit-box; margin: .15rem auto 0 auto; position: relative; left: .3rem; -webkit-transform: scale(.8); -webkit-transform-origin: 0% 0%; }
+.barcode i, .barcode em { height: 100%; display: block; width: .02rem; }
 .barcode i { background: #000; }
 
-@media screen and (min-width:375px) {
-    .barcode { width: 340px; height: 80px; left: 0px; }
-    .barcode i, .barcode em { width: 2.5px; }
-}
+.hm_user__base { background: $color; text-align: center; padding-bottom: 8px; }
+.hm_user__base .avatars img { width: 57px; height: 57px; border-radius: 50%; }
+.hm_user__base .name { color: #fff; font-size: 16px; height: 16px; margin-top: 5px; }
+.hm_user__base .addr { color: #fff; font-size: 14px; margin-top: 6px; }
 
-.hm_my_list { margin: 10px 0; color: #333; }
-.hm_my_list li { background: #fff; border-bottom: 1px solid #ccc; overflow: hidden; display: -webkit-box; height: 35px; line-height: 35px; margin-top: 10px; }
-.hm_my_list li:before { display: block; content: ''; width: 24px; height: 24px; border-radius: 50%; background: #e65ba2 url(../images/icon.png) no-repeat -120px -30px; background-size: 320px auto; margin: 6px 0 0 8px; }
-.hm_my_list li:after { border-top: 1px solid #999; border-right: 1px solid #999; content: ''; display: block; width: 10px; height: 10px; -webkit-transform: rotate(45deg); margin: 12px 10px 0 6px; }
-.hm_my_list li:nth-child(2):before { background-position: -150px -30px; background-color: #4dbeea; }
-.hm_my_list li:nth-child(3):before { background-position: -180px -30px; background-color: #66bec2; }
-.hm_my_list li:nth-child(4):before { background-position: -120px -60px; background-color: #a061ad; }
-.hm_my_list li:nth-child(5):before { background-position: -150px -60px; background-color: #ffa549; }
-.hm_my_list li b { display: block; font-size: 16px; -webkit-box-flex: 1; font-weight: normal; margin-left: 8px; }
-.hm_my_list li span { display: block; font-size: 16px; text-align: right; }
-.hm_my_list li em { color: $color; font-size: 20px; vertical-align: -1px; font-weight: 200; }
+.hm_user__card { background-color: #fff; margin: 15px; padding: 10px 0; border-radius: 4px; box-shadow: 5px 2px 6px #ddd; }
+.hm_user__card .hd { position: relative; height: 36px; font-size: 14px; padding: 0 6px 10px 10px; line-height: 30px; color: #000; }
+.hm_user__card .hd:before { position: relative; z-index: 1; top: -2px; left: 2px; margin-right: 10px; }
+.hm_user__card .hd:after { position: absolute; z-index: 0; background: $color; content: ''; width: 28px; height: 28px; border-radius: 50%; left: 10px; top: 0; }
+.hm_user__card .energy { float: right; font-size: 12px; }
+.hm_user__card .energy em { color: $color; margin-left: 5px; }
+.hm_user__card .rights { font-size: 12px; padding: 10px 0 0 10px; color: #3FA9F5; }
+.hm_user__card .rights:after { content: ''; @include arrow(#3FA9F5,6px); float: right; margin: 4px 10px 0 0; }
+
+.hm_user__order { background-color: #fff; padding: 10px; margin-top: 10px; }
+.hm_user__order .user-order { position: relative; height: 34px; font-size: 14px; padding: 0 6px 10px 10px; line-height: 28px; color: #000; }
+.hm_user__order .user-order:before { position: relative; z-index: 1; top: -3px; left: 1px; margin-right: 10px; }
+.hm_user__order .user-order:after { position: absolute; z-index: 0; background: #FF8793; content: ''; width: 24px; height: 24px; border-radius: 50%; left: 5px; top: 0; }
+.hm_user__order .allorder { float: right; font-size: 12px; color: #999; }
+.hm_user__order .allorder:after { content: ''; @include arrow(#999,6px); float: right; margin: 10px 0 0 0; }
+.hm_user__order .ordercates { display: -webkit-box; text-align: center; }
+.hm_user__order .ordercates li { position: relative; -webkit-box-flex: 1; width: 0; padding: 15px; }
+.hm_user__order .ordercates li span { display: block; font-size: 12px; margin-top: 10px; }
+.hm_user__order .ordercates li i { display: block; position: absolute; font-size: 10px; background: $color; color: #fff; border-radius: 10px; height: 16px; min-width: 16px; padding: 0 5px; line-height: 16px; top: 10px; left: .4rem; }
+
+.hm_user__other { padding: 1px 0; margin-top: 10px; background-color: #fff; }
+.hm_user__other li { height: 40px; line-height: 40px; background-color: #fff; overflow: hidden; margin-left: 10px; font-size: 14px; color: #000; font-weight: bold; }
+.hm_user__other li:before { margin-right: 5px; vertical-align: -7px; }
+.hm_user__other .note { color: #999; float: right; margin-right: 10px; margin-top: 2px; font-size: 12px; font-weight: normal; }
+.hm_user__other .note:after { content: ''; @include arrow(#999,6px); top: -2px; }
+
+//设置
+.uc_setting__about .logo { text-align: center; width: 62px; height: 60px; margin: 15px auto 0 auto; background: $color; padding-top: 19px; }
+.uc_setting__about .ver { text-align: center; font-size: 14px; color: #ccc; padding: 10px; }
+.uc_setting__list { background-color: #fff; margin-top: 10px; }
+.uc_setting__list li { margin-left: 10px; font-size: 14px; color: #000; font-weight: bold; line-height: 40px; }
+.uc_setting__list .logout { text-align: center; margin-right: 10px; }
 
 //月礼
 .month_present { padding: 6px; background: #fff; }
@@ -526,14 +524,8 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .member_bar b { display: inline-block; color: #fff; border-radius: 4px; line-height: 36px; height: 36px; padding: 0 20px; margin: 15px 15px; }
 .member_bar .btn_mid { background: $color; }
 .member_bar .btn_cancel { background: #999; }
-.settings { background: #fff; }
-.settings .hello { text-align: center; height: 140px; padding-top: 50px; font-size: 1.2em; color: #333; background: #eeefef; }
-.settings .con { border-top: 1px solid $color; }
-.settings .con li { border-bottom: 1px solid $color; height: 70px; line-height: 70px; }
-.settings .con li:before { content: ''; display: inline-block; width: 40px; height: 40px; margin: 15px 10px 0 10px; vertical-align: -14px; border-radius: 50%; background: $color url(../images/icon.png) no-repeat 0px -190px; background-size: 320px auto; }
-.settings .con li:nth-child(2):before { background-position-x: -40px; }
-.settings .con li:after { display: inline; content: ''; float: right; width: 12px; height: 12px; border-top: 1px solid $color; border-right: 1px solid $color; -webkit-transform: rotate(45deg); margin-top: 29px; margin-right: 15px; }
-.settings .ft { margin-top: 50px; }
+
+
 .message_card { background: #fff; padding-bottom: 1px; border-bottom: 1px solid #ddd; padding-top: 5px; }
 .message_card .hd { overflow: hidden; }
 .message_card .hd:before { content: ''; display: block; width: 30px; height: 30px; margin: 5px 10px 0 10px; vertical-align: 0px; border-radius: 50%; background: $color url(../images/icon.png) no-repeat -181px 0px; background-size: 320px auto; float: left; }
@@ -825,17 +817,6 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
     .btn { border-radius: 0; height: 50px; position: fixed; bottom: 0px; right: 0px; left: 0; line-height: 50px; }
 }
 
-.uc_settings {
-    padding-top: .1px;
-    li {
-        margin-top: 10px; height: 45px; border-bottom: 1px solid #ccc; background: #fff; padding-left: 10px; font-size: 14px; position: relative;
-        &:before { @include icon(0px,-150px); vertical-align: -9px; margin-top: 8px; margin-right: 5px; }
-        @for $i from 0 to 5 {
-            &:nth-child(#{$i+1}):before { background-position-x: -($i*30px); }
-        }
-        &:after { @extend .ex_arrow; }
-    }
-}
 
 .uc_pwd {
     dt { height: 30px; padding-top: 10px; font-size: 14px; padding-left: 8px; }
@@ -1144,7 +1125,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
     &:before { content: ''; display: block; width: 105px; height: 105px; background: url(../images/icon_tip.png) no-repeat; background-size: 100% auto; margin: 40% auto 10px auto; }
     h1 { font-weight: normal; margin-bottom: 8px; font-size: 30px; }
     &.fastbuy_nodata{
-        &:before { background-image: url(../images/fast_buy_../images/icon.png); }
+        &:before { background-image: url(../images/fast_buy_icon.png); }
     }
 }
 
@@ -1198,7 +1179,6 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .disc_bottom ul li:last-child { border-right: 0; }
 
 .ct_coupon_list li .name { height: auto; }
-.footer { border-top: 0; }
 .head_all:before { background-image: url(../images/icon.png); }
 .searchwrap { z-index: 1001; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff; }
 .searchwrap .main { bottom: 0; }

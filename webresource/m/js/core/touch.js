@@ -5,7 +5,7 @@ var $ = require('$'),
     Event = require('./event');
 
 var slice = Array.prototype.slice;
-var cb = new CubicBezier(.08, .53, .2, .96);
+var defaultCB = new CubicBezier(.08, .53, .2, .96);
 
 var Touch = Event.mixin(function (el, options) {
     var self = this,
@@ -220,12 +220,20 @@ var Touch = Event.mixin(function (el, options) {
                 resultY,
                 maxDuration = endEvent.maxDuration || self.options.maxDuration;
 
+            var cb = defaultCB;
+
             if (Date.now() - self.timestamp < 50) {
                 changeX = point.pageX - (self.prevPointX || self.oldPointX);
                 changeY = point.pageY - (self.prevPointY || self.oldPointY);
 
-                changeY = changeY > 80 ? 80 : changeY < -80 ? -80 : changeY;
-                changeX = changeX > 80 ? 80 : changeX < -80 ? -80 : changeX;
+                var absX = Math.min(80, Math.max(20, Math.abs(changeX)));
+                var absY = Math.min(80, Math.max(20, Math.abs(changeY)));
+
+                changeX = (changeX < 0 ? -1 : 1) * absX;
+                changeY = (changeY < 0 ? -1 : 1) * absY;
+
+
+                cb = new CubicBezier(.05, absY / 100, Math.min(.2, 1 - (absY / 100)), .96);
 
                 distX = (changeX * Math.abs(changeX) / -4) * 1.3;
                 distY = (changeY * Math.abs(changeY) / -4) * 1.3;

@@ -11,7 +11,7 @@ var razor = require('../core/razor');
 var _ = require('underscore');
 var Tools = require('../tools/tools');
 var sass = require('node-sass');
-var sprity = require('sprity');
+var sprity = require('../tools/sprity');
 
 var Util = require('util');
 var util = require('../core/util');

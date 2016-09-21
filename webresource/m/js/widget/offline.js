@@ -1,15 +1,15 @@
 var $ = require('$');
-var model = require('core/model');
+var model = require('core/model2');
 
 var Offline = model.ViewModel.extend({
-    el: <div class="viewport offline">
-        <div class="offline_con">
-            <div class="ico"></div>
-            <div class="txt">您的网络不太顺畅哦</div>
-            <div class="txt_sub">请检查您的手机是否联网</div>
-            <div class="btn" sn-click="this.reload()">重新加载</div>
-        </div>
-    </div>,
+    el: '<div class="viewport offline">\
+        <div class="offline_con">\
+            <div class="ico"></div>\
+            <div class="txt">您的网络不太顺畅哦</div>\
+            <div class="txt_sub">请检查您的手机是否联网</div>\
+            <div class="btn" sn-click="this.reload()">重新加载</div>\
+        </div>\
+    </div>',
 
     reload: function() {
 

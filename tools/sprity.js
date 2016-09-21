@@ -6,18 +6,21 @@ var Canvas = require('canvas');
 var Image = Canvas.Image;
 
 
-function combineImages(dist, srcs) {
+function combineImages(out, srcs, callback) {
     var count = 0;
     var images = [];
+
+    var className = path.basename(out);
 
     srcs.forEach(function (src) {
         count++;
 
-        fs.readFile(src, function (err, src) {
+        fs.readFile(src, function (err, buffer) {
 
             if (err) throw err;
             var img = new Image;
-            img.src = src;
+            img.src = buffer;
+            img.alt = src;
 
             images.push(img);
 
@@ -25,70 +28,186 @@ function combineImages(dist, srcs) {
 
             if (count == 0) {
 
-                images.sort(function (a, b) {
-                    return a.width > b.width ? 1 : a.width < b.width ? -1 : 0;
-                });
+                var maxWidth = 0;
+                var height = 0;
+                var margin = 1;
 
-                var maxWidth = images[0].width;
-                var height = images[0].height;
-
-                images[0].top = 0;
-                images[0].left = 0;
-                for (var i = 1, j = images.length - 1; i < j; i++) {
+                for (var i = 0, j = images.length; i < j; i++) {
                     img = images[i];
-                    if (i == 1) {
-                        img.left = 0;
-                        img.top = height;
-                    } else {
 
-                    }
+                    img.w = img.width % 2 != 0 ? img.width + 1 : img.width;
+                    img.h = img.height % 2 != 0 ? img.height + 1 : img.height;
 
+                    img.left = margin;
+                    height += margin;
+
+                    img.top = height;
+
+                    height += img.h + margin;
+
+                    if (img.w > maxWidth) maxWidth = img.w;
                 }
 
-                var canvas = new Canvas(200, 200);
+                var outImageWidth = maxWidth + 2;
+                var canvas = new Canvas(outImageWidth, height);
                 var ctx = canvas.getContext('2d');
+                var results = [];
 
-                ctx.drawImage(img, 0, 0, img.width / 4, img.height / 4);
+                for (var i = 0, j = images.length; i < j; i++) {
+                    img = images[i];
+
+                    results.push({
+                        name: path.basename(img.alt).replace(/\.(png|jpg|jpeg|gif)$/, ''),
+                        x: img.left - 1,
+                        y: img.top - 1,
+                        width: img.w + margin * 2,
+                        height: img.h + margin * 2
+                    })
+
+                    ctx.drawImage(img, img.left, img.top, img.w + margin, img.h + margin);
+                }
+
+                var outDir = path.dirname(out);
+
+                fse.mkdirs(outDir, function () {
+
+                    out = path.resolve(outDir, "sprite-" + className + ".png");
+
+                    var output = fs.createWriteStream(out),
+                        stream = canvas.pngStream();
+
+                    stream.on('data', function (chunk) {
+                        output.write(chunk);
+                    });
+
+                    stream.on('end', function () {
+                        console.log('saved ' + out);
+
+                        callback({
+                            width: outImageWidth,
+                            height: height,
+                            name: className,
+                            imageSrc: out,
+                            images: results
+                        });
+                    });
+                })
+
             }
         });
     });
 }
 
-export.create = function (src, dist, cb) {
-    fs.readdir(path.join(__dirname, src), function (err, files) {
+exports.create = function (options, cb) {
+    var src = options.src,
+        out = options.out,
+        outStylePath = path.resolve(out, options.style || "./sprite.scss");
+
+    var combineCount = 0;
+    var layouts = []
+    var combineCallback = function (result) {
+        var imageSrc = path.relative(path.dirname(outStylePath), result.imageSrc);
+
+        layouts.push({
+            name: result.name,
+            src: imageSrc,
+            images: result.images,
+            width: result.width,
+            height: result.height,
+        })
+
+        combineCount--;
+        if (combineCount == 0) {
+            var codes = "";
+
+            layouts.forEach(function (layout) {
+                var styleCode;
+                var commonStyle = 'background-image: url("' + layout.src + '");content:\'\';display:inline-block;font-size:0px;vertical-align:middle;';
+                var pxClassNames = "";
+                var remClassNames = "";
+                var styles = "";
+
+                layout.images.forEach(function (img) {
+                    var className = "." + layout.name + '-' + img.name;
+
+                    pxClassNames += className + ':before,'
+                    remClassNames += className + '-rem:before,'
+
+                    styles += className + ':before{background-position: -' + (img.x / 2) + 'px -' + (img.y / 2) + 'px; width: ' + (img.width / 2) + 'px; height: ' + (img.height / 2) + 'px;}\n';
+                    styles += className + '-rem:before{background-position: -' + (img.x / 200) + 'rem -' + (img.y / 200) + 'rem; width: ' + (img.width / 200) + 'rem; height: ' + (img.height / 200) + 'rem;}\n';
+                });
+
+                pxClassNames = pxClassNames.substr(0, pxClassNames.length - 1);
+                remClassNames = remClassNames.substr(0, remClassNames.length - 1);
+
+                styleCode = pxClassNames + "{" + commonStyle + "background-size: " + (layout.width / 2) + "px " + (layout.height / 2) + "px;" + "}\n";
+                styleCode += remClassNames + "{" + commonStyle + "background-size: " + (layout.width / 200) + "rem " + (layout.height / 200) + "rem;" + "}\n";
+
+                codes += styleCode + styles;
+            });
+
+            fse.mkdirs(path.dirname(outStylePath), function () {
+                fs.writeFile(outStylePath, codes, 'utf8', function () {
+                    console.log('saved ' + outStylePath);
+
+                    cb && cb(null);
+                });
+            });
+        }
+    }
+
+    fs.readdir(src, function (err, files) {
         if (err) {
-            return cb(err);
+            console.error(err);
+
+            return cb && cb(err);
         }
 
         var count = 0;
         var rootImages = [];
 
-        list.forEach(function (file) {
+        files.forEach(function (file) {
             count++;
 
-            file = path.resolve(dir, file);
+            file = path.resolve(src, file)
+
             fs.stat(file, function (err, stat) {
 
                 if (stat && stat.isDirectory()) {
+                    combineCount++;
 
-                    fse.find(file, '*.(png|jpg|jpeg)', function (err, images) {
-                        combineImages(dist, images);
+                    fse.find(file, '*.(png|jpg|jpeg|gif)', function (err, images) {
+                        if (err || !images || images.length == 0) {
+                            combineCount--;
+                            return;
+                        }
+
+                        combineImages(path.resolve(out, path.basename(file)), images, combineCallback);
                     });
 
                 } else {
                     var ext = path.extname(file);
 
-                    if (/^\.(png|jpg|jpeg)$/.test(ext)) {
+                    if (/^\.(png|jpg|jpeg|gif)$/.test(ext)) {
                         rootImages.push(file);
                     }
                 }
                 count--;
 
-                if (count == 0) {
-                    combineImages(dist, rootImages);
+                if (count == 0 && rootImages.length != 0) {
+                    combineCount++;
+                    combineImages(path.resolve(out, path.basename(src)), rootImages, combineCallback);
                 }
-            }
-        }
+            })
+        })
 
     });
 }
+
+/*
+exports.create({
+    src: "./sprite",
+    out: "./out",
+    style: "./sprite.scss"
+})
+*/

@@ -1,6 +1,4 @@
-﻿@import "./global.scss";
-
-.gp_list__wrap { padding-bottom: 15px; }
+﻿.gp_list__wrap { padding-bottom: 15px; }
 .gp_list__list { }
 .gp_list__listitem { background: #fff; width: 2.97rem; margin: 10px auto 0 auto; }
 .gp_list__listitem .img { position: relative; width: 100%; }
@@ -14,7 +12,6 @@
 .gp_list__listitem .btn_detail .go { float: right; border-left: 1px dashed #fff; padding-left: 8px; }
 .gp_list__listitem .btn_detail .go:after { display: inline-block; content: ''; border-right: 1px solid #fff; border-top: 1px solid #fff; -webkit-transform: rotate(45deg); width: 10px; height: 10px; }
 .gp_list__listitem .btn_single { display: block; background: $color; color: #fff; height: 35px; line-height: 35px; border-radius: 4px; padding: 0 8px; margin-left: 6px; }
-
 
 .gp_item__action { font-size: 16px; line-height: 120%; }
 .gp_item__action em { font-weight: normal; display: block; }

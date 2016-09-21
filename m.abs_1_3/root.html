@@ -52,6 +52,7 @@
                 'activity': 'core/activity'
             }
         });
+
         seajs.use(['$', 'util', 'core/app', 'bridge', 'widget/loading', 'widget/offline'], function($, util, App, bridge, Loading, Offline) {
             var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
             sl.isDebug = @debug;
