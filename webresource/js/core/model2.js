@@ -1200,7 +1200,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     destory: function () {
-        this.$el.off('input change blur', '[' + this.snModelKey + ']');
+        this.$el.off('input change blur', '[' + this.snModelKey + ']')
+            .each(function () {
+                this.snViewModel = null;
+            });
 
         for (var key in ModelEvents) {
             var eventName = ModelEvents[key];
@@ -1215,6 +1218,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 break;
             }
         }
+
+        this.$el = null;
     }
 
 });
