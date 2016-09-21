@@ -2,7 +2,7 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
-var model = require('core/model');
+var model = require('core/model2');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
@@ -108,12 +108,12 @@ module.exports = Activity.extend({
             self.cpCategory.show();
         }
 
-        this.model.selectSubCate = function (e, item) {
+        this.model.selectSubCate = function (item) {
             this.set("currentSub", item);
-            this.requestProd(e, item.PCG_ID);
+            this.requestProd(item.PCG_ID);
         }
 
-        this.model.requestProd = function (e, id) {
+        this.model.requestProd = function (id) {
 
             this.set("currentSearchId", id);
 
@@ -166,7 +166,6 @@ module.exports = Activity.extend({
 
     setCategories: function (categories, navs) {
         var self = this;
-        this.categories = model.State.data.categories;
 
         var id = self.route.query.id || 1;
         var current = util.first(categories, function (item) {

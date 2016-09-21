@@ -123,6 +123,25 @@ function updateView(viewModel, el) {
     } else {
         viewModel.updateElement(el);
 
+        if (el.nodeType == 1) {
+            var ref = el.getAttribute('ref');
+            var refs;
+
+            if (ref) {
+                refs = viewModel.refs[ref];
+
+                if (!refs) {
+                    viewModel.refs[ref] = el;
+
+                } else if (refs.nodeType) {
+                    viewModel.refs[ref] = [refs, el];
+
+                } else {
+                    refs.push(el);
+                }
+            }
+        }
+
         if (el.snIf && !el.parentNode) {
             return { isBreak: true, nextSibling: el.snIf.nextSibling };
         }
@@ -659,7 +678,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var attrs = modelName.split('.');
         var model;
 
-
         if (el.snData && attrs[0] in el.snData) {
             model = el.snData[attrs.shift()];
         } else {
@@ -750,10 +768,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 } else if (attr == 'sn-src') {
                     attr = 'src'
                 }
-                if (attr == "ref") {
-                    self.refs[val] = el;
 
-                } else if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr.indexOf('sn-') != 0) {
+                if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr.indexOf('sn-') != 0) {
                     if (attr.indexOf('sn-') == 0 && val.indexOf("{") == -1 && val.indexOf("}") == -1) {
                         val = '{' + val + '}';
                     }
@@ -762,6 +778,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     if (fid) {
                         (el.snBinding || (el.snBinding = {}))[attr] = fid.id;
                         el.snIsGlobal = fid.isGlobal;
+                    } else if (attr == "ref") {
+
+                        self.refs[val] = el;
                     }
 
                 } else if (attr == 'sn-model') {
@@ -1064,6 +1083,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         var self = this;
 
+        this.refs = {};
+
         eachElement(this.$el, function (el) {
             if (el.snViewModel && el.snViewModel != self) return false;
 
@@ -1154,6 +1175,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         this._bindElement(newNode);
 
+        this.updateViewNextTick();
+
         return newNode;
     },
 
@@ -1167,7 +1190,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         } else {
 
             this.$el.each(function () {
-                if ($.contains(this, node))
+                if (!$.contains(this, node))
                     throw new Error('referenceNode must in model');
             });
         }
@@ -1237,16 +1260,22 @@ ViewModel.extend = util.extend;
 
 var Global = ViewModel.prototype.$global = new ViewModel();
 
-
-
 Global.updateView = (function () {
 
     viewModelList.forEach(function (viewModel) {
+        var refs = {};
 
         eachElement(viewModel.$el, function (el) {
             if (el.snViewModel && el.snViewModel != viewModel) return false;
 
             if (el.snIsGlobal) {
+                if (el.nodeType == 1) {
+                    var ref = el.getAttribute('ref');
+                    if (ref && !refs[ref]) {
+                        viewModel.refs[ref] = null;
+                        refs[ref] = true;
+                    }
+                }
                 return updateView(viewModel, el);
             }
         });

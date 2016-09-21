@@ -295,6 +295,8 @@ module.exports = Activity.extend({
                     topbanner: res.topbanner
                 });
 
+                console.log(model.refs);
+
                 if (self.slider)
                     self.slider.set(res.topbanner.data);
                 else

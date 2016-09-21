@@ -1,7 +1,6 @@
 ﻿define(function (require, exports, module) {
     var $ = require('$'),
         _ = require('util'),
-        ScrollView = require('./scrollview'),
         Touch = require('core/touch');
 
     var Slider = function (options) {

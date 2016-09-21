@@ -4,8 +4,9 @@ define(function (require, exports, module) {
     var util = require('util');
     var Activity = require('activity');
     var Loading = require('../widget/loading');
-    var model = require('../core/model');
+    var model = require('../core/model2');
     var Scroll = require('../widget/scroll');
+    var Tab = require('../widget/tab');
     var animation = require('animation');
     var bridge = require('bridge');
 
@@ -28,6 +29,20 @@ define(function (require, exports, module) {
                     bridge.openInApp(self.user.OpenUrl || 'http://m.abs.cn');
                 }
             });
+
+            var tab = new Tab({
+                items: ["收入", "支出"]
+            });
+
+            tab.next(function () {
+
+                console.log(this.refs.items);
+
+                tab.appendTo('<div>xxxxx</div>', tab.refs.items[0])
+            });
+
+
+            tab.$el.appendTo(this.model.refs.main);
         },
 
         onShow: function () {
@@ -50,7 +65,7 @@ define(function (require, exports, module) {
                         self.model.set(res);
                     }
                 });
-                this.loading.load();
+                //this.loading.load();
 
             } else {
                 this.forward('/login');

@@ -1,5 +1,5 @@
 <header>
-    <div class="head_back" data-back="{{back}}"></div>
+    <div class="head_back" data-back="{back}"></div>
     <form class="head_search">
         <input class="js_search" type="search" placeholder="热门搜索：新月枕" />
     </form>
@@ -7,8 +7,8 @@
 <div class="main" style="padding-bottom:10px">
     <div class="sp_all_cates">
         <div ref="cates">
-            <ul style="width:{{navs.length*.73}}rem;padding-right:30px;">
-                <li sn-repeat="item in navs" class="{{item.LPE_URL?'noicon':('cate'+item.LPE_PCG_ID)}} {{current.PCG_ID==item.LPE_PCG_ID?'curr':''}}" sn-tap="this.selectCate(item.LPE_URL||item.LPE_PCG_ID)">{{item.LPE_PCG_NAME}}</li>
+            <ul style="width:{navs.length*.73}rem;padding-right:30px;">
+                <li sn-repeat="item in navs" class="{item.LPE_URL?'noicon':('cate'+item.LPE_PCG_ID)} {current.PCG_ID==item.LPE_PCG_ID?'curr':''}" sn-tap="this.selectCate(item.LPE_URL||item.LPE_PCG_ID)">{item.LPE_PCG_NAME}</li>
             </ul>
         </div>
         <div class="dropdown_btn" sn-tap="this.showCategories()"></div>
@@ -16,13 +16,13 @@
 
     <div class="sp_all_catelist_wrap">
         <ul class="sp_all_catelist_cate">
-            <li sn-repeat="item in current.children" sn-tap="this.selectSubCate(item)" class="{{currentSub.PCG_ID==item.PCG_ID?'curr':''}}">{{item.PCG_NAME}}</li>
+            <li sn-repeat="item in current.children" sn-tap="this.selectSubCate(item)" class="{currentSub.PCG_ID==item.PCG_ID?'curr':''}">{item.PCG_NAME}</li>
         </ul>
         <ul class="sp_all_catelist_subcate">
-            <li class="sp_all_catelist_subcate_item{{currentSearchId==cate.PCG_ID?' curr':''}}" sn-repeat="cate in currentSub.children" sn-tap="this.requestProd(cate.PCG_ID)">
-                <p><img alt="{{cate.PCG_NAME}}" sn-src="{{cate.PCG_IMG_URL}}" /></a>
+            <li class="sp_all_catelist_subcate_item{currentSearchId==cate.PCG_ID?' curr':''}" sn-repeat="cate in currentSub.children" sn-tap="this.requestProd(cate.PCG_ID)">
+                <p><img alt="{cate.PCG_NAME}" sn-src="{cate.PCG_IMG_URL}" /></a>
                 </p>
-                <span>{{cate.PCG_NAME}}</span>
+                <span>{cate.PCG_NAME}</span>
             </li>
             <li class="sp_all_catelist_subcate_item more" sn-tap="this.requestProd(currentSub.PCG_ID)">
                 <p><i></i></p>
@@ -32,13 +32,13 @@
     </div>
 
     <ul class="sp_list">
-        <li sn-repeat="item in data" class="sp_list_item" data-forward="/item/{{item.PRD_ID}}?from={{url}}">
-            <img src="{{item.WPP_LIST_PIC1}}" />
-            <p class="price"><b>￥{{item.PRD_PRICE}}</b>
-                <del sn-display="{{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}}">￥{{item.PRD_MEMBER_PRICE}}&nbsp;</del>
+        <li sn-repeat="item in data" class="sp_list_item" data-forward="/item/{item.PRD_ID}?from={url}">
+            <img src="{item.WPP_LIST_PIC1}" />
+            <p class="price"><b>￥{item.PRD_PRICE}</b>
+                <del sn-display="{item.PRD_PRICE!=0&&item.PRD_PRICE<item.PRD_MEMBER_PRICE}">￥{item.PRD_MEMBER_PRICE}&nbsp;</del>
             </p>
-            <p class="name">{{item.PRD_NAME}}</p>
-            <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销<br>Sold Out</div>
+            <p class="name">{item.PRD_NAME}</p>
+            <div class="sold_out" sn-display="{item.PRD_NUM==0}">脱 销<br>Sold Out</div>
         </li>
     </ul>
 </div>
