@@ -1195,6 +1195,13 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             .appendTo(parentNode);
     },
 
+    prependTo: function (newNode, parentNode) {
+        parentNode = this._checkOwnNode(parentNode);
+
+        return this._bindNewNode(newNode)
+            .prependTo(parentNode);
+    },
+
     next: function (callback) {
         return this.one('viewDidUpdate', callback);
     },
