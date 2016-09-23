@@ -173,17 +173,7 @@ function updateView(viewModel, el) {
 
         if (el.nodeType == 1) {
             if (el.snRequire) {
-                if (typeof el.snRequire == 'string') {
-                    console.log(el.snRequire);
-
-                    seajs.use(el.snRequire, function (model) {
-                        el.snRequire = model;
-
-                        updateRequireView(viewModel, el);
-                    });
-                } else {
-                    updateRequireView(viewModel, el);
-                }
+                updateRequireView(viewModel, el);
             }
             setRefs(viewModel, el);
         }
