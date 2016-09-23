@@ -53,7 +53,7 @@
         </div>
     </div>
     <div sn-display="{!isStart||isLogin}">
-        <div class="main js_shop hm_tab_con" style="-webkit-transform:translate({bottomTab==0?'0px':'100%'},0px)" data-index="0">
+        <div class="main js_shop hm_tab_con" sn-style="-webkit-transform:translate({bottomTab==0?'0px':'100%'},0px)" data-index="0">
             <div class="hm_shop">
                 <div class="sp_all_cates">
                     <div ref="cates">
@@ -106,15 +106,15 @@
             </div>
         </div>
 
-        <div class="main" style="-webkit-transform:translate({bottomTab==1?'0px':'100%'},0px)">
+        <div class="main" sn-style="-webkit-transform:translate({bottomTab==1?'0px':'100%'},0px)">
             <div class="baiduMap" sn-html="{baiduMap}">
             </div>
         </div>
 
-        <div ref="discovery" class="main" style="-webkit-transform:translate({bottomTab==2?'0px':'100%'},0px)">
+        <div ref="discovery" class="main" sn-style="-webkit-transform:translate({bottomTab==2?'0px':'100%'},0px)">
 
         </div>
-        <div ref="messages" class="main hm_msg" style="-webkit-transform:translate({bottomTab==3?'0px':'100%'},0px)">
+        <div ref="messages" class="main hm_msg" sn-style="-webkit-transform:translate({bottomTab==3?'0px':'100%'},0px)">
             <div style="overflow:hidden">
                 <div class="hm_msg_list" data-forward="/messages">通知<i sn-display="{msg_count!=0}">{msg_count}</i></div>
                 <div class="hm_msg_service" data-forward="/news/100">联系客服</div>
@@ -129,42 +129,45 @@
                     <div class="ft" data-forward="/discovery/list/0">查看更多态度>></div>
                 </div>
             </div>
-
         </div>
-        <div class="main" style="-webkit-transform:translate({bottomTab==4?'0px':'100%'},0px)" data-index="3">
-            <div class="hm_user__base">
-                <div class="avatars"><img sn-src="{user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
-                <div class="name">{user.UserName}</div>
-                <div class="addr" data-forward="/address">收货地址<em class="icon_arrow"></em></div>
-            </div>
-            <div class="hm_user__card">
-                <div class="icon-abs hd bottom_border"><span class="level">{vipName}</span>
-                    <span class="energy">活力值<em>{util.formatMoney(energy)}</em></span>
-                </div>
-                <div class="bottom_border">
-                    <div class="barcode" sn-html="{barcode}">
+        <div class="hm_user" sn-style="-webkit-transform:translate({bottomTab==4?'0px':'100%'},0px)">
+            <div class="main" data-index="3">
+                <div class="hm_user__body">
+                    <div class="hm_user__base">
+                        <div class="avatars"><img sn-src="{user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
+                        <div class="name">{user.UserName}</div>
+                        <div class="addr" data-forward="/address">收货地址<em class="icon_arrow"></em></div>
                     </div>
-                </div>
-                <div class="rights" data-forward="/news/201">会员权益<em class="icon_arrow"></em></div>
-            </div>
-            <div class="hm_user__order top_bottom_line">
-                <div class="user-order bottom_border">我的订单<span class="allorder" data-forward="/myorder">查看全部订单</span></div>
-                <ul class="ordercates">
-                    <li class="user-unpay" data-forward="/myorder?state=1"><i>12</i><span>待付款</span></li>
-                    <li class="user-unsend" data-forward="/myorder?state=2"><i>1</i><span>待发货</span></li>
-                    <li class="user-send" data-forward="/myorder?state=3"><span>配送中</span></li>
-                    <li class="user-complete" data-forward="/myorder?state=4"><span>已完成</span></li>
-                </ul>
-            </div>
+                    <div class="hm_user__card">
+                        <div class="icon-abs hd bottom_border"><span class="level">{vipName}</span>
+                            <span class="energy">活力值<em>{util.formatMoney(energy)}</em></span>
+                        </div>
+                        <div class="bottom_border">
+                            <div class="barcode" sn-html="{barcode}">
+                            </div>
+                        </div>
+                        <div class="rights" data-forward="/news/201">会员权益<em class="icon_arrow"></em></div>
+                    </div>
+                    <div class="hm_user__order top_bottom_line">
+                        <div class="user-order bottom_border">我的订单<span class="allorder" data-forward="/myorder">查看全部订单</span></div>
+                        <ul class="ordercates">
+                            <li class="user-unpay" data-forward="/myorder?state=1"><i>12</i><span>待付款</span></li>
+                            <li class="user-unsend" data-forward="/myorder?state=2"><i>1</i><span>待发货</span></li>
+                            <li class="user-send" data-forward="/myorder?state=3"><span>配送中</span></li>
+                            <li class="user-complete" data-forward="/myorder?state=4"><span>已完成</span></li>
+                        </ul>
+                    </div>
 
-            <ul class="hm_user__other top_bottom_line">
-                <li class="user-gift bottom_border" data-forward="/month">我的月礼 <em class="note">{user.FreeMonths}个月</em></li>
-                <li class="user-card bottom_border" data-forward="/coupon">我的卡券 <em class="note">{user.FreeCouponsCount+user.CouponsCount}</em></li>
-                <li class="user-money" data-forward="/mypoint">积分钱包 <em class="note">{user.Points}积分</em></li>
-            </ul>
-            <ul class="hm_user__other top_bottom_line">
-                <li class="user-group" data-forward="/steward">爱管家记录 <em class="note">{user.StewardNum}条</em></li>
-            </ul>
+                    <ul class="hm_user__other top_bottom_line">
+                        <li class="user-gift bottom_border" data-forward="/month">我的月礼 <em class="note">{user.FreeMonths}个月</em></li>
+                        <li class="user-card bottom_border" data-forward="/coupon">我的卡券 <em class="note">{user.FreeCouponsCount+user.CouponsCount}</em></li>
+                        <li class="user-money" data-forward="/mypoint">积分钱包 <em class="note">{user.Points}积分</em></li>
+                    </ul>
+                    <ul class="hm_user__other top_bottom_line">
+                        <li class="user-group" data-forward="/steward">爱管家记录 <em class="note">{user.StewardNum}条</em></li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="main js_offline" sn-display="{isOffline}">
             <div class="home_offline">

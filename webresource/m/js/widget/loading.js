@@ -1,7 +1,6 @@
 ﻿define(function(require, exports, module) {
     var $ = require('$'),
         _ = require('util'),
-        app = require('bridge'),
         $empty = $();
 
     var extend = ['$el', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'complete', 'pageIndex', 'pageSize', 'append', 'checkData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];

@@ -20,8 +20,7 @@
         </ul>
         <ul class="sp_all_catelist_subcate">
             <li class="sp_all_catelist_subcate_item{currentSearchId==cate.PCG_ID?' curr':''}" sn-repeat="cate in currentSub.children" sn-tap="this.requestProd(cate.PCG_ID)">
-                <p><img alt="{cate.PCG_NAME}" sn-src="{cate.PCG_IMG_URL}" /></a>
-                </p>
+                <p><img alt="{cate.PCG_NAME}" sn-src="{cate.PCG_IMG_URL}" /></p>
                 <span>{cate.PCG_NAME}</span>
             </li>
             <li class="sp_all_catelist_subcate_item more" sn-tap="this.requestProd(currentSub.PCG_ID)">

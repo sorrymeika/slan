@@ -6,6 +6,9 @@ var model = require('core/model');
 var model2 = require('core/model2');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
+var Tab = require('widget/tab');
+
+console.log(Tab);
 
 module.exports = Activity.extend({
     events: {

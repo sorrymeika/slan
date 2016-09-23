@@ -141,10 +141,6 @@ var Touch = Event.mixin(function (el, options) {
                 self.y = y < self.minY ? self.minY + (y - self.minY) / 2 : y > self.maxY ? self.maxY + (y - self.maxY) / 2 : y;
             }
 
-            self.trigger(new Event('move', {
-                currentTarget: e.currentTarget
-            }));
-
             self.isTouchMoved = true;
 
             self.isMoveLeft = self.pointX - point.pageX > 0 ? true : self.pointX == point.pageX ? self.isMoveLeft : false;
@@ -160,6 +156,10 @@ var Touch = Event.mixin(function (el, options) {
             self.pointY = point.pageY;
 
             self.timestamp = Date.now();
+
+            self.trigger(new Event('move', {
+                currentTarget: e.currentTarget
+            }));
 
             return false;
         },
@@ -364,6 +364,9 @@ var Touch = Event.mixin(function (el, options) {
                 self.y = y;
 
                 self.trigger('move');
+
+                callback && callback();
+
             } else {
                 var currentX = self.x;
                 var currentY = self.y;

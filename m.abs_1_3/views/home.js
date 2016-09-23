@@ -401,7 +401,6 @@ module.exports = Activity.extend({
         Scroll.bind(this.$('.main:not(.js_shop)'));
 
         this.scroll = Scroll.bind(this.$('.js_shop'), {
-            useScroll: true,
             refresh: function (resolve, reject) {
                 self.shopApi.load(function () {
                     resolve();

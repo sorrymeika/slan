@@ -6,19 +6,6 @@
 header { background: $color; height: 44px; line-height: 44px; }
 .has_status_bar header { border-top-color: $color; }
 
-.refreshing { background: transparent; color: #333; }
-
-.checkboxlist li:before { @include icon(-240px,-30px); vertical-align: middle; -webkit-transform: scale(.8); }
-.checkboxlist .checked:before { background-position: -210px -30px; }
-
-.footer { position: absolute; bottom: 0px; width: 100%; height: 50px; border-top: 0; background-color: #fff; z-index: 1000; display: -webkit-box; text-align: center; color: #666; -webkit-user-select: none; -webkit-touch-callout: none; }
-.footer_line { display: block; content: ''; position: absolute; width: 100%; bottom: 50px; left: 0; right: 0; border-top: 1px solid #ccc; -webkit-transform: scaleY(.5); z-index: 998; }
-.footer li { position: relative; width: 0px; -webkit-box-flex: 1; font-size: 10px; padding-top: 4px; }
-.footer li i { position: absolute; right: 25%; top: 5px; position: absolute; border-radius: 50%; background: $color; color: #fff; text-align: center; width: 12px; height: 12px; font-size: 10px; line-height: 12px; }
-.footer li.curr { color: $color; }
-.footer li em { display: block; margin: 5px auto 3px auto; width: 23px; height: 20px; }
-
-.btn { background: $color; border-radius: 4px; }
 .has_status_bar header.header_trans { border-top-color: transparent; }
 .header_trans { background: transparent; }
 .header_trans .head_back, .header_trans .head_call, .header_trans .head_share { border-radius: 50%; background-color: rgba(0, 0, 0, .8); width: 36px; height: 36px; margin: 5px 0 0 5px; }
@@ -54,9 +41,31 @@ header { background: $color; height: 44px; line-height: 44px; }
 .head_share { width: 44px; height: 44px; }
 .head_share:before { @extend .icon; background-position: -150px -150px; margin: 5px 0px 0px 6px; }
 
+.white_header { background: #fff; color: #000; }
+.white_header .head_back:before { background: #fff; @include arrow_left(#000); left: -6px; }
+.has_status_bar .white_header { border-top-color: #fff; }
+
+.refreshing { background: transparent; color: #333; }
+
+.checkboxlist li:before { @include icon(-240px,-30px); vertical-align: middle; -webkit-transform: scale(.8); }
+.checkboxlist .checked:before { background-position: -210px -30px; }
+
+.footer { position: absolute; bottom: 0px; width: 100%; height: 50px; border-top: 0; background-color: #fff; z-index: 1000; display: -webkit-box; text-align: center; color: #666; -webkit-user-select: none; -webkit-touch-callout: none; }
+.footer_line { display: block; content: ''; position: absolute; width: 100%; bottom: 50px; left: 0; right: 0; border-top: 1px solid #ccc; -webkit-transform: scaleY(.5); z-index: 998; }
+.footer li { position: relative; width: 0px; -webkit-box-flex: 1; font-size: 10px; padding-top: 4px; }
+.footer li i { position: absolute; right: 25%; top: 5px; position: absolute; border-radius: 50%; background: $color; color: #fff; text-align: center; width: 12px; height: 12px; font-size: 10px; line-height: 12px; }
+.footer li.curr { color: $color; }
+.footer li em { display: block; margin: 5px auto 3px auto; width: 23px; height: 20px; }
+
+.btn { background: $color; border-radius: 4px; }
+
+.cp_tab__cursor { background-color: $color; }
+.cp_tab__head_item.curr { color: $color; }
+
 .main { background: #eeefef; padding-top: .1px; top: 44px; }
 .btn_large { height: 40px; line-height: 40px; background-color: $color; font-size: 16px; }
 .btn_middle { background-color: $color; height: 35px; line-height: 35px; display: block; border-radius: 4px; color: #fff; padding: 0 5px; }
+
 .form { margin-top: 10px; padding-top: .1px; }
 .form li { margin: 15px 10% 0 10%; display: -webkit-box; }
 .form li input { display: block; height: 40px; border: 0px; border-radius: 5px; padding-left: 10px; font-size: 14px; }
@@ -66,6 +75,7 @@ header { background: $color; height: 44px; line-height: 44px; }
 .form_mobile:before { content: '+86'; padding-left: 9px; line-height: 40px; position: absolute; }
 .form .form_mobile input { padding-left: 40px; }
 .form .btn_middle { height: 40px; line-height: 40px; font-size: 14px; }
+
 .login_form input { -webkit-box-flex: 1; }
 .login_btn { margin-top: 20px; text-align: center; }
 .login_btn a { color: $color; }
@@ -83,7 +93,7 @@ header { background: $color; height: 44px; line-height: 44px; }
 .home_text h4 { font-size: .9em; display: inline-block; border: 1px solid #fff; border-radius: 4px; padding: 4px; margin-top: 8px; }
 
 /*首页*/
-.home .main { bottom: 50px; padding-bottom: 10px; }
+.home .main { bottom: 50px; padding-bottom: 0px; }
 .home .main.isnotlogin { bottom: 0; }
 
 .hm_guide {
@@ -388,6 +398,11 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .barcode i, .barcode em { height: 100%; display: block; width: .02rem; }
 .barcode i { background: #000; }
 
+.hm_user { position: absolute; left: 0; right: 0; @extend .main; }
+.hm_user .main { top: 0; bottom: 0; background: rgba(0,0,0,0); }
+.hm_user:before { content: ''; display: block; background: $color; position: absolute; z-index: 0; top: 0px; right: 0; left: 0; height: 100px; }
+.hm_user__body { background: #eeefef; padding-bottom: 10px; position: relative; z-index: 2; overflow: visible; }
+
 .hm_user__base { background: $color; text-align: center; padding-bottom: 8px; }
 .hm_user__base .avatars img { width: 57px; height: 57px; border-radius: 50%; }
 .hm_user__base .name { color: #fff; font-size: 16px; height: 16px; margin-top: 5px; }
@@ -417,7 +432,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .hm_user__other li { height: 40px; line-height: 40px; background-color: #fff; overflow: hidden; margin-left: 10px; font-size: 14px; color: #000; font-weight: bold; }
 .hm_user__other li:before { margin-right: 5px; vertical-align: -7px; }
 .hm_user__other .note { color: #999; float: right; margin-right: 10px; margin-top: 2px; font-size: 12px; font-weight: normal; }
-.hm_user__other .note:after { content: ''; @include arrow(#999,6px); top: -2px; }
+.hm_user__other .note:after { content: ''; @include arrow(#999,6px); top: 0px; vertical-align: 0px; }
 
 //设置
 .uc_setting__about .logo { text-align: center; width: 62px; height: 60px; margin: 15px auto 0 auto; background: $color; padding-top: 19px; }
@@ -467,18 +482,27 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .mycard_con li.price50 { background: #fc3; }
 .mycard_con li.price10 { background: $color; }
 .mycard_con li.dis { background: #ccc; }
-.mypoint .curr { text-align: center; margin-top: 20px; }
-.mypoint .curr b { font-size: 2.4em; color: $color; vertical-align: -3px; }
-.mypoint .notice { text-align: center; font-size: .7em; margin-top: 5px; }
-.mypoint .notice span { color: $color; }
-.mypoint .hd { margin-top: 6px; font-size: 1em; margin: 20px 0 0 6px; }
-.mypoint_list { margin-top: 6px; background: #fff; }
-.mypoint_list li { padding: 12px 6px 10px 6px; position: relative; border-bottom: 1px solid #ccc; margin: 0 5px; }
-.mypoint_list .from { margin-top: 4px; font-size: .9em; }
-.mypoint_list .date { font-size: .7em; color: #999; margin-top: 4px; }
-.mypoint_list .points { position: absolute; right: 5px; top: 50%; margin-top: -8px; color: $color; }
-.mypoint_list .points.minus { color: #000; }
-.myorder { }
+
+
+//积分
+.uc_point__overview { height: 140px; background-color: $color; color: #fff; text-align: center; padding-top: 1px; }
+.uc_point__overview .haspoints { margin-top: 10px; }
+.uc_point__overview .haspoints dt { font-size: 14px; font-weight: bold; }
+.uc_point__overview .haspoints dd { font-size: 34px; margin-top: 2px; }
+.uc_point__overview .note { margin-top: 4px; font-size: 12px; }
+.uc_point__data .cp_tab { top: 140px; }
+.uc_point__list { background: #fff; }
+.uc_point__list li { padding: 12px 6px 10px 6px; position: relative; margin: 0 5px; height: 80px; }
+.uc_point__list li:last-child { background: #fff; }
+.uc_point__list .from { margin-top: 17px; }
+.uc_point__list .points { position: absolute; right: 10px; top: 20px; color: $color; }
+.uc_point__list .date { position: absolute; right: 10px; top: 45px; color: #999; font-size: 14px; }
+.uc_point__list .minus { color: #39B54A; }
+
+.uc_point__nodata { text-align: center; }
+.uc_point__nodata .l-money { margin-top: 1.2rem; margin-bottom: 15px; }
+.uc_point__nodata .btn_l { margin-top: 30px; }
+
 .has_status_bar .myorder_hd { top: 64px; }
 .myorder_hd { display: -webkit-box; padding-top: 0px; background: #eeefef; text-align: center; font-size: .9em; position: fixed; width: 100%; top: 44px; left: 0px; z-index: 1000; }
 .myorder_hd li { -webkit-box-flex: 1; width: 0px; background: #eeefef; color: #666; height: 36px; line-height: 36px; font-size: .9em; }

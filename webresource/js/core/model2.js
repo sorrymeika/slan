@@ -19,7 +19,7 @@ var ModelEvents = {
     focus: 'focus',
     blur: 'blur'
 };
-var GlobalVariables = ['this', '$', 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
+var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
@@ -113,6 +113,54 @@ function eachElement(el, fn) {
     }
 }
 
+function setRefs(viewModel, el) {
+    var ref = el.getAttribute('ref');
+    var refs;
+
+    if (ref) {
+        refs = viewModel.refs[ref];
+
+        if (!refs) {
+            viewModel.refs[ref] = el;
+
+        } else if (refs.nodeType) {
+            viewModel.refs[ref] = [refs, el];
+
+        } else {
+            refs.push(el);
+        }
+    }
+}
+
+function updateRequireView(viewModel, el) {
+    var data = viewModel.fns[el.getAttribute('sn-data')].call(viewModel, viewModel.formatData(el));
+    var instance
+
+    if (el.snRequireInstance) {
+        instance = el.snRequireInstance;
+        instance.set(data)
+
+    } else {
+        var children = [];
+        var node;
+        for (var i = 0, j = el.childNodes.length - 1; i < j; i++) {
+            node = el.childNodes[i];
+
+            if (node.nodeType !== 3) {
+                children.push(node);
+                node.snViewModel = viewModel;
+                viewModel.$el.push(node);
+            }
+        }
+
+        el.snRequireInstance = instance = new el.snRequire(data, children);
+
+        instance.$el.appendTo(el);
+
+        console.log(instance.$el);
+    }
+}
+
 function updateView(viewModel, el) {
     if (el.nodeType == 8 && el.snRepeatSource) {
         viewModel.updateRepeatElement(el);
@@ -124,22 +172,20 @@ function updateView(viewModel, el) {
         viewModel.updateElement(el);
 
         if (el.nodeType == 1) {
-            var ref = el.getAttribute('ref');
-            var refs;
+            if (el.snRequire) {
+                if (typeof el.snRequire == 'string') {
+                    console.log(el.snRequire);
 
-            if (ref) {
-                refs = viewModel.refs[ref];
+                    seajs.use(el.snRequire, function (model) {
+                        el.snRequire = model;
 
-                if (!refs) {
-                    viewModel.refs[ref] = el;
-
-                } else if (refs.nodeType) {
-                    viewModel.refs[ref] = [refs, el];
-
+                        updateRequireView(viewModel, el);
+                    });
                 } else {
-                    refs.push(el);
+                    updateRequireView(viewModel, el);
                 }
             }
+            setRefs(viewModel, el);
         }
 
         if (el.snIf && !el.parentNode) {
@@ -643,11 +689,13 @@ RepeatSource.prototype.appendChild = function (child) {
 
 var viewModelList = [];
 
-function ViewModel(el, data) {
+function ViewModel(el, data, children) {
     if (el !== false) viewModelList.push(this);
 
-    if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
-        data = el, el = this.el;
+    if ((typeof data === 'undefined' || $.isArray(data)) && (el == undefined || $.isPlainObject(el)))
+        children = data, data = el, el = this.el;
+
+    this.children = [].concat(children);
 
     this.updateView = this.updateView.bind(this);
     this._handleEvent = this._handleEvent.bind(this);
@@ -655,7 +703,7 @@ function ViewModel(el, data) {
     this.cid = util.guid();
     this.snModelKey = 'sn-' + this.cid + 'model';
 
-    this.data = $.extend({}, data);
+    this.data = $.extend({}, this.defaultData, data);
     this.model = {};
     this.repeats = {};
     this._expressions = {
@@ -669,7 +717,7 @@ function ViewModel(el, data) {
 
     this.set(this.data);
 
-    this.initialize.call(this, el, data);
+    this.initialize.call(this, data);
 }
 
 ViewModel.prototype = Object.assign(Object.create(ModelProto), {
@@ -769,13 +817,17 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     attr = 'src'
                 }
 
-                if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr.indexOf('sn-') != 0) {
+                if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr == "sn-data" || attr.indexOf('sn-') != 0) {
                     if (attr.indexOf('sn-') == 0 && val.indexOf("{") == -1 && val.indexOf("}") == -1) {
                         val = '{' + val + '}';
                     }
                     var fid = self.getFunctionId(val);
 
-                    if (fid) {
+                    if (attr == "sn-data" && fid) {
+                        el.setAttribute(attr, fid.id);
+
+                    } else if (fid) {
+
                         (el.snBinding || (el.snBinding = {}))[attr] = fid.id;
                         el.snIsGlobal = fid.isGlobal;
                     } else if (attr == "ref") {
@@ -786,6 +838,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 } else if (attr == 'sn-model') {
                     el.removeAttribute(attr);
                     el.setAttribute(self.snModelKey, val);
+
+                } else if (attr == 'sn-require') {
+                    el.snRequire = require(val) || val;
 
                 } else {
                     //处理事件绑定
@@ -865,7 +920,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             switch (attr) {
                 case 'textContent':
-                    el.textContent = val;
+                    if (typeof val == 'object' && val.nodeType) {
+                        $(val).insertBefore(el);
+                        console.log(val, el)
+
+                    } else
+                        el.textContent = val;
                     break;
                 case 'value':
                     if (el.tagName == 'INPUT' || el.tagName == 'SELECT' || el.tagName == 'TEXTAREA') {
@@ -903,8 +963,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                     break;
                 case 'sn-style':
-                case 'style':
                     el.style.cssText += val;
+                    break;
+                case 'style':
+                    el.style.cssText = val;
                     break;
                 case 'checked':
                 case 'selected':
@@ -1185,18 +1247,40 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             node = this.$el.find(node);
 
             if (!node.length)
-                throw new Error('referenceNode must in model');
+                throw new Error('is not own node');
 
         } else {
 
             this.$el.each(function () {
                 if (!$.contains(this, node))
-                    throw new Error('referenceNode must in model');
+                    throw new Error('is not own node');
             });
         }
         return node;
     },
-    insertBefore: function (newNode, referenceNode) {
+
+    isOwnNode: function (node) {
+        if (typeof node == 'string') {
+            return !this.$el.find(node).length;
+
+        } else {
+            var flag = true;
+            this.$el.each(function () {
+                if (!$.contains(this, node)) return false;
+            });
+            return flag;
+        }
+    },
+
+    insertBefore: function (ownNode, referenceNode) {
+        ownNode = this._checkOwnNode(ownNode);
+
+        ownNode.snViewModel = this;
+
+        return ownNode.insertBefore(referenceNode);
+    },
+
+    before: function (newNode, referenceNode) {
 
         referenceNode = this._checkOwnNode(referenceNode);
 
@@ -1204,21 +1288,21 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             .insertBefore(referenceNode);
     },
 
-    insertAfter: function (newNode, referenceNode) {
+    after: function (newNode, referenceNode) {
         referenceNode = this._checkOwnNode(referenceNode);
 
         return this._bindNewNode(newNode)
             .insertAfter(referenceNode);
     },
 
-    appendTo: function (newNode, parentNode) {
+    append: function (newNode, parentNode) {
         parentNode = this._checkOwnNode(parentNode);
 
         return this._bindNewNode(newNode)
             .appendTo(parentNode);
     },
 
-    prependTo: function (newNode, parentNode) {
+    prepend: function (newNode, parentNode) {
         parentNode = this._checkOwnNode(parentNode);
 
         return this._bindNewNode(newNode)
