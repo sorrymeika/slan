@@ -12,7 +12,21 @@
             <div class="note">您在ABS的每次消费，均可获得会员积分。<br> 会员积分可直接抵扣现金使用。（100积分＝1元）
             </div>
         </div>
-        <div class="uc_point__data" ref="data">
+        <div class="uc_point__data" sn-require="widget/tab" ref="tab" sn-data="{{items:['收入','支出']}}">
+            <ul class="uc_point__list">
+                <li sn-repeat="item,i in data|filter:item.HPT_POINT_AMOUNT>0" class="bottom_border">
+                    <p class="from" sn-html="{item.HPT_PIT_ID==1?item.CNL_DESC:item.POT_DESC}"></p>
+                    <p class="date" sn-html="{util.formatDate(item.HPT_DT,'yyyy-MM-dd')}"></p>
+                    <p class="points" sn-html="{item.HPT_POINT_AMOUNT>0?'+'+Math.round(item.HPT_POINT_AMOUNT):Math.round(item.HPT_POINT_AMOUNT)}"></p>
+                </li>
+            </ul>
+            <ul class="uc_point__list">
+                <li sn-repeat="item in data|filter:item.HPT_POINT_AMOUNT<0" class="bottom_border">
+                    <p class="from" sn-html="{item.HPT_PIT_ID==1?item.CNL_DESC:item.POT_DESC}"></p>
+                    <p class="date" sn-html="{util.formatDate(item.HPT_DT,'yyyy-MM-dd')}"></p>
+                    <p class="points minus" sn-html="{Math.round(item.HPT_POINT_AMOUNT)}"></p>
+                </li>
+            </ul>
         </div>
     </div>
     <div class="uc_point__nodata" sn-display="{points==0}" style="display:none">
@@ -21,22 +35,3 @@
         <button class="btn_l" data-forward="/?tab=1">去逛逛吧</button>
     </div>
 </div>
-
-@helper income() {
-<ul class="uc_point__list">
-    <li sn-repeat="item,i in data|filter:item.HPT_POINT_AMOUNT>0" class="bottom_border">
-        <p class="from" sn-html="{item.HPT_PIT_ID==1?item.CNL_DESC:item.POT_DESC}"></p>
-        <p class="date" sn-html="{util.formatDate(item.HPT_DT,'yyyy-MM-dd')}"></p>
-        <p class="points" sn-html="{item.HPT_POINT_AMOUNT>0?'+'+Math.round(item.HPT_POINT_AMOUNT):Math.round(item.HPT_POINT_AMOUNT)}"></p>
-    </li>
-</ul>
-
-} @helper expense() {
-<ul class="uc_point__list">
-    <li sn-repeat="item in data|filter:item.HPT_POINT_AMOUNT<0" class="bottom_border">
-        <p class="from" sn-html="{item.HPT_PIT_ID==1?item.CNL_DESC:item.POT_DESC}"></p>
-        <p class="date" sn-html="{util.formatDate(item.HPT_DT,'yyyy-MM-dd')}"></p>
-        <p class="points minus" sn-html="{Math.round(item.HPT_POINT_AMOUNT)}"></p>
-    </li>
-</ul>
-}

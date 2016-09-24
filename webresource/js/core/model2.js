@@ -114,20 +114,20 @@ function eachElement(el, fn) {
 }
 
 function setRefs(viewModel, el) {
-    var ref = el.getAttribute('ref');
-    var refs;
+    var refName = el.getAttribute('ref');
 
-    if (ref) {
-        refs = viewModel.refs[ref];
+    if (refName) {
+        var ref = el.snRequireInstance || el;
+        var refs = viewModel.refs[refName];
 
         if (!refs) {
-            viewModel.refs[ref] = el;
+            viewModel.refs[refName] = ref;
 
         } else if (refs.nodeType) {
-            viewModel.refs[ref] = [refs, el];
+            viewModel.refs[refName] = [refs, ref];
 
         } else {
-            refs.push(el);
+            refs.push(ref);
         }
     }
 }
@@ -156,8 +156,6 @@ function updateRequireView(viewModel, el) {
         el.snRequireInstance = instance = new el.snRequire(data, children);
 
         instance.$el.appendTo(el);
-
-        console.log(instance.$el);
     }
 }
 

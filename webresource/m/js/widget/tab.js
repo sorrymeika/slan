@@ -40,8 +40,6 @@ var Tab = Model.extend({
             this.touch.maxX = self.refs.content.offsetWidth - this.wapperW;
         })
 
-        console.log(self.refs.body)
-
         this.touch = new Touch(this.refs.body, {
             enableVertical: false,
             enableHorizontal: true,

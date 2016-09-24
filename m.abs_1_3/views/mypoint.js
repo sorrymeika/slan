@@ -18,32 +18,19 @@ define(function (require, exports, module) {
         onCreate: function () {
             var self = this;
 
-            var tIncome = this.$('.js_income').remove();
-
-            var tab = new Tab({
-                items: ["收入", "支出"]
-
-            }).next(function () {
-                console.log(this.refs.items);
-
-                tab.append(self.razor.helpers.income(), tab.refs.items[0]);
-                tab.append(self.razor.helpers.expense(), tab.refs.items[1]);
-            });
-
-            this.tab = tab;
-
             this.model = new model.ViewModel(this.$el, {
                 back: '/',
                 title: '积分钱包',
                 points: 0.001,
-                tab: tab,
                 open: function () {
                     bridge.openInApp(self.user.OpenUrl || 'http://m.abs.cn');
                 }
+            }).next(function () {
+                console.log(this.refs.tab)
+
             });
             Scroll.bind(this.model.refs.main);
 
-            tab.$el.appendTo(this.model.refs.data);
         },
 
         onShow: function () {
@@ -64,11 +51,9 @@ define(function (require, exports, module) {
                     $el: this.$el,
                     success: function (res) {
                         self.model.set({
-                            points: res.points
-                        })
-                        self.tab.set({
+                            points: res.points,
                             data: res.data
-                        });
+                        })
                     }
                 });
                 this.loading.load();
