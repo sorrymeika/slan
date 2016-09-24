@@ -1072,7 +1072,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                         clone.snData = snData;
                         clone.snIsGlobal = node.snIsGlobal;
-                        clone.snViewModel = node.snIsGlobal;
 
                         if (node.snRepeatSource) {
                             clone.snRepeatSource = node.snRepeatSource;

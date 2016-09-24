@@ -8,8 +8,6 @@ var Scroll = require('widget/scroll');
 var animation = require('animation');
 var Tab = require('widget/tab');
 
-console.log(Tab);
-
 module.exports = Activity.extend({
     events: {
         'tap .js_bind:not(.disabled)': function () {
