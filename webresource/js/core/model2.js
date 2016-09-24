@@ -209,7 +209,7 @@ function insertElementAfter(cursorElem, elem) {
 }
 
 function closestElement(el, fn) {
-    for (var parentNode = el.parentNode; parentNode && !parentNode.snViewModel; parentNode = parentNode.parentNode) {
+    for (var parentNode = el.parentNode; parentNode; parentNode = parentNode.parentNode) {
         if (fn(parentNode, el)) {
             return parentNode;
         }
@@ -911,8 +911,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             switch (attr) {
                 case 'textContent':
                     if (typeof val == 'object' && val.nodeType) {
-                        $(val).insertBefore(el);
-                        console.log(val, el)
+                        if (val.nextSibling != el) {
+                            $(val).insertBefore(el);
+                        }
 
                     } else
                         el.textContent = val;
@@ -1048,7 +1049,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                 if (repeatSource.parent) {
                     closestElement(el, function (parentNode) {
-                        if (parentNode.snRepeatSource && parentNode.snData) {
+                        if (parentNode.snRepeatSource == repeatSource.parent && parentNode.snData) {
                             Object.assign(snData, parentNode.snData);
                             return true;
                         }
@@ -1071,6 +1072,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                         clone.snData = snData;
                         clone.snIsGlobal = node.snIsGlobal;
+                        clone.snViewModel = node.snIsGlobal;
 
                         if (node.snRepeatSource) {
                             clone.snRepeatSource = node.snRepeatSource;
