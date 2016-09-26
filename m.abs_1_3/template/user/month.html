@@ -8,7 +8,7 @@
         <div class="canget">
             <div class="left">您可领取的礼品 <span>您还可领取<em>{user.FreeMonths}</em>/{user.TotalMonths}</span></div>
             <div class="uc_month__list">
-                <div class="item" sn-repeat="item in products">
+                <div class="item" sn-repeat="item in list">
                     <p class="img">
                         <span class="date">{data.Year}年{data.Month}月</span>
                         <img sn-src="{item.WPP_LIST_PIC}">
@@ -16,7 +16,7 @@
                     <p class="con">
                         <span class="name">{item.PRD_NAME}</span>
                         <em class="price">￥{item.PRD_PRICE}</em>
-                        <button class="btn_m">立即领取</button>
+                        <button class="btn_m" sn-tap="this.getGift(item)">立即领取</button>
                     </p>
                 </div>
                 <div class="next_month l-gift_white-rem">

@@ -188,6 +188,23 @@ var Util = {
     },
     validateMobile: function (str) {
         return /^1[0-9]{10}$/.test(str)
+    },
+
+    convertTo26: function (code) {
+        var result = 0;
+        for (var i = code.length - 1; i >= 0; i--) {
+            result = (code.charCodeAt(code.length - 1 - i) - 64) * Math.pow(26, i) + result;
+        }
+        return result
+    },
+
+    convertFrom26: function (num) {
+        var result = "";
+        while (num) {
+            result = String.fromCharCode(--num % 26 + 65) + result
+            num = Math.floor(num / 26)
+        }
+        return result
     }
 };
 

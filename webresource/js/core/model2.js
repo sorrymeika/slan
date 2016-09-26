@@ -27,7 +27,7 @@ var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
-var rthis = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
+var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
 
 var Filters = {
     contains: function (source, keywords) {
@@ -846,8 +846,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                         attr = "sn-" + self.cid + evt;
 
-                        if (rset.test(val) || rthis.test(val)) {
-                            var content = val.replace(rthis, function (match, $1, $2) {
+                        if (rset.test(val) || rfunc.test(val)) {
+                            var content = val.replace(rfunc, function (match, $1, $2) {
+
+                                if (/^(Math\.|encodeURIComponent\(|parseInt\()/.test($1)) {
+                                    return match;
+                                }
                                 return $1 + $2 + ($2 ? ',e)' : 'e)');
 
                             }).replace(rset, 'this._updateElementData(e.currentTarget,"$1",$2)');

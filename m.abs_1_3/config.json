@@ -17,6 +17,10 @@
             "models/user": null,
             "models/discovery": null,
             "models/category": null
+        },
+        "logical": {
+            "logical/product": null,
+            "logical/user": null
         }
     },
     "css": {

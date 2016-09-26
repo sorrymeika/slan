@@ -2,20 +2,17 @@
 var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
-var Slider = require('widget/slider');
 var Model = require('core/model2').Model;
 var Scroll = require('widget/scroll');
 var Toast = require('widget/toast');
 var Tab = require('widget/tab');
 
+var Size = require('components/size');
+
 var user = require('logical/user');
+var product = require('logical/product');
 
 return Activity.extend({
-    events: {
-        'tap .js_canget': function (e) {
-            this.forward('/news/month' + $(e.currentTarget).attr('data-id') + '?from=' + encodeURIComponent(this.route.url));
-        }
-    },
 
     loadUserInfo: function () {
         var self = this;
@@ -41,6 +38,58 @@ return Activity.extend({
         });
     },
 
+    getGift: function (item) {
+        var self = this;
+
+        this.size.set({
+            data: item
+
+        }).show();
+
+        product.getSizeByPrhId(item.PRH_ID, function (err, res) {
+
+            if (err) {
+                Toast.showToast(err.msg);
+                return;
+            }
+
+            var color = [];
+            var spec = [];
+            for (var i = 0, len = res.data.length; i < len; i++) {
+                var item = res.data[i];
+
+                if (util.indexOf(self.model.data.products, function (record) {
+                    return (record.PRD_ID == item.PRD_ID)
+                }) != -1) {
+                    if (color.indexOf(item.PRD_COLOR) == -1) {
+                        color.push(item.PRD_COLOR);
+                    }
+                    if (spec.indexOf(item.PRD_SPEC) == -1) {
+                        spec.push(item.PRD_SPEC);
+                    }
+                }
+
+            }
+
+            var data = self.size.data.data;
+            var item = util.first(res.data, function (item) {
+                return item.PRD_ID == data.PRD_ID;
+            });
+
+            self.size.set({
+                freid: self.route.data.id,
+                type: "month",
+                color: color,
+                spec: spec,
+                colorSpec: res.data,
+                data: item,
+                qty: 1
+            });
+
+        }, $('body'));
+
+    },
+
     onCreate: function () {
         var self = this;
         self.user = util.store('user');
@@ -50,9 +99,16 @@ return Activity.extend({
             back: this.swipeRightBackAction,
             user: self.user
         });
+
+        this.model.getGift = this.getGift.bind(this);
+
         Scroll.bind(this.model.refs.main);
 
         this.loadUserInfo();
+
+        this.size = new Size();
+
+        this.size.$el.appendTo($('body'));
     },
 
     onShow: function () {
@@ -68,11 +124,7 @@ return Activity.extend({
 
             model.set({
                 data: res.data,
-                hasNextMonthGift: res.hasNextMonthGift,
-                products: [{
-                    PRD_NAME:'test',
-                    PRD_PRICE: 99.9
-                }]
+                hasNextMonthGift: res.hasNextMonthGift
             })
 
             if (res.data.FRE_ID) {
@@ -82,7 +134,17 @@ return Activity.extend({
                         Toast.showToast(err.msg);
                         return;
                     }
+
+                    var result = [];
+                    for (var i = 0; i < res.data.length; i++) {
+                        if (util.indexOf(result, function (item) {
+                            return item.PRH_ID == res.data[i].PRH_ID;
+                        }) == -1) {
+                            result.push(res.data[i]);
+                        }
+                    }
                     model.set({
+                        list: result,
                         products: res.data
                     });
 

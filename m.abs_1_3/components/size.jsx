@@ -1,19 +1,19 @@
 var $ = require('$');
-var model = require('core/model');
+var Model = require('core/model2').Model;
 var api = require('models/api');
 var util = require('util');
 var Scroll = require('widget/scroll');
 var userModel = require('models/user');
 
-var Month = model.ViewModel.extend({
-	el: <div class="pd_size_wrap js_size {{isShowSize?'':'out'}}" style="display:none" sn-tap="this.tap()">
+var Month = Model.extend({
+	el: <div class="pd_size_wrap js_size {isShowSize?'':'out'}" style="display:none" sn-tap="this.tap()" sn-transition-end="this.transitionEnd()">
 		<div class="pd_size">
 			<div class="pd_size_close" sn-tap="isShowSize=false"></div>
 			<div class="base_info">
-				<div class="img"><img src="{{data.WPP_LIST_PIC||data.WPP_M_PIC}}" /></div>
+				<div class="img"><img sn-src="{data.WPP_LIST_PIC||data.WPP_M_PIC}" /></div>
 				<div class="info">
-					<h2 class="price">¥{{ specialPrice||data.PRD_PRICE }}</h2>
-					<div class="qty">库存{{ data.PRD_NUM }}件</div>
+					<h2 class="price">¥{ specialPrice || data.PRD_PRICE }</h2>
+					<div class="qty">库存{ data.PRD_NUM }件</div>
 					<p class="other">
 						<em>选择</em>
 						<em>尺码</em>
@@ -21,28 +21,28 @@ var Month = model.ViewModel.extend({
 					</p>
 				</div>
 			</div>
-			<div class="pd_size_con">
+			<div class="pd_size_con" ref="content">
 				<div class="pd_size_select">
 					<div class="hd">尺码</div>
 					<ul>
-						<li sn-repeat="item in spec" class="{{this.equal(data.PRD_SPEC,item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}}" sn-tap="this.setSpec(item)">{{ item.split('|')[0] }}</li>
+						<li sn-repeat="item in spec" class="{this.equal(data.PRD_SPEC,item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}" sn-tap="this.setSpec(item)">{ item.split('|')[0]}</li>
 					</ul>
 				</div>
 				<div class="pd_size_select">
 					<div class="hd">颜色分类</div>
 					<ul>
-						<li sn-repeat="item in color" class="{{data.PRD_COLOR==item?'curr':this.isInList(data.PRD_SPEC,item,colorSpec)?'':'disabled'}}" sn-tap="this.setColor(item)">{{ item }}</li>
+						<li sn-repeat="item in color" class="{data.PRD_COLOR==item?'curr':this.isInList(data.PRD_SPEC,item,colorSpec)?'':'disabled'}" sn-tap="this.setColor(item)">{ item }</li>
 					</ul>
 				</div>
 			</div>
 			<div class="pd_size_buy">
 				<p class="hd">购买数量</p>
-				<p class="qty"><em sn-tap="qty=Math.max(1,qty-1)">-</em>
-					<input type="text" class="qty" sn-model="qty" value="{{qty}}" />
-					<em sn-tap="qty=qty+1">+</em>
+				<p class="qty"><em sn-tap="qty=Math.max(1,parseInt(qty)-1)">-</em>
+					<input type="text" class="qty" sn-model="qty" value="{qty}" />
+					<em sn-tap="qty=parseInt(qty)+1">+</em>
 				</p>
 			</div>
-			<b class="btn_large btn_confirm{{data.PRD_NUM===0?' disabled':''}}" sn-tap="this.confirm()">{{ data.PRD_NUM === 0 ? '商品已售罄' : (btn || '确认') }}</b>
+			<b class="btn_large btn_confirm{data.PRD_NUM===0?' disabled':''}" ref="buy" sn-tap="this.confirm()">{ data.PRD_NUM === 0 ? '商品已售罄' : (btn || '确认') }</b>
 		</div>
 	</div>,
 
@@ -58,7 +58,7 @@ var Month = model.ViewModel.extend({
 		});
     },
 
-	setSpec: function (e, item) {
+	setSpec: function (item, e) {
 
         if ($(e.currentTarget).hasClass('disabled')) {
             return;
@@ -69,7 +69,7 @@ var Month = model.ViewModel.extend({
         this.onChange();
     },
 
-    setColor: function (e, item) {
+    setColor: function (item, e) {
         if ($(e.currentTarget).hasClass('disabled')) {
             return;
         }
@@ -158,17 +158,17 @@ var Month = model.ViewModel.extend({
 		}
 	},
 
+	transitionEnd: function () {
+		if (this.$el.hasClass('out')) {
+			this.$el.hide();
+		}
+	},
+
 	initialize: function () {
 		var self = this;
 		self.user = util.store('user');
 
-		Scroll.bind(self.$('.pd_size_con'));
-
-		self.listenTo(self.$el, $.fx.transitionEnd, function (e) {
-			if (self.$el.hasClass('out')) {
-				self.$el.hide();
-			}
-		});
+		Scroll.bind(self.refs.content);
 
 		self.cartAddAPI = new api.CartAddAPI({
 			$el: self.$el,
@@ -187,7 +187,7 @@ var Month = model.ViewModel.extend({
 						prd: self.get('data').PRD_ID
 					})
 				}
-				self.$('.js_buy').addClass('disabled');
+				$(self.refs.buy).addClass('disabled');
 			},
 			success: function (res) {
 				if (res.success) {
@@ -201,7 +201,7 @@ var Month = model.ViewModel.extend({
                 }
 			},
 			complete: function () {
-				self.$('.js_buy').removeClass('disabled');
+				$(self.refs.buy).removeClass('disabled');
 			}
 		});
 	}
