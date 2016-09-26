@@ -1,12 +1,12 @@
-var Loading = require('widget/loading');
+var Loader = require('widget/loader');
 
-var UpdateAPI = Loading.extend({
+var UpdateAPI = Loader.extend({
     url: '/app/getversion',
     baseUri: $('meta[name="update-api-base-url"]').attr('content')
 });
 exports.UpdateAPI = UpdateAPI;
 
-var API = Loading.extend({
+var API = Loader.extend({
     baseUri: $('meta[name="api-base-url"]').attr('content')
 });
 exports.API = API;
@@ -38,7 +38,7 @@ exports.CouponStatusAPI = API.extend({
     }
 });
 
-var ShopAPI = Loading.extend({
+var ShopAPI = Loader.extend({
     baseUri: $('meta[name="shop-api-base-url"]').attr('content'),
     KEY_PAGE: 'currentpage'
 });

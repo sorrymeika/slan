@@ -1,43 +1,37 @@
-﻿<header>
-    <div class="head_back" data-back="{{back}}"></div>
-    <div class="head_title">{{title}}</div>
+﻿<header class="white_header bottom_border">
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
+    <div class="head_right" data-forward="/news/coupon?from=/coupon">使用规则</div>
 </header>
 <div class="main uc_coupon">
-    <div class="uc_coupon_help" style="font-size:15px;margin-top:15px;" data-forward="/news/coupon?from=/coupon">使用规则</div>
-    <div class="uc_coupon_get">
-        <input type="text" sn-model="code" placeholder="请输入券码" />
-        <b class="btn" sn-tap="this.couponApi.load()">我要领券</b>
+    <div class="uc_coupon__get">
+        <input type="text" sn-if="puttingCoupon" sn-model="code" placeholder="请输入券码" />
+        <b class="btn" sn-tap="this.receiveCoupon()">{puttingCoupon?'兑换':'我要领券'}</b>
     </div>
-    <ul class="uc_coupon_hd">
-        <li class="{{isOverdue?'':'curr'}}" sn-tap="isOverdue=false">优惠券</li>
-        <li class="{{isOverdue?'curr':''}}" sn-tap="isOverdue=true">免邮卡</li>
-    </ul>
-    <ul class="uc_coupon_list js_not_overdue" sn-display="{{!isOverdue}}">
-        <li sn-repeat="item in data" class="{{(item.VCA_VCT_ID == 4 ? 'free' : item.VCA_VCT_ID == 2 ? 'vct2' : item.VCA_VCT_ID == 5 ? 'vct5' : '') + (item.IsOverdue ? ' dis' : '')}}"
-            sn-tap="this.goTo(item)">
-            <div class="price">{{util.currency(item.VCA_DEDUCT_AMOUNT,'')}}</div>
-            <div class="name">{{item.VCA_VCT_ID==4?'免邮卡':item.VCA_NAME}}</div>
-            <div class="time">有效期:{{item.IsOverdue?'已过期':(util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(item.CSV_END_DT,'yyyy/MM/dd'))}}</div>
-            <div class="share" sn-tap="this.share(item)">
-                <i>赠送</i>
+    <div class="uc_coupon__tip" sn-display="{isShowToast}" style="display:none">
+        <div class="{toastType=='error'?'icon-wrong-rem':'icon-right-rem'} icon_cm"></div>
+        <div class="msg">{toastMsg?toastMsg:'兑换成功'}</div>
+    </div>
+    <div class="uc_coupon__overdue" sn-if="closeNumber">您有{closeNumber}个优惠券即将到期</div>
+    <ul class="uc_coupon__list">
+        <li sn-repeat="item in data" class="icon-couponline {(item.VCA_VCT_ID == 4 ? 'free' : '') + (item.IsOverdue ? ' dis' : '')}" sn-tap="this.detail(item)">
+            <div class="hd {item.VCA_VCT_ID == 4 ? 'l-free' : ''}">
+                <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT,'')}</p>
+                <p class="type" sn-if="item.VCA_VCT_ID!=4">{item.VCA_VCT_ID==4?'免邮卡':item.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
+            </div>
+            <div class="bd l-abs_card">
+                <p class="name">{item.VCA_VCT_ID==4?'免邮卡':(item.VCA_NAME+'，')}</p>
+                <p class="prd" sn-if="{item.PRD_NAME&&item.VCA_VCT_ID!=4}" sn-tap="this.goTo(item)">仅限“<span>{item.PRD_NAME}</span>”使用</p>
+                <p class="prd" sn-if="{!item.PRD_NAME&&item.VCA_VCT_ID!=4}">任意消费即可使用</p>
+                <p class="time">有效期:<br>{item.IsOverdue?'已过期':(util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(item.CSV_END_DT,'yyyy/MM/dd'))}</p>
             </div>
         </li>
     </ul>
-    <ul class="uc_coupon_list js_overdue" sn-display="{{isOverdue}}">
-        <li sn-repeat="item in data1" class="{{(item.VCA_VCT_ID == 4 ? 'free' : item.VCA_VCT_ID == 2 ? 'price10' : item.VCA_VCT_ID == 1 ? 'price50' : '') + (item.IsOverdue ? ' dis' : '')}}">
-            <div class="price">{{util.currency(item.VCA_DEDUCT_AMOUNT,'')}}</div>
-            <div class="name">{{item.VCA_VCT_ID==4?'免邮卡':item.VCA_NAME}}</div>
-            <div class="time">有效期:{{util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')}}-{{util.formatDate(item.CSV_END_DT,'yyyy/MM/dd')}}</div>
-            <div class="share" sn-tap="this.share(item)">
-                <i>赠送</i>
-            </div>
-        </li>
-    </ul>
-    <div class="my_nodata" sn-display="{{isOverdue&&!data1.length||!isOverdue&&!data.length}}">
+    <div class="my_nodata" sn-display="{!data.length}">
         <div class="icon"></div>
         <div class="text">您目前还没有卡券哦</div>
         <div class="btn" data-forward="/all?from=/coupon">去逛逛吧</div>
     </div>
 </div>
 
-<div class="coupon_tip" sn-display="{{showTipStep==2}}"></div>
+<div class="coupon_tip" sn-if="{showTipStep==2}"></div>

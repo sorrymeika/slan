@@ -6,7 +6,7 @@
         bridge = require('bridge'),
         model = require('core/model'),
         Scroll = require('../widget/scroll');
-    var Loading = require('../widget/loading');
+    var Loading = require('../widget/loader');
 
     return Activity.extend({
         toggleAnim: 'menu',

@@ -101,16 +101,13 @@ var Tab = Model.extend({
         var self = this;
         var index = page >= this.data.items.length ? 0 : page < 0 ? this.data.items.length - 1 : page;
 
-        if (self.data.index != index) {
-
-            self.touch.scrollTo(self.refs.body.offsetWidth * index, 0, duration, function () {
-                self.set({
-                    index: index,
-                    cursorX: self.refs.heads[index].offsetLeft,
-                    cursorWidth: self.refs.heads[index].offsetWidth
-                });
+        self.touch.scrollTo(self.refs.body.offsetWidth * index, 0, duration, function () {
+            self.set({
+                index: index,
+                cursorX: self.refs.heads[index].offsetLeft,
+                cursorWidth: self.refs.heads[index].offsetWidth
             });
-        }
+        });
     }
 
 });

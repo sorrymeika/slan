@@ -41,8 +41,10 @@ header { background: $color; height: 44px; line-height: 44px; }
 .head_share { width: 44px; height: 44px; }
 .head_share:before { @extend .icon; background-position: -150px -150px; margin: 5px 0px 0px 6px; }
 
-.white_header { background: #fff; color: #000; }
-.white_header .head_back:before { background: #fff; @include arrow_left(#000); left: -6px; }
+.white_header { background-color: #fff; color: #000; }
+.white_header .head_back:before { background-color: #fff; @include arrow_left(#000); left: -6px; }
+.white_header .head_right { color: $color; }
+.white_header .head_right.dark { color: #333; }
 .has_status_bar .white_header { border-top-color: #fff; }
 
 .refreshing { background: transparent; color: #333; }
@@ -58,13 +60,14 @@ header { background: $color; height: 44px; line-height: 44px; }
 .footer li em { display: block; margin: 5px auto 3px auto; width: 23px; height: 20px; }
 
 .btn { background: $color; border-radius: 4px; }
+.btn_large { height: 40px; line-height: 40px; background-color: $color; font-size: 16px; }
+.btn_middle { background-color: $color; height: 35px; line-height: 35px; display: block; border-radius: 4px; color: #fff; padding: 0 5px; }
+
 
 .cp_tab__cursor { background-color: $color; }
 .cp_tab__head_item.curr { color: $color; }
 
 .main { background: #eeefef; padding-top: .1px; top: 44px; }
-.btn_large { height: 40px; line-height: 40px; background-color: $color; font-size: 16px; }
-.btn_middle { background-color: $color; height: 35px; line-height: 35px; display: block; border-radius: 4px; color: #fff; padding: 0 5px; }
 
 .form { margin-top: 10px; padding-top: .1px; }
 .form li { margin: 15px 10% 0 10%; display: -webkit-box; }
@@ -566,10 +569,8 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .my_nodata .text { text-align: center; margin: 25px 0 15px 0; font-size: 12px; color: #333; }
 .my_nodata .btn { text-align: center; margin: 0px auto; padding: 0px 25px; height: auto; border-radius: 6px; border: 1px solid #ddd; background: transparent; color: #666; font-size: 12px; }
 .mypoint .my_nodata .icon:before { background-position-x: -75px; }
-.uc_coupon .my_nodata .icon:before { background-position-x: -150px; }
-.uc_coupon .my_nodata { margin-top: 90px; }
 .myorder .my_nodata { margin-top: 90px; }
-.uc_month .my_nodata .icon:before { background-position-x: -225px; }
+
 .ct_list_wrap~ .my_nodata .icon:before { background-position-x: 0px; }
 .guide_hd { padding: 10px; line-height: 1.5; font-size: .9em; }
 .guide_bd { background: #fff; padding: 5px; }
@@ -662,72 +663,70 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .stw_detail img { width: 100%; display: block; }
 
 /*我-月礼*/
-.uc_month_card { display: -webkit-box; padding: 7px 17px 22px 15px; background: #fff; }
-.uc_month_card_user { -webkit-box-flex: 1; margin-top: 18px; }
-.uc_month_card_user b { color: $color; font-size: 18px; display: block; font-weight: normal; }
-.uc_month_card_user span { font-size: 16px; display: block; margin-top: 5px; font-weight: 200; }
-.uc_month_card_user p { font-size: 12px; margin-top: 10px; }
-.uc_month_card_user p em { color: #d6415c; }
-.uc_month_val { width: 98px; height: 98px; border-radius: 50%; background: -webkit-gradient(linear, 100% 33%, 100% 79%, from(#e04447), to(#ea6333)); color: #fff; text-align: center; overflow: hidden; }
-.uc_month_val b { display: block; font-size: 14px; margin-top: 25px; font-weight: normal; line-height: 1; }
-.uc_month_val span { display: block; font-size: 24px; margin-top: 8px; font-weight: 200; line-height: 1; }
-.uc_month_slider_tit { display: -webkit-box; height: 17px; line-height: 17px; margin-top: 6px; border-bottom: 1px solid #ccc; text-align: center; font-size: 12px; }
-.uc_month_slider_tit li { -webkit-box-flex: 1; }
-.uc_month_slider_tit li.curr { color: $color; position: relative; }
-.uc_month_slider_tit li.curr:after { border-bottom: 2px solid $color; height: 0px; overflow: hidden; content: ''; display: block; position: absolute; width: 20px; left: 50%; bottom: 0px; margin-left: -10px; }
-.uc_month_slider {
-    width: 80%; margin-left: 10%;
-    .slider { overflow: visible; }
-    ul { display: block; background: transparent; margin-left: 28px; margin-top: 25px; }
-    li {
-        background: transparent;
-        .img {
-            width: 90%; margin: 0 auto; border-radius: 6px; overflow: hidden; position: relative;
-            &:before { padding-top: 118%; display: block; content: ''; }
-            &.canget:after { display: block; text-align: center; content: '立即领取>'; position: absolute; right: 0; bottom: 0; height: 36px; line-height: 36px; background: #e04447; left: 0px; color: #fff; font-size: 14px; }
-            img { width: 100%; border-radius: 6px; position: absolute; top: 0; right: 0; left: 0; bottom: 0; background: url(../images/coming_soon.png) no-repeat center center; background-size: 100% auto; }
-            &.disabled {
-                opacity: 1;
-                &:before { background: rgba(0, 0, 0, .6); z-index: 10; position: relative; }
-                &:after { border: 1px solid #fff; color: #fff; content: '已过期'; position: absolute; top: 50%; left: 50%; width: 100px; height: 30px; line-height: 30px; margin: -15px 0 0 -50px; z-index: 11; text-align: center; -webkit-transform: rotate(-45deg); }
-                img { background-image: url(../images/overdue.jpg); }
-                &.hasget:after { content: '已领取'; }
-            }
-        }
-        span { display: block; text-align: center; margin: 15px 0; color: $color; }
-    }
-}
+.uc_month__tab .cp_tab__head_item { font-size: 16px; }
+.uc_month__tab .left { padding: 10px 10px 5px 10px; font-size: 14px; }
+.uc_month__tab .left span { float: right; }
+.uc_month__tab .left em { color: $color; }
+.uc_month__tab .cp_tab__item { background-color: #eeefef; }
+.uc_month__list .item { display: -webkit-box; padding: 10px 0; background: #fff; margin: 10px; margin-bottom: 0; }
+.uc_month__list .item .img{ width: 1.2rem; height: 1.2rem; position: relative; margin-left: 10px; }
+.uc_month__list .item .img img { width: 100%; height: 100%; }
+.uc_month__list .item .date{ position: absolute; top: 0; left: 0; font-size: 12px; text-align: center; width: .8rem; background-color: rgba(0,0,0,.6); color: #fff; z-index: 2; }
+.uc_month__list .item .con { -webkit-box-flex: 1; margin: 5px 10px; position: relative; }
+.uc_month__list .item .name { display: block; font-size: 16px; }
+.uc_month__list .item .price { display: block; font-size: 14px; color: $color; }
+.uc_month__list .item .btn_m { display: block; position: absolute; bottom: -5px; left: 0; right: 0; }
+
+.uc_month__list .next_month { background: #E6E6E6; text-align: center; padding: 25px 0 15px 0; margin: 10px; }
+.uc_month__list .next_month .note { padding: 10px; color: #fff; }
 
 /*我-卡券*/
-.uc_coupon { }
-.uc_coupon_help { font-size: 10px; color: #666; text-align: right; margin-top: 10px; padding-right: 10px; }
-.uc_coupon_help:before { background: url(../images/icon.png) no-repeat -240px -60px; background-size: 320px auto; width: 15px; height: 15px; display: inline-block; content: ''; vertical-align: -5px; }
-.uc_coupon_get { display: -webkit-box; margin-top: 14px; margin-right: 15px; }
-.uc_coupon_get input { display: block; -webkit-box-flex: 1; margin: 0 15px; border: 0px; padding-left: 10px; border-radius: 4px; height: 35px; }
-.uc_coupon_get .btn { display: block; height: 35px; font-size: 16px; padding: 0 5px; }
-.uc_coupon_hd { display: -webkit-box; padding-top: 0px; background: #fff; margin-top: 18px; text-align: center; top: 44px; left: 0; width: 100%; z-index: 1000; }
-.uc_coupon_hd li { -webkit-box-flex: 1; width: 0px; color: #666; height: 40px; line-height: 40px; font-size: .9em; }
-.uc_coupon_hd .curr { color: $color; border-bottom: 2px solid $color; }
-.uc_coupon_list { margin-top: 10px; position: relative; }
-.uc_coupon_list li { height: 95px; margin: 0 0 5px 0; overflow: hidden; position: absolute; top: 0px; left: 1%; background: #e84838; -webkit-transition: all 300ms ease-out 0ms; opacity: 0; width: 98%; -webkit-transform: scale(.8); }
-.uc_coupon_list li.show { opacity: 1; -webkit-transform: scale(1); }
-.uc_coupon_list li.vct2 { background: #e8672e; }
-.uc_coupon_list li.vct5 { background: #fc3; }
-.uc_coupon_list li.dis { background: #ccc; }
-.uc_coupon_list li:after, .uc_coupon_list .free:before { background: url(../images/site.png) no-repeat 0px -30px; background-size: 320px auto; position: absolute; right: 0px; bottom: 0px; content: ''; display: block; width: 139px; height: 55px; z-index: 0; }
-.uc_coupon_list li:after { right: 56px; }
-.uc_coupon_list li .price { font-size: 55px; color: #fff; margin: 5px 0 0 20px; line-height: 1; }
-.uc_coupon_list li .price:before { content: '￥'; display: inline-block; font-size: 12px; vertical-align: 2px; }
-.uc_coupon_list li.free .price { display: none; }
-.uc_coupon_list li .name { font-size: 14px; color: #fff; margin: -2px 0 0 20px; line-height: 1; }
-.uc_coupon_list li .time { font-size: 10px; color: #fff; margin: 2px 0 0 20px; }
-.uc_coupon_list li .share { color: #fff; font-size: .8em; width: 54px; position: absolute; text-align: center; right: 0; top: 0; margin-top: 7px; height: 82px; border-left: 1px dashed #fff; }
-.uc_coupon_list li .share i { display: block; margin-top: 17px; }
-.uc_coupon_list li .share i:before { display: block; content: ''; background: url(../images/icon.png) no-repeat -180px -120px; background-size: 320px auto; width: 30px; height: 30px; margin: 0 auto; }
-.uc_coupon_list li.free { background: #4dbeea; }
-.uc_coupon_list li.free:before { width: 100px; height: 69px; background-position: 0px -85px; left: 17px; top: 8px; -webkit-transform: scale(.8); }
-.uc_coupon_list li.free .name { font-size: 2em; color: #fff; margin: 30px 0 0 120px; height: auto; }
-.uc_coupon_list li.free .time { margin-left: 30px; margin-top: 7px; }
+.uc_coupon { background-color: #F4F4F4; }
+.uc_coupon__get { padding: 14px 0; background: #fff; }
+.uc_coupon__get input,.uc_coupon__get .btn { display: block; margin: 0 .15rem; width: 2.9rem; border: 0px; padding-left: 10px; border-radius: 1px; height: .4rem; }
+
+.uc_coupon__get input { border: 1px solid #bdbdbd; }
+.uc_coupon__get input::-webkit-input-placeholder { font-size: 14px; }
+.uc_coupon__get .btn{ font-size: 16px; line-height: .4rem; }
+.uc_coupon__get input~.btn { margin-top: 14px; }
+.uc_coupon__tip { position: absolute; top: 0px; right: 0px; left: 0; background-color: #fff; height: 1.15rem; text-align: center; }
+.uc_coupon__tip .icon-right-rem { width: .67rem; height: .67rem; border: 3px solid #39B54A; border-radius: 50%; margin: 10px auto; }
+.uc_coupon__tip .icon-wrong-rem { width: .67rem; height: .67rem; border: 3px solid $color; border-radius: 50%; margin: 10px auto; }
+
+.uc_coupon__list { margin-top: 15px; padding-top: .1px; }
+.uc_coupon__list > li { height: 117px; position: relative; -webkit-box-shadow: 0px 0px 12px #ddd; box-shadow: 0px 0px 12px #ddd; margin: 0 10px 10px 10px; background: #fff; padding-top: .1px; display: -webkit-box; border-left: 3px solid $color; }
+.uc_coupon__list > li:before { content: ''; display: block; position: absolute; z-index: 1; top: -5px; left: 100px; }
+.uc_coupon__list .hd { width: 100px; height: 100%; text-align: center; }
+.uc_coupon__list .bd { -webkit-box-flex: 1; height: 100%; margin: 10px 0 0 26px; position: relative; }
+.uc_coupon__list .bd:before { position: absolute; right: -7px; top: -7px; }
+
+.uc_coupon__list .price { font-size: 38px; margin-top: 15px; }
+.uc_coupon__list .price:before { content: '¥'; vertical-align: 14px; font-size: 16px; font-weight: bold; }
+.uc_coupon__list .type { font-size: 20px; font-weight: bold; }
+.uc_coupon__list .name { font-size: 14px; }
+.uc_coupon__list .prd { font-size: 14px; }
+.uc_coupon__list .prd span { color: $blue; }
+.uc_coupon__list .time { font-size: 12px; position: absolute; bottom: 25px; left: 0; }
+
+.uc_coupon__list .free { border-left: 3px solid $blue; }
+.uc_coupon__list .l-free { margin-top: 32px; }
+.uc_coupon__list .free .name { font-size: 24px; margin-top: 15px; }
+
+.uc_coupon .my_nodata .icon:before { background-position-x: -150px; }
+.uc_coupon .my_nodata { margin-top: 90px; }
+
+.uc_couponitem { background-color: #fff; }
+.uc_couponitem__hd { background: $color url(../images/decorate.png) repeat-x 0px bottom; background-size: 15px auto; color: #fff; text-align: center; padding: 20px 0; }
+.uc_couponitem__hd p { display: inline-block; }
+.uc_couponitem__hd.l-free_white { background-color: $blue; }
+.uc_couponitem__hd .price { font-size: 42px; vertical-align: middle; }
+.uc_couponitem__hd .price:before { content: '¥'; vertical-align: 14px; font-size: 16px; font-weight: bold; }
+
+.uc_couponitem__bd { padding: 15px; line-height: 25px; }
+.uc_couponitem__bd span { color: $blue; }
+
+.uc_couponitem__ft { margin: 20px 30px 0 30px; padding-bottom: 20px; }
+.uc_couponitem__ft button { margin: 10px 0 0 0; }
 
 
 .ex_icon { @include icon(); }
@@ -1130,10 +1129,6 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 
 .pd_slider { position: relative; }
 
-.uc_coupon_list {
-    li.dis { background: #ccc; }
-    li .name { height: 14px; overflow: hidden; margin-right: 60px; text-overflow: ellipsis; }
-}
 
 .coupon_tip { position: absolute; top: 0; z-index: 2000; bottom: 0; right: 0; top: 0; left: 0; background: rgba(0, 0, 0, .7); }
 .coupon_tip:before { position: absolute; right: 20px; top: 62px; display: block; background: url(../images/coupon_tip.png) no-repeat; content: ''; width: 118px; height: 110px; background-size: 100% auto; margin: 22px auto 2px auto; }

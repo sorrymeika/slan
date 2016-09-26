@@ -53,7 +53,7 @@
             }
         });
 
-        seajs.use(['$', 'util', 'core/app', 'bridge', 'widget/loading', 'widget/offline'], function($, util, App, bridge, Loading, Offline) {
+        seajs.use(['$', 'util', 'core/app', 'bridge', 'widget/loader', 'widget/offline'], function($, util, App, bridge, Loader, Offline) {
             var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
             sl.isDebug = @debug;
             sl.buildVersion = @(Date.now());
@@ -64,10 +64,10 @@
             @if(!debug && !useLocal) {
 
                 function loadResourceMapping() {
-                    loading.reload();
+                    loader.reload();
                 }
 
-                var loading = new Loading({
+                var loader = new Loader({
                     url: bridge.url('/api/settings/resourceMapping'),
                     params: {
                         v: sl.appVersion

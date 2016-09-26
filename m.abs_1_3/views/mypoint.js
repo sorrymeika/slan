@@ -3,7 +3,7 @@ define(function (require, exports, module) {
     var $ = require('$');
     var util = require('util');
     var Activity = require('activity');
-    var Loading = require('../widget/loading');
+    var Loading = require('../widget/loader');
     var model = require('../core/model2');
     var Scroll = require('../widget/scroll');
     var Tab = require('../widget/tab');
@@ -18,19 +18,16 @@ define(function (require, exports, module) {
         onCreate: function () {
             var self = this;
 
-            this.model = new model.ViewModel(this.$el, {
+            this.model = new model.Model(this.$el, {
                 back: '/',
                 title: '积分钱包',
                 points: 0.001,
                 open: function () {
                     bridge.openInApp(self.user.OpenUrl || 'http://m.abs.cn');
                 }
-            }).next(function () {
-                console.log(this.refs.tab)
-
             });
-            Scroll.bind(this.model.refs.main);
 
+            Scroll.bind(this.model.refs.main);
         },
 
         onShow: function () {

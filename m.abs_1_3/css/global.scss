@@ -1,4 +1,5 @@
 $color: #D10B16;
+$blue: #3FA9F5;
 
 @mixin arrow($color:#fff,$size:10px) { position: relative; border-top: 2px solid $color; border-right: 2px solid $color; width: $size; height: $size; font-size: 0px; vertical-align: middle; -webkit-transform: rotate(45deg); -webkit-transform-origin: 50% 50%; display: inline-block; }
 
@@ -21,5 +22,7 @@ $color: #D10B16;
 .icon_cm:before { position: absolute; display: block; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); transform: translate(-50%,-50%); }
 .icon_vm:before { position: absolute; display: block; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
 
-.btn_l { height: 48px; line-height: 48px; width: 2.4rem; color: #fff; background: $color; display: inline-block; border: 0px; font-size: 18px; }
-.btn_xl { height: 48px; line-height: 48px; width: 100%; color: #fff; background: $color; display: block; border: 0px; font-size: 18px; }
+.btn_l,.btn_m { height: 44px; line-height: 44px; width: 100%; color: #fff; background: $color; display: inline-block; border: 0px; font-size: 18px; }
+.btn_m { height: 36px; line-height: 36px; padding: 0 6px; font-size: 16px;  }
+.btn_xl, .btn_light_xl{ height: 44px; line-height: 44px; width: 100%; color: #fff; background: $color; display: block; border: 0px; font-size: 18px; }
+.btn_light_xl { background: #F2F2F2; color: #000; }

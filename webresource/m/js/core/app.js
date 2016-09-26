@@ -427,39 +427,49 @@ var Application = Component.extend(Object.assign(appProto, {
 
     },
 
-    forward: function (url, options) {
-
+    match: function (url, callback) {
+        var self = this;
         var route = this.route.match(url);
+
         if (route) {
-            this.queue.then(function () {
-                var currentActivity = this._currentActivity;
-                (options || (options = {})).isForward = true;
+            var queue = this.queue;
 
-                this._toggle(route, options, function () {
-                    currentActivity.trigger('Pause');
-                });
+            queue.then(function () {
+                callback.call(self, route)
 
-                return this.queue;
-            }, this);
+                return queue;
+            });
+
+        } else {
+            location.hash = this._currentActivity.url;
         }
     },
 
+    forward: function (url, options) {
+
+        this.match(url, function (route) {
+            var currentActivity = this._currentActivity;
+
+            (options || (options = {})).isForward = true;
+
+            this._toggle(route, options, function () {
+                currentActivity.trigger('Pause');
+            });
+        })
+    },
+
     back: function (url, options) {
-        var route = this.route.match(url);
-        if (route) {
-            this.queue.then(function () {
-                var currentActivity = this._currentActivity;
 
-                (options || (options = {})).isForward = false;
+        this.match(url, function (route) {
+            var currentActivity = this._currentActivity;
 
-                this._toggle(route, options, function () {
-                    currentActivity.destroy();
-                });
+            (options || (options = {})).isForward = false;
 
-                return this.queue;
+            this._toggle(route, options, function () {
+                currentActivity.destroy();
+            });
+        })
 
-            }, this);
-        }
     }
 }));
 

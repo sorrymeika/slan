@@ -2,10 +2,9 @@ define(function (require, exports, module) {
     var $ = require('$'),
         _ = require('util');
 
-    var records = [];
-
     var extend = ['url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete'];
 
+    //@options={url:'', params: {}, method:"POST", dataType:"json", headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }, xhrFields: { withCredentials: true }}
     var Http = function (options) {
         $.extend(this, _.pick(options, extend));
 
@@ -26,10 +25,19 @@ define(function (require, exports, module) {
 
         complete: _.noop,
         error: _.noop,
+        success: _.noop,
 
         check: function (res) {
             var flag = !!(res && res.success);
             return flag;
+        },
+
+        createError: function (errorCode, errorMsg) {
+            return {
+                success: false,
+                code: errorCode,
+                msg: errorMsg
+            }
         },
 
         DATAKEY_MSG: 'msg',
@@ -97,22 +105,22 @@ define(function (require, exports, module) {
                 dataType: that.dataType,
                 cache: false,
                 error: function (xhr) {
-                    var res = {};
-                    res[that.DATAKEY_MSG] = '网络错误'
-                    that.error(res, xhr);
-                    callback && callback.call(that, res, null);
+                    var err = that.createError(10001, '网络错误');
+                    that.error(err, xhr);
+
+                    callback && callback.call(that, err, xhr);
                 },
                 success: function (res, status, xhr) {
 
                     if (!that.check || that.check(res)) {
                         that.success(res, status, xhr);
-
                         callback && callback.call(that, null, res);
 
                     } else {
-                        that.error(res);
-                        callback && callback.call(that, res, null);
+                        that.error(res, xhr);
+                        callback && callback.call(that, res, xhr);
                     }
+
                 },
                 complete: function () {
                     that._xhr = null;

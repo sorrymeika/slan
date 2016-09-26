@@ -1,4 +1,4 @@
-﻿var UglifyJS = require('uglify-js');
+var UglifyJS = require('uglify-js');
 var razor = require('./../core/razor');
 
 var replaceBOM = function (text) {

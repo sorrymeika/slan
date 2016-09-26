@@ -2,7 +2,7 @@
 var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
-var Loading = require('../widget/loading');
+var Loading = require('../widget/loader');
 var model = require('core/model2');
 var Scroll = require('../widget/scroll');
 var animation = require('animation');
@@ -27,7 +27,7 @@ return Activity.extend({
                 if (userModel.get()) {
                     userModel.set(null);
                     self.setResult("Logout");
-                    self.back('/?tab=1');
+                    self.back('/?tab=0');
                 } else {
                     self.forward('/login');
                 }

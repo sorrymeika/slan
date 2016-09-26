@@ -70,6 +70,7 @@
             "controller": "user/month",
             "template": "user/month"
         },
+        "/coupon/{id:\\d+}": "user/couponItem",
         "/coupon": {
             "controller": "user/coupon",
             "template": "user/coupon"

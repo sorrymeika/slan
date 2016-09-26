@@ -38,7 +38,7 @@
             </em>
         </div>
     </header>
-    <div sn-display="{isStart&&!isLogin}" style="position:absolute;z-index: 1000;right:0;left:0;top:0;bottom:0;">
+    <div sn-if="{isStart&&!isLogin}" style="position:absolute;z-index: 1000;right:0;left:0;top:0;bottom:0;">
         <div class="home_mask"></div>
         <div class="home_text" data-forward="/login">
             <h1></h1>
@@ -169,7 +169,7 @@
                 </div>
             </div>
         </div>
-        <div class="main js_offline" sn-display="{isOffline}">
+        <div class="main js_offline" sn-if="{isOffline}">
             <div class="home_offline">
                 <div class="ico"></div>
                 <div class="txt">您的网络不太顺畅哦</div>
@@ -188,8 +188,8 @@
     <div class="open_msg" style="display:none">
         <div class="msg_bd" sn-html="{message}"></div>
     </div>
-    <div class="home_tip_mask" sn-display="{(!isStart||isLogin)&&showTipStep==1}"></div>
+    <div class="home_tip_mask" sn-if="{(!isStart||isLogin)&&showTipStep==1}"></div>
 </div>
-<div class="hm_guide" sn-display="{showGuide}">
+<div class="hm_guide" sn-if="{showGuide}">
 
 </div>

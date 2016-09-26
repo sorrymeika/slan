@@ -44,7 +44,7 @@
         </dl>
         <i class="js_delete" data-wacid="{{ppg.SPB_WAC_ID}}" data-groupid="{{ppg.SPB_GROUP}}" data-ppgid="{{ppg.PPG_ID}}"></i>
     </div>
-    <div class="ct_buy_more" data-back="/?tab=1" sn-display="{{this.getPrice(bag_amount,couponcode,Points)<=99}}">
+    <div class="ct_buy_more" data-back="/?tab=0" sn-display="{{this.getPrice(bag_amount,couponcode,Points)<=99}}">
         <i>去凑单</i> 满<em>¥99</em>即可免运费，还差<em>¥{{Math.round((99-this.getPrice(bag_amount,couponcode,Points))*100)/100}}</em>
     </div>
     <ul class="ct_list_info">
@@ -67,7 +67,7 @@
 <div class="my_nodata" sn-display="{{!loading&&util.isFalse(data_baglist)&&util.isFalse(data_package)}}" style="display:none">
     <div class="icon"></div>
     <div class="text">您的购物车内还没有商品</div>
-    <div class="btn" data-back="/?tab=1">去逛逛吧</div>
+    <div class="btn" data-back="/?tab=0">去逛逛吧</div>
 </div>
 }
 <header>

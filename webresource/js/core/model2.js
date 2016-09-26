@@ -159,7 +159,7 @@ function updateRequireView(viewModel, el) {
     }
 }
 
-function updateView(viewModel, el) {
+function updateElement(viewModel, el) {
     if (el.nodeType == 8 && el.snRepeatSource) {
         viewModel.updateRepeatElement(el);
 
@@ -806,7 +806,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 }
 
                 if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr == "sn-data" || attr.indexOf('sn-') != 0) {
-                    if (attr.indexOf('sn-') == 0 && val.indexOf("{") == -1 && val.indexOf("}") == -1) {
+                    if (attr.indexOf('sn-') == 0 && (val.indexOf("{") == -1 || val.indexOf("}") == -1)) {
                         val = '{' + val + '}';
                     }
                     var fid = self.getFunctionId(val);
@@ -815,6 +815,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                         el.setAttribute(attr, fid.id);
 
                     } else if (fid) {
+                        if (attr == 'sn-if') {
+                            el.style.display = 'none';
+                        }
 
                         (el.snBinding || (el.snBinding = {}))[attr] = fid.id;
                         el.snIsGlobal = fid.isGlobal;
@@ -908,9 +911,18 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             switch (attr) {
                 case 'textContent':
-                    if (typeof val == 'object' && val.nodeType) {
-                        if (val.nextSibling != el) {
-                            $(val).insertBefore(el);
+                    if (typeof val == 'object') {
+                        if (val.nodeType) {
+                            if (el.nextSibling != val) {
+                                $(val).insertAfter(el);
+                            }
+
+                        } else if ($.isArray(val)) {
+                            var firstChild = val[0];
+                            if (firstChild && el.nextSibling != firstChild)
+                                val.forEach(function (item) {
+                                    $(item).insertAfter(el);
+                                });
                         }
 
                     } else
@@ -945,11 +957,35 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                 ? el.snIf.parentNode.insertBefore(el, el.snIf.nextSibling)
                                 : el.snIf.parentNode.appendChild(el);
                         }
+                        if (el.style.display == 'none') el.style.display = '';
                     }
                     break;
                 case 'display':
-                case 'sn-display':
                     el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                    break;
+                case 'sn-display':
+                    var display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                    if (display == 'none') {
+                        $(el).animate({
+                            opacity: 0
+
+                        }, 'ease-out', 200, function () {
+                            el.style.display = display;
+                        });
+                    } else {
+                        $(el).css({
+                            display: display,
+                            opacity: 0
+                        });
+
+                        el.clientHeight;
+
+                        $(el).animate({
+                            opacity: 1
+
+                        }, 'ease-out', 200, function () {
+                        })
+                    }
                     break;
                 case 'sn-style':
                     el.style.cssText += val;
@@ -1139,7 +1175,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         eachElement(this.$el, function (el) {
             if (el.snViewModel && el.snViewModel != self) return false;
 
-            return updateView(self, el);
+            return updateElement(self, el);
         });
 
         console.timeEnd('updateView');
@@ -1261,14 +1297,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         }
     },
 
-    insertBefore: function (ownNode, referenceNode) {
-        ownNode = this._checkOwnNode(ownNode);
-
-        ownNode.snViewModel = this;
-
-        return ownNode.insertBefore(referenceNode);
-    },
-
     before: function (newNode, referenceNode) {
 
         referenceNode = this._checkOwnNode(referenceNode);
@@ -1349,7 +1377,7 @@ Global.updateView = (function () {
                         refs[ref] = true;
                     }
                 }
-                return updateView(viewModel, el);
+                return updateElement(viewModel, el);
             }
         });
 

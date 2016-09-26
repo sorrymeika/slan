@@ -1,0 +1,26 @@
+﻿<header class="white_header bottom_border">
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
+    <div class="head_right" data-forward="/news/coupon">使用规则</div>
+</header>
+<div class="main " ref="main">
+    <div class="uc_couponitem">
+        <div class="uc_couponitem__hd {data.VCA_VCT_ID == 4 ? 'l-free_white' : ''}">
+            <p class="price" sn-if="data.VCA_VCT_ID!=4">{util.currency(data.VCA_DEDUCT_AMOUNT,'')}</p>
+            <p class="type">{data.VCA_VCT_ID==4?'免邮卡':data.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
+        </div>
+
+        <div class="uc_couponitem__bd">
+            <p class="name">{data.VCA_NAME}</p>
+            <p class="prd" sn-if="{data.Products.length&&data.VCA_VCT_ID!=4}" sn-tap="this.goTo(item)" sn-repeat="item in data.Products">仅限“<span>{item.PRD_NAME}</span>”使用</p>
+            <p class="prd" sn-if="{!data.Products.length&&data.VCA_VCT_ID!=4}">任意消费即可使用</p>
+            <p class="time">有效期:{data.IsOverdue?'已过期':(util.formatDate(data.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(data.CSV_END_DT,'yyyy/MM/dd'))}</p>
+        </div>
+        <div class="uc_couponitem__ft">
+            <button class="btn_xl" sn-if="{data.VCA_VCT_ID!=4}" sn-tap="this.use(data.Products)">立即使用</button>
+            <button class="btn_light_xl" sn-tap="this.share(data)">赠送好友</button>
+        </div>
+    </div>
+</div>
+
+<div class="coupon_tip" sn-if="{showTipStep==2}"></div>

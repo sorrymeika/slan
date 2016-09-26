@@ -18,8 +18,6 @@
 
         $.extend(this, _.pick(options, ['width', 'loop', 'render', 'template', 'itemTemplate', 'navTemplate']));
 
-        console.log(this.itemTemplate)
-
         var self = this,
             data = options.data,
             itemsHtml = '',

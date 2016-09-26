@@ -6,7 +6,7 @@
         model = require('core/model'),
         Scroll = require('../widget/scroll'),
         bridge = require('bridge');
-    var Loading = require('../widget/loading');
+    var Loading = require('../widget/loader');
     var Selector = require('../widget/selector');
     var guid = 0;
 

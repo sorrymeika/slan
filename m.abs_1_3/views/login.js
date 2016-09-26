@@ -1,7 +1,7 @@
 var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
-var Loading = require('../widget/loading');
+var Loading = require('../widget/loader');
 var model = require('../core/model');
 var Scroll = require('../widget/scroll');
 var animation = require('animation');
@@ -102,7 +102,7 @@ module.exports = Activity.extend({
 
                     var backUrl = self.route.query.success || self.swipeRightBackAction;
 
-                    self.back(backUrl == '/' ? backUrl + '?tab=1' : backUrl);
+                    self.back(backUrl == '/' ? backUrl + '?tab=0' : backUrl);
                     setTimeout(function () {
                         self.setResult("Login");
                     }, 0);
@@ -144,7 +144,7 @@ module.exports = Activity.extend({
 
     onShow: function () {
         if (this.swipeRightBackAction == '/') {
-            this.swipeRightBackAction = this.swipeRightBackAction + '?tab=1';
+            this.swipeRightBackAction = this.swipeRightBackAction + '?tab=0';
 
             this.model.set({
                 back: this.swipeRightBackAction

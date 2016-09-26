@@ -3,7 +3,7 @@ define(function (require, exports, module) {
     var $ = require('$');
     var util = require('util');
     var Activity = require('activity');
-    var Loading = require('widget/loading');
+    var Loading = require('widget/loader');
     var model = require('core/model');
     var Promise = require('core/promise');
     var Scroll = require('widget/scroll');

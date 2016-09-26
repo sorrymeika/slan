@@ -26,15 +26,15 @@ Route.prototype.append = function (options) {
         option = options[key];
         parts = [];
 
-        regex = '^(?:\/{0,1})' + key.replace(/(\/|^|\?)\{((?:.+?\{[^\}]+\}){0,}[^\}]*)\}/g, function (match, first, param) {
+        regex = '^(?:\/{0,1})' + key.replace(/(\/|^|\?)\{((?:\{[^\}]+\}|.){0,}[^\}]*)\}/g, function (match, first, param) {
             namedParam = param.split(':');
 
             if (namedParam.length > 1) {
                 parts.push(namedParam.shift());
                 param = namedParam.join(':');
             }
-
             return first + '(' + param + ')';
+
         }) + '$';
 
         if (typeof option === 'string')
@@ -106,6 +106,10 @@ Route.prototype.match = function (url) {
             }
             break;
         }
+    }
+
+    if (!result) {
+        console.error('wrong url:', url);
     }
 
     return result;

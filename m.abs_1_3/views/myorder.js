@@ -3,7 +3,7 @@ define(function (require, exports, module) {
     var $ = require('$');
     var util = require('util');
     var Activity = require('activity');
-    var Loading = require('../widget/loading');
+    var Loading = require('../widget/loader');
     var model = require('core/model');
     var Scroll = require('../widget/scroll');
     var animation = require('animation');
@@ -20,7 +20,7 @@ define(function (require, exports, module) {
                 }
             },
             'tap .btn_go': function () {
-                this.back('/?tab=1');
+                this.back('/?tab=0');
             }
         },
 

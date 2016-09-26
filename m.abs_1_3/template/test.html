@@ -2,7 +2,7 @@
     <div class="head_back" data-back="{back}"></div>
     <div class="head_title">{$global.title}</div>
 </header>
-<div class="main">
+<div class="main" style="bottom:150px">
     <div>
         <input sn-model='name' value='{name}' />
 
@@ -19,10 +19,9 @@
         </dl>
 
         <div sn-repeat="item in colletion">{item.name}</div>
-
-        <div sn-require="widget/tab" sn-data="{{items:['name','name1']}}">
-            <div>asdf</div>
-            <div>bbbb</div>
-        </div>
     </div>
+</div>
+<div sn-require="widget/tab" sn-data="{{items:['name','name1']}}" style="top:420px;position:absolute;bottom:0; right: 0; left: 0;">
+    <div>asdf</div>
+    <div>bbbb</div>
 </div>

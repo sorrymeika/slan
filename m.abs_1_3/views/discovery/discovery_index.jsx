@@ -1,6 +1,6 @@
 var $ = require('$');
 var util = require('util');
-var Loading = require('widget/loading');
+var Loader = require('widget/loader');
 var model = require('core/model2');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
