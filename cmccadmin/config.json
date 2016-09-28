@@ -1,0 +1,16 @@
+{
+    "js": {},
+    "css": {},
+    "route": {
+        "/": {
+            "controller": "index",
+            "template": "index"
+        },
+        "/login": {
+            "controller": "login",
+            "template": "login"
+        },
+        "/connect": "oracle/connect",
+        "/databases": "oracle/databases"
+    }
+}

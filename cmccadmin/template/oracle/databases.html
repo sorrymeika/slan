@@ -1,0 +1,173 @@
+<style>
+    .mysql_tables {
+        position: absolute;
+        left: 200px;
+        bottom: 0;
+        top: 60px;
+        width: 150px;
+        overflow-x: auto;
+        padding: 10px;
+        border-right: 1px solid #f1f1f1;
+    }
+    
+    .mysql_tables ul {
+        margin-top: 30px;
+    }
+    
+    .mysql_table_name input {
+        width: 120px;
+    }
+    
+    .mysql_table_name {
+        position: fixed;
+        background: #fff;
+    }
+    
+    .mysql_results {
+        position: absolute;
+        left: 380px;
+        right: 0;
+        bottom: 5px;
+        top: 460px;
+        overflow: auto;
+    }
+    
+    .mysql_form {
+        position: absolute;
+        left: 380px;
+        right: 10px;
+        top: 65px;
+        height: 395px;
+    }
+    
+    .mysql_text {
+        display: -webkit-box;
+    }
+    
+    .mysql_text textarea {
+        display: block;
+        -webkit-box-flex: 1;
+        border: 1px solid #bdbdbd;
+        height: 57px;
+        box-sizing: border-box;
+    }
+    
+    .mysql_action {
+        margin: 0 0 0 6px;
+    }
+    
+    .mysql_action .button {
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .mysql_action .button:last-child {
+        margin-bottom: 0px;
+    }
+    
+    .mysql_query_list li {
+        background: #f1f1f1;
+        padding: 5px;
+        margin: 5px 0;
+        color: #0074a3;
+    }
+    
+    .mysql_query_list a {
+        color: #c00;
+        white-space: nowrap;
+    }
+    
+    .mysql_query_list a.exec {
+        border-radius: 2px;
+        background: #c00;
+        color: #fff;
+        padding: 0 2px;
+        margin-left: 5px;
+    }
+    
+    .mysql_query_list a.exec:before {
+        display: inline-block;
+        content: "";
+        width: 0px;
+        height: 0px;
+        border-top: 5px solid #c00;
+        border-bottom: 5px solid #c00;
+        border-left: 5px solid #fff;
+        margin: 0 2px 0 2px;
+        vertical-align: -1px;
+    }
+    
+    .mysql_topbar .filter {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        height: 20px;
+        margin-top: 3px;
+    }
+    
+    .mysql_topbar {
+        position: relative;
+        z-index: 1;
+        background: #fff;
+    }
+    
+    .mysql_query_list {
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        top: 80px;
+        overflow: auto;
+    }
+</style>
+
+<div class="main">
+    <h1>{{title}} <select sn-model="database" sn-change="this.useDatabase()" value="{{database}}">
+        <option sn-repeat="item in databases" value="{{item.Database}}" selected="{{item.Database==database}}">{{item.Database}}</option></select></h1>
+    <div class="mysql_tables">
+        <div class="mysql_table_name">
+            <input type="text" sn-model="tableName">
+        </div>
+        <ul>
+            <li sn-repeat="item in tables|filter:like(item.name,tableName)"><a style="color:#999" href="javascript:;" sn-click="this.getTableData(item.name)">#</a><a style="color:#{{item.name==table?'c00':'333'}}"
+                href="javascript:;" sn-click="this.getTableInfo(item.name)">{{item.name}}</a></li>
+        </ul>
+    </div>
+    <div class="mysql_form">
+        <div class="mysql_topbar">
+            <div class="mysql_text">
+                <textarea ref="sql" sn-model="query" value="{{query}}"></textarea>
+                <div class="mysql_action">
+                    <b class="button" sn-click="query='',origin=''">清空</b>
+                    <b class="button" sn-click="this.save()">执行</b>
+                </div>
+            </div>
+            <input ref="query_search" class="filter" sn-model="sql_keywords" />
+        </div>
+        <div class="mysql_query_list">
+            <ul>
+                <li sn-repeat="item in queries|filter:like(item.text,sql_keywords)" sn-click="item.checked=!item.checked">
+                    <input type="checkbox" checked="{{item.checked}}" /><span html="{{this.formatSQL(item.text)}}"></span>
+                    <a href="javascript:;" class="exec" sn-click="this.exec(item.text)">执行</a>
+                    <a href="javascript:;" sn-click="query=item.text,origin=item.text">[选择]</a>
+                    <a href="javascript:;" sn-click="this.del(item.text)">[删除]</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="mysql_results">
+        <table class="datatable">
+            <thead>
+                <tr>
+                    <th sn-repeat="item in columns">{{item.key}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr sn-repeat="data in result">
+                    <td sn-repeat="item in columns">{{data[item.key]}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div html="{{errors}}"></div>
+    </div>
+</div>

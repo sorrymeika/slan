@@ -1,0 +1,15 @@
+{
+    "currentConnection": {
+        "host": "172.16.168.185/XE",
+        "user": "sys",
+        "password": "12345Qwert"
+    },
+    "connections": [
+       
+        {
+            "host": "172.16.168.185/XE",
+            "user": "sys",
+            "password": "12345Qwert"
+        }
+    ]
+}
