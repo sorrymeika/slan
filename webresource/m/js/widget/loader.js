@@ -136,7 +136,10 @@
 
             this.$error && this.$error.hide();
 
+            this.isLoading = true;
+
             if (that.pageIndex == 1) {
+
                 if (!that.$loading) {
                     that.$loading = $(that.template);
                 }
@@ -155,6 +158,7 @@
             this.$error && this.$error.hide();
             this.$refreshing && this.$refreshing.hide();
             this.$loading.removeClass('show');
+            this.isLoading = false;
         },
 
         setHeaders: function (key, val) {

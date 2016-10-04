@@ -35,7 +35,7 @@ define(function (require, exports, module) {
             this.model = new model.ViewModel(this.$el, {
                 back: this.swipeRightBackAction,
                 title: '爱管家',
-                id: this.route.data.id
+                id: this.route.params.id
             });
 
             var detailAPI = new api.StewardDetailAPI({

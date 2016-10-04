@@ -311,7 +311,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
     .hd { font-size: 14px; }
     ul { overflow: hidden; }
     li {
-        float: left; width: 70px; height: 26px; border: 1px solid #ccc; text-align: center;  margin: 5px 10px 0 0; line-height: 26px; font-size: 12px;
+        float: left; width: 70px; height: 26px; border: 1px solid #ccc; text-align: center; margin: 5px 10px 0 0; line-height: 26px; font-size: 12px;
         &.curr { border: 1px solid $color; background: $color; color: #fff; }
     }
 }
@@ -404,6 +404,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .barcode i { background: #000; }
 
 .hm_user { position: absolute; left: 0; right: 0; @extend .main; }
+.has_status_bar .hm_user { top: 64px; }
 .hm_user .main { top: 0; bottom: 0; background: rgba(0,0,0,0); }
 .hm_user:before { content: ''; display: block; background: $color; position: absolute; z-index: 0; top: 0px; right: 0; left: 0; height: 100px; }
 .hm_user__body { background: #eeefef; padding-bottom: 10px; position: relative; z-index: 2; overflow: visible; }
@@ -504,9 +505,9 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_point__list .date { position: absolute; right: 10px; top: 45px; color: #999; font-size: 14px; }
 .uc_point__list .minus { color: #39B54A; }
 
-.uc_point__nodata { text-align: center; }
+.uc_point__nodata { position: absolute; text-align: center; top: 0; left: 0; background: #eeefef; }
 .uc_point__nodata .l-money { margin-top: 1.2rem; margin-bottom: 15px; }
-.uc_point__nodata .btn_l { margin-top: 30px; }
+.uc_point__nodata .btn_l { margin: 30px .2rem 0 .2rem; width: 2.8rem; }
 
 .has_status_bar .myorder_hd { top: 64px; }
 .myorder_hd { display: -webkit-box; padding-top: 0px; background: #eeefef; text-align: center; font-size: .9em; position: fixed; width: 100%; top: 44px; left: 0px; z-index: 1000; }
@@ -541,19 +542,13 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .myorder .express { background: #eeefef; padding-top: 10px; }
 .myorder .express_con { background: #fff; font-size: .8em; padding: 10px; position: relative; }
 .myorder .express_con:before { background: #fff; width: 10px; height: 10px; position: absolute; content: ''; display: block; right: 30px; top: -5px; -webkit-transform: rotate(45deg); }
-.member_info { }
-.member_info dt { margin: 15px 0 6px 15px; font-size: .8em; }
-.member_info dd { height: 38px; line-height: 38px; background: #fff; color: #666; }
-.member_info dd p { padding-left: 15px; font-size: 14px; }
-.member_info dd input { border: 0px; box-sizing: border-box; width: 100%; height: 36px; color: #666; padding-left: 15px; font-size: 14px; }
-.member_info dd .radio { width: 50%; float: left; height: 100%; background: #fff; color: #666; text-align: center; font-size: .8em; }
-.member_info dd .radio:before { display: none; }
-.member_info dd .radio.checked { background: $color; color: #fff; }
-.member_bar { text-align: center; }
-.member_bar b { display: inline-block; color: #fff; border-radius: 4px; line-height: 36px; height: 36px; padding: 0 20px; margin: 15px 15px; }
-.member_bar .btn_mid { background: $color; }
-.member_bar .btn_cancel { background: #999; }
 
+.uc_member__info { background-color: #fff; margin-top: 10px; }
+.uc_member__info .avatars { overflow: hidden; line-height: 60px; font-weight: bold; }
+.uc_member__info .avatars img { display: block; width: 60px; height: 60px; float: right;margin-right: 15px; border-radius: 50%;overflow: hidden; background: #eee url(../images/default.jpg) no-repeat center center; background-size: 80% 80%; }
+.uc_member__info > li { padding: 10px 10px 10px 0; margin-left: 10px; line-height: 26px; position: relative; }
+.uc_member__info > li span { float: right; color: #ccc; margin-right: 15px; }
+.uc_member__info > li:after { content: ''; @include arrow(#aaa,8px); position: absolute;  right:  10px; top: 50%; margin-top: -4px; }
 
 .message_card { background: #fff; padding-bottom: 1px; border-bottom: 1px solid #ddd; padding-top: 5px; }
 .message_card .hd { overflow: hidden; }
@@ -701,6 +696,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_coupon__list .hd { width: 100px; height: 100%; text-align: center; }
 .uc_coupon__list .bd { -webkit-box-flex: 1; height: 100%; margin: 10px 0 0 26px; position: relative; }
 .uc_coupon__list .bd:before { position: absolute; right: -7px; top: -7px; }
+.uc_coupon__list .bd p { position: relative; z-index: 1; }
 
 .uc_coupon__list .price { font-size: 38px; margin-top: 15px; }
 .uc_coupon__list .price:before { content: '¥'; vertical-align: 14px; font-size: 16px; font-weight: bold; }
@@ -708,7 +704,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_coupon__list .name { font-size: 14px; }
 .uc_coupon__list .prd { font-size: 14px; }
 .uc_coupon__list .prd span { color: $blue; }
-.uc_coupon__list .time { font-size: 12px; position: absolute; bottom: 25px; left: 0; }
+.uc_coupon__list .time { font-size: 12px; position: absolute !important; bottom: 25px; left: 0; }
 
 .uc_coupon__list .free { border-left: 3px solid $blue; }
 .uc_coupon__list .l-free { margin-top: 32px; }
@@ -729,6 +725,14 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 
 .uc_couponitem__ft { margin: 20px 30px 0 30px; padding-bottom: 20px; }
 .uc_couponitem__ft button { margin: 10px 0 0 0; }
+
+
+.uc_avatars { background: #fff;}
+.uc_avatars__img { text-align: center; height: 3.2rem; line-height: 3.2rem; background: #eee;position: relative; }
+.uc_avatars__img img { display: block; width: 100%; height: 100%; background: rgba(0,0,0,0); position: absolute; top: 0; left: 0; }
+.uc_avatars_btns { padding-top: 20px; }
+.uc_avatars_btns .icon-camera:before { margin-right: 6px; vertical-align: -2px; }
+.uc_avatars_btns .btn_l,.uc_avatars_btns .btn_light_l { display: block; margin: 10px .2rem 0 .2rem; width: 2.8rem;  }
 
 
 .ex_icon { @include icon(); }

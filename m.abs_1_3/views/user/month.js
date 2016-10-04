@@ -11,8 +11,9 @@ var Size = require('components/size');
 
 var user = require('logical/user');
 var product = require('logical/product');
+var bridge = require('bridge');
 
-return Activity.extend({
+module.exports = Activity.extend({
 
     loadUserInfo: function () {
         var self = this;
@@ -77,7 +78,7 @@ return Activity.extend({
             });
 
             self.size.set({
-                freid: self.route.data.id,
+                freid: self.route.params.id,
                 type: "month",
                 color: color,
                 spec: spec,
@@ -114,6 +115,8 @@ return Activity.extend({
     onShow: function () {
         var self = this;
         var model = this.model;
+
+        bridge.statusBar('dark');
 
         user.getMonth(function (err, res) {
 
@@ -152,6 +155,10 @@ return Activity.extend({
             }
 
         }, this.$el);
+    },
+
+    onPause: function () {
+        bridge.statusBar('light');
     },
 
     onDestory: function () {

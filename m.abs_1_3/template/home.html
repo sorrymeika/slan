@@ -134,7 +134,7 @@
             <div class="main" data-index="3">
                 <div class="hm_user__body">
                     <div class="hm_user__base">
-                        <div class="avatars"><img sn-src="{user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
+                        <div class="avatars" data-forward="/avatars"><img sn-src="{$global.user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
                         <div class="name">{user.UserName}</div>
                         <div class="addr" data-forward="/address">收货地址<em class="icon_arrow"></em></div>
                     </div>
@@ -148,7 +148,7 @@
                         </div>
                         <div class="rights" data-forward="/news/201">会员权益<em class="icon_arrow"></em></div>
                     </div>
-                    <div class="hm_user__order top_bottom_line">
+                    <div class="hm_user__order top_bottom_border">
                         <div class="user-order bottom_border">我的订单<span class="allorder" data-forward="/myorder">查看全部订单</span></div>
                         <ul class="ordercates">
                             <li class="user-unpay" data-forward="/myorder?state=1"><i>12</i><span>待付款</span></li>
@@ -158,12 +158,12 @@
                         </ul>
                     </div>
 
-                    <ul class="hm_user__other top_bottom_line">
+                    <ul class="hm_user__other top_bottom_border">
                         <li class="user-gift bottom_border" data-forward="/month">我的月礼 <em class="note">{user.FreeMonths}个月</em></li>
                         <li class="user-card bottom_border" data-forward="/coupon">我的卡券 <em class="note">{user.FreeCouponsCount+user.CouponsCount}</em></li>
                         <li class="user-money" data-forward="/mypoint">积分钱包 <em class="note">{user.Points}积分</em></li>
                     </ul>
-                    <ul class="hm_user__other top_bottom_line">
+                    <ul class="hm_user__other top_bottom_border">
                         <li class="user-group" data-forward="/steward">爱管家记录 <em class="note">{user.StewardNum}条</em></li>
                     </ul>
                 </div>

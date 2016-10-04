@@ -45,20 +45,47 @@
                 hybrid('cmbpay', url + '');
             },
 
-            pickImage: function (callback) {
-                hybrid('pickImage', callback);
+            image: {
+
+                //@callback=function(res={id:2,src:"base64OriginImg",thumbnail:'base64Thumbnail'})
+                photo: function (allowsEditing, callback) {
+                    if (typeof allowsEditing == 'function') callback = allowsEditing, allowsEditing = true;
+
+                    hybrid('image', {
+                        type: 'photo',
+                        allowsEditing: allowsEditing
+
+                    }, callback);
+                },
+
+                //@callback=function(res={id:2,src:"base64OriginImg",thumbnail:'base64Thumbnail'})
+                camera: function (allowsEditing, callback) {
+                    if (typeof allowsEditing == 'function') callback = allowsEditing, allowsEditing = true;
+
+                    hybrid('image', {
+                        type: 'camera',
+                        allowsEditing: allowsEditing
+                    }, callback);
+                },
+
+                //@images={'avatars':0,'file2':1}
+                upload: function (url, data, images, callback) {
+
+                    hybrid('image', {
+                        type: 'upload',
+                        url: url,
+                        data: data,
+                        images: images
+
+                    }, callback);
+
+                }
             },
-            takePhoto: function (f) {
-                setTimeout(function () {
-                    hybrid('takePhoto', f);
-                }, 0);
-            },
-            queryThumbnailList: function (f) {
-                hybrid('queryThumbnailList', f);
-            },
+
             pickColor: function (f) {
                 hybrid('pickColor', f);
             },
+
             system: {
                 info: function (callback) {
                     hybrid('system', {
@@ -69,6 +96,47 @@
             },
             getDeviceToken: function (callback) {
                 hybrid('getDeviceToken', callback);
+            },
+
+            statusBar: function (type) {
+                hybrid('statusBar', type);
+            },
+
+            assets: {
+
+                //@return={data:[{albumId:"xx-xx",albumName:"相册"}]}
+                albums: function (callback) {
+                    hybrid('assets', {
+                        type: 'album'
+
+                    }, callback);
+                },
+
+                //@params = { albumId:"xx-xx-xx", page:1, pageSize:20, size:120 }
+                //@return={ albumId:'xx-xx-xx',data:[{id:'xx-xx-xx',src:'base64ImgString'}]}
+                thumbnails: function (params, callback) {
+
+                    hybrid('assets', {
+                        type: 'thumbnails',
+                        albumId: params.albumId,
+                        width: params.size || 120,
+                        height: params.size || 120,
+                        page: params.page || 1,
+                        pageSize: params.pageSize || 50
+
+                    }, callback);
+
+                },
+
+                image: function (albumId, assetId, callback) {
+
+                    hybrid('assets', {
+                        type: 'image',
+                        albumId: albumId,
+                        assetId: assetId
+
+                    }, callback);
+                }
             },
 
             //@callback = function({longitude,latitude})

@@ -1,7 +1,7 @@
 {
     "debug": true,
     "dest": "./dest",
-    "api": "http://127.0.0.1:6006",
+    "api": "http://127.0.0.1:10009",
     "proxy": {},
     "css": [
         "../webresource/images/reset.css",

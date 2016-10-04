@@ -1,42 +1,21 @@
 <header>
-    <div class="head_back" data-back="{{back}}"></div>
-    <div class="head_title">{{title}}</div>
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
 </header>
-<div class="main scrollview">
-    <div class="member">
-        <dl class="member_info">
-            <dt>登录名</dt>
-            <dd>
-                <p>{{user.Mobile}}</p>
-            </dd>
-            <dt>姓名</dt>
-            <dd><input value="{{user.UserName}}" sn-model="user.UserName" /></dd>
-            <dt>性别：</dt>
-            <dd>
-                <span sn-tap="user.Gender=1" value="1" class="radio {{user.Gender==1?' checked':''}}">男</span>
-                <span sn-tap="user.Gender=2" value="2" class="radio {{user.Gender==2?' checked':''}}">女</span>
-            </dd>
-            <dt>生日</dt>
-            <dd><input type="text" value="{{util.formatDate(user.BirthDay,'yyyy/MM/dd')}}" sn-model="user.BirthDay" /></dd>
-            <dt>所在地</dt>
-            <dd sn-tap="this.showCity()">
-                <p>{{user.City}}</p>
-            </dd>
-
-            <dt>家庭人数</dt>
-            <dd><input value="{{user.FamilySize}}" sn-model="user.FamilySize" /></dd>
-
-            <dt>是否有小孩：</dt>
-            <dd>
-                <span sn-tap="user.HasChild=1" value="1" class="radio {{user.HasChild?'checked':''}}">是</span>
-                <span sn-tap="user.HasChild=0" value="0" class="radio {{!user.HasChild?'checked':''}}">否</span>
-            </dd>
-
-            <dt>小孩生日</dt>
-            <dd><input type="text" value="{{user.ChildBirthDay}}" sn-model="user.ChildBirthDay" /></dd>
-        </dl>
-        <div class="member_bar">
-            <b class="btn_mid" sn-tap="this.submit()" class="{{submiting?'disabled':''}}">修改</b>
-        </div>
-    </div>
+<div class="main uc_member scrollview">
+    <ul class="uc_member__info top_bottom_border">
+        <li class="avatars" data-forward="/avatars">
+            <em>头像</em>
+            <img sn-src="{user.Avatars}" />
+        </li>
+    </ul>
+    <ul class="uc_member__info">
+        <li class="bottom_border" data-forward="/user/update/userName"><em>会员名</em><span>{user.UserName}</span></li>
+        <li class="bottom_border" data-forward="/user/update/gender"><em>性别</em><span>{user.Gender==1?'男':user.Gender==2?'女':'保密'}</span></li>
+        <li class="bottom_border"><em>生日</em><span>{util.formatDate(user.BirthDay,'yyyy/MM/dd')}</span></li>
+        <li class="bottom_border" sn-tap="this.showCity()"><em>所在地</em><span>{user.City}</span></li>
+        <li class="bottom_border"><em>家庭人数</em><span sn-if="{user.FamilySize}">{user.FamilySize}人</span></li>
+        <li class="bottom_border"><em>是否有小孩</em><span>{user.HasChild==1?'有':'无'}</span></li>
+        <li><em>小孩生日</em><span>{user.ChildBirthDay}</span></li>
+    </ul>
 </div>

@@ -45,7 +45,7 @@ module.exports = Activity.extend({
     loadData: function() {
         var self = this;
 
-        user.getCoupon(this.route.data.id, function(err, res) {
+        user.getCoupon(this.route.params.id, function(err, res) {
 
             if (err) {
                 Toast.showToast(err.msg);

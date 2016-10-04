@@ -57,7 +57,7 @@ module.exports = Activity.extend({
         var self = this;
 
         self.discoverListAPI.setParam({
-            dctid: this.route.data.id || 0,
+            dctid: this.route.params.id || 0,
             wd: this.route.query.s || '',
             pspcode: self.user.PSP_CODE,
             orderby: 'asc',

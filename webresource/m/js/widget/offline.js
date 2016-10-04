@@ -2,7 +2,7 @@ var $ = require('$');
 var model = require('core/model2');
 
 var Offline = model.ViewModel.extend({
-    el: '<div class="viewport offline">\
+    el: '<div class="viewport offline" sn-transition-end="this._hide()">\
         <div class="offline_con">\
             <div class="ico"></div>\
             <div class="txt">您的网络不太顺畅哦</div>\
@@ -16,7 +16,7 @@ var Offline = model.ViewModel.extend({
     },
 
     initialize: function() {
-        this.listenTo(this.$el, $.fx.transitionEnd, this._hide);
+        //this.listenTo(this.$el, $.fx.transitionEnd, this._hide);
         this.$el.appendTo('body');
     },
 

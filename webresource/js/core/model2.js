@@ -543,9 +543,13 @@ Collection.prototype = {
         return this;
     },
 
-    each: function (fn) {
-        for (var i = 0; i < this.models.length; i++) {
-            if (fn.call(this, this.models[i], i) === false) break;
+    each: function (start, end, fn) {
+
+        if (typeof start == 'function') fn = start, start = 0, end = this.models.length;
+        else if (typeof end == 'function') fn = end, end = this.models.length;
+
+        for (; start < end; start++) {
+            if (fn.call(this, this.models[start], start) === false) break;
         }
         return this;
     },
@@ -557,6 +561,27 @@ Collection.prototype = {
             }
         }
         return null;
+    },
+
+    insert: function (index, data) {
+
+        var model;
+        var count;
+
+        if (!$.isArray(data)) {
+            data = [data];
+        }
+
+        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
+            var dataItem = data[i];
+
+            count = index + i;
+            model = new Model(this, count, dataItem);
+
+            this.models.splice(count, 0, model);
+        }
+
+        this.root.updateViewNextTick();
     },
 
     add: function (data) {
@@ -964,10 +989,11 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                         if (el.style.display == 'none') el.style.display = '';
                     }
                     break;
-                case 'display':
+                case 'sn-visible':
                     el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                     break;
                 case 'sn-display':
+                case 'display':
                     var display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                     if (display == 'none') {
                         $(el).animate({
@@ -1002,19 +1028,28 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
                     break;
                 case 'src':
-                case 'sn-src':
-                    var $el = $(el).one('load error', function () {
-                        $el.animate({
-                            opacity: 1
-                        }, 200);
-                    }).css({
-                        opacity: 0
-
-                    }).attr({
-                        src: val
-                    });
+                    el.src = val;
                     break;
-                case 'className':
+                case 'sn-src':
+                    if (el.src) {
+                        el.src = val;
+
+                    } else {
+                        var $el = $(el).one('load error', function () {
+                            $el.animate({
+                                opacity: 1
+                            }, 200);
+                        }).css({
+                            opacity: 0
+
+                        }).attr({
+                            src: val
+                        });
+                    }
+                    break;
+
+                case 'classname':
+                case 'class':
                     el.className = val;
                     break;
                 default:
@@ -1170,7 +1205,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     updateView: function () {
-        console.time('updateView')
+        // console.time('updateView')
 
         var self = this;
 
@@ -1182,7 +1217,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             return updateElement(self, el);
         });
 
-        console.timeEnd('updateView');
+        //console.timeEnd('updateView');
 
         if (this.parents) {
             this.parents.forEach(function (parent) {
@@ -1204,7 +1239,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         this._bindElement($el);
 
-        self.$el = !self.$el ? $el : self.$el.add($el);
+        self.$el = (self.$el || $()).add($el);
 
         $el.each(function () { this.snViewModel = self; })
 

@@ -15,7 +15,6 @@ var noop = util.noop;
 var lastIndexOf = util.lastIndexOf;
 var slice = Array.prototype.slice;
 var getPath = util.getPath;
-var trimHash = Route.trimHash;
 
 function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
     if (!toggleAnim) toggleAnim = (isForward ? activity : currentActivity).toggleAnim;
@@ -135,6 +134,9 @@ function bindBackGesture(application) {
 
         that.isCancelSwipe = that.isMoveLeft !== that.isSwipeLeft || Math.abs(that.deltaX) <= 10;
 
+        if (!that.isCancelSwipe)
+            application._currentActivity.trigger('Pause');
+
         if (that.swiperPromise) {
             that.swiperPromise.then(function () {
 
@@ -158,12 +160,12 @@ function bindBackGesture(application) {
                         application._currentActivity = that.swipeActivity;
                         application.navigate(activity.url, that.isSwipeOpen);
 
+                        currentActivity.trigger('Hide');
                         activity._enterAnimationEnd();
 
                         if (that.isSwipeOpen) {
                             activity.referrer = currentActivity.url;
                             activity.referrerDir = that.isSwipeLeft ? "Right" : "Left";
-                            currentActivity.trigger('Pause');
                         } else {
                             currentActivity.destroy();
                         }
@@ -260,7 +262,6 @@ var Application = Component.extend(Object.assign(appProto, {
     start: function (delay) {
         var that = this;
         var $win = $(window);
-        var hash = location.hash || '/';
         var $el = that.$el;
 
         that.queue = new Promise();
@@ -283,13 +284,13 @@ var Application = Component.extend(Object.assign(appProto, {
             $('body').addClass('has_status_bar');
         }
 
-        that.hash = hash = trimHash(hash);
+        that.hash = Route.formatUrl(location.hash);
 
         that.historyPromise = new Promise().resolve();
 
-        that.get(hash, function (activity) {
+        that.get(that.hash, function (activity) {
 
-            that.history.push(hash);
+            that.history.push(that.hash);
 
             activity.$el.appendTo(that.el);
             that._currentActivity = activity;
@@ -304,7 +305,7 @@ var Application = Component.extend(Object.assign(appProto, {
             });
 
             $win.on('hashchange', function () {
-                var hash = that.hash = trimHash(location.hash);
+                var hash = that.hash = Route.formatUrl(location.hash);
                 var hashIndex;
 
                 if (that.hashChanged) {
@@ -336,7 +337,7 @@ var Application = Component.extend(Object.assign(appProto, {
             currentActivity = that._currentActivity,
             url = route.url,
             isForward = options.isForward,
-            duration = options.duration || 300;
+            duration = options.duration === undefined ? 400 : options.duration;
 
         that.navigate(url, isForward);
 
@@ -364,6 +365,8 @@ var Application = Component.extend(Object.assign(appProto, {
                 activity.trigger('Appear');
             });
 
+            currentActivity.trigger('Pause');
+
             var ease = 'cubic-bezier(.34,.86,.54,.99)';
             var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
             var anim;
@@ -373,8 +376,9 @@ var Application = Component.extend(Object.assign(appProto, {
                 if (executedFinish) return;
                 executedFinish = true;
 
+                currentActivity.trigger('Hide');
                 activity._enterAnimationEnd();
-                callback && callback(activity);
+                callback && callback.call(that, activity);
                 that.queue.resolve();
             };
 
@@ -400,7 +404,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.historyPromise.then(function () {
             var index,
-                hashChanged = url !== trimHash(location.hash);
+                hashChanged = !Route.compareUrl(url, location.hash);
 
             that.hashChanged = hashChanged;
 
@@ -427,7 +431,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
     },
 
-    match: function (url, callback) {
+    _navigate: function (url, isForward, duration, toggleAnim, data) {
         var self = this;
         var route = this.route.match(url);
 
@@ -435,7 +439,25 @@ var Application = Component.extend(Object.assign(appProto, {
             var queue = this.queue;
 
             queue.then(function () {
-                callback.call(self, route)
+                var options = {};
+
+                if (typeof duration == "string") data = toggleAnim, toggleAnim = duration, duration = 400;
+                else if (typeof duration == "object") data = duration, toggleAnim = null, duration = 400;
+
+                var currentActivity = self._currentActivity;
+
+                if (data) {
+                    route.data = Object.assign(route.data || {}, data);
+                }
+
+                options.isForward = isForward;
+
+                duration !== null && (options.duration = duration);
+                toggleAnim !== null && (options.toggleAnim = toggleAnim);
+
+                self._toggle(route, options, isForward ? null : function () {
+                    currentActivity.destroy();
+                });
 
                 return queue;
             });
@@ -445,31 +467,13 @@ var Application = Component.extend(Object.assign(appProto, {
         }
     },
 
-    forward: function (url, options) {
-
-        this.match(url, function (route) {
-            var currentActivity = this._currentActivity;
-
-            (options || (options = {})).isForward = true;
-
-            this._toggle(route, options, function () {
-                currentActivity.trigger('Pause');
-            });
-        })
+    //@arguments=[url,[[duration],[toggleAnim],[data]]]
+    forward: function (url, duration, toggleAnim, data) {
+        this._navigate(url, true, duration, toggleAnim, data);
     },
 
-    back: function (url, options) {
-
-        this.match(url, function (route) {
-            var currentActivity = this._currentActivity;
-
-            (options || (options = {})).isForward = false;
-
-            this._toggle(route, options, function () {
-                currentActivity.destroy();
-            });
-        })
-
+    back: function (url, duration, toggleAnim, data) {
+        this._navigate(url, false, duration, toggleAnim, data);
     }
 }));
 

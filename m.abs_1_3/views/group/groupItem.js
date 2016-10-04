@@ -67,7 +67,7 @@ module.exports = Activity.extend({
         self.user = userModel.get();
 
         self.model = new model.ViewModel(self.$el, {
-            id: self.route.data.id,
+            id: self.route.params.id,
             user: self.user,
             url: encodeURIComponent(self.route.url),
             qty: 1,
@@ -127,7 +127,7 @@ module.exports = Activity.extend({
         self.groupShareAPI = new api.GroupShareAPI({
             $el: self.$el,
             params: {
-                gppid: self.route.data.id
+                gppid: self.route.params.id
             },
             checkData: false,
             success: function (res) {
@@ -138,7 +138,7 @@ module.exports = Activity.extend({
             $el: self.$el,
 
             params: {
-                gppid: self.route.data.id
+                gppid: self.route.params.id
             },
 
             checkData: false,
@@ -165,7 +165,7 @@ module.exports = Activity.extend({
 
                 self.groupShareAPI.setParam({
                     pspcode: self.user.PSP_CODE,
-                    gppid: self.route.data.id
+                    gppid: self.route.params.id
 
                 }).load(function (err, res) {
                     console.log(res);

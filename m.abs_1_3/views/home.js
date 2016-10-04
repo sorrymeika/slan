@@ -16,9 +16,11 @@ var userModel = require("models/user");
 var Category = require("models/category");
 var CpCategory = require("components/category");
 
+var Album = require("widget/album");
+
 var Discovery = require('./discovery/discovery_index');
 
-var trimHash = require('core/route').trimHash;
+var trimHash = require('core/route').formatUrl;
 
 Global.set({
     msg_count: 0,
@@ -167,6 +169,9 @@ module.exports = Activity.extend({
 
         this.startMakeLog();
 
+        //var album = new Album();
+        //album.$el.appendTo($('body'));
+
         var model = this.model = new Model(this.$el, {
             menu: 'head_menu',
             titleClass: 'head_title',
@@ -294,8 +299,6 @@ module.exports = Activity.extend({
                     activity: res.data,
                     topbanner: res.topbanner
                 });
-
-                console.log(model.refs);
 
                 if (self.slider)
                     self.slider.set(res.topbanner.data);

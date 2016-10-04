@@ -91,7 +91,7 @@ module.exports = Activity.extend({
         self.orderApi = new api.OrderAPI({
             $el: self.$el,
             params: {
-                orderId: self.route.data.id,
+                orderId: self.route.params.id,
                 UserID: self.user.ID,
                 Auth: self.user.Auth
             },
@@ -103,7 +103,7 @@ module.exports = Activity.extend({
                 })
 
                 if (self.referrer != '/myorder' && res.data.PUR_PAS_ID == 2) {
-                    self.forward("/news/order" + self.route.data.id);
+                    self.forward("/news/order" + self.route.params.id);
                 }
             }
         });
@@ -121,7 +121,7 @@ module.exports = Activity.extend({
                     }, 2000);
 
                 } else if (res.status == 2) {
-                    self.forward("/news/order" + self.route.data.id);
+                    self.forward("/news/order" + self.route.params.id);
                     self.model.set('data.PUR_PAS_ID', 2);
                 }
             }
@@ -158,7 +158,7 @@ module.exports = Activity.extend({
         self.timer && clearTimeout(self.timer);
 
         self.orderStatusAPI.setParam({
-            id: self.route.data.id
+            id: self.route.params.id
 
         }).load();
     },

@@ -129,6 +129,12 @@ module.exports = Activity.extend({
         if (!userModel.get()) {
             this.forward('/login?success=' + this.route.url + "&from=/");
         }
+
+        bridge.statusBar('dark');
+    },
+
+    onPause: function () {
+        bridge.statusBar("light");
     },
 
     onDestory: function () {

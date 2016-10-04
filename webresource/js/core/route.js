@@ -1,19 +1,24 @@
 ﻿var util = require('util');
 
-var trimHash = function (hash) {
+var Route = function (options) {
+    this.routes = [];
+    this.append(options);
+};
+
+Route.formatUrl = function (hash) {
     var searchIndex = hash.indexOf('?');
     var search = '';
     if (searchIndex != -1) {
         search = hash.substr(searchIndex);
         hash = hash.substr(0, searchIndex);
     }
-    return (hash.replace(/^#+|\/$/, '') || '/').toLowerCase() + search;
-};
+    return (hash.replace(/^#+|\/$/, '') || '/') + search;
+}
 
-var Route = function (options) {
-    this.routes = [];
-    this.append(options);
-};
+Route.compareUrl = function (a, b) {
+
+    return this.formatUrl(a).toLowerCase() == this.formatUrl(b).toLowerCase();
+}
 
 Route.prototype.append = function (options) {
     var option,
@@ -56,7 +61,7 @@ Route.prototype.append = function (options) {
 Route.prototype.match = function (url) {
     var result = null,
         query = {},
-        hash = url = trimHash(url),
+        hash = url = Route.formatUrl(url),
         index = url.indexOf('?'),
         search,
         routes = this.routes,
@@ -90,18 +95,18 @@ Route.prototype.match = function (url) {
                 template: route.template,
                 package: sl.isDebug ? false : util.combinePath(route.root, 'controller'),
                 view: route.view,
-                data: {},
+                params: {},
                 search: search,
                 query: query
             };
 
             for (var j = 0, len = route.parts.length; j < len; j++) {
-                result.data[route.parts[j]] = match[j + 1];
+                result.params[route.parts[j]] = match[j + 1];
             }
 
             if (route.api) {
                 result.api = route.api.replace(/\{([^\}]+?)\}/g, function (match, key) {
-                    return result.data[key];
+                    return result.params[key];
                 });
             }
             break;
@@ -114,7 +119,5 @@ Route.prototype.match = function (url) {
 
     return result;
 }
-
-Route.trimHash = trimHash;
 
 module.exports = Route;

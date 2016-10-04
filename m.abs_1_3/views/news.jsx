@@ -22,7 +22,7 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
         
-        var id = self.route.data.id;
+        var id = self.route.params.id;
         var m = /(order|month|activity|package|fastbuy|banner|coupon){0,1}(\d*)/.exec(id);
         var type = m[1];
         id = m[2];

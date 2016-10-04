@@ -29,7 +29,7 @@ define(function (require, exports, module) {
             this.model = new model.ViewModel(this.$el, {
                 back: '/steward',
                 title: '爱管家',
-                id: self.route.data.id,
+                id: self.route.params.id,
                 url: self.route.url
             });
 

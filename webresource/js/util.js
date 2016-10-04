@@ -17,7 +17,7 @@ if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
 else if (ie) osVersion = ie[1].split('.');
 
-var pad = function(num, n) {
+var pad = function (num, n) {
     var a = '0000000000000000' + num;
     return a.substr(a.length - (n || 2));
 };
@@ -29,13 +29,13 @@ var util = {
     android: isAndroid,
     osVersion: osVersion ? parseFloat(osVersion[0] + '.' + osVersion[1]) : 0,
     isInWechat: /micromessenger/i.test(navigator.userAgent),
-    combinePath: function() {
+    combinePath: function () {
         var args = [].slice.apply(arguments);
         var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^\:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
         var flag = true;
         while (flag) {
             flag = false;
-            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function(match, name) {
+            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function (match, name) {
                 if (name == '..') return match;
                 if (!flag) flag = true;
                 return '';
@@ -43,11 +43,11 @@ var util = {
         }
         return result.replace(/\/$/, '');
     },
-    guid: function() {
+    guid: function () {
         return ++guid;
     },
 
-    uuid: function() {
+    uuid: function () {
         var chars = CHARS,
             uuid = '',
             rnd = 0,
@@ -67,22 +67,22 @@ var util = {
         return uuid;
     },
 
-    isFalse: function(value) {
+    isFalse: function (value) {
         return !value || ($.isArray(value) && !value.length) || (typeof value == 'object' && util.isEmptyObject(value));
     },
 
-    isTrue: function(value) {
+    isTrue: function (value) {
         return !this.isFalse(value);
     },
 
-    isEmptyObject: function(obj) {
+    isEmptyObject: function (obj) {
         for (var name in obj) {
             return false;
         }
         return true;
     },
 
-    keys: function(obj) {
+    keys: function (obj) {
         if (nativeKeys) return nativeKeys(obj);
         var keys = [];
         for (var key in obj)
@@ -90,13 +90,13 @@ var util = {
         return keys;
     },
 
-    extend: function(proto) {
+    extend: function (proto) {
         var parent = this,
-            child = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function() {
+            child = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function () {
                 return parent.apply(this, arguments);
             };
 
-        var Surrogate = function() {
+        var Surrogate = function () {
             this.constructor = child;
         };
         Surrogate.prototype = parent.prototype;
@@ -113,7 +113,7 @@ var util = {
         return child;
     },
 
-    random: function(min, max) {
+    random: function (min, max) {
         if (max == null) {
             max = min;
             min = 0;
@@ -121,7 +121,7 @@ var util = {
         return min + Math.floor(Math.random() * (max - min + 1));
     },
 
-    log: function(msg) {
+    log: function (msg) {
         if (!this.$log) {
             this.$log = $('<div style="height:40px;position:fixed;top:0;left:0;right:0;z-index:100000;background:#fff;overflow-y:scroll;word-break:break-all;word-wrap:break-word;"></div>').appendTo('body');
         }
@@ -131,7 +131,7 @@ var util = {
         this.$log.html(msg + '<br>' + this.$log.html());
     },
 
-    indexOf: function(arr, val) {
+    indexOf: function (arr, val) {
         var isFn = typeof val === 'function',
             length = arr.length;
 
@@ -141,7 +141,7 @@ var util = {
         return -1;
     },
 
-    lastIndexOf: function(arr, val) {
+    lastIndexOf: function (arr, val) {
         var isFn = typeof val === 'function';
         for (var i = arr.length - 1; i >= 0; i--) {
             if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;
@@ -149,7 +149,7 @@ var util = {
         return -1;
     },
 
-    first: function(arr, fn) {
+    first: function (arr, fn) {
         var item;
 
         for (var i = 0, len = arr.length; i < len; i++) {
@@ -160,7 +160,7 @@ var util = {
         return null;
     },
 
-    find: function(arr, fn) {
+    find: function (arr, fn) {
         var result = [],
             item;
 
@@ -173,7 +173,7 @@ var util = {
         return result;
     },
 
-    select: function(arr, fn) {
+    select: function (arr, fn) {
         var result = [],
             length = arr.length;
 
@@ -183,7 +183,7 @@ var util = {
         return result;
     },
 
-    pick: function(obj, iteratee) {
+    pick: function (obj, iteratee) {
         var result = {},
             key;
         if (obj == null) return result;
@@ -204,15 +204,15 @@ var util = {
 
     pad: pad,
 
-    formatMoney: function(number) {
-        return (number + '').replace(/(\d{3})+(\.|$)/, function(match, a) {
-            return match.replace(/\d{3}/g, function(a) {
+    formatMoney: function (number) {
+        return (number + '').replace(/(\d{3})+(\.|$)/, function (match, a) {
+            return match.replace(/\d{3}/g, function (a) {
                 return ',' + a
             })
         }).replace(/^,/, '');
     },
 
-    deepValue: function(data, names) {
+    deepValue: function (data, names) {
         if (typeof names === 'string')
             names = names.split('.');
 
@@ -223,20 +223,22 @@ var util = {
         return data;
     },
 
-    format: function(format, str) {
+    format: function (format, str) {
         var args = arguments;
-        return format.replace(/\{(\d+)\}/g, function(match, index) {
+        return format.replace(/\{(\d+)\}/g, function (match, index) {
             return args[parseInt(index) + 1];
         })
     },
 
-    formatDate: function(d, f) {
+    formatDate: function (d, f) {
         if (typeof d === "string" && /^\/Date\(\d+\)\/$/.test(d)) {
             d = new Function("return new " + d.replace(/\//g, ''))();
-        } else if (typeof d === 'string') {
+        } else if (typeof d === 'string' && !f) {
             f = d, d = new Date;
-        } else if (typeof d === 'number' || !d) {
+        } else if (typeof d === 'number') {
             d = new Date(d);
+        } else {
+            return '';
         }
 
         var y = d.getFullYear() + "",
@@ -258,12 +260,12 @@ var util = {
             .replace(/m/, m)
             .replace(/s{2,}/, pad(s))
             .replace(/s/, s)
-            .replace(/f+/, function(w) {
+            .replace(/f+/, function (w) {
                 return mill.substr(0, w.length)
             })
     },
 
-    style: function(css) {
+    style: function (css) {
         var doc = document,
             head = doc.getElementsByTagName("head")[0],
             style = doc.createElement("style");
@@ -279,24 +281,24 @@ var util = {
         return style;
     },
 
-    currency: function(str, p) {
+    currency: function (str, p) {
         return (p === undefined || p === null ? '￥' : p) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
     },
 
-    template: function(str, data) {
+    template: function (str, data) {
         var tmpl = 'var __p=[];var $data=obj||{};with($data){__p.push(\'' +
             str.replace(/\\/g, '\\\\')
-            .replace(/'/g, '\\\'')
-            .replace(/<%=([\s\S]+?)%>/g, function(match, code) {
-                return '\',' + code.replace(/\\'/, '\'') + ',\'';
-            })
-            .replace(/<%([\s\S]+?)%>/g, function(match, code) {
-                return '\');' + code.replace(/\\'/, '\'')
-                    .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
-            })
-            .replace(/\r/g, '\\r')
-            .replace(/\n/g, '\\n')
-            .replace(/\t/g, '\\t') +
+                .replace(/'/g, '\\\'')
+                .replace(/<%=([\s\S]+?)%>/g, function (match, code) {
+                    return '\',' + code.replace(/\\'/, '\'') + ',\'';
+                })
+                .replace(/<%([\s\S]+?)%>/g, function (match, code) {
+                    return '\');' + code.replace(/\\'/, '\'')
+                        .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
+                })
+                .replace(/\r/g, '\\r')
+                .replace(/\n/g, '\\n')
+                .replace(/\t/g, '\\t') +
             '\');}return __p.join("");',
 
             func = new Function('obj', tmpl);
@@ -304,15 +306,15 @@ var util = {
         return data ? func(data) : func;
     },
 
-    encodeHTML: function(text) {
+    encodeHTML: function (text) {
         return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
     },
 
-    getPath: function(url) {
+    getPath: function (url) {
         return url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase();
     },
 
-    cookie: function(a, b, c, p) {
+    cookie: function (a, b, c, p) {
         if (typeof b === 'undefined') {
             var res = document.cookie.match(new RegExp("(^| )" + a + "=([^;]*)(;|$)"));
             if (res != null)
@@ -332,14 +334,14 @@ var util = {
             document.cookie = a + "=" + escape(b) + (c || "") + ";path=" + (p || '/')
         }
     },
-    store: window.localStorage ? function(key, value) {
+    store: window.localStorage ? function (key, value) {
         if (typeof value === 'undefined')
             return JSON.parse(localStorage.getItem(key));
         if (value === null)
             localStorage.removeItem(key);
         else
             localStorage.setItem(key, JSON.stringify(value));
-    } : function() {
+    } : function () {
         if (typeof value === 'undefined')
             return JSON.parse(this.cookie(key));
         if (value === null)
@@ -347,19 +349,19 @@ var util = {
         else
             this.cookie(key, JSON.stringify(value));
     },
-    noop: function() {},
+    noop: function () { },
 
-    circlePoint: function(x0, y0, r, a) {
+    circlePoint: function (x0, y0, r, a) {
         return {
             x: x0 + r * Math.cos(a * Math.PI / 180),
             y: y0 + r * Math.sin(a * Math.PI / 180)
         };
     },
 
-    validateEmail: function(email) {
+    validateEmail: function (email) {
         return /^[-_a-zA-Z0-9\.]+@([-_a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,3}$/.test(email)
     },
-    validateMobile: function(str) {
+    validateMobile: function (str) {
         return /^1[0-9]{10}$/.test(str)
     }
 };

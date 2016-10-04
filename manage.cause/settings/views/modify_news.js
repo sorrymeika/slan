@@ -32,7 +32,7 @@ return Page.extend({
             }]
         });
 
-        self.model.set('data', $.extend(util.store('current_news'), { Name: this.route.data.name }));
+        self.model.set('data', $.extend(util.store('current_news'), { Name: this.route.params.name }));
 
         self.model.set('data.Sort', self.model.data.data.Sort + '');
 

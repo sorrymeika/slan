@@ -81,7 +81,9 @@ define(function (require, exports, module) {
             self.onStart && self.on('Start', self.onStart);
             self.onResume && self.on('Resume', self.onResume);
             self.onShow && self.on('Show', self.onShow);
+            self.onHide && self.on('Hide', self.onHide);
             self.onPause && self.on('Pause', self.onPause);
+
             self.onQueryChange && self.on('QueryChange', self.onQueryChange);
 
             if (!self.$el.data('path')) {
@@ -161,8 +163,11 @@ define(function (require, exports, module) {
             this._isShowed = true;
         },
 
-        //离开动画结束时触发
+        //离开动画开始时触发
         onPause: null,
+
+        //离开动画结束时触发
+        onHide: null,
 
         onResume: null,
 
@@ -200,12 +205,12 @@ define(function (require, exports, module) {
             return this;
         },
 
-        forward: function (url, options) {
-            this.application.forward(url, options);
+        forward: function (url, duration, toggleAnim, data) {
+            this.application.forward(url, duration, toggleAnim, data);
         },
 
-        back: function (url, options) {
-            this.application.back(url, options);
+        back: function (url, duration, toggleAnim, data) {
+            this.application.back(url, duration, toggleAnim, data);
         },
 
         queryString: function (key, val) {

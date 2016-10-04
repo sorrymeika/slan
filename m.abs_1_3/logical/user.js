@@ -3,7 +3,7 @@ var userModel = require('models/user');
 var api = require('models/api');
 
 var User = {
-    getMonthGifts: function(freId, callback) {
+    getMonthGifts: function (freId, callback) {
         var user = userModel.get();
 
         new api.MonthAPI({
@@ -17,7 +17,7 @@ var User = {
         }).request(callback);
     },
 
-    getMonth: function(callback, $el) {
+    getMonth: function (callback, $el) {
         var user = userModel.get();
 
         new Loader({
@@ -32,7 +32,7 @@ var User = {
         }).request(callback);
     },
 
-    getCouponList: function(callback, $el) {
+    getCouponList: function (callback, $el) {
         var user = userModel.get();
 
         new Loader({
@@ -47,7 +47,7 @@ var User = {
 
         }).request(callback);
     },
-    getCoupon: function(csvId, callback, $el) {
+    getCoupon: function (csvId, callback, $el) {
         var user = userModel.get();
 
         new Loader({
@@ -58,12 +58,13 @@ var User = {
 
                 UserID: user.ID,
                 Auth: user.Auth
-            }
+            },
+            error: function () { }
 
         }).request(callback);
     },
 
-    recieveCoupon: function(csvcode, callback, $el) {
+    recieveCoupon: function (csvcode, callback, $el) {
 
         var user = userModel.get();
 
@@ -74,12 +75,12 @@ var User = {
                 csvcode: csvcode,
                 pspcode: user.PSP_CODE
             },
-            error: function() { }
+            error: function () { }
 
         }).request(callback);
     },
 
-    getCouponStatus: function(csvId, callback, $el) {
+    getCouponStatus: function (csvId, callback, $el) {
         var user = userModel.get();
 
         new Loader({
@@ -90,7 +91,7 @@ var User = {
                 UserID: user.ID,
                 Auth: user.Auth
             },
-            error: function() { }
+            error: function () { }
 
         }).request(callback);
     }

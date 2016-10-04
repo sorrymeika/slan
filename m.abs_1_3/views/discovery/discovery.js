@@ -49,14 +49,14 @@ module.exports = Activity.extend({
         var discoveryAddShareAPI = new api.DiscoveryAddShareAPI({
             $el: self.$el,
             params: {
-                dcvid: self.route.data.id
+                dcvid: self.route.params.id
             }
         });
 
         var discoveryFavAPI = new api.DiscoveryFavAPI({
             $el: self.$el,
             params: {
-                dcvid: self.route.data.id
+                dcvid: self.route.params.id
             },
             success: function () {
                 self.model.set('data.Like_Flag', true).set("data.DCV_LIKE_QTY", (self.model.data.data.DCV_LIKE_QTY || 0) + 1);
@@ -70,7 +70,7 @@ module.exports = Activity.extend({
         var discoveryRemoveFavAPI = new api.DiscoveryRemoveFavAPI({
             $el: self.$el,
             params: {
-                dcvid: self.route.data.id
+                dcvid: self.route.params.id
             },
             success: function () {
                 self.model.set('data.Like_Flag', false).set("data.DCV_LIKE_QTY", (self.model.data.data.DCV_LIKE_QTY || 1) - 1);
@@ -84,7 +84,7 @@ module.exports = Activity.extend({
         var discoveryAPI = new api.DiscoveryAPI({
             $el: self.$el,
             params: {
-                id: self.route.data.id,
+                id: self.route.params.id,
                 pspcode: self.user.PSP_CODE
             },
             checkData: false,

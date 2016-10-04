@@ -1,22 +1,28 @@
-﻿define(function(require, exports, module) {
+﻿define(function (require, exports, module) {
 
     var $ = require('$');
     var util = require('util');
-    var model = require('core/model');
+    var Model = require('core/model2').Model;
     var Page = require('core/page');
+    var Http = require('core/http');
     var Form = require('components/form');
     var Grid = require('components/grid');
 
     return Page.extend({
         events: {},
 
-        onCreate: function() {
+        onCreate: function () {
             var self = this;
 
-            this.model = new model.ViewModel(this.$el, {});
+            this.model = new Model(this.$el, {});
+
+            new Http({
+                url: '/user/test'
+
+            }).request();
         },
 
-        onShow: function() {
+        onShow: function () {
         }
     });
 });

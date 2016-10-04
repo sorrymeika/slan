@@ -74,6 +74,8 @@
             "controller": "user/month",
             "template": "user/month"
         },
+        "/avatars": "user/avatars",
+        "/user/update/{type:\\w+}": "user/update",
         "/coupon/{id:\\d+}": "user/couponItem",
         "/coupon": {
             "controller": "user/coupon",

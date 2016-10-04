@@ -19,6 +19,7 @@ define(function (require, exports, module) {
 
     Http.prototype = {
 
+
         baseUri: $('meta[name="api-base-url"]').attr('content'),
         method: "POST",
         dataType: 'json',

@@ -38,7 +38,7 @@ module.exports = Activity.extend({
         });
 
         expressApi.setParam({
-            pur_code: self.route.data.code,
+            pur_code: self.route.params.code,
             pspcode: self.user.PSP_CODE
 
         }).load()

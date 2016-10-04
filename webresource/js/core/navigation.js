@@ -11,7 +11,6 @@
     var noop = util.noop,
         slice = Array.prototype.slice,
         getPath = util.getPath,
-        trimHash = Route.trimHash,
         checkQueryString = appProto.checkQueryString;
 
     var Navigation = View.extend($.extend(appProto, {
@@ -44,7 +43,6 @@
 
         start: function () {
             var that = this,
-                hash,
                 $win = $(window),
                 $body = $(document.body),
                 $views = $body.find('.view');
@@ -57,10 +55,10 @@
             }
 
             if (!location.hash) location.hash = '/';
-            that.hash = hash = trimHash(location.hash);
+            that.hash = Route.formatUrl(location.hash);
 
             that.promise.then(function () {
-                that.get(hash, function (activity) {
+                that.get(that.hash, function (activity) {
                     activity.$el.show().appendTo(that.el);
                     that._currentActivity = activity;
 
@@ -73,11 +71,11 @@
                 });
 
                 $win.on('hashchange', function () {
-                    hash = that.hash = trimHash(location.hash);
+                    that.hash = Route.formatUrl(location.hash);
 
                     if (that.skip == 0) {
 
-                        that.to(hash);
+                        that.to(that.hash);
 
                     } else if (that.skip > 0)
                         that.skip--;
@@ -91,13 +89,13 @@
         },
 
         navigate: function (url) {
-            url = trimHash(url);
+            url = Route.formatUrl(url);
             this.skip++;
             location.hash = url;
         },
 
         to: function (url) {
-            url = trimHash(url);
+            url = Route.formatUrl(url);
 
             var that = this,
                 promise = that.promise;
@@ -106,7 +104,7 @@
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
-                if (promise.queue.length == 0 && url != trimHash(location.hash)) {
+                if (promise.queue.length == 0 && !Route.compareUrl(url, location.hash) {
                     that.navigate(url);
                 }
 

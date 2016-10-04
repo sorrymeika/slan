@@ -58,7 +58,7 @@ module.exports = Activity.extend({
         var appShareActivityAPI = new api.AppShareActivityAPI({
             $el: self.$el,
             params: {
-                id: self.route.data.id
+                id: self.route.params.id
             },
             success: function (res) {
                 self.model.set({

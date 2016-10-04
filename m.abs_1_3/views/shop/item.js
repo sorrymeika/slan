@@ -53,7 +53,7 @@ define(function (require, exports, module) {
 
             self.model = new model.ViewModel(self.$el, {
                 title: '床品',
-                id: self.route.data.id,
+                id: self.route.params.id,
                 user: self.user,
                 isLogin: !!self.user,
                 url: encodeURIComponent(self.route.url),
@@ -89,7 +89,7 @@ define(function (require, exports, module) {
             var product = new api.ProductAPI({
                 $el: self.$el,
                 params: {
-                    id: self.route.data.id
+                    id: self.route.params.id
                 },
                 checkData: false,
                 success: function (res) {
@@ -174,7 +174,7 @@ define(function (require, exports, module) {
             var packageRelativeAPI = new api.PackageRelativeAPI({
                 $el: self.$el,
                 params: {
-                    prdId: this.route.data.id
+                    prdId: this.route.params.id
                 },
                 checkData: false,
                 success: function (res) {

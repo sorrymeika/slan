@@ -19,7 +19,7 @@ module.exports = Activity.extend({
         self.model = new model.ViewModel(this.$el, {
             back: self.swipeRightBackAction,
             title: '图文详情',
-            id: self.route.data.id
+            id: self.route.params.id
         });
 
         Scroll.bind(self.$('.main'));
@@ -27,7 +27,7 @@ module.exports = Activity.extend({
         var detail = new api.ProductDetailAPI({
             $el: self.$el,
             params: {
-                id: self.route.data.id
+                id: self.route.params.id
             },
             success: function (res) {
                 self.model.set({

@@ -132,6 +132,11 @@ var touchStart = function (e) {
         point = e.touches[0],
         now = +new Date;
 
+    if (e.touches.length == 2) {
+        el.__isStop = true;
+        return;
+    }
+
     touchStartEvent = e;
 
     e.scrolling = false;
@@ -144,6 +149,7 @@ var touchStart = function (e) {
     el.__isMoved = false;
     el.__isStart = false;
     el.__isStop = false;
+    el.__isPreventScroll = false;
     el.__isScroll = false;
 };
 
@@ -223,7 +229,8 @@ var touchEnd = function (e) {
         pointY = e.changedTouches[0].pageY,
         dy = Math.abs(el.__lastPY - pointY);
 
-    scrollStop(el);
+    if (el.__isMoved || touchStartEvent.isHoldScroll)
+        scrollStop(el);
 
     if (util.ios && dy < 5) {
         el.__isStop = false;
@@ -234,6 +241,7 @@ var touchEnd = function (e) {
     }
 
     e.cancelTap === undefined && (e.cancelTap = el.__isScroll || touchStartEvent.isHoldScroll);
+
     if (el.__isScroll && !el.__isStop || touchStartEvent.isHoldScroll) {
         e.stopPropagation();
         e.preventDefault();
@@ -292,6 +300,8 @@ exports.bind = function (selector, options) {
             scrollView,
             ret;
 
+        if (el.scroll) return;
+
         if (options && options.useScroll || util.android && parseFloat(util.osVersion <= 2.3)) {
             ret = scrollView = new ScrollView(this, options);
         }
@@ -327,6 +337,12 @@ exports.bind = function (selector, options) {
                         .off('touchmove', touchMove)
                         .off('touchend', touchEnd)
                         .off('scroll', scroll);
+                },
+                scrollHeight: function () {
+                    return this.el.scrollHeight;
+                },
+                scrollTop: function () {
+                    return this.el.scrollTop;
                 },
                 scrollTo: function (x, y, duration) {
                     if (duration) {

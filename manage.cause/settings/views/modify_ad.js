@@ -34,7 +34,7 @@
                 }]
             });
 
-            self.model.set('data', $.extend(util.store('current_ad'), { Name: this.route.data.name }));
+            self.model.set('data', $.extend(util.store('current_ad'), { Name: this.route.params.name }));
 
             console.log(self.model.data.data)
 
