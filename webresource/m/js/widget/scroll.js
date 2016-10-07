@@ -125,7 +125,7 @@ var _refresh = function () {
     });
 };
 
-var touchStartEvent;
+var touchStartEvent={};
 
 var touchStart = function (e) {
     var el = this,

@@ -1,0 +1,13 @@
+$color: #42be52;
+$deepcolor: #c00;
+$lightcolor:#ffa5b5;
+$bgcolor: #fe4a5d;
+$fontcolor: #333;
+
+$blue: #3FA9F5;
+
+@mixin arrow($color:#fff,$size:10px) { position: relative; border-top: 2px solid $color; border-right: 2px solid $color; width: $size; height: $size; font-size: 0px; vertical-align: middle; -webkit-transform: rotate(45deg); -webkit-transform-origin: 50% 50%; display: inline-block; }
+
+@mixin border($color:#aaa) { content: ''; display: block; -webkit-transform: scale(.5); width: 200%; border-top: 1px solid $color; -webkit-transform-origin: left bottom; position: absolute; bottom: 0px; }
+
+@mixin arrow_left($color:#fff,$size:10px) { position: relative; border-top: 2px solid $color; border-right: 2px solid $color; width: $size; height: $size; font-size: 0px; vertical-align: middle; -webkit-transform: rotate(-135deg); display: inline-block; top: -5px; -webkit-transform-origin: 50% 50%; }

@@ -75,6 +75,7 @@
             "template": "user/month"
         },
         "/avatars": "user/avatars",
+        "/feedback": "user/feedback",
         "/user/update/{type:\\w+}": "user/update",
         "/coupon/{id:\\d+}": "user/couponItem",
         "/coupon": {

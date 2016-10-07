@@ -1,18 +1,9 @@
 {
     "debug": true,
-    "useLocal": false,
     "dest": "./dest",
-    "api": "http://192.168.0.100:5559/proxy3",
-    "shopApi": "http://192.168.0.100:5559/proxy",
-    "updateApi": "http://192.168.0.100:5559/proxy2",
+    "api": "http://127.0.0.1:6006",
     "proxy": {
-        "/proxy/*": "testappapi-1-3-2.abs.cn",
-        "/proxy1/*": "172.16.168.185:6005",
-        "/proxy2/*": "testappversion.abs.cn",
-        "/proxy3/*": "appuser2.abs.cn",
-        "/proxy_/*": "appapi-1-3-2.abs.cn",
-        "/proxy2_/*": "appversion.abs.cn",
-        "/proxy3_/*": "appuser.abs.cn"
+        "/proxy/*": "testappapi-1-2-0.abs.cn"
     },
     "css": [
         "../webresource/m/images/style.css",
@@ -27,34 +18,30 @@
         "../webresource/m",
         "../webresource/m/js"
     ],
-    "port": 5559,
+    "port": 5560,
     "projects": [
         "./"
     ],
     "env": {
         "production": {
-            "api": "http://appuser.abs.cn",
-            "shopApi": "http://appapi-1-3-2.abs.cn",
-            "updateApi": "http://appversion.abs.cn"
+            "api": "http://appuser.abs.cn"
         },
         "test": {
-            "api": "http://appuser2.abs.cn",
-            "shopApi": "http://testappapi-1-3-2.abs.cn",
-            "updateApi": "http://testappversion.abs.cn"
+            "api": "http://appuser2.abs.cn"
         },
         "debug": {
-            "api": "http://appuser2.abs.cn",
-            "shopApi": "http://testappapi-1-3-2.abs.cn",
-            "updateApi": "http://testappversion.abs.cn",
-            "useLocal": true
+            "api": "http://10.0.76.119:5559/proxy1"
         },
         "dev": {
-            "api": "http://192.168.0.100:5559/proxy1",
-            "shopApi": "http://192.168.0.100:5559/proxy",
-            "updateApi": "http://192.168.0.100:5559/proxy2"
+            "api": "http://10.0.76.119:6005"
         }
     },
-    "js": {},
+    "js": {
+        "components": {
+            "components/share": null,
+            "models/api": null
+        }
+    },
     "framework": {
         "seajs": "../webresource/js/seajs/sea",
         "zepto": "../webresource/js/zepto",
@@ -63,7 +50,6 @@
         "extend/matchMedia": "../webresource/m/js/extend/matchMedia",
         "extend/ortchange": "../webresource/m/js/extend/ortchange",
         "util": "../webresource/js/util",
-        "util/barcode": "../webresource/js/util/barcode",
         "util/md5": "../webresource/js/util/md5",
         "bridge": "../webresource/m/js/bridge",
         "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
@@ -76,7 +62,7 @@
         "core/component": "../webresource/js/core/component",
         "core/view": "../webresource/js/core/view",
         "core/model": "../webresource/js/core/model",
-        "core/model2": "../webresource/js/core/model2",
+        "core/page": "../webresource/js/core/page",
         "core/route": "../webresource/js/core/route",
         "core/animation": "../webresource/js/core/animation",
         "core/appProto": "../webresource/js/core/appProto",
@@ -87,14 +73,8 @@
         "widget/scroll": "../webresource/m/js/widget/scroll",
         "widget/tip": "../webresource/js/widget/tip",
         "widget/dialog": "../webresource/js/widget/dialog",
-        "widget/loader": "../webresource/m/js/widget/loader",
+        "widget/loading": "../webresource/m/js/widget/loading",
         "widget/offline": "../webresource/m/js/widget/offline",
-        "widget/slider": "../webresource/m/js/widget/slider",
-        "widget/tab": "../webresource/m/js/widget/tab",
-        "widget/toast": "../webresource/js/widget/toast",
-        "widget/selector": "../webresource/m/js/widget/selector",
-        "widget/album": "../webresource/m/js/widget/album",
-        "widget/photoViewer": "../webresource/m/js/widget/photoViewer",
         "anim/default": "../webresource/m/js/anim/default"
     }
 }

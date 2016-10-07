@@ -1,0 +1,20 @@
+{
+    "root": "/",
+    "js": {},
+    "css": {
+        "images/style.css": [
+            "images/app.css"
+        ],
+        "images/append.css": [
+            "images/append.css"
+        ]
+    },
+    "images": [
+        "./images"
+    ],
+    "route": {
+        "/": "home",
+        "/signup": "signup",
+        "/login": "login"
+    }
+}

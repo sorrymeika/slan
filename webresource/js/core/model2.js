@@ -27,7 +27,10 @@ var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
-var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
+//var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
+var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
+
+//   /(?:\((?:\(.*?\)|.)*?\)|.)/
 
 var Filters = {
     contains: function (source, keywords) {
@@ -133,12 +136,13 @@ function setRefs(viewModel, el) {
 }
 
 function updateRequireView(viewModel, el) {
-    var data = viewModel.fns[el.getAttribute('sn-data')].call(viewModel, viewModel.formatData(el));
+    var id = el.getAttribute('sn-data');
+    var data = !id ? null : viewModel.fns[id].call(viewModel, viewModel.formatData(el));
     var instance
 
     if (el.snRequireInstance) {
         instance = el.snRequireInstance;
-        instance.set(data)
+        data && instance.set(data)
 
     } else {
         var children = [];
@@ -705,13 +709,16 @@ var viewModelList = [];
 function ViewModel(el, data, children) {
     if (el !== false) viewModelList.push(this);
 
-    if ((typeof data === 'undefined' || $.isArray(data)) && (el == undefined || $.isPlainObject(el)))
+    if ((typeof data === 'undefined' || $.isArray(data)) && (el === undefined || el === null || $.isPlainObject(el)))
         children = data, data = el, el = this.el;
 
     this.children = [].concat(children);
 
     this.updateView = this.updateView.bind(this);
     this._handleEvent = this._handleEvent.bind(this);
+
+    if (this.viewWillUpdate) this.on('viewWillUpdate', this.viewWillUpdate);
+    if (this.viewDidUpdate) this.on('viewDidUpdate', this.viewDidUpdate);
 
     this.cid = util.guid();
     this.snModelKey = 'sn-' + this.cid + 'model';
@@ -826,11 +833,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             if (val) {
                 if (attr == 'sn-error') {
                     attr = 'onerror'
-                } else if (attr == 'sn-src') {
-                    attr = 'src'
                 }
 
-                if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr == "sn-data" || attr.indexOf('sn-') != 0) {
+                if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-src' || attr == 'sn-style' || attr == "sn-data" || attr.indexOf('sn-') != 0) {
                     if (attr.indexOf('sn-') == 0 && (val.indexOf("{") == -1 || val.indexOf("}") == -1)) {
                         val = '{' + val + '}';
                     }
@@ -1025,10 +1030,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     break;
                 case 'checked':
                 case 'selected':
+                case 'disabled':
                     (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
                     break;
                 case 'src':
                     el.src = val;
+                    console.log(el.src);
                     break;
                 case 'sn-src':
                     if (el.src) {
@@ -1206,6 +1213,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
     updateView: function () {
         // console.time('updateView')
+        this._nextTick = null;
+        this.trigger('viewWillUpdate');
+
+        if (this._nextTick) return;
 
         var self = this;
 
@@ -1225,7 +1236,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             })
         }
 
-        this._nextTick = null;
         this.trigger('viewDidUpdate');
     },
 

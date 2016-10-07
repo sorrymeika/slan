@@ -1,0 +1,17 @@
+<header>
+    <div class="head_title">{title}</div>
+    <div class="head_msg iconfont icon-mail" ref="msg">
+        <i class="iconfont icon-favfull" sn-display="{$state.msgCount}"><em>{$state.msgCount}</em></i>
+    </div>
+</header>
+<div class="main" sn-display="{tab==0}">
+</div>
+<footer class="footer">
+    <ul>
+        <li class="iconfont icon-home1{tab==0?' curr':''}" sn-tap="this.changeTab(0)"></li>
+        <li class="iconfont icon-topic1{tab==1?' curr':''}" sn-tap="this.changeTab(1)"></li>
+        <li class="iconfont icon-find{tab==2?' curr':''}" sn-tap="this.changeTab(2)"></li>
+        <li class="iconfont icon-lovemessage{tab==3?' curr':''}" sn-tap="this.changeTab(3)"></li>
+        <li class="iconfont icon-user2{tab==4?' curr':''}" sn-tap="this.changeTab(4)"></li>
+    </ul>
+</footer>

@@ -11,7 +11,7 @@ var userModel = require('models/user');
 
 var UpdateType = {
     userName: {
-        key: 'userName',
+        key: 'UserName',
         title: '修改会员名'
     }
 }
@@ -21,11 +21,21 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
 
+        var user = userModel.get();
+
         this.loader = new Loader({
             $el: this.$el
         });
 
-        var model = this.model = new Model(this.$el, Object.assign({}, UpdateType[this.route.params.type]));
+        var props = UpdateType[this.route.params.type];
+
+        var model = this.model = new Model(this.$el, Object.assign({
+            text: user[props.key],
+            origin: user[props.key]
+
+        }, props));
+
+        model.refs.text.focus();
 
         model.back = function () {
             self.back(self.swipeRightBackAction);

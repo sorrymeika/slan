@@ -25,7 +25,10 @@ module.exports = {
 
         this.popup({
             content: content,
-            action: params.action
+            action: function () {
+                this.hide();
+                params.action.call(this);
+            }
         })
     },
 
@@ -39,7 +42,10 @@ module.exports = {
         this.popup({
             content: content,
             confirmAction: params.confirmAction,
-            cancelAction: params.cancelAction
+            cancelAction: function () {
+                this.hide();
+                params.cancelAction.call(this);
+            }
         })
     },
 

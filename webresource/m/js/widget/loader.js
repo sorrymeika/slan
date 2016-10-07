@@ -141,9 +141,13 @@
             if (that.pageIndex == 1) {
 
                 if (!that.$loading) {
-                    that.$loading = $(that.template);
+                    that.$loading = $(that.template).on($.fx.transitionEnd, function () {
+                        if (!$(this).hasClass('show')) {
+                            this.style.display = "none";
+                        }
+                    });
                 }
-                that.$loading.show().appendTo(that.$el)[0].clientHeight;
+                that.$loading.show().appendTo(that.$el)//[0].clientHeight;
                 that.$loading.addClass('show');
 
                 that.$refreshing && that.$refreshing.hide();
@@ -158,6 +162,7 @@
             this.$error && this.$error.hide();
             this.$refreshing && this.$refreshing.hide();
             this.$loading.removeClass('show');
+
             this.isLoading = false;
         },
 
