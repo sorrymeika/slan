@@ -13,7 +13,15 @@
 
     var Master = {
         checkQueryString: function (activity, route) {
+            if (route.data) {
+                Object.assign(activity.route.data, route.data);
+            }
+
+            console.log(activity.route.url, route.url)
+
             if (activity.route.url != route.url) {
+                route.data = activity.route.data;
+
                 activity._setRoute(route);
 
                 var diff = {};

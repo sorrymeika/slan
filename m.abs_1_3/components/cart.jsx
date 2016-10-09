@@ -56,16 +56,6 @@ var Cart = Model.extend({
 				res.total = count;
 				res.loading = false;
 
-				res.data_package = [{
-					PPG_NAME: 'xxx',
-					PackageList: [$.extend({}, res.data_baglist[0])]
-
-				}, {
-						PPG_NAME: 'xx1x',
-						PackageList: [$.extend({}, res.data_baglist[0]), $.extend({}, res.data_baglist[0])]
-
-					}]
-
 				self.set(res);
 
 				var couponCount = 0;
@@ -308,85 +298,6 @@ var Cart = Model.extend({
 			spbId: item.SPB_ID,
 			qty: qty
 		}).load();
-	},
-
-	usePoint: function (points) {
-		if (!points) {
-			this.set({
-				isShowPoint: false,
-				Points: 0
-			});
-			return;
-		}
-		points = parseFloat(points);
-		if (points > this.user.Points) {
-			Toast.showToast('您输入的数值已超过您的积分最大值，请重新输入');
-			return;
-		}
-		else if (points < 100 || points % 100 != 0) {
-			Toast.showToast('您输入的数值不是100的倍数，请重新输入');
-			return;
-		}
-
-		this.set({
-			isShowPoint: false,
-			Points: points
-		});
-	},
-
-	useCoupon: function (coupon) {
-		if (coupon.VCT_ID == 1 && coupon.VCA_MIN_AMOUNT > self.data.bag_amount) {
-			Toast.showToast('您的购物金额满' + coupon.VCA_MIN_AMOUNT + '元才可使用哦');
-			return;
-		}
-
-		if (coupon.VCT_ID == 4) {
-			this.set({
-				freecouponcode: this.data.freecouponcode && this.data.freecouponcode.CSV_CODE == coupon.CSV_CODE
-					? null
-					: coupon
-			});
-
-		} else if (coupon.VCT_ID == 5) {
-			var usedCoupons = this.data.usedCoupons || [];
-			var index = util.indexOf(usedCoupons, function (item) {
-				return item.CSV_CODE == coupon.CSV_CODE;
-			});
-
-			if (index != -1) {
-				usedCoupons.splice(index, 1);
-			} else {
-				usedCoupons.push(coupon);
-			}
-
-			var codes = [];
-			var amount = 0;
-			usedCoupons.forEach(function (item) {
-				codes.push(item.CSV_CODE);
-				amount += item.VCA_DEDUCT_AMOUNT;
-			});
-
-			this.set({
-				usedCoupons: usedCoupons,
-				couponcode: {
-					VCT_ID: 5,
-					VCA_DEDUCT_AMOUNT: amount,
-					CSV_CODE: codes.join(',')
-				}
-			});
-
-		} else {
-			this.set({
-				usedCoupons: [],
-				couponcode: this.data.couponcode && this.data.couponcode.CSV_CODE == coupon.CSV_CODE
-					? null
-					: coupon
-			})
-		}
-
-		this.set({
-			isShowCoupon: false
-		});
 	},
 
 	submit: function () {

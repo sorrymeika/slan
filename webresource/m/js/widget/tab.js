@@ -24,6 +24,16 @@ var Tab = Model.extend({
         cursorX: 0
     },
 
+    viewDidUpdate: function () {
+        this.wapperW = this.refs.body.offsetWidth;
+        this.touch.maxX = this.refs.content.offsetWidth - this.wapperW;
+
+        this.refs.items.forEach(function (item) {
+            if (!item.scroll)
+                Scroll.bind(item);
+        });
+    },
+
     initialize: function (data) {
 
         var self = this;
@@ -34,11 +44,6 @@ var Tab = Model.extend({
                 cursorWidth: this.refs.heads[this.data.index].offsetWidth
             });
         });
-
-        this.on('viewDidUpdate', function () {
-            this.wapperW = self.refs.body.offsetWidth;
-            this.touch.maxX = self.refs.content.offsetWidth - this.wapperW;
-        })
 
         this.touch = new Touch(this.refs.body, {
             enableVertical: false,
@@ -71,7 +76,7 @@ var Tab = Model.extend({
 
                 self.set({
                     cursorX: currentHeadX + (nextHeadLeft - currentHeadX) * percent,
-                    cursorWidth: currentHeadWidth + (currentHeadWidth - nextHead.offsetWidth) * percent
+                    cursorWidth: currentHeadWidth + (nextHead.offsetWidth - currentHeadWidth) * percent
                 });
             }
 
@@ -102,6 +107,9 @@ var Tab = Model.extend({
         var index = page >= this.data.items.length ? 0 : page < 0 ? this.data.items.length - 1 : page;
 
         self.touch.scrollTo(self.refs.body.offsetWidth * index, 0, duration, function () {
+            if (index !== self.data.index) {
+                self.trigger('tabChange', index, self.data.index);
+            }
             self.set({
                 index: index,
                 cursorX: self.refs.heads[index].offsetLeft,

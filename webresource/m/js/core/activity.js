@@ -1,6 +1,7 @@
 define(function (require, exports, module) {
 
     var util = require('util'),
+        Event = require('./event'),
         Promise = require('./promise'),
         Scroll = require('widget/scroll'),
         Component = require('./component'),
@@ -49,14 +50,13 @@ define(function (require, exports, module) {
         },
 
         _setRoute: function (route) {
-            var backUrl;
+            this._query = $.extend({}, this.query);
 
             this.route = route;
             this.hash = route.hash;
             this.url = route.url;
             this.path = route.path;
-            this._query = this.query;
-            this.query = $.extend({}, route.query);
+            this.query = route.query;
 
             return this;
         },
@@ -214,17 +214,30 @@ define(function (require, exports, module) {
         },
 
         queryString: function (key, val) {
+            var query = this.route.query;
+
             if (typeof val === 'undefined')
-                return this.route.query[key];
+                return query[key];
+
+            if (query[key] == val) return;
 
             else if (val === null || val === false || val === '')
-                delete this.route.query[key];
+                delete query[key];
             else
-                this.route.query[key] = val || '';
+                query[key] = val;
 
-            var query = $.param(this.route.query);
+            var queryString = $.param(query);
 
-            this.application.navigate(this.route.path + (query ? '?' + query : ''));
+            this.route.url = this.url = this.route.path + (queryString ? '?' + queryString : '');
+
+            this.application.navigate(this.url);
+
+            var data = {};
+            data[key] = val;
+
+            this.trigger(new Event('QueryChange', {
+                data: data
+            }));
         },
 
         _queryActions: {},

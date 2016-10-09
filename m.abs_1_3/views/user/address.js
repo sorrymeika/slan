@@ -6,7 +6,7 @@ var model = require('core/model');
 var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
-var Deletion = require("components/deletion");
+var Deletion = require("widget/deletion");
 
 module.exports = Activity.extend({
     events: {

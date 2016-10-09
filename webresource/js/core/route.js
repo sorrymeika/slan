@@ -97,7 +97,8 @@ Route.prototype.match = function (url) {
                 view: route.view,
                 params: {},
                 search: search,
-                query: query
+                query: query,
+                data: {}
             };
 
             for (var j = 0, len = route.parts.length; j < len; j++) {

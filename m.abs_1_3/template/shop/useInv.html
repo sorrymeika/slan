@@ -1,0 +1,47 @@
+﻿<header class="white_header bottom_border">
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
+    <div class="head_right" sn-tap="this.useInv()">确定</div>
+</header>
+<div class="main">
+    <div class="sp_useinv">
+
+        <div class="sp_useinv__info bottom_border">
+            是否需要开票
+            <div class="cp_switch {requireInv?'cp_switch_on':''}" sn-tap="requireInv=!requireInv"></div>
+        </div>
+
+        <div class="sp_useinv__info top_bottom_border" sn-if="requireInv">
+            <div class="hd bottom_border">发票类型</div>
+            <div class="bd">
+                <div class="radio checked"></div>普通发票
+            </div>
+        </div>
+        <div class="sp_useinv__info top_bottom_border" sn-if="requireInv">
+            <div class="hd bottom_border">开票方式</div>
+            <div class="bd">
+                <div class="radio checked"></div>纸质发票
+            </div>
+        </div>
+        <div class="sp_useinv__info top_bottom_border" sn-if="requireInv">
+            <div class="hd bottom_border">发票抬头</div>
+            <ul class="bd">
+                <li sn-tap="isCompany=false" class="bottom_border">
+                    <div class="radio {!isCompany?'checked':''}"></div>个人
+                </li>
+                <li sn-tap="isCompany=true">
+                    <div class="radio {isCompany?'checked':''}"></div>公司
+                </li>
+                <li sn-if="isCompany" class="com">
+                    <input type="text" sn-model="company" value='{company}'>
+                </li>
+            </ul>
+        </div>
+        <div class="sp_useinv__info top_bottom_border" sn-if="requireInv">
+            <div class="hd bottom_border">发票内容</div>
+            <div class="bd">
+                <div class="radio checked"></div>家居
+            </div>
+        </div>
+    </div>
+</div>

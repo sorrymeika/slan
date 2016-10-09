@@ -742,7 +742,19 @@ function ViewModel(el, data, children) {
 
 ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
-    _updateElementData: function (el, modelName, value) {
+    getDataFromElement: function (el, modelName) {
+        var attrs = modelName.split('.');
+        var model;
+
+        if (el.snData && attrs[0] in el.snData) {
+            model = el.snData[attrs.shift()];
+        } else {
+            model = this;
+        }
+        return model.get(attrs);
+    },
+
+    setDataFromElement: function (el, modelName, value) {
         var attrs = modelName.split('.');
         var model;
 
@@ -752,6 +764,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             model = this;
         }
         model.set(attrs, value);
+        return this;
     },
 
     //事件处理
@@ -773,7 +786,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             snData.e = e;
 
-            return this.fns[eventCode].call(this, snData);
+            var res = this.fns[eventCode].call(this, snData);
+
+            return res;
         }
     },
 
@@ -884,7 +899,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                 }
                                 return $1 + $2 + ($2 ? ',e)' : 'e)');
 
-                            }).replace(rset, 'this._updateElementData(e.currentTarget,"$1",$2)');
+                            }).replace(rset, 'this.setDataFromElement(e.currentTarget,"$1",$2)');
 
                             var fid = self.getFunctionId('{' + content + '}');
                             if (fid) {
@@ -1244,7 +1259,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
             var target = e.currentTarget;
 
-            self._updateElementData(target, target.getAttribute(self.snModelKey), target.value);
+            self.setDataFromElement(target, target.getAttribute(self.snModelKey), target.value);
         });
 
         this._bindElement($el);

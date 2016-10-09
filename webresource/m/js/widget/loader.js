@@ -3,7 +3,7 @@
         _ = require('util'),
         $empty = $();
 
-    var extend = ['$el', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
+    var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
 
     var Loader = function (options) {
 
@@ -92,7 +92,8 @@
         },
 
         showMoreMsg: function (msg) {
-            var $refreshing = (this.$refreshing || (this.$refreshing = $(this.refresh)).appendTo(this.$content));
+
+            var $refreshing = (this.$refreshing || (this.$refreshing = $(this.refreshTemplate)).appendTo(this.$content));
 
             $refreshing.find('.js_msg').show().html(msg);
             $refreshing.show().find('.js_loading').hide();
@@ -314,6 +315,7 @@
             var that = this,
                 data = that.params;
 
+
             if (that.append && ((that.DATAKEY_PAGENUM && res[that.DATAKEY_PAGENUM] && res[that.DATAKEY_PAGENUM] > data[that.KEY_PAGE]) || (that.DATAKEY_TOTAL && res[that.DATAKEY_TOTAL] && res[that.DATAKEY_TOTAL] > data[that.KEY_PAGE] * parseInt(data[that.KEY_PAGESIZE])))) {
 
                 that.pageIndex++;
@@ -333,9 +335,13 @@
 
             this.$scroll.on('scrollStop', $.proxy(this._scroll, this));
 
-            if (this.el && this.el.scrollTop + this.$scroll.height() >= this.$refreshing[0].offsetTop) {
-                this._refresh();
-            }
+            var self = this;
+
+            setTimeout(function () {
+                if (self.el && self.el.scrollTop + self.$scroll.height() >= self.$refreshing[0].offsetTop) {
+                    self._refresh();
+                }
+            }, 200);
         },
 
         disableAutoRefreshing: function () {

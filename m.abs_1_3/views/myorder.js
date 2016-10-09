@@ -3,14 +3,13 @@ define(function (require, exports, module) {
     var $ = require('$');
     var util = require('util');
     var Activity = require('activity');
-    var Loading = require('../widget/loader');
-    var model = require('core/model');
+    var Loader = require('../widget/loader');
+    var Tab = require('../widget/tab');
+    var model = require('core/model2');
     var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var bridge = require('bridge');
     var api = require('models/api');
-
-    var IFRAME;
 
     return Activity.extend({
         events: {
@@ -28,11 +27,8 @@ define(function (require, exports, module) {
 
         onCreate: function () {
             var self = this;
-            var $main = this.$('.main');
 
             self.user = util.store('user');
-
-            Scroll.bind($main);
 
             this.model = new model.ViewModel(this.$el, {
                 back: '/',
@@ -41,6 +37,49 @@ define(function (require, exports, module) {
                 currentType: 0,
                 isLoading: true,
                 isShowShare: true
+
+            }).next(function () {
+                var tab = self.tab = this.refs.tab;
+
+                var inits = {};
+
+                var createLoader = function (index) {
+                    if (inits[index]) return;
+                    inits[index] = true;
+
+                    var key = 'data' + (index || '');
+
+                    var loader = new Loader({
+                        url: "/api/order/list",
+                        $el: self.$el,
+                        $refreshing: $(self.model.refs.refreshing),
+                        $scroll: $(tab.refs.items[index]),
+                        checkData: false,
+                        success: function (res) {
+                            var data = {
+                                isLoading: false
+                            }
+                            data[key] = res.data;
+                            self.model.set(data);
+                        },
+                        append: function (res) {
+                            self.model.getModel(key).add(res.data);
+                        }
+                    });
+
+                    loader.setParam({
+                        UserID: self.user.ID,
+                        Auth: self.user.Auth
+
+                    }).request();
+                }
+
+                tab.on('tabChange', function (e, index) {
+                    createLoader(index)
+
+                }).next(function () {
+                    createLoader(0)
+                });
             });
 
             this.wxPayApi = new api.WxPayAPI({
@@ -59,7 +98,6 @@ define(function (require, exports, module) {
                 }
             });
 
-
             var orderShareAPI = new api.OrderShareAPI({
                 $el: this.$el,
                 checkData: false,
@@ -75,7 +113,7 @@ define(function (require, exports, module) {
             orderShareAPI.load();
 
             $.extend(this.model, {
-                select: function (e, type) {
+                select: function (type, e) {
                     if (!$(e.currentTarget).hasClass('curr')) {
                         $(e.currentTarget).addClass('curr').siblings('.curr').removeClass('curr');
 
@@ -99,7 +137,7 @@ define(function (require, exports, module) {
                         this.set('currentType', type)
                     }
                 },
-                showExpress: function (e, item, itemModel) {
+                showExpress: function (item, itemModel, e) {
                     itemModel.set('showExpress', !item.showExpress);
                     e.stopPropagation();
 
@@ -119,7 +157,7 @@ define(function (require, exports, module) {
 
 
                 },
-                openOrder: function (e, order) {
+                openOrder: function (order, e) {
                     if ($(e.target).hasClass('btn_sml') && $(e.target).html() != '立即付款') return;
 
                     self.forward('/order/' + order.PUR_ID);
@@ -129,7 +167,7 @@ define(function (require, exports, module) {
                     //}
                     e.stopPropagation();
                 },
-                cancelOrder: function (e, order) {
+                cancelOrder: function (order, e) {
 
                     self.confirm('你确定取消订单吗？', function () {
                         self.cancelOrderApi.setParam({
@@ -140,7 +178,7 @@ define(function (require, exports, module) {
                     e.stopPropagation();
                     e.preventDefault();
                 },
-                openPrd: function (e, prd, order) {
+                openPrd: function (prd, order, e) {
                     e.stopPropagation();
                     if (order.PUS_DESC != '待付款' || e.target.tagName == "IMG") {
                         if (prd.PRD_DISCONTINUED_FLAG) {
@@ -162,28 +200,6 @@ define(function (require, exports, module) {
                     self.$open_msg.hide();
                 }
             });
-
-            self.loading = new Loading({
-                url: "/api/order/list",
-                $el: this.$el,
-                checkData: false,
-                success: function (res) {
-                    self.model.set({
-                        isLoading: false,
-                        data: res.data
-                    });
-                },
-                append: function (res) {
-                    self.model.getModel('data').add(res.data);
-                }
-            });
-
-
-            self.loading.setParam({
-                UserID: self.user.ID,
-                Auth: self.user.Auth
-
-            }).load();
 
             self.onResult("OrderChange", function () {
                 self.loading.reload();
@@ -208,8 +224,6 @@ define(function (require, exports, module) {
                     sl.tip(res.msg);
                 }
             });
-
-
         },
 
         onShow: function () {

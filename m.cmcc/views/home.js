@@ -14,7 +14,7 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = self.model = new Model(this.$el, {
-            title: '缘起之因'
+            title: ''
         });
 
         Scroll.bind(this.$('.main'));

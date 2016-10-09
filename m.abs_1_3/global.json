@@ -2,9 +2,9 @@
     "debug": true,
     "useLocal": false,
     "dest": "./dest",
-    "api": "http://192.168.0.100:5559/proxy3",
-    "shopApi": "http://192.168.0.100:5559/proxy",
-    "updateApi": "http://192.168.0.100:5559/proxy2",
+    "api": "http://127.0.0.1:5559/proxy3",
+    "shopApi": "http://127.0.0.1:5559/proxy",
+    "updateApi": "http://127.0.0.1:5559/proxy2",
     "proxy": {
         "/proxy/*": "testappapi-1-3-2.abs.cn",
         "/proxy1/*": "172.16.168.185:6005",
@@ -16,6 +16,7 @@
     },
     "css": [
         "../webresource/m/images/style.css",
+        "../webresource/m/images/offline.css",
         "../webresource/m/images/anim.css"
     ],
     "images": [
@@ -49,9 +50,9 @@
             "useLocal": true
         },
         "dev": {
-            "api": "http://192.168.0.100:5559/proxy1",
-            "shopApi": "http://192.168.0.100:5559/proxy",
-            "updateApi": "http://192.168.0.100:5559/proxy2"
+            "api": "http://127.0.0.1:5559/proxy1",
+            "shopApi": "http://127.0.0.1:5559/proxy",
+            "updateApi": "http://127.0.0.1:5559/proxy2"
         }
     },
     "js": {},
@@ -95,6 +96,7 @@
         "widget/selector": "../webresource/m/js/widget/selector",
         "widget/album": "../webresource/m/js/widget/album",
         "widget/photoViewer": "../webresource/m/js/widget/photoViewer",
+        "widget/deletion": "../webresource/m/js/widget/deletion",
         "anim/default": "../webresource/m/js/anim/default"
     }
 }

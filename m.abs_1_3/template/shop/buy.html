@@ -1,46 +1,72 @@
-﻿<header>
-    <div class="head_back" data-back="{{back}}"></div>
-    <div class="head_title">{{title}}</div>
+<header>
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
 </header>
 <div class="main">
     <div class="sp_buy">
-        <div class="sp_buy_hd js_address">
-            <div class="info"><span class="name">{{address.MBA_NAME}}</span><span class="mobi">{{address.MBA_MOBILE}}</span></div>
-            <div class="loc">{{address.MBA_FULL_ADDRESS}}</div>
+        <div class="sp_buy__addr" sn-tap="this.selectAddress()">
+            <div class="icon-loc"></div>
+            <div class="info">收货人：<span class="name">{address.MBA_NAME}</span><span class="mobi">{address.MBA_MOBILE}</span></div>
+            <div class="loc">收货地址：{address.MBA_FULL_ADDRESS}</div>
         </div>
-        <div class="sp_buy_bd sp_buy_bill">
-            <div class="hd">支付结算</div>
-            <ul>
-                <li><span>商品价</span><em>¥{{prod_amount}}</em></li>
-                <li><span>优惠券</span><em>-¥{{$state.selectedCoupon.VCA_DEDUCT_AMOUNT||0}}</em></li>
-                <li><span>积分</span><em>-¥{{Points/100||0}}</em></li>
-                <li><span>运费</span><em>{{this.getFreight(bag_amount,$state.selectedCoupon,Points||0,$state.selectedFreeCoupon.CSV_CODE)}}</em></li>
-                <li><span>总计</span><b>{{this.getTotal(bag_amount,$state.selectedCoupon,Points||0,$state.selectedFreeCoupon)}}</b></li>
+        <ul class="sp_buy__info top_bottom_border">
+            <li class="bottom_border" sn-tap="this.useCoupon()"><span>使用优惠券</span><em>{selectedCoupon.CSV_CODE?selectedCoupon.CSV_CODE.split(',').length+"张":((coupon.length||0)+'张可用')}</em><b>-¥{selectedCoupon.CSV_CODE?selectedCoupon.VCA_DEDUCT_AMOUNT:'0'}</b></li>
+            <li class="bottom_border" sn-tap="this.usePoint()"><span>积分抵扣</span><em>{Points}积分</em><b>-¥{Points/100||0}</b></li>
+            <li><span>运费</span><em>{this.getFreight(bag_amount,selectedCoupon,Points||0,selectedFreeCoupon.CSV_CODE)}</em></li>
+        </ul>
+        <ul class="sp_buy__info top_bottom_border" sn-tap="this.useInv()">
+            <li><span>发票信息</span><span>{requireInv?isCompany?'公司':'个人':'不需要'}</span></li>
+        </ul>
+        <div class="sp_buy__cart">
+            <div class="hd bottom_border">商品信息</div>
+            <ul class="sp_cart__list">
+                <li sn-repeat="item in data_baglist" class="sp_cart__listitem" data-id="{item.SPB_ID}">
+                    <div class="sp_cart__listitem_con">
+                        <img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" />
+                        <div class="con">
+                            <b class="name">{ item.PRD_NAME }</b>
+                            <p class="size">尺寸：{ item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
+                            <p class="price">￥{ Math.round(item.SPB_AMOUNT * 100) / 100 }</p>
+                        </div>
+                        <div class="ft">
+                            <p class="qty">x{item.SPB_QTY}</p>
+                        </div>
+                    </div>
+                </li>
             </ul>
-        </div>
-        <div class="sp_buy_bd sp_buy_pay">
-            <div class="hd">支付方式</div>
-            <ul>
-                <li class="ico_alipay{{payType==1?' checked':''}}" sn-tap="payType=1">支付宝支付</li>
-                <li class="ico_wxpay{{payType==2?' checked':''}}" sn-tap="payType=2">微信支付</li>
-                <li class="ico_cmbpay{{payType==3?' checked':''}}" sn-tap="payType=3">一网通银行卡支付</li>
-            </ul>
-        </div>
-        <div class="sp_buy_bd">
-            <div class="hd">是否需要发票</div>
-            <div class="sp_buy__inv_required">
-                <ol class="checkboxlist">
-                    <li class="{{!requireInv?'checked':''}}" sn-tap="requireInv=0">不需要</li>
-                    <li class="{{requireInv?'checked':''}}" sn-tap="requireInv=1">需要</li>
-                </ol>
-                <div class="inputs" sn-display="requireInv">
-                    <input type="text" sn-model="invTitle" value="{{invTitle}}" />
-                </div>
+            <div sn-repeat="ppg in data_package" class="sp_cart__pkgitem">
+                <dl>
+                    <dt class="sp_cart__pkgitem_hd bottom_border">
+						{ ppg.PPG_NAME }
+						<b class="price">￥{ Math.round(ppg.PPG_PRICE * 100) / 100 }</b>
+					</dt>
+                    <dd sn-repeat="item in ppg.PackageList" class="sp_cart__listitem bottom_border">
+                        <div class="sp_cart__listitem_con">
+                            <img sn-src="{item.PRD_PIC}" data-back="/item/{item.PRD_ID}" />
+                            <div class="con">
+                                <b class="name">{ item.PRD_NAME }</b>
+                                <p class="size">尺寸：{ item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
+                                <p class="price">￥{ Math.round(item.PRD_MEMBER_PRICE * (item.SPB_QTY || 1) * 100) / 100 }</p>
+                            </div>
+                            <div class="ft">
+                                <p class="qty">x{item.SPB_QTY}</p>
+                            </div>
+                        </div>
+                    </dd>
+                </dl>
             </div>
+        </div>
+        <div class="sp_buy__pay">
+            <ul class="sp_buy__info top_bottom_border">
+                <li class="hd bottom_border">支付方式</li>
+                <li class="ico_alipay{payType==1?' checked':''} bottom_border" sn-tap="payType=1"><span>支付宝支付</span></li>
+                <li class="ico_wxpay{payType==2?' checked':''} bottom_border" sn-tap="payType=2"><span>微信支付</span></li>
+                <li class="ico_cmbpay{payType==3?' checked':''}" sn-tap="payType=3"><span>一网通银行卡支付</span></li>
+            </ul>
         </div>
     </div>
 </div>
-<footer class="sp_buy_action">
-    <div class="total">总计：<b ref="total">{{this.getTotal(bag_amount,$state.selectedCoupon,Points||0,$state.selectedFreeCoupon)}}</b></div>
-    <div class="btn_buy js_buy">立即支付</div>
+<footer class="sp_buy__action">
+    <div class="total">实付款：<b ref="total">{this.getTotal(bag_amount,selectedCoupon,Points||0,selectedFreeCoupon)}</b></div>
+    <div class="btn_buy" sn-tap="this.createOrder()">立即支付</div>
 </footer>

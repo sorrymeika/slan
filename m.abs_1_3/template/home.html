@@ -20,7 +20,7 @@
     </div>
     <header sn-display="{!isStart||isLogin}">
         <div class="head_left">
-            <em class="icon-location" sn-if="{bottomTab==0||bottomTab==1}">
+            <em class="icon-location" sn-if="{bottomTab==0||bottomTab==1}" sn-tap="this.showMap()">
             </em>
             <em class="icon-setting" sn-if="{bottomTab==4}" data-forward="/settings">
             </em>
@@ -31,9 +31,10 @@
         <div class="head_search head_search_holder" sn-click="this.showSearch()" sn-display="{tab==0&&bottomTab==0}">
             <em class="icon-search icon_cm"></em>
         </div>
-        <div class="head_title" sn-display="{bottomTab==4}" style="display:none"></div>
-        <div class="head_right" data-forward="{isLogin?'/cart':'/login'}">
-            <em class="icon-message head_msg">
+        <div class="head_title" sn-display="{bottomTab==3}" style="display:none">购物车</div>
+        <div class="head_right">
+            <button sn-if="bottomTab==3" class="btn_s" sn-tap="cart.isEdit=!cart.isEdit">{cart.isEdit?'完成':'编辑'}</button>
+            <em class="icon-message head_msg" data-forward="{isLogin?'/messages':'/login'}">
                 <i sn-display="{$global.msg_count!=0?'block':'none'}">{$global.msg_count}</i>
             </em>
         </div>
@@ -114,7 +115,10 @@
         <div ref="discovery" class="main" sn-style="-webkit-transform:translate({bottomTab==2?'0px':'100%'},0px)">
 
         </div>
-        <div ref="messages" class="main hm_msg" sn-style="-webkit-transform:translate({bottomTab==3?'0px':'100%'},0px)">
+        <div ref="cart" class="main hm_cart" sn-style="-webkit-transform:translate({bottomTab==3?'0px':'100%'},0px)">
+
+        </div>
+        <div ref="messages" class="main hm_msg" style="display:none">
             <div style="overflow:hidden">
                 <div class="hm_msg_list" data-forward="/messages">通知<i sn-display="{msg_count!=0}">{msg_count}</i></div>
                 <div class="hm_msg_service" data-forward="/news/100">联系客服</div>
@@ -179,10 +183,10 @@
         </div>
     </div>
     <ul class="footer top_border" sn-display="{!isStart||isLogin}">
-        <li class="{bottomTab==0?'curr':''}" sn-tap="bottomTab=0"><em class="{bottomTab==0?'icon-home_cur':'icon-home'}"></em>首页</li>
+        <li class="{bottomTab==0?'curr':''}" sn-tap="this.showHome()"><em class="{bottomTab==0?'icon-home_cur':'icon-home'}"></em>首页</li>
         <li data-forward="/all?id=1"><em class="icon-menu"></em>分类</li>
         <li class="{bottomTab==2?'curr':''}" sn-tap="this.showDiscovery()"><em class="{bottomTab==2?'icon-life_cur':'icon-life'}"></em>会生活</li>
-        <li class="{bottomTab==3?'curr':''}"><em class="{bottomTab==3?'icon-cart_cur':'icon-cart'}"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
+        <li class="{bottomTab==3?'curr':''}" sn-tap="this.showCart()"><em class="{bottomTab==3?'icon-cart_cur':'icon-cart'}"></em>购物车<i sn-display="{$global.cartQty!=0}">{$global.cartQty}</i></li>
         <li class="{bottomTab==4?'curr':''}" sn-tap="this.showMe()"><em class="{bottomTab==4?'icon-person_cur':'icon-person'}"></em>我</li>
     </ul>
     <div class="open_msg" style="display:none">

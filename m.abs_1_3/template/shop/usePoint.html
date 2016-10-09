@@ -1,0 +1,16 @@
+﻿<header class="white_header bottom_border">
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main">
+    <div class="sp_usepoint">
+        <div class="sp_usepoint__tip">您还有<em>{user.Points}</em>积分可使用</div>
+        <form class="sp_usepoint__con">
+            <input type="tel" sn-model="points" value="{points}" />
+            <div class="btn_s" sn-tap="this.usePoint()">使用积分</div>
+        </form>
+        <div class="sp_usepoint__ft">
+            <em>＊</em>您的积分可直接抵扣现金使用<em>（100积分＝1元）</em>
+        </div>
+    </div>
+</div>

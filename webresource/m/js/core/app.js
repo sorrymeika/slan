@@ -447,7 +447,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 var currentActivity = self._currentActivity;
 
                 if (data) {
-                    route.data = Object.assign(route.data || {}, data);
+                    Object.assign(route.data, data);
                 }
 
                 options.isForward = isForward;

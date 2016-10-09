@@ -1,58 +1,54 @@
 ﻿<header>
-    <div class="head_back" data-back="{{back}}"></div>
-    <div class="head_title">{{title}}</div>
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title">{title}</div>
 </header>
 <div class="main">
     <div class="sp_buy uc_order__wrap">
-        <div class="sp_buy_hd js_address">
-            <div class="info"><span class="name">{{data.ORA_NAME}}</span><span class="mobi">{{data.ORA_MOBILE}}</span></div>
-            <div class="loc">{{data.CTY_DESC}}{{data.REG_DESC}}{{data.ORA_ADDRESS}}</div>
+        <div class="sp_buy__addr">
+            <div class="icon-loc"></div>
+            <div class="info">收货人：<span class="name">{data.ORA_NAME}</span><span class="mobi">{data.ORA_MOBILE}</span></div>
+            <div class="loc">收货地址：{data.CTY_DESC}{data.REG_DESC}{data.ORA_ADDRESS}</div>
         </div>
-        <div class="sp_buy_bd uc_order__prodlist">
-            <div class="hd">商品信息</div>
-            <div class="uc_order__prod_listitem" sn-repeat="prd in data.Children" data-forward="/item/{{prd.PRD_ID}}">
-                <img sn-src="{{prd.WPP_LIST_PIC||'images/default.jpg'}}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
+        <div class="sp_buy__cart uc_order__prodlist">
+            <div class="hd bottom_border">商品信息</div>
+            <div class="sp_cart__listitem_con" sn-repeat="prd in data.Children" data-forward="/item/{prd.PRD_ID}">
+                <img sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
                 <div class="con">
-                    <h2>{{prd.PRD_NAME}}</h2>
-                    <h3>颜色：<span>{{prd.PRD_COLOR}}</span></h3>
-                    <h4>尺寸：<span>{{prd.PRD_SPEC}}</span></h4>
+                    <b class="name">{ prd.PRD_NAME }</b>
+                    <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
+                    <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥') }</p>
                 </div>
-                <p class="priceinfo">
-                    <span class="price">{{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}}</span>
-                    <span class="qty">x{{prd.LPK_QTY}}</span>
-                </p>
+                <div class="ft">
+                    <p class="qty">x{prd.LPK_QTY}</p>
+                </div>
             </div>
         </div>
-        <div class="sp_buy_bd sp_buy_bill">
-            <div class="hd">订单信息</div>
-            <ul>
-                <li><span>订单号</span><em>{{data.PUR_CODE}}</em></li>
-                <li><span>订单状态</span><em>{{data.PUS_DESC}}</em></li>
-                <li><span>下单日期</span><em>{{util.formatDate(data.PUR_DT)}}</em></li>
-                <li><span>订单金额</span><em>{{util.currency(data.PUR_AMOUNT,'￥')}}</em></li>
-                <li><span>运费</span><em>{{util.currency(data.PUR_EXP_IN_AMOUNT,'￥')}}</em></li>
-                <li><span>总计</span><b>{{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}}</b></li>
-            </ul>
-        </div>
-        <div class="sp_buy_bd sp_buy_pay" sn-display="{{data.PUS_DESC=='待付款'}}">
-            <div class="hd">支付方式</div>
-            <ul>
-                <li class="ico_alipay{{payType==1?' checked':''}}" sn-tap="payType=1">支付宝支付</li>
-                <li class="ico_wxpay{{payType==2?' checked':''}}" sn-tap="payType=2">微信支付</li>
-                <li class="ico_cmbpay{{payType==3?' checked':''}}" sn-tap="payType=3">一网通银行卡支付</li>
+        <ul class="sp_buy__info sp_buy__bill top_bottom_border">
+            <li class="hd bottom_border">订单信息</li>
+            <li class="bottom_border"><span>订单号</span><em>{data.PUR_CODE}</em></li>
+            <li class="bottom_border"><span>订单状态</span><em>{data.PUS_DESC}</em></li>
+            <li class="bottom_border"><span>下单日期</span><em>{util.formatDate(data.PUR_DT)}</em></li>
+            <li class="bottom_border"><span>订单金额</span><em>{util.currency(data.PUR_AMOUNT,'￥')}</em></li>
+            <li class="bottom_border"><span>运费</span><em>{util.currency(data.PUR_EXP_IN_AMOUNT,'￥')}</em></li>
+            <li><span>总计</span><b>{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}</b></li>
+        </ul>
+        <div class="sp_buy__pay" sn-if="{data.PUS_DESC=='待付款'}">
+            <ul class="sp_buy__info top_bottom_border">
+                <li class="hd bottom_border">支付方式</li>
+                <li class="ico_alipay{payType==1?' checked':''} bottom_border" sn-tap="payType=1"><span>支付宝支付</span></li>
+                <li class="ico_wxpay{payType==2?' checked':''} bottom_border" sn-tap="payType=2"><span>微信支付</span></li>
+                <li class="ico_cmbpay{payType==3?' checked':''}" sn-tap="payType=3"><span>一网通银行卡支付</span></li>
             </ul>
         </div>
     </div>
 </div>
-<footer class="sp_buy_action uc_order__footer">
-
+<footer class="sp_buy__action uc_order__footer">
     <div class="total">
-        <div sn-display="{{data.PUS_DESC=='待付款'}}">总计：<b>{{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}}</b></div>
+        总计：<b>{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}</b>
     </div>
-    <div class="btn js_pay" sn-display="{{data.PUS_DESC=='待付款'}}">立即支付</div>
+    <div class="btn js_pay" sn-if="{data.PUS_DESC=='待付款'}">立即支付</div>
 
-    <b class="btn" sn-display="{{data.XPU_EXPRESS_CODE}}" data-forward="/user/express/{{data.PUR_CODE}}">查看物流</b>
-    <b class="btn" sn-display="{{data.PUR_PAS_ID==2&&data.isShowShare}}" data-forward="/news/order{{data.PUR_ID}}?from={{url}}">分享有惊喜</b>
-    <b class="btn btn_dark" sn-display="{{data.PUS_DESC=='待付款'||(data.PUR_PUS_ID==1&&(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT)==0&&data.PUR_PAS_ID==2)}}" sn-tap="false" sn-click="this.cancelOrder(data)">取消订单</b>
-
+    <b class="btn" sn-if="{data.XPU_EXPRESS_CODE}" data-forward="/user/express/{data.PUR_CODE}">查看物流</b>
+    <b class="btn" sn-if="{data.PUR_PAS_ID==2&&data.isShowShare}" data-forward="/news/order{data.PUR_ID}?from={url}">分享有惊喜</b>
+    <b class="btn btn_dark" sn-if="{data.PUS_DESC=='待付款'||(data.PUR_PUS_ID==1&&(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT)==0&&data.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(data)">取消订单</b>
 </footer>

@@ -11,9 +11,8 @@
         </div>
 
         <div class="uc_couponitem__bd">
-            <p class="name">{data.VCA_NAME}</p>
+            <p class="name">{data.VCA_NAME.split(/\,|，/)[0]}</p>
             <p class="prd" sn-if="{data.Products.length&&data.VCA_VCT_ID!=4}" sn-tap="this.goTo(item)" sn-repeat="item in data.Products">仅限“<span>{item.PRD_NAME}</span>”使用</p>
-            <p class="prd" sn-if="{!data.Products.length&&data.VCA_VCT_ID!=4}">任意消费即可使用</p>
             <p class="time">有效期:{data.IsOverdue?'已过期':(util.formatDate(data.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(data.CSV_END_DT,'yyyy/MM/dd'))}</p>
         </div>
         <div class="uc_couponitem__ft">

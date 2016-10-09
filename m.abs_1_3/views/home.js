@@ -15,6 +15,7 @@ var api = require("models/api");
 var userModel = require("models/user");
 var Category = require("models/category");
 var CpCategory = require("components/category");
+var Cart = require("components/cart");
 
 var Album = require("widget/album");
 
@@ -107,28 +108,39 @@ module.exports = Activity.extend({
             this.model.set({
                 bottomTab: 2
             });
+            this.queryString('tab', 2);
         }
     },
 
     showMap: function () {
-        var self = this;
+        this.forward('/map')
+    },
 
-        if (!this.model.data.baiduMap) {
-            this.model.set('baiduMap', '<iframe class="js_baidu_map" src="' + bridge.url("/baiduMap.html?v4") + '" frameborder="0" ></iframe>')
-                .one('viewDidUpdate', function () {
-                    self.$baiduMap = self.$('.js_baidu_map').css({
-                        width: window.innerWidth,
-                        height: window.innerHeight - 47 - 44 - (util.isInApp ? 20 : 0)
+    showCart: function () {
+        var data = this.model.data;
+
+        if (data.isLogin) {
+
+            if (data.bottomTab != 3) {
+
+                if (!this.cart) {
+                    var cart = this.cart = new Cart();
+
+                    this.model.set({
+                        cart: cart
                     });
-                    bridge.getLocation(function (res) {
-                        self.$baiduMap[0].src = bridge.url("/baiduMap.html?v3#longitude=" + res.longitude + "&latitude=" + res.latitude);
-                    });
+                    cart.$el.appendTo(this.model.refs.cart);
+                }
+
+                this.model.set({
+                    bottomTab: 3
                 });
 
+                this.queryString('tab', 3);
+            }
+
         } else {
-            bridge.getLocation(function (res) {
-                self.$baiduMap[0].src = bridge.url("/baiduMap.html?v3#longitude=" + res.longitude + "&latitude=" + res.latitude);
-            });
+            self.forward('/login');
         }
     },
 
@@ -191,8 +203,17 @@ module.exports = Activity.extend({
             searchHistory: util.store("searchHistory")
         });
 
+        this.model.showHome = function () {
+            if (this.data.bottomTab != 0) {
+                this.set({
+                    bottomTab: 0
+                });
+                self.queryString('tab', 0);
+            }
+        };
         this.model.showDiscovery = this.showDiscovery.bind(this);
         this.model.showMap = this.showMap.bind(this);
+        this.model.showCart = this.showCart.bind(this);
 
         this.model.showMe = function () {
 
@@ -200,6 +221,7 @@ module.exports = Activity.extend({
                 this.set({
                     bottomTab: 4
                 });
+                self.queryString('tab', 4);
             } else {
                 self.forward('/login');
             }
@@ -461,6 +483,8 @@ module.exports = Activity.extend({
         }).onResult('CartChange', function () {
 
             self.getCartQty();
+
+            self.cart.cartApi.request();
         });
 
         setInterval(function () {
@@ -550,7 +574,6 @@ module.exports = Activity.extend({
                 self.showMessageDialog(res.vdpMessage);
                 //util.store('ivcode', null);
             }
-
 
             util.isInApp && bridge.getDeviceToken(function (token) {
 
@@ -678,11 +701,8 @@ module.exports = Activity.extend({
 
     onQueryChange: function () {
 
-        if (this.query.tab) {
+        if (this.query.tab === '0') {
             this.$('.footer li:nth-child(1)').trigger('tap');
-            this.model.set({
-                tab: 0
-            });
         }
         this.model.set({
             isStart: this.query.start == 1

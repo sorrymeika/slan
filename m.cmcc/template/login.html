@@ -1,17 +1,18 @@
-<div ref="main" class="main sign">
-    <div class="sign_hd">进入起姻</div>
-    <div class="sign_subhd">遇见最合适的人</div>
-    <ul class="sign_form">
-        <li>
-            <input placeholder="请输入您的邮箱" sn-model="email" type="email" />
+<div ref="main" class="main uc_login">
+    <ul class="uc_login__form bd_tb">
+        <li class="bd_b flex">
+            <div class="icon-person ml_s"></div>
+            <input class="flexitem ml_s fs_s" placeholder="请输入您的手机号码（目前仅支持福建移动用户）" sn-model="email" type="email" />
         </li>
-        <li>
-            <input placeholder="请输入密码" sn-model="password" type="password" />
+        <li class="flex">
+            <div class="icon-msg ml_s"></div>
+            <input class="flexitem ml_s" placeholder="请输入短信验证码" sn-model="password" type="text" />
+            <button class="btn_s ml_s mr_s">获取验证码</button>
         </li>
     </ul>
-    <div class="sign_btn"><b class="btn_large js_login">立即登录</b> </div>
-    <div class="sign_ft">
-        <a href="/forget" forward>忘记密码?</a>
-        <a href="/signup" forward>没有帐号，<i>立即注册</i></a>
+    <div class="mg_m"><button class="btn_xl ">立即登录</button></div>
+    <div class="mg_l fs_m">
+        <a href="/forget" forward class="cl_app">忘记密码?</a>
+        <a href="/signup" forward class="fl_r">没有帐号，<i class="cl_app">立即注册</i></a>
     </div>
 </div>
