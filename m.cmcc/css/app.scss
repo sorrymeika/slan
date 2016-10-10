@@ -1,7 +1,10 @@
 @import "global.scss";
 
+.cp_tab__head_item.curr { color: $color; }
+.cp_tab__cursor { background-color: $color; }
+
 .bd_b,.bd_t { background-image: url(../images/border-bottom.png); background-repeat: repeat-x; background-position: 0 bottom; background-size: auto 1px; }
-.bt_t { background-position: 0 top; background-image: url(../images/border-top.png); }
+.bd_t { background-position: 0 top; background-image: url(../images/border-top.png); }
 .bd_r,.bd_l { background-image: url(../images/border-right.png); background-repeat: repeat-y; background-position: right 0; background-size: 1px auto; }
 .bd_l { background-position: left 0; background-image: url(../images/border-left.png); }
 .bd_tb { background-image: url(../images/border-bottom.png),url(../images/border-top.png); background-repeat: repeat-x,repeat-x; background-position: 0 bottom,0 top; background-size: auto 1px, auto 1px; }
@@ -12,12 +15,15 @@
 .icon_cm:before { position: absolute; display: block; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); transform: translate(-50%,-50%); }
 .icon_vm:before { position: absolute; display: block; top: 50%; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
 
-header { background: #fff; height: 44px; line-height: 44px; font-weight: 200; }
-header:after { content: ''; display: block; -webkit-transform: scale(.5); width: 200%; border-top: 1px solid #aaa; -webkit-transform-origin: left bottom; position: absolute; bottom: 0px; }
+header { background: #fff; height: 44px; line-height: 44px; font-weight: 200; position: relative; }
+header:after { content: ''; display: block; -webkit-transform: scale(.5); width: 200%; border-top: 1px solid #aaa; -webkit-transform-origin: left bottom; position: absolute; bottom: 0px; left: 0px; }
 .has_status_bar header { border-top-color: #fff; }
 
-.head_title { color: $fontcolor; font-size: .16rem; font-weight: 400; }
-.head_right { position: absolute; right: 0px; top: 0; text-align: right; display: -webkit-box; }
+header img { display: block; width: 33px; height: 33px; }
+
+.head_title { color: $fontcolor; font-size: 16px; font-weight: 400; position: absolute; left: 0px; top: 0; right: 0; bottom: 0; }
+.head_left { position: absolute; left: 0px; top: 0; z-index: 10; text-align: center; display: -webkit-box; }
+.head_right { position: absolute; right: 0px; top: 0; text-align: center; display: -webkit-box; }
 .head_back { width: 44px; height: 44px; z-index: 1000; position: absolute; top: 0; left: 0; }
 .head_back:before { content: ""; @include arrow_left(#999); top: -1px; }
 
@@ -45,26 +51,50 @@ header:after { content: ''; display: block; -webkit-transform: scale(.5); width:
 .btn_xl, .btn_light_xl{ height: 44px; line-height: 44px; width: 100%; color: #fff; background: $color; display: block; border: 0px; font-size: 18px; text-align: center; border-radius: 4px; }
 .btn_light_xl,.btn_light_l { background: #F2F2F2; color: #000; }
 
-.flex { display: -webkit-box; -webkit-box-align: center; }
 .flexitem { display: block; -webkit-box-flex: 1; }
+.flexavg { display: block; -webkit-box-flex: 1; width: 0px; }
 input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
+.flex { display: -webkit-box; -webkit-box-align: center; }
+
+.dp_b { display: block; }
+.dp_i { display: inline; }
+.dp_ib { display: inline-block; }
 
 .fl_r { float: right; }
-.fl_l { float: right; }
+.fl_l { float: left; }
+
+.ps_r { position: relative; }
+.ps_a { position: absolute; }
 
 .va_m { vertical-align: middle; }
 .ta_c { text-align: center; }
+.ta_r { text-align: right; }
 
 .dock { position: absolute; bottom: 0; left: 0; right: 0; top: 0; }
-.dock_b { position: absolute; bottom: 0; left: 0; right: 0; }
-.dock_r { position: absolute; bottom: 0; top: 0; right: 0; }
-.dock_t { position: absolute; left: 0; right: 0; top: 0; }
-.dock_l { position: absolute; bottom: 0; left: 0; top: 0; }
+.dock_t { position: absolute; top: 0; }
+.dock_b { position: absolute; bottom: 0; }
+.dock_l { position: absolute; left: 0; }
+.dock_r { position: absolute; right: 0; }
+.dock_lr { position: absolute; left: 0; right: 0; }
+.dock_tl { position: absolute; top: 0; left: 0; }
+.dock_tlr { position: absolute; top: 0; left: 0; right: 0; }
+.dock_tr { position: absolute; top: 0; right: 0; }
+.dock_blr { position: absolute; bottom: 0; left: 0; right: 0; }
+.dock_bl { position: absolute; bottom: 0; left: 0; }
+.dock_br { position: absolute; bottom: 0; right: 0; }
 
 .pd_s { padding: 5px; }
 .pd_m { padding: 10px; }
 .pd_l { padding: 15px; }
 .pd_xl { padding: 20px; }
+
+.pl_s { padding-left: 5px; }
+.pl_m { padding-left: 10px; }
+
+.pr_s { padding-right: 5px; }
+.pr_m { padding-right: 10px; }
+
+.pb_m { padding-bottom: 10px; }
 
 .mg_s { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
 .mg_m { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
@@ -98,16 +128,43 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .cl_app { color: $color; }
 .cl_fff { color: #fff; }
 .cl_999 { color: #999; }
+.cl_000 { color: #000; }
+.cl_s { color: #FF931E; }
 
+.bg_non,.transparent { background-color: rgba(0,0,0,0); }
 .bg_fff { background-color: #fff; }
+.bg_ddd { background-color: #ddd; }
+.bg_000 { background-color: #000; }
 
-.lh_s { line-height: 20px; }
-.lh_m { line-height: 24px; }
-.lh_l { line-height: 30px; }
-.lh_xl { line-height: 40px; }
-.lh_xxl { line-height: 50px; }
-.lh_44 { line-height: 44px; }
+.lh_xxs { line-height: 20px; }
+.lh_xs { line-height: 24px; }
+.lh_s { line-height: 34px; }
+.lh_m { line-height: 40px; }
+.lh_l { line-height: 50px; }
+.lh_xl { line-height: 60px; }
+.lh_bar { line-height: 44px; }
 
+.cir { border-radius: 50%; overflow: hidden; }
+.cir_m { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; }
+.cir_l { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; }
+.cir_xl { width: 90px; height: 90px; border-radius: 50%; }
+.cir_xxl { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; }
+
+.sqr_s { width: 33px; height: 33px; }
 .sqr_m { width: 44px; height: 44px; }
+.sqr_l { width: 60px; height: 60px; }
+
+.h_xs { height: 24px; }
+.h_s { height: 34px; }
+.h_m { height: 40px; }
+.h_l { height: 50px; }
+.h_xl { height: 60px; }
+.h_bar { height: 44px; }
+
+.w_s { width: 30px; }
+.w_m { width: 40px; }
+.w_l { width: 50px; }
+.w_xl { width: 60px; }
+.w_bar { width: 44px; }
 
 @import "sprite.scss";

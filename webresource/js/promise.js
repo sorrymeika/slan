@@ -15,9 +15,16 @@ var getCallbackParams = function (args, parameters, fn) {
     return newArgs;
 }
 
-var Promise = function (args, callback, ctx) {
+function resolve(thenable) {
+
+    if (thenable && typeof thenable.then == 'function') {
+
+    }
+}
+
+var Promise = function (callback, ctx) {
     if (!(this instanceof Promise))
-        return new Promise(args, callback, ctx);
+        return new Promise(callback, ctx);
 
     var self = this;
 
@@ -197,22 +204,9 @@ Promise.prototype = {
         }
     },
 
-    then: function (args, callback, ctx) {
+    then: function (callback, ctx) {
         var self = this,
             fn;
-
-        if (!(args instanceof Array)) {
-            ctx = callback;
-            callback = args;
-            args = null;
-
-        } else {
-            fn = callback;
-            callback = function () {
-                fn.apply(this, getCallbackParams(args, arguments, self.resolveSelf));
-                return self;
-            };
-        }
 
         self.queue.append([callback, ctx || this]);
 

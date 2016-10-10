@@ -116,19 +116,33 @@ define(function (require, exports, module) {
             });
             address.load();
 
-            self.cart = new api.CartAPI({
+            new api.CartAPI({
                 $el: self.$el,
                 checkData: false,
+                params: {
+                    pspcode: self.user.PSP_CODE
+                },
                 success: function (res) {
                     console.log(res);
-                    self.model.set(res).set({
-                        loading: false
-                    });
+                    self.model.set(res)
+                        .set({
+                            loading: false
+                        });
                 }
             });
 
-            self.cart.setParam({
-                pspcode: self.user.PSP_CODE
+            self.cart = new api.PreOrderAPI({
+                $el: self.$el,
+                checkData: false,
+                params: {
+                    pspcode: self.user.PSP_CODE
+                },
+                success: function (res) {
+                    self.model.set({
+                        bag_amount: res.bagamount,
+                        loading: false
+                    });
+                }
             });
 
             self.orderCreateApi = new api.OrderCreateAPI({

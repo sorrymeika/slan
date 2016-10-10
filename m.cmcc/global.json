@@ -76,6 +76,7 @@
         "widget/dialog": "../webresource/js/widget/dialog",
         "widget/loading": "../webresource/m/js/widget/loading",
         "widget/offline": "../webresource/m/js/widget/offline",
+        "widget/tab": "../webresource/m/js/widget/tab",
         "anim/default": "../webresource/m/js/anim/default"
     }
 }

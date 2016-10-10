@@ -373,8 +373,8 @@ var Cart = Model.extend({
 		<div class="main">
 			<ul class="sp_cart__list">
 				<li sn-repeat="item in data_baglist|filter:!isEdit" class="sp_cart__listitem" data-id="{item.SPB_ID}">
-					<div class="sp_cart__listitem_con js_delete_item">
-						<img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" data-forward="{item.SPB_WAC_ID==10?'/group/'+item.SPB_GROUP:('/item/'+item.PRD_ID)}" />
+					<div class="sp_cart__listitem_con js_delete_item" data-forward="{item.SPB_WAC_ID==10?'/group/'+item.SPB_GROUP:('/item/'+item.PRD_ID)}">
+						<img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" />
 						<div class="con">
 							<b class="name">{ item.PRD_NAME }</b>
 							<p class="size">尺寸：{ item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
@@ -411,8 +411,8 @@ var Cart = Model.extend({
 						<b class="price">￥{ Math.round(ppg.PPG_PRICE * 100) / 100 }</b>
 					</dt>
 					<dd sn-repeat="item in ppg.PackageList" class="sp_cart__listitem bottom_border">
-						<div class="sp_cart__listitem_con">
-							<img sn-src="{item.PRD_PIC}" data-back="/item/{item.PRD_ID}" />
+						<div class="sp_cart__listitem_con" data-forward="/item/{item.PRD_ID}">
+							<img sn-src="{item.PRD_PIC}" />
 							<div class="con">
 								<b class="name">{ item.PRD_NAME }</b>
 								<p class="size">尺寸：{ item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>

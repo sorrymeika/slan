@@ -284,6 +284,13 @@ exports.CancelOrderAPI = ShopAPI.extend({
     }
 });
 
+exports.PreOrderAPI = ShopAPI.extend({
+    url: '/api/shop/getPreOrder',
+    params: {
+        pspcode: 0
+    }
+});
+
 exports.OrderCreateAPI = ShopAPI.extend({
     url: '/api/shop/CreateMOrder',
     params: {

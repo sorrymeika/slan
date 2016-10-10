@@ -1,12 +1,21 @@
-<header>
-    <div class="head_title"></div>
-    <div class="head_msg iconfont icon-mail" ref="msg">
-        <i class="iconfont icon-favfull" sn-display="{$state.msgCount}"><em>{$state.msgCount}</em></i>
+<header class="flex">
+    <img sn-src="{user.avatars}" class="cir ml_m" />
+    <div class="ml_m flexitem flex hm_quan__search">
+        <div class="icon-search sqr_s"></div>
+        <input type="text" class="flexitem fs_m" placeholder="公众圈、朋友圈、通讯录" />
     </div>
+    <div class="icon-bill h_bar pl_m"></div>
+    <div class="icon-scan h_bar pl_m pr_m"></div>
 </header>
-<div class="main" sn-display="{tab==0}">
+<div class="hm_quan" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">
+    <div class="hm_pubquan">
+        <div class="bd_tb mt_l bg_fff">
+            <div class="bd_b lh_s  ml_l">推荐圈子</div>
+        </div>
+    </div>
 </div>
-<footer class="footer top_border">
+
+<footer class="footer bd_t">
     <ul>
         <li class="icon-life">
             <span>生活</span>

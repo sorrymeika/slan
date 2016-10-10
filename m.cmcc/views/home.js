@@ -6,6 +6,7 @@ var Loader = require('../widget/loader');
 var Model = require('core/model2').Model;
 var Scroll = require('../widget/scroll');
 var Slider = require('../widget/slider');
+var Tab = require('../widget/tab');
 var animation = require('animation');
 
 module.exports = Activity.extend({

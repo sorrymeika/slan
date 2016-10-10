@@ -360,7 +360,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_cart__listitem { position: relative; margin-top: 1px; }
 .sp_cart__listitem_con .qty input { border-radius: 0; }
 
-.sp_cart__listitem_con .js_delete,.sp_cart__delete {
+.sp_cart__listitem .js_delete,.sp_cart__delete {
     display: block; width: 70px; text-align: center; background: $color; position: absolute; right: 0; bottom: 0; top: 0; color: #fff; font-size: 16px; z-index: 1;
     &:after { position: absolute; display: block; content: "删除"; top: 50%; left: 0; line-height: 20px; height: 20px; margin: -10px 0 0 20px; }
 }

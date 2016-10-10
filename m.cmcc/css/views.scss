@@ -11,4 +11,13 @@
 .uc_licence__ft { bottom: 5px; }
 
 //首页
-.home { margin-bottom: 48px; padding-bottom: 10px; }
+.hm_main { margin-bottom: 48px; }
+
+//圈
+.hm_quan__search { background-color: $bgcolor; height: 33px; margin: 0 0 0 5px; position: relative; border-radius: 33px; }
+.hm_quan__search:before { @include border(#ccc,33px); }
+.hm_quan__search .icon-search:before { vertical-align: 3px; }
+
+.hm_quan .cp_tab { top: 44px; }
+.hm_quan .cp_tab__item { background-color: $bgcolor; }
+.has_status_bar .hm_quan .cp_tab { top: 64px; }

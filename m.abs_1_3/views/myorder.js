@@ -50,7 +50,7 @@ define(function (require, exports, module) {
                     var key = 'data' + (index || '');
 
                     var loader = new Loader({
-                        url: "/api/order/list",
+                        url: "/api/order/getListByType",
                         $el: self.$el,
                         $refreshing: $(self.model.refs.refreshing),
                         $scroll: $(tab.refs.items[index]),
@@ -69,7 +69,8 @@ define(function (require, exports, module) {
 
                     loader.setParam({
                         UserID: self.user.ID,
-                        Auth: self.user.Auth
+                        Auth: self.user.Auth,
+                        type: index
 
                     }).request();
                 }
@@ -113,30 +114,7 @@ define(function (require, exports, module) {
             orderShareAPI.load();
 
             $.extend(this.model, {
-                select: function (type, e) {
-                    if (!$(e.currentTarget).hasClass('curr')) {
-                        $(e.currentTarget).addClass('curr').siblings('.curr').removeClass('curr');
 
-                        self.loading.setParam(type == 0 ? {
-                            status: 0,
-                            payStatus: 0
-                        } : type == 1 ? {
-                            status: 0,
-                            payStatus: 3
-                        } : type == 2 ? {
-                            status: 18,
-                            payStatus: 0
-                        } : type == 3 ? {
-                            status: 19,
-                            payStatus: 0
-                        } : {
-                                            status: 8,
-                                            payStatus: 0
-                                        }).reload();
-
-                        this.set('currentType', type)
-                    }
-                },
                 showExpress: function (item, itemModel, e) {
                     itemModel.set('showExpress', !item.showExpress);
                     e.stopPropagation();
