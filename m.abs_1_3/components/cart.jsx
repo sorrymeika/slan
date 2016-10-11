@@ -233,7 +233,7 @@ var Cart = Model.extend({
 				}
 			},
 			confirmText: '确认删除'
-		})
+		});
 	},
 
 	getPrice: function (bag_amount, coupon, Points) {

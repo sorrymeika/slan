@@ -64,17 +64,17 @@ define(function (require, exports, module) {
                     return Math.max(0, bag_amount - couponPrice - (Points / 100));
                 },
 
-                getFreight: function (bag_amount, coupon, Points, freecouponcode) {
+                getFreight: function (bag_amount, full_amount_free, coupon, Points, freecouponcode) {
 
-                    console.log(bag_amount, coupon, Points, freecouponcode);
+                    console.log(bag_amount, full_amount_free, coupon, Points, freecouponcode);
 
                     var price = this.getPrice(bag_amount, coupon, Points);
-                    var freight = ((self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= 99 || freecouponcode) ? 0 : 15);
+                    var freight = ((self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= full_amount_free || freecouponcode) ? 0 : 15);
 
-                    return (self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= 99) ? "免邮费" : ('¥' + Math.round(freight * 100) / 100);
+                    return (self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= full_amount_free) ? "免邮费" : ('¥' + Math.round(freight * 100) / 100);
                 },
 
-                getTotal: function (bag_amount, coupon, Points, freecouponcode) {
+                getTotal: function (bag_amount, full_amount_free, coupon, Points, freecouponcode) {
                     var couponPrice = coupon && coupon.VCA_DEDUCT_AMOUNT ? coupon.VCA_DEDUCT_AMOUNT : 0;
                     var total;
                     var price;
@@ -82,12 +82,12 @@ define(function (require, exports, module) {
 
                     if (coupon && coupon.VCA_VCT_ID == 5) {
                         price = Math.max(0, bag_amount - couponPrice - (Points / 100));
-                        freight = ((self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || bag_amount - (Points / 100) >= 99 || freecouponcode) ? 0 : 15);
+                        freight = ((self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || bag_amount - (Points / 100) >= full_amount_free || freecouponcode) ? 0 : 15);
                         total = Math.max(0, bag_amount + freight - couponPrice - (Points / 100));
 
                     } else {
                         price = Math.max(0, bag_amount - couponPrice - (Points / 100));
-                        total = price + ((self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= 99 || freecouponcode) ? 0 : 15);
+                        total = price + ((self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= full_amount_free || freecouponcode) ? 0 : 15);
                     }
 
                     return '¥' + (Math.round(total * 100) / 100);
@@ -124,12 +124,15 @@ define(function (require, exports, module) {
                 },
                 success: function (res) {
                     console.log(res);
-                    self.model.set(res)
-                        .set({
-                            loading: false
-                        });
+                    self.model.set({
+                        bag_amount: res.bag_amount,
+                        full_amount_free: parseInt(res.full_amount_free),
+                        coupon: coupon,
+                        freight: freight
+                    });
                 }
-            });
+
+            }).request();
 
             self.cart = new api.PreOrderAPI({
                 $el: self.$el,
@@ -139,7 +142,7 @@ define(function (require, exports, module) {
                 },
                 success: function (res) {
                     self.model.set({
-                        bag_amount: res.bagamount,
+                        data: res.data,
                         loading: false
                     });
                 }

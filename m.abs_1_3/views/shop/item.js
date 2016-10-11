@@ -63,6 +63,7 @@ module.exports = Activity.extend({
         var $detailScroll = $(model.refs.detailScroll);
 
         Scroll.bind($main);
+        Scroll.bind($detail);
 
         var detail = new api.ProductDetailAPI({
             $el: self.$el,
@@ -77,8 +78,10 @@ module.exports = Activity.extend({
         });
 
         self.listenTo($main, 'touchstart', function (e) {
+            var main = e.currentTarget;
             this.isStart = false;
             this.startY = e.touches[0].pageY;
+            this.isStop_iOS = util.ios && (main.scrollTop + main.clientHeight !== main.scrollHeight);
 
         }).listenTo($main, 'touchmove', function (e) {
             var main = e.currentTarget;
@@ -92,24 +95,25 @@ module.exports = Activity.extend({
                     dY = 0;
                 }
 
-                if (dY <= -70) {
-                    model.set({
-                        detailTip: '释放'
-                    })
+                if (!this.isStop_iOS) {
 
-                } else {
-                    console.log(dY);
+                    if (dY <= -70) {
+                        model.set({
+                            detailTip: '释放'
+                        })
 
-                    model.set({
-                        detailTip: '继续拖动'
-                    })
+                    } else {
+                        model.set({
+                            detailTip: '继续拖动'
+                        })
+                    }
+
+                    scroll.transform({
+                        translate: '0px,' + (dY > 0 ? 0 : dY / 2) + 'px'
+                    });
+
+                    return false;
                 }
-
-                scroll.transform({
-                    translate: '0px,' + (dY > 0 ? 0 : dY / 2) + 'px'
-                })
-
-                return false;
             }
         }).listenTo($main, 'touchend', function (e) {
             if (self.isStart) {
@@ -123,12 +127,12 @@ module.exports = Activity.extend({
                     $main.animate({
                         translate: '0px,-100%'
 
-                    }, 'ease-out', 300)
+                    }, 'ease-out', 400)
 
                     $detail.animate({
                         translate: '0px,0'
 
-                    }, 'ease-out', 300);
+                    }, 'ease-out', 400);
 
                     model.set({
                         isShowDetail: true,
@@ -144,7 +148,7 @@ module.exports = Activity.extend({
                     scroll.animate({
                         translate: '0px,0px'
 
-                    }, 'ease-out', 300);
+                    }, 'ease-out', 400);
                 }
             }
         });
@@ -152,6 +156,7 @@ module.exports = Activity.extend({
         self.listenTo($detail, 'touchstart', function (e) {
             this.isStart = false;
             this.startY = e.touches[0].pageY;
+            this.isStop_iOS = util.ios && (e.currentTarget.scrollTop != 0);
 
         }).listenTo($detail, 'touchmove', function (e) {
             var main = e.currentTarget;
@@ -165,25 +170,26 @@ module.exports = Activity.extend({
                     dY = 0;
                 }
 
-                if (dY >= 70) {
-                    model.set({
-                        pullTip: '释放'
+                if (!this.isStop_iOS) {
+                    if (dY >= 70) {
+                        model.set({
+                            pullTip: '释放'
+                        })
+
+                    } else {
+
+                        model.set({
+                            pullTip: '下拉'
+                        })
+                    }
+
+                    $detailScroll.transform({
+                        translate: '0px,' + (dY < 0 ? 0 : dY / 2) + 'px'
                     })
 
-                } else {
-
-                    model.set({
-                        pullTip: '下拉'
-                    })
+                    return false;
                 }
 
-                console.log(dY);
-
-                $detailScroll.transform({
-                    translate: '0px,' + (dY < 0 ? 0 : dY / 2) + 'px'
-                })
-
-                return false;
             }
         }).listenTo($detail, 'touchend', function (e) {
             if (self.isStart) {
@@ -197,12 +203,12 @@ module.exports = Activity.extend({
                     $detail.animate({
                         translate: '0px,100%'
 
-                    }, 'ease-out', 300)
+                    }, 'ease-out', 400)
 
                     $main.animate({
                         translate: '0px,0px'
 
-                    }, 'ease-out', 300);
+                    }, 'ease-out', 400);
 
                     model.set({
                         isShowDetail: false,
@@ -213,7 +219,7 @@ module.exports = Activity.extend({
                     $detailScroll.animate({
                         translate: '0px,0px'
 
-                    }, 'ease-out', 300);
+                    }, 'ease-out', 400);
                 }
             }
         });

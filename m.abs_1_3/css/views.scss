@@ -257,11 +257,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_list_item .price { padding: 4px 6px 0 4px; }
 .sp_list_item .name { font-size: 10px; padding: 0 6px; line-height: 1.5; height: 26px; margin: 6px 0; }
 
-
 /*购物-单品*/
-.pd_item_bg { background: #fff; -webkit-perspective: 320; }
-.pd_item_wrap { -webkit-transition: -webkit-transform 300ms ease-out 0ms; }
-.pd_item_wrap.out { -webkit-transform: scale(.9) rotateX(5deg); height: 100%; }
 .pd_item.main,.pd_item__detail { bottom: 48px; padding-bottom: 10px; }
 .pd_slider { min-height: 320px; }
 .pd_info_wrap { display: -webkit-box; border-top: 1px solid #ddd; background: #fff; padding-bottom: 5px; }

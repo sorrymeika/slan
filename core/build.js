@@ -1,12 +1,12 @@
 ﻿var path = require('path');
 var fs = require('fs');
-var Promise = require('./promise');
+var Async = require('./async');
 var razor = require('./razor');
 var configloader = require('./configloader');
 var Tools = require('../tools/tools');
 
 var build = function (config, routes, projectsRequires) {
-    var tmplPromise = Promise.resolve();
+    var tmplPromise = Async.resolve();
     var views = {};
     var Route = require('./route');
     var route = new Route(routes);
@@ -63,14 +63,14 @@ var build = function (config, routes, projectsRequires) {
             callback();
         });
     })
-    .then(function () {
-        for (var key in views) {
-            Tools.save(config.dest + key + 'controller.js', views[key].code);
-        }
+        .then(function () {
+            for (var key in views) {
+                Tools.save(config.dest + key + 'controller.js', views[key].code);
+            }
 
-        Tools.save(path.join(config.node_dest, 'config.js'), 'module.exports=' + JSON.stringify(config));
-        Tools.copy(path.join(config.node_dest, 'index.js'), './index.js');
-    });
+            Tools.save(path.join(config.node_dest, 'config.js'), 'module.exports=' + JSON.stringify(config));
+            Tools.copy(path.join(config.node_dest, 'index.js'), './index.js');
+        });
 
     return tmplPromise;
 }

@@ -104,7 +104,7 @@
                 });
 
             } else {
-                activity._referrer(route);
+                activity._setReferrer(route);
 
                 callback.call(that, activity, route);
             }

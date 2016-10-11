@@ -1,53 +1,51 @@
-﻿<div class="pd_item_wrap">
-    <header class="{isShowDetail?'white_header':'header_trans'}">
-        <div class="head_back" data-back="{back}"></div>
-        <div class="head_title" sn-if="isShowDetail">图文详情</div>
-        <div class="head_right">
-            <a class="{!isShowDetail?'icon-tel':'icon-tel_dark'}" href="tel:4008205077"></a>
-            <div class="{!isShowDetail?'icon-share':'icon-share_dark'} js_share"></div>
-        </div>
-    </header>
-    <div class="main pd_item" ref="main">
-        <div class="pd_item__scroll" ref="scroll">
-
-            <div class="pd_slider{data.PRD_NUM<=0?' sold_out':''}" ref="image">
-            </div>
-            <div class="pd_info_wrap">
-                <div class="pd_info">
-                    <h1>{data.PRD_NAME}</h1>
-                    <p class="price">{data.PRD_PRICE}</p>
-                    <del class="ori_price" sn-display="{data.PRD_PRICE<data.PRD_MEMBER_PRICE}">¥{data.PRD_MEMBER_PRICE}</del>
-                    <p class="pd_code">
-                        <span class="code">商品编码 {data.PRD_CODE}</span>
-                        <span class="sale">销售 {data.PSV_QTY} 件</span>
-                    </p>
-                    <p class="pd_code" style="padding:5px 0;" sn-html="{data.PRH_DESC}"></p>
-                </div>
-            </div>
-            <ul class="pd_sign top_bottom_border">
-                <li class="icon-has">满99包邮</li>
-                <li class="icon-has" sn-if="data.XPR_RTN_DAYS">{data.XPR_RTN_DAYS}天退换货保障</li>
-            </ul>
-            <div class="pd_select_plus" sn-if="{Package.PPG_ID}" data-forward="/news/package{Package.PPG_ID}?from={url}">
-                {Package.PPG_NAME}
-            </div>
-            <div class="pd_select_size js_select_size top_bottom_border">
-                选择尺码 颜色分类
-            </div>
-            <div class="pd_item__detail_tip">{detailTip}，查看图文详情</div>
-        </div>
+﻿<header class="{isShowDetail?'white_header':'header_trans'}">
+    <div class="head_back" data-back="{back}"></div>
+    <div class="head_title" sn-if="isShowDetail">图文详情</div>
+    <div class="head_right">
+        <a class="{!isShowDetail?'icon-tel':'icon-tel_dark'}" href="tel:4008205077"></a>
+        <div class="{!isShowDetail?'icon-share':'icon-share_dark'} js_share"></div>
     </div>
-    <div class="main pd_item__detail" ref="detail" style="transform:translate(0px,100%)">
-        <div class="pd_item__scroll" ref="detailScroll">
-            <div class="pull">{pullTip}，返回宝贝详情</div>
-            <div class="con pd_detail">
-                <img sn-repeat="item in detailHtml" sn-src="{item.img}" />
+</header>
+<div class="main pd_item" ref="main">
+    <div class="pd_item__scroll" ref="scroll">
+
+        <div class="pd_slider{data.PRD_NUM<=0?' sold_out':''}" ref="image">
+        </div>
+        <div class="pd_info_wrap">
+            <div class="pd_info">
+                <h1>{data.PRD_NAME}</h1>
+                <p class="price">{data.PRD_PRICE}</p>
+                <del class="ori_price" sn-display="{data.PRD_PRICE<data.PRD_MEMBER_PRICE}">¥{data.PRD_MEMBER_PRICE}</del>
+                <p class="pd_code">
+                    <span class="code">商品编码 {data.PRD_CODE}</span>
+                    <span class="sale">销售 {data.PSV_QTY} 件</span>
+                </p>
+                <p class="pd_code" style="padding:5px 0;" sn-html="{data.PRH_DESC}"></p>
             </div>
         </div>
+        <ul class="pd_sign top_bottom_border">
+            <li class="icon-has">满99包邮</li>
+            <li class="icon-has" sn-if="data.XPR_RTN_DAYS">{data.XPR_RTN_DAYS}天退换货保障</li>
+        </ul>
+        <div class="pd_select_plus" sn-if="{Package.PPG_ID}" data-forward="/news/package{Package.PPG_ID}?from={url}">
+            {Package.PPG_NAME}
+        </div>
+        <div class="pd_select_size js_select_size top_bottom_border">
+            选择尺码 颜色分类
+        </div>
+        <div class="pd_item__detail_tip">{detailTip}，查看图文详情</div>
     </div>
-
-    <footer class="pd_buy">
-        <b class="btn_cart icon-cart_dark" data-forward="{isLogin?'/cart':('/login?success='+url)}"><i sn-if="$global.cartQty!=0">{$global.cartQty}</i></b>
-        <b class="btn_buy {data.PRD_NUM==0?'sold_out':'js_buy'}">{data.PRD_NUM==0?'商品已售罄':'加入购物车'}</b>
-    </footer>
 </div>
+<div class="main pd_item__detail" ref="detail" style="transform:translate(0px,100%)">
+    <div class="pd_item__scroll" ref="detailScroll">
+        <div class="pull">{pullTip}，返回宝贝详情</div>
+        <div class="con pd_detail">
+            <img sn-repeat="item in detailHtml" sn-src="{item.img}" />
+        </div>
+    </div>
+</div>
+
+<footer class="pd_buy">
+    <b class="btn_cart icon-cart_dark" data-forward="{isLogin?'/cart':('/login?success='+url)}"><i sn-if="$global.cartQty!=0">{$global.cartQty}</i></b>
+    <b class="btn_buy {data.PRD_NUM==0?'sold_out':'js_buy'}">{data.PRD_NUM==0?'商品已售罄':'加入购物车'}</b>
+</footer>

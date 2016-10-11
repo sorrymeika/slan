@@ -7,6 +7,7 @@ var model = require('core/model2');
 var Scroll = require('../widget/scroll');
 var animation = require('animation');
 var userModel = require("models/user");
+var popup = require('widget/popup');
 
 return Activity.extend({
 
@@ -23,15 +24,24 @@ return Activity.extend({
         });
 
         this.model.logout = function (e) {
-            self.confirm("你确认要退出登录?", function () {
-                if (userModel.get()) {
-                    userModel.set(null);
-                    self.setResult("Logout");
-                    self.back('/?tab=0');
-                } else {
-                    self.forward('/login');
+
+            popup.confirm({
+                title: '温馨提示',
+                content: '你确认要退出登录',
+                cancelText: '取消',
+                cancelAction: function () { },
+                confirmText: '确定退出',
+                confirmAction: function () {
+                    if (userModel.get()) {
+                        userModel.set(null);
+                        self.setResult("Logout");
+                        self.back('/?tab=0');
+                    } else {
+                        self.forward('/login');
+                    }
                 }
             });
+
             return false;
         }
 

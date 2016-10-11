@@ -8,16 +8,17 @@ var animation = require('animation');
 var api = require('models/api');
 var userModel = require('models/user');
 var bridge = require('bridge');
+var popup = require('widget/popup');
 
 module.exports = Activity.extend({
     events: {
-        'tap .js_pay:not(.disabled)': function() {
+        'tap .js_pay:not(.disabled)': function () {
             var self = this;
             var order = this.model.get('data');
 
             self.orderApi.showLoading();
 
-            setTimeout(function() {
+            setTimeout(function () {
                 self.orderApi.hideLoading();
             }, 3000);
 
@@ -33,7 +34,7 @@ module.exports = Activity.extend({
                         spUrl: api.API.prototype.baseUri + '/AlipayApp/Pay',
                         orderCode: order.PUR_CODE
 
-                    }, function(res) {
+                    }, function (res) {
                         sl.tip(res.msg);
                         self.orderApi.hideLoading();
                     });
@@ -46,7 +47,7 @@ module.exports = Activity.extend({
                         orderCode: order.PUR_CODE,
                         orderName: 'ABS商品',
                         orderPrice: order.PUR_AMOUNT
-                    }, function(res) {
+                    }, function (res) {
                         sl.tip(res.msg);
                         self.orderApi.hideLoading();
                     });
@@ -58,7 +59,7 @@ module.exports = Activity.extend({
         }
     },
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var $main = self.$('.main');
 
@@ -74,14 +75,22 @@ module.exports = Activity.extend({
             payType: 1
         });
 
-        self.model.cancelOrder = function(e, order) {
+        self.model.cancelOrder = function (e, order) {
 
-            self.confirm('你确定取消订单吗？', function() {
-                self.cancelOrderApi.setParam({
-                    purcode: order.PUR_CODE
+            popup.confirm({
+                title: '温馨提示',
+                content: '你确定取消订单吗？',
+                cancelText: '不取消',
+                cancelAction: function () { },
+                confirmText: '确定取消',
+                confirmAction: function () {
+                    self.cancelOrderApi.setParam({
+                        purcode: order.PUR_CODE
 
-                }).load();
+                    }).load();
+                }
             });
+
             e.stopPropagation();
             e.preventDefault();
         };
@@ -95,11 +104,12 @@ module.exports = Activity.extend({
                 UserID: self.user.ID,
                 Auth: self.user.Auth
             },
-            success: function(res) {
+            success: function (res) {
                 console.log(res);
 
                 self.model.set({
-                    data: res.data
+                    data: res.data,
+                    list: res.list
                 })
 
                 if (self.referrer != '/myorder' && res.data.PUR_PAS_ID == 2) {
@@ -114,9 +124,9 @@ module.exports = Activity.extend({
             $el: this.$el,
             check: false,
             checkData: false,
-            success: function(res) {
+            success: function (res) {
                 if (res.status != 2) {
-                    self.timer = setTimeout(function() {
+                    self.timer = setTimeout(function () {
                         self.checkStatus();
                     }, 2000);
 
@@ -133,7 +143,7 @@ module.exports = Activity.extend({
             params: {
                 pspcode: self.user.PSP_CODE
             },
-            success: function(res) {
+            success: function (res) {
                 if (res.success) {
                     sl.tip('订单已成功取消');
                     self.orderApi.reload();
@@ -142,7 +152,7 @@ module.exports = Activity.extend({
                     self.setResult("UserChange");
                 }
             },
-            error: function(res) {
+            error: function (res) {
                 sl.tip(res.msg);
             }
         });
@@ -152,7 +162,7 @@ module.exports = Activity.extend({
         }
     },
 
-    checkStatus: function() {
+    checkStatus: function () {
         var self = this;
 
         self.timer && clearTimeout(self.timer);
@@ -163,11 +173,11 @@ module.exports = Activity.extend({
         }).load();
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestory: function() {
+    onDestory: function () {
         self.timer && clearTimeout(self.timer);
     }
 });

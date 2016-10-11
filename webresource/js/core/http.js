@@ -19,7 +19,6 @@ define(function (require, exports, module) {
 
     Http.prototype = {
 
-
         baseUri: $('meta[name="api-base-url"]').attr('content'),
         method: "POST",
         dataType: 'json',
@@ -37,11 +36,9 @@ define(function (require, exports, module) {
             return {
                 success: false,
                 code: errorCode,
-                msg: errorMsg
+                message: errorMsg
             }
         },
-
-        DATAKEY_MSG: 'msg',
 
         setHeaders: function (key, val) {
             var attrs;
@@ -118,6 +115,7 @@ define(function (require, exports, module) {
                         callback && callback.call(that, null, res);
 
                     } else {
+                        if (!res.message && res.msg) res.message = res.msg;
                         that.error(res, xhr);
                         callback && callback.call(that, res, xhr);
                     }

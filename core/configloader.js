@@ -1,7 +1,7 @@
 ﻿var _ = require('underscore');
 
 var path = require('path');
-var Promise = require('./promise');
+var Async = require('./async');
 var fs = require('fs');
 
 function ConfigLoader(configPath, env) {
@@ -70,7 +70,7 @@ ConfigLoader.prototype = {
 
     loadAll: function (callback) {
         var self = this;
-        var promise = new Promise().resolve();
+        var promise = new Async().resolve();
 
         return promise.each(self.config.projects, function (i, project) {
 

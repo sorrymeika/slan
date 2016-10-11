@@ -56,7 +56,7 @@
         "graphics/matrix2d": "../webresource/js/graphics/matrix2d",
         "graphics/tween": "../webresource/js/graphics/tween",
         "core/base": "../webresource/js/core/base",
-        "core/promise": "../webresource/js/core/promise",
+        "core/async": "../webresource/js/core/async",
         "core/linklist": "../webresource/js/core/linklist",
         "core/event": "../webresource/js/core/event",
         "core/component": "../webresource/js/core/component",

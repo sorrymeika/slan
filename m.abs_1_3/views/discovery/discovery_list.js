@@ -53,7 +53,7 @@ module.exports = Activity.extend({
         });
     },
 
-    onEnter: function () {
+    onLoad: function () {
         var self = this;
 
         self.discoverListAPI.setParam({

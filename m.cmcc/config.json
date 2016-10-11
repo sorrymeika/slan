@@ -35,6 +35,7 @@
         "/": "home",
         "/signup": "signup",
         "/login": "login",
-        "/licence": "licence"
+        "/licence": "licence",
+        "/publicquan/{id:\\d+}": "publicquan/item"
     }
 }

@@ -6,7 +6,7 @@ var Component = require('./component');
 var appProto = require('./appProto');
 var animation = require('./animation');
 var LinkList = require('./linklist');
-var Promise = require('./promise');
+var Async = require('./async');
 var Touch = require('./touch');
 var Route = require('./route');
 var Activity = require('./activity');
@@ -69,8 +69,8 @@ function bindBackGesture(application) {
             isForward,
             deltaX = that.deltaX;
 
-        if (that.isDirectionY || that.swiperPromise || that.swiper) {
-            if (that.swiperPromise) {
+        if (that.isDirectionY || that.swiperAsync || that.swiper) {
+            if (that.swiperAsync) {
                 that._stop();
             }
             that.stop();
@@ -98,7 +98,7 @@ function bindBackGesture(application) {
         }
 
         if (action) {
-            that.swiperPromise = new Promise();
+            that.swiperAsync = new Async();
 
             application.mask.show();
             application.get(action, function (activity) {
@@ -110,20 +110,20 @@ function bindBackGesture(application) {
                 that.swiper = new animation.Animation(getToggleAnimation(isForward, currentActivity, activity));
                 that.swipeActivity = activity;
 
-                that.swiperPromise.resolve();
+                that.swiperAsync.resolve();
             });
 
         } else {
-            that.swiperPromise = null;
+            that.swiperAsync = null;
         }
 
     }).on('move', function (e) {
         var that = this,
             deltaX = that.deltaX;
 
-        if (!that.swiperPromise) return;
+        if (!that.swiperAsync) return;
 
-        that.swiperPromise.then(function () {
+        that.swiperAsync.then(function () {
             that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
                 0 :
                 (Math.abs(deltaX) * 100 / that.width));
@@ -137,8 +137,8 @@ function bindBackGesture(application) {
         if (!that.isCancelSwipe)
             application._currentActivity.trigger('Pause');
 
-        if (that.swiperPromise) {
-            that.swiperPromise.then(function () {
+        if (that.swiperAsync) {
+            that.swiperAsync.then(function () {
 
                 that._isInAnim = true;
 
@@ -174,7 +174,7 @@ function bindBackGesture(application) {
 
                 }], that.swiper.animate, that.swiper);
 
-                that.swiperPromise = null;
+                that.swiperAsync = null;
                 that.swiper = null;
             });
         }
@@ -264,7 +264,7 @@ var Application = Component.extend(Object.assign(appProto, {
         var $win = $(window);
         var $el = that.$el;
 
-        that.queue = new Promise();
+        that.queue = new Async();
 
         if (delay) {
             setTimeout(function () {
@@ -272,7 +272,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 delay.resolve();
             }, delay);
 
-            delay = new Promise();
+            delay = new Async();
 
         } else {
             $el.appendTo(document.body);
@@ -286,7 +286,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.hash = Route.formatUrl(location.hash);
 
-        that.historyPromise = new Promise().resolve();
+        that.historyPromise = new Async().resolve();
 
         that.get(that.hash, function (activity) {
 
@@ -384,14 +384,24 @@ var Application = Component.extend(Object.assign(appProto, {
 
             for (var i = 0, n = anims.length; i < n; i++) {
                 anim = anims[i];
-                anim.ease = ease;
-                anim.duration = duration;
 
-                anim.el.css(animation.transform(anim.start).css)
-                    .animate(animation.transform(anim.css).css, duration, ease, finish);
+                if (!duration) {
+                    anim.el.css(animation.transform(anim.css).css);
+
+                } else {
+                    anim.ease = ease;
+                    anim.duration = duration;
+
+                    anim.el.css(animation.transform(anim.start).css)
+                        .animate(animation.transform(anim.css).css, duration, ease, finish);
+                }
             }
 
-            setTimeout(finish, duration + 300);
+            if (!duration) {
+                finish();
+            }
+
+            //setTimeout(finish, duration + 300);
 
             //anim.finish = finish;
             //animation.parallel(anims);
@@ -474,6 +484,49 @@ var Application = Component.extend(Object.assign(appProto, {
 
     back: function (url, duration, toggleAnim, data) {
         this._navigate(url, false, duration, toggleAnim, data);
+    },
+
+    createIFrame: function ($container) {
+        var $iframe = $('<iframe width="' + window.innerWidth + 'px" frameborder="0" />').appendTo($container);
+        var iframeWin = $iframe[0].contentWindow;
+        var iframeDoc = iframeWin.document;
+        var self = this;
+
+        $(iframeDoc.body).on('click', 'a[href]', function (e) {
+            var target = $(e.currentTarget);
+            var href = target.attr('href');
+
+            if (!/^(http\:|https\:|javascript\:|mailto\:|tel\:)/.test(href)) {
+                e.preventDefault();
+                if (!/^#/.test(href)) href = '#' + href;
+
+                target.attr('back') != null ? self.back(href) : self.forward(href);
+
+            } else if (sl.isInApp && href.indexOf('http') == 0) {
+                bridge.openInApp(href);
+            }
+            return false;
+        });
+
+        return {
+            $el: $iframe,
+            window: iframeWin,
+            document: iframeDoc,
+            html: function (content) {
+
+                iframeDoc.body.innerHTML = '<style>p{ padding:0;margin:0 0 10px 0; }img{width:100%;height:auto;display:block;}</style>' + content;
+
+                $iframe.css({ height: iframeDoc.documentElement.scrollHeight });
+
+                [].forEach.call(iframeDoc.querySelectorAll('img'), function (img) {
+                    img.style.width = "100%";
+                    img.style.height = "auto";
+                    img.onload = function () {
+                        $iframe.css({ height: iframeDoc.documentElement.scrollHeight });
+                    }
+                })
+            }
+        }
     }
 }));
 

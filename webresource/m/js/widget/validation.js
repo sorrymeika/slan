@@ -1,6 +1,6 @@
 ﻿define(function(require,exports,module) {
     var $=require('$');
-    var Promise=require('../core/promise');
+    var async=require('../core/async');
 
     var offsetParent=function(el) {
         var parent=el.parent(),
@@ -241,7 +241,7 @@
                 result=true,
                 immediately,
                 isDfd=false,
-                dfd=Promise();
+                dfd=async();
 
             $.each(list,function(i,item) {
                 immediately=item.validate(function(flag) {

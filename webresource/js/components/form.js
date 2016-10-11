@@ -4,7 +4,7 @@
     var util = require('util');
     var Validator = require('./validator');
     var model = require('core/model');
-    var Promise = require('core/promise');
+    var Async = require('core/async');
     var TimePicker = require('./timepicker');
 
     var valid_keys = ["stringifyData", 'emptyAble', 'emptyText', 'regex', 'regexText', 'compare', 'compareText', 'validate', 'validateText', 'success', 'msg'];
@@ -220,7 +220,7 @@
         var $script = $('<script type="text/plain" id="' + self.id + '" style="width:' + (options.width || 640) + 'px;height:300px;"></script>').insertBefore($input);
 
         window.UMEDITOR_HOME_URL = seajs.resolve('components/umeditor/');
-        self.promise = Promise();
+        self.async = Async();
 
         (function(fn) {
             window.jQuery ? fn() : seajs.use(['components/umeditor/third-party/jquery.min'], fn);
@@ -243,7 +243,7 @@
 
                 self.editor = editor;
                 editor.ready(function() {
-                    self.promise.resolve();
+                    self.async.resolve();
                 });
             });
         });
@@ -252,7 +252,7 @@
     RichTextBox.prototype = {
         val: function(val) {
             var self = this;
-            self.promise.then(function() {
+            self.async.then(function() {
                 self.editor.setContent(val, false);
             });
             self.$input.val(val).trigger('change');

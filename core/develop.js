@@ -5,7 +5,7 @@ var Tools = require('./../tools/tools');
 var Util = require('util');
 var util = require('./util');
 var razor = require('./razor');
-var Promise = require('./promise');
+var Async = require('./async');
 var fs = require('fs');
 
 _.extend(Util, util);
@@ -15,7 +15,7 @@ var app = express();
 
 var generateHomePage = function (project) {
 
-    var promise = new Promise();
+    var promise = new Async();
     fs.readFile(path.join(project, './index.tpl'), { encoding: 'utf-8' }, function (err, data) {
 
         data = data.replace(/^\uFEFF/i, '');

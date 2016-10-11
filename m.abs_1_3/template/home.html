@@ -155,10 +155,10 @@
                     <div class="hm_user__order top_bottom_border">
                         <div class="user-order bottom_border">我的订单<span class="allorder" data-forward="/myorder">查看全部订单</span></div>
                         <ul class="ordercates">
-                            <li class="user-unpay" data-forward="/myorder?state=1"><i>12</i><span>待付款</span></li>
-                            <li class="user-unsend" data-forward="/myorder?state=2"><i>1</i><span>待发货</span></li>
-                            <li class="user-send" data-forward="/myorder?state=3"><span>配送中</span></li>
-                            <li class="user-complete" data-forward="/myorder?state=4"><span>已完成</span></li>
+                            <li class="user-unpay" data-forward="/myorder?state=1"><i sn-if="{order1num}">{order1num}</i><span>待付款</span></li>
+                            <li class="user-unsend" data-forward="/myorder?state=2"><i sn-if="{order2num}">{order2num}</i><span>待发货</span></li>
+                            <li class="user-send" data-forward="/myorder?state=3"><i sn-if="{order3num}">{order3num}</i><span>配送中</span></li>
+                            <li class="user-complete" data-forward="/myorder?state=4"><i sn-if="{order4num}">{order4num}</i><span>已完成</span></li>
                         </ul>
                     </div>
 

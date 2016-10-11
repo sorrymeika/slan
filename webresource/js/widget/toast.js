@@ -1,7 +1,7 @@
 ﻿
 var $ = require('$'),
     util = require('util'),
-    Promise = require('core/promise');
+    Async = require('core/async');
 
 var $el = $('<div class="tip" style="display:none"></div>')
     .on($.fx.transitionEnd, function () {
@@ -12,7 +12,7 @@ var $el = $('<div class="tip" style="display:none"></div>')
     .appendTo(document.body),
     timer;
 
-exports.promise = Promise.resolve();
+exports.async = Async.resolve();
 
 exports.msec = 2000;
 
@@ -24,7 +24,7 @@ exports.show = function () {
 exports.msg = function (msg) {
     var self = this;
 
-    self.promise.then(function () {
+    self.async.then(function () {
         $el.html(msg);
         self.show();
 
@@ -32,7 +32,7 @@ exports.msg = function (msg) {
 
             self.hide();
 
-            self.promise.resolve();
+            self.async.resolve();
 
         }, self.msec);
 

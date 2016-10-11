@@ -5,9 +5,17 @@
 
     var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
 
-    var Loader = function (options) {
 
-        if (options.length !== undefined) options = { $el: options };
+    /*
+    @options = { 
+        pageEnabled: true|false //是否自动加入分页判断,
+        hasData: function(res){ return true|false; } //判断是否有数据,
+        check: function(res) { return true|false; } //验证数据是否正确
+    }
+    */
+    var Loader = function (options) {
+        if (options.nodeType) options = { el: options };
+        else if (options.length !== undefined && options[0].nodeType) options = { $el: options };
 
         $.extend(this, _.pick(options, extend));
 
@@ -20,7 +28,7 @@
         this.error = options.error || this.showError;
         this.$scroll = options.$scroll || this.$el;
         this.$content = options.$content || this.$scroll;
-        this.pageEnabled = !!(options.pageEnabled || this.append);
+        this.pageEnabled = this.pageEnabled === false || options.pageEnabled === false ? false : (options.pageEnabled || this.append);
         options.showLoading != undefined && (this.isShowLoading = options.showLoading !== false && !!this.el);
 
         this.url && this.setUrl(this.url);
@@ -148,7 +156,7 @@
                         }
                     });
                 }
-                that.$loading.show().appendTo(that.$el)//[0].clientHeight;
+                that.$loading.show().appendTo(that.$el)[0].clientHeight;
                 that.$loading.addClass('show');
 
                 that.$refreshing && that.$refreshing.hide();
@@ -315,8 +323,9 @@
             var that = this,
                 data = that.params;
 
-
-            if (that.append && ((that.DATAKEY_PAGENUM && res[that.DATAKEY_PAGENUM] && res[that.DATAKEY_PAGENUM] > data[that.KEY_PAGE]) || (that.DATAKEY_TOTAL && res[that.DATAKEY_TOTAL] && res[that.DATAKEY_TOTAL] > data[that.KEY_PAGE] * parseInt(data[that.KEY_PAGESIZE])))) {
+            if (that.append && (!that.pageEnabled && that.hasData(res)
+                || ((that.DATAKEY_PAGENUM && res[that.DATAKEY_PAGENUM] && res[that.DATAKEY_PAGENUM] > data[that.KEY_PAGE])
+                    || (that.DATAKEY_TOTAL && res[that.DATAKEY_TOTAL] && res[that.DATAKEY_TOTAL] > data[that.KEY_PAGE] * parseInt(data[that.KEY_PAGESIZE]))))) {
 
                 that.pageIndex++;
                 that.enableAutoRefreshing();

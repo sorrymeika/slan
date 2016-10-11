@@ -55,7 +55,7 @@
             sl.isDebug = @debug;
             sl.buildVersion = @(Date.now());
             sl.isInApp = util.isInApp = !!matchUA;
-            sl.appVersion = matchUA ? matchUA[1] : '1.3.1';
+            sl.appVersion = matchUA ? matchUA[1] : '1.3.2';
 
             $(window).on('ortchange', adjustPx);
             @if(!debug && !useLocal) {
@@ -74,7 +74,7 @@
                     $el: $('body'),
                     error: function() {
                         Offline.getInstance().show(loadResourceMapping);
-
+                        console.log("cantload: /api/settings/resourceMapping");
                     },
                     success: function(res) {
                         Offline.getInstance().hide();
@@ -100,6 +100,8 @@
                         });
                         seajs.on("error", function(errorData) {
                             errorData.pause = true;
+
+                            console.log(errorData.uri);
 
                             Offline.getInstance().show(function() {
                                 this.hide();

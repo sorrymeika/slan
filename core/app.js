@@ -10,7 +10,7 @@ var Tools = require('./../tools/tools');
 var Util = require('util');
 var util = require('./util');
 var razor = require('./razor');
-var Promise = require('./promise');
+var Async = require('./async');
 var fs = require('fs');
 
 _.extend(Util, util);
@@ -46,7 +46,7 @@ if (useCluster && cluster.isMaster) {
     var http = require('http');
     var express = require('express');
     var app = express();
-    var promise = Promise.resolve();
+    var async = Async.resolve();
 
     var T = require('./index');
     var Route = require('./route');

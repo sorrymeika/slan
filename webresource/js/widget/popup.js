@@ -1,4 +1,5 @@
 var $ = require('$');
+var Promise = require('promise');
 
 var $mask = $('<div class="cp_popup__mask"></div>').appendTo('body');
 
@@ -13,6 +14,9 @@ function showMask() {
     $mask.show()[0].clientHeight;
     $mask.addClass('show');
 }
+
+var popupPromise = Promise.resolve();
+var popups = [];
 
 module.exports = {
 
@@ -63,7 +67,10 @@ module.exports = {
 
                 params.confirmAction.call(this, value);
             },
-            cancelAction: params.cancelAction
+            cancelAction: function () {
+                this.hide();
+                params.cancelAction.call(this);
+            }
         })
 
     },
@@ -73,46 +80,79 @@ module.exports = {
         var ret = {
 
             find: function (selector) {
-                return $container.find(selector)
+                return ret.$container.find(selector)
             },
 
             hide: function () {
-                ($('.cp_popup__container').length == 1) && $mask.removeClass('show');
 
-                $container.removeClass('show');
-            }
+                this.promise.then(function () {
+
+                    (popups.length <= 1) && $mask.removeClass('show');
+                    ret.$container.removeClass('show');
+
+                    for (var i = popups.length; i >= 0; i--) {
+                        if (popups[i] == ret) {
+                            popups.splice(i, 1);
+                            break;
+                        }
+                    }
+                    ret.resolve();
+                })
+            },
+            promise: popupPromise
         };
 
-        var $container = $('<div class="cp_popup__container"></div>')
-            .on($.fx.transitionEnd, function () {
-                if (!$(this).hasClass('show')) {
+        popupPromise = popupPromise.then(function () {
 
-                    this.parentNode && this.parentNode.removeChild(this);
-                }
-            })
-            .on('click', '[click]', function (e) {
+            return new Promise(function (resolve, reject) {
+                ret.resolve = resolve;
 
-                params[$(e.currentTarget).attr('click')].call(ret, e);
+                var $container = $('<div class="cp_popup__container"></div>')
+                    .on($.fx.transitionEnd, function () {
+                        if (!$(this).hasClass('show')) {
 
-            })
+                            this.parentNode && this.parentNode.removeChild(this);
+                        }
+                    })
+                    .on('click', '[click]', function (e) {
 
-        if (params.className) $container.addClass(params.className);
+                        var actionName = $(e.currentTarget).attr('click');
 
-        $container.append(params.content)
+                        params[actionName].call(ret, e);
 
-        $container.appendTo('body');
+                        if ((params.type == 'alert' && actionName == 'action') || actionName == 'cancelAction') {
+                            ret.hide();
+                        }
+                    });
 
-        showMask();
+                ret.$container = $container;
 
-        $container.addClass('show');
+                $container.append(params.content);
+
+                $container.appendTo('body');
+
+                showMask();
+                $container.addClass('show');
+
+                popups.push(ret);
+            });
+        });
 
         return ret;
     },
 
     hidePopup: function () {
-        $mask.removeClass('show');
+        if (popups.length) popups.pop().hide();
+    },
 
-        $('.cp_popup__container').removeClass('show');
+    hideAllPopups: function () {
+
+        if (popups.length) {
+            $mask.removeClass('show');
+            $('.cp_popup__container').removeClass('show');
+            popups.length = 0;
+            popupPromise = Promise.resolve();
+        }
     }
 
 };

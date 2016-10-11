@@ -55,6 +55,7 @@ header img { display: block; width: 33px; height: 33px; }
 .flexavg { display: block; -webkit-box-flex: 1; width: 0px; }
 input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .flex { display: -webkit-box; -webkit-box-align: center; }
+.flexstart { display: -webkit-box; }
 
 .dp_b { display: block; }
 .dp_i { display: inline; }
@@ -65,6 +66,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 
 .ps_r { position: relative; }
 .ps_a { position: absolute; }
+.ps_c { position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); }
 
 .va_m { vertical-align: middle; }
 .ta_c { text-align: center; }
@@ -88,6 +90,8 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .pd_l { padding: 15px; }
 .pd_xl { padding: 20px; }
 
+.pt_1 { padding-top: 1px; }
+
 .pl_s { padding-left: 5px; }
 .pl_m { padding-left: 10px; }
 
@@ -95,6 +99,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .pr_m { padding-right: 10px; }
 
 .pb_m { padding-bottom: 10px; }
+.pt_m { padding-top: 10px; }
 
 .mg_s { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
 .mg_m { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
@@ -126,6 +131,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .fs_l { font-size: 16px; }
 
 .cl_app { color: $color; }
+.cl_dark { color: $colordark; }
 .cl_fff { color: #fff; }
 .cl_999 { color: #999; }
 .cl_000 { color: #000; }

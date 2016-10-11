@@ -4,6 +4,7 @@ var Activity = require('activity');
 var Loader = require('widget/loader');
 var model = require('core/model');
 var Scroll = require('widget/scroll');
+var popup = require('widget/popup');
 var api = require('models/api');
 var Share = require('components/share');
 var userModel = require('models/user');
@@ -76,7 +77,13 @@ module.exports = Activity.extend({
             },
             success: function (res) {
                 if (res.success) {
-                    self.confirm(res.msg, function () {
+
+                    popup.alert({
+                        title: '温馨提示',
+                        content: res.msg,
+                        action: function () {
+                        },
+                        btn: '确定'
                     });
                 }
             },

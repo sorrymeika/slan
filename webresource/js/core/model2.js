@@ -14,6 +14,8 @@ var ModelEvents = {
     touchend: 'touchend',
     touchmove: 'touchmove',
     click: 'click',
+    load: 'load',
+    error: 'error',
     change: 'change',
     input: 'input',
     focus: 'focus',
@@ -25,11 +27,11 @@ var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
 var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
-var rvar = /'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
+var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
-//var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
 var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
 
+//var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
 //   /(?:\((?:\(.*?\)|.)*?\)|.)/
 
 var Filters = {
@@ -137,7 +139,7 @@ function setRefs(viewModel, el) {
 
 function updateRequireView(viewModel, el) {
     var id = el.getAttribute('sn-data');
-    var data = !id ? null : viewModel.fns[id].call(viewModel, viewModel.formatData(el));
+    var data = !id ? null : viewModel.fns[id].call(viewModel, viewModel.formatData(el.snData, el));
     var instance
 
     if (el.snRequireInstance) {
@@ -258,6 +260,7 @@ function genFunction(expression) {
     if (variables && variables.length) {
         content = 'var ' + variables.join(',') + ';' + content
     }
+
     return {
         isGlobal: isGlobal,
         code: content,
@@ -717,9 +720,6 @@ function ViewModel(el, data, children) {
     this.updateView = this.updateView.bind(this);
     this._handleEvent = this._handleEvent.bind(this);
 
-    if (this.viewWillUpdate) this.on('viewWillUpdate', this.viewWillUpdate);
-    if (this.viewDidUpdate) this.on('viewDidUpdate', this.viewDidUpdate);
-
     this.cid = util.guid();
     this.snModelKey = 'sn-' + this.cid + 'model';
 
@@ -738,6 +738,9 @@ function ViewModel(el, data, children) {
     this.set(this.data);
 
     this.initialize.call(this, data);
+
+    if (this.viewWillUpdate) this.on('viewWillUpdate', this.viewWillUpdate);
+    if (this.viewDidUpdate) this.on('viewDidUpdate', this.viewDidUpdate);
 }
 
 ViewModel.prototype = Object.assign(Object.create(ModelProto), {
@@ -782,7 +785,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         } else if (/^\d+$/.test(eventCode)) {
 
-            var snData = this.formatData(target.snData);
+            var snData = this.formatData(target, target.snData);
 
             snData.e = e;
 
@@ -846,9 +849,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             var val = el.attributes[j].value;
 
             if (val) {
-                if (attr == 'sn-error') {
-                    attr = 'onerror'
-                }
 
                 if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-src' || attr == 'sn-style' || attr == "sn-data" || attr.indexOf('sn-') != 0) {
                     if (attr.indexOf('sn-') == 0 && (val.indexOf("{") == -1 || val.indexOf("}") == -1)) {
@@ -915,9 +915,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         }
     },
 
-    formatData: function (snData) {
+    formatData: function (element, snData) {
         var data = Object.assign({
-            $global: this.$global.data
+            $global: this.$global.data,
+            srcElement: element
 
         }, Filters, this.data);
 
@@ -927,6 +928,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                 if (model instanceof Model || model instanceof Collection) {
                     data[key] = model.data;
+                    data['$' + key] = model;
 
                 } else {
                     data[key] = model;
@@ -942,7 +944,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         var self = this;
         var attrsBinding;
-        var data = this.formatData(el.snData);
+        var data = this.formatData(el, el.snData);
 
         if (attribute)
             (attrsBinding = {})[attribute] = el.snBinding[attribute];
@@ -1050,17 +1052,20 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     break;
                 case 'src':
                     el.src = val;
-                    console.log(el.src);
                     break;
                 case 'sn-src':
+                    if (el.getAttribute('sn-' + this.cid + 'load') || el.getAttribute('sn-' + this.cid + 'error'))
+                        $(el).one('load error', this._handleEvent);
+
                     if (el.src) {
                         el.src = val;
 
                     } else {
-                        var $el = $(el).one('load error', function () {
-                            $el.animate({
+                        $(el).one('load error', function (e) {
+                            $(this).animate({
                                 opacity: 1
                             }, 200);
+
                         }).css({
                             opacity: 0
 
@@ -1157,7 +1162,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
 
             if (repeatSource.filter) {
-                isInData = repeatSource.filter(self.formatData(snData));
+                isInData = repeatSource.filter(self.formatData(elem, snData));
             }
 
             if (isInData) {

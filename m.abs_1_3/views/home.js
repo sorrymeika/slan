@@ -665,28 +665,20 @@ module.exports = Activity.extend({
         self.requestUser();
     },
 
-    onLoad: function () {
+    onShow: function () {
+        var self = this;
 
         if (this.user) {
             this.showEnergy();
             this.doWhenLogin();
         }
-    },
-
-    onShow: function () {
-        var self = this;
 
         this.setResult('ResetCart');
 
         setTimeout(function () {
             self.guideSlider && self.guideSlider._adjustWidth();
 
-        }, 0)
-
-    },
-
-    onEnter: function () {
-        var self = this;
+        }, 0);
 
         if (self.model.data.tab == 0) {
             self.slider && setTimeout(function () {

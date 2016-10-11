@@ -3,7 +3,7 @@
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
 
-var Promise = require('../core/promise');
+var Async = require('../core/async');
 var fs = require('fs');
 var fsc = require('../core/fs');
 var path = require('path');
@@ -54,11 +54,11 @@ function combineRouters(config) {
 }
 
 exports.loadConfig = function (callback) {
-    var promise = new Promise();
+    var async = new Async();
 
     fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
         var globalConfig = JSON.parse(globalStr);
-        var subPromise = new Promise().resolve();
+        var subPromise = new Async().resolve();
         globalConfig.routes = {};
 
         subPromise.each(globalConfig.projects, function (i, project) {
@@ -73,12 +73,12 @@ exports.loadConfig = function (callback) {
         }).then(function (err, result) {
             globalConfig.projects = result;
 
-            promise.resolve(null, callback(err, globalConfig));
+            async.resolve(null, callback(err, globalConfig));
         });
 
     });
 
-    return promise;
+    return async;
 }
 
 exports.createIndex = function (config, callback) {
@@ -86,12 +86,12 @@ exports.createIndex = function (config, callback) {
 
         var T = razor.nodeFn(html.replace(/^\uFEFF/i, ''));
 
-        var promise = new Promise().resolve();
+        var async = new Async().resolve();
         var rimg = /url\(("|'|)([^\)]+)\1\)/g;
 
-        promise.each(config.css, function (i, cssPath) {
+        async.each(config.css, function (i, cssPath) {
             fs.readFile(cssPath, { encoding: 'utf-8' }, function (err, style) {
-                promise.next(i, err, style.replace(/^\uFEFF/i, ''));
+                async.next(i, err, style.replace(/^\uFEFF/i, ''));
             });
 
         }).then(function (err, styles) {
@@ -289,7 +289,7 @@ if (args.build) {
 
         //打包业务代码
         config.projects.forEach(function (project) {
-            var promise = new Promise().resolve();
+            var async = new Async().resolve();
             var codes = '';
             var requires = [];
 
@@ -326,7 +326,7 @@ if (args.build) {
                             Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
                         });
 
-                    })(key, project.js[key], new Promise().resolve());
+                    })(key, project.js[key], new Async().resolve());
                 }
             }
 
@@ -360,7 +360,7 @@ if (args.build) {
                             Tools.save(path.join(destDir, project.root, key), results.join(''));
                         });
 
-                    })(key, project.css[key], new Promise().resolve());
+                    })(key, project.css[key], new Async().resolve());
                 }
             }
 
@@ -386,7 +386,7 @@ if (args.build) {
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
 
-                    promise.then(function () {
+                    async.then(function () {
                         //打包模版
                         fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
                             if (!err && contains.indexOf(fileName) == -1) {
@@ -396,10 +396,10 @@ if (args.build) {
                                 codes += text;
                             }
 
-                            promise.resolve();
+                            async.resolve();
                         });
 
-                        return promise;
+                        return async;
 
                     }).then(function () {
                         //打包控制器
@@ -410,24 +410,24 @@ if (args.build) {
                                 codes += text;
                             }
 
-                            promise.resolve();
+                            async.resolve();
                         });
 
-                        return promise;
+                        return async;
                     });
 
                 })(project.route[key]);
             }
 
             //保存合并后的业务代码
-            promise.then(function () {
+            async.then(function () {
                 Tools.save(path.join(destDir, project.root, 'controller.js'), codes);
             });
         });
 
 
         //复制图片资源
-        var imgPromise = new Promise().resolve();
+        var imgPromise = new Async().resolve();
         imgPromise.each(config.images, function (i, imgDir) {
             fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function (err, result) {
                 imgPromise.next(i, err, result);

@@ -5,7 +5,6 @@ define(function (require, exports, module) {
     var Activity = require('activity');
     var Loading = require('widget/loader');
     var model = require('core/model2');
-    var Promise = require('core/promise');
     var Scroll = require('widget/scroll');
     var animation = require('animation');
     var api = require("models/api");

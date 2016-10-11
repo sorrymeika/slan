@@ -15,9 +15,9 @@ var getCallbackParams = function (args, parameters, fn) {
     return newArgs;
 }
 
-var Promise = function (args, callback, ctx) {
-    if (!(this instanceof Promise))
-        return new Promise(args, callback, ctx);
+var Async = function (args, callback, ctx) {
+    if (!(this instanceof Async))
+        return new Async(args, callback, ctx);
 
     var self = this;
 
@@ -37,7 +37,7 @@ var Promise = function (args, callback, ctx) {
     }
 }
 
-Promise.prototype = {
+Async.prototype = {
     reject: function (reason) {
         this.resolve(reason || 'unknow error', null);
     },
@@ -48,26 +48,28 @@ Promise.prototype = {
             then = that.queue.shift(),
             next,
             ctx,
-            promise;
+            async;
 
         if (then) {
             that.state = 1;
             next = then[0];
             ctx = then[1];
 
-            if (next instanceof Promise) {
+            if (next instanceof Async) {
                 next.then(that.resolveSelf);
 
             } else if (typeof next == 'function') {
-                promise = next.apply(ctx, args);
+                async = next.apply(ctx, args);
 
-                if (promise instanceof Promise) {
-                    if (promise !== that) {
-                        promise.then(that.resolveSelf);
+                if (async instanceof Async) {
+                    if (async !== that) {
+                        async.then(that.resolveSelf);
                     }
 
-                } else
-                    that.resolve(null, promise);
+                } else if (async instanceof Error)
+                    that.reject(async);
+                else
+                    that.resolve(null, async);
 
             } else if (next instanceof Array) {
                 var errors = [],
@@ -81,7 +83,7 @@ Promise.prototype = {
                             fn = fn.apply(ctx, args);
                         }
 
-                        if (fn instanceof Promise) {
+                        if (fn instanceof Async) {
 
                             fn.then(function (err, obj) {
                                 if (err) errors[i] = err;
@@ -111,18 +113,6 @@ Promise.prototype = {
         }
 
         return that;
-    },
-    when: function (fns, ctx) {
-        if (!(fns instanceof Array))
-            fns = [fns];
-
-        this.queue.append([fns, ctx || this]);
-
-        if (this.state != 1) {
-            this.resolve();
-        }
-
-        return this;
     },
 
     map: function (argsList, callback, ctx) {
@@ -234,14 +224,14 @@ Promise.prototype = {
     }
 };
 
-Promise.resolve = function () {
-    return new Promise().resolve();
+Async.resolve = function () {
+    return new Async().resolve();
 }
 
-module.exports = Promise;
+module.exports = Async;
 
 /*
-var promise=Promise(function () {
+var async=Async(function () {
 var that=this;
 
 setTimeout(function () {
@@ -254,8 +244,8 @@ that.resolve(null,'tes1t');
 return that;
 });
 
-promise.when(function () {
-var dfd=Promise();
+async.when(function () {
+var dfd=Async();
 
 setTimeout(function () {
 console.log('when');
@@ -270,21 +260,21 @@ return dfd;
 setTimeout(function () {
 console.log('then',err,result);
 
-promise.resolve();
+async.resolve();
 
 },1000);
 
-return promise;
+return async;
 })
 .then(function (err,result) {
 
 setTimeout(function () {
 console.log('end',err,result);
 
-promise.resolve();
+async.resolve();
 
 },500);
 
-return promise;
+return async;
 });
 */

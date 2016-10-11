@@ -164,35 +164,35 @@ var compressHTML = function (html) {
 var path = require('path');
 var fs = require('fs');
 var fse = require('fs-extra');
-var Promise = require('./../core/promise');
+var Async = require('./../core/async');
 
 var _save = function (savePath, data, isCopy, callback) {
 
-    var promise = new Promise();
+    var async = new Async();
     var dir = path.dirname(savePath);
 
     fs.exists(dir, function (exists) {
         if (!exists) {
             fse.mkdirs(dir, function (err, r) {
-                promise.resolve(null, data);
+                async.resolve(null, data);
             });
         } else {
-            promise.resolve(null, data);
+            async.resolve(null, data);
         }
     });
 
     if (isCopy) {
-        promise.then([data], fs.readFile, fs);
+        async.then([data], fs.readFile, fs);
     }
 
-    promise.then([savePath, '$1'], fs.writeFile)
+    async.then([savePath, '$1'], fs.writeFile)
         .then(function () {
             console.log('save', savePath)
         });
 
-    if (callback) promise.then(callback);
+    if (callback) async.then(callback);
 
-    return promise;
+    return async;
 };
 
 var save = function (savePath, data, callback) {
@@ -207,7 +207,7 @@ var Tools = function (baseDir, destDir) {
     this.baseDir = baseDir;
     this.destDir = destDir;
 
-    this.promise = new Promise().resolve();
+    this.async = new Async().resolve();
 }
 
 Tools.prototype = {
@@ -250,9 +250,9 @@ Tools.prototype = {
             if (fileList.length) {
 
                 (function (fileList, ids, isCss, destPath) {
-                    var promise = new Promise().resolve();
+                    var async = new Async().resolve();
 
-                    promise.map(fileList, fs.readFile, fs)
+                    async.map(fileList, fs.readFile, fs)
                         .then(function (err, result) {
                             if (err) {
                                 console.log(err)
@@ -275,7 +275,7 @@ Tools.prototype = {
                             return self.save(destPath, text);
                         });
 
-                    self.promise.then(promise);
+                    self.async.then(async);
 
                 })(fileList, ids, isCss, path.join(self.destDir, isCss || /\.js$/.test(destPath) ? destPath : (destPath + '.js')));
 
@@ -295,7 +295,7 @@ Tools.prototype = {
             now = new Date().getTime();
 
         fileList.forEach(function (fileName) {
-            var promise = new Promise();
+            var async = new Async();
 
             fs.readFile(path.join(self.baseDir, fileName), { encoding: 'utf-8' }, function (err, html) {
 
@@ -319,10 +319,10 @@ Tools.prototype = {
 
                 html = compressHTML(html);
 
-                self.save(path.join(self.destDir, fileName), html, promise.resolveSelf);
+                self.save(path.join(self.destDir, fileName), html, async.resolveSelf);
             });
 
-            self.promise.then(promise);
+            self.async.then(async);
         });
 
         return this;
@@ -331,16 +331,16 @@ Tools.prototype = {
     resource: function (resourceDir) {
 
         var self = this;
-        var promise = new Promise().resolve();
+        var async = new Async().resolve();
         var pathArr = [];
 
         resourceDir.forEach(function (dir, i) {
             pathArr.push([path.join(self.baseDir, dir), path.join(self.destDir, dir)]);
         });
 
-        promise.map(pathArr, fse.copy, fse);
+        async.map(pathArr, fse.copy, fse);
 
-        this.promise.then(promise);
+        this.async.then(async);
     },
 
     compress: function (fileList) {
@@ -360,7 +360,7 @@ Tools.prototype = {
 
         for (var key in dict) {
             (function (fileName, readPath) {
-                var promise = new Promise();
+                var async = new Async();
 
                 if (/\.css$/.test(fileName)) {
 
@@ -368,7 +368,7 @@ Tools.prototype = {
                         encoding: 'utf-8'
 
                     }, function (err, text) {
-                        self.save(path.join(self.destDir, fileName), compressCss(text), promise.resolveSelf);
+                        self.save(path.join(self.destDir, fileName), compressCss(text), async.resolveSelf);
                     });
 
                 } else if (/\.html/.test(fileName)) {
@@ -377,7 +377,7 @@ Tools.prototype = {
                         encoding: 'utf-8'
 
                     }, function (err, text) {
-                        self.save(path.join(self.destDir, fileName), compressHTML(text), promise.resolveSelf);
+                        self.save(path.join(self.destDir, fileName), compressHTML(text), async.resolveSelf);
                     });
 
                 } else {
@@ -390,11 +390,11 @@ Tools.prototype = {
 
                         text = compressJs(replaceDefine(fileName, text));
 
-                        self.save(path.join(self.destDir, jsFileName), text, promise.resolveSelf);
+                        self.save(path.join(self.destDir, jsFileName), text, async.resolveSelf);
                     });
                 }
 
-                self.promise.then(promise);
+                self.async.then(async);
 
             })(key, dict[key]);
         }
@@ -408,10 +408,10 @@ Tools.prototype = {
     razor: function (fileList) {
         var self = this;
 
-        var promise = new Promise().resolve();
+        var async = new Async().resolve();
         var result = '';
 
-        fileList.forEach(promise.bind(function (fileName, i) {
+        fileList.forEach(async.bind(function (fileName, i) {
 
             fs.readFile(path.join(self.baseDir, fileName + '.tpl'), {
                 encoding: 'utf-8'
@@ -423,11 +423,11 @@ Tools.prototype = {
 
                 result += text;
 
-                self.save(path.join(self.destDir, 'js/' + fileName + '.js'), text, promise.resolveSelf);
+                self.save(path.join(self.destDir, 'js/' + fileName + '.js'), text, async.resolveSelf);
             });
         }));
 
-        self.promise.then(promise)
+        self.async.then(async)
             .then(function () {
                 return self.save(path.join(self.destDir, self.razorUri), result);
             });
@@ -445,7 +445,7 @@ Tools.prototype = {
         options.compress && this.compress(options.compress);
         options.razor && this.razor(options.razor);
 
-        this.promise.then(function () {
+        this.async.then(function () {
             console.log('finish')
         });
     }

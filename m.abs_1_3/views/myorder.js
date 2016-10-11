@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     var animation = require('animation');
     var bridge = require('bridge');
     var api = require('models/api');
+    var popup = require('widget/popup');
 
     return Activity.extend({
         events: {
@@ -147,12 +148,20 @@ define(function (require, exports, module) {
                 },
                 cancelOrder: function (order, e) {
 
-                    self.confirm('你确定取消订单吗？', function () {
-                        self.cancelOrderApi.setParam({
-                            purcode: order.PUR_CODE
+                    popup.confirm({
+                        title: '温馨提示',
+                        content: '你确定取消订单吗？',
+                        cancelText: '不取消',
+                        cancelAction: function () { },
+                        confirmText: '确定取消',
+                        confirmAction: function () {
+                            self.cancelOrderApi.setParam({
+                                purcode: order.PUR_CODE
 
-                        }).load();
+                            }).load();
+                        }
                     });
+
                     e.stopPropagation();
                     e.preventDefault();
                 },

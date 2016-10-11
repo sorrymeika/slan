@@ -2,7 +2,7 @@ var $ = require('$'),
     util = require('util'),
     Base = require('./base'),
     Component = require('./component'),
-    Promise = require('./promise'),
+    Async = require('./async'),
     Dialog = require('../widget/dialog');
 
 require('../widget/tip');
@@ -14,6 +14,9 @@ var noop = util.noop,
 
 var Page = Component.extend({
     el: '<div class="view"></div>',
+
+    _setReferrer: function () {
+    },
 
     _setRoute: function (route) {
         this.route = route;
@@ -63,9 +66,9 @@ var Page = Component.extend({
 
     initialize: function () {
         var that = this,
-            promise = Promise.resolve();
+            async = Async.resolve();
 
-        that._promise = promise;
+        that._promise = async;
         that.className = that.el.className;
 
         that._setRoute(that.options.route);
@@ -82,9 +85,9 @@ var Page = Component.extend({
 
         if (!that.$el.data('path')) {
             that.$el.data('url', that.url).data('path', that.path);
-            promise.then(that.loadTemplate, that);
+            async.then(that.loadTemplate, that);
         }
-        promise.then(that.onCreate, that)
+        async.then(that.onCreate, that)
             .then(function () {
                 that.checkQuery();
             });
@@ -149,39 +152,6 @@ var Page = Component.extend({
                 }
             }
         });
-    },
-
-    bindQueryAction: function (name, ctx, fnMap) {
-        var that = this;
-        var newFn;
-        var map = {};
-        var option = {
-            ctx: ctx,
-            map: map
-        };
-
-        $.each(fnMap, function (key, functionName) {
-            var functionName = fnMap[key];
-            var fn = ctx[functionName];
-            var action = {
-                fn: fn,
-                exec: false
-            };
-
-            map[key] = action;
-
-            ctx[functionName] = function () {
-                fn.apply(ctx, arguments);
-
-                if (that.queryString(name) != key) {
-                    action.exec = true;
-                    that.queryString(name, key);
-                }
-            }
-        });
-
-        this._queryActions[name] = option;
-        return this;
     },
 
     onResult: function (event, fn) {

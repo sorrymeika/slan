@@ -12,15 +12,17 @@
         <ul class="sp_buy__info top_bottom_border">
             <li class="bottom_border" sn-tap="this.useCoupon()"><span>使用优惠券</span><em>{selectedCoupon.CSV_CODE?selectedCoupon.CSV_CODE.split(',').length+"张":((coupon.length||0)+'张可用')}</em><b>-¥{selectedCoupon.CSV_CODE?selectedCoupon.VCA_DEDUCT_AMOUNT:'0'}</b></li>
             <li class="bottom_border" sn-tap="this.usePoint()"><span>积分抵扣</span><em>{Points}积分</em><b>-¥{Points/100||0}</b></li>
-            <li><span>运费</span><em>{this.getFreight(bag_amount,selectedCoupon,Points||0,selectedFreeCoupon.CSV_CODE)}</em></li>
+            <li><span>运费</span><em>{this.getFreight(bag_amount,full_amount_free,selectedCoupon,Points||0,selectedFreeCoupon.CSV_CODE)}</em></li>
         </ul>
         <ul class="sp_buy__info top_bottom_border" sn-tap="this.useInv()">
             <li><span>发票信息</span><span>{requireInv?isCompany?'公司':'个人':'不需要'}</span></li>
         </ul>
-        <div class="sp_buy__cart">
-            <div class="hd bottom_border">商品信息</div>
+        <div class="sp_buy__cart" sn-repeat="store in data">
+            <div class="hd bottom_border">
+                <div class="icon-shop dp_ib"></div> <span class="va_m">{store.tagname}</span>
+            </div>
             <ul class="sp_cart__list">
-                <li sn-repeat="item in data_baglist" class="sp_cart__listitem" data-id="{item.SPB_ID}">
+                <li sn-repeat="item in store.prodlist" class="sp_cart__listitem" data-id="{item.SPB_ID}">
                     <div class="sp_cart__listitem_con">
                         <img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" />
                         <div class="con">
@@ -34,7 +36,7 @@
                     </div>
                 </li>
             </ul>
-            <div sn-repeat="ppg in data_package" class="sp_cart__pkgitem">
+            <div sn-repeat="ppg in store.packagelist" class="sp_cart__pkgitem">
                 <dl>
                     <dt class="sp_cart__pkgitem_hd bottom_border">
 						{ ppg.PPG_NAME }
@@ -67,6 +69,6 @@
     </div>
 </div>
 <footer class="sp_buy__action">
-    <div class="total">实付款：<b ref="total">{this.getTotal(bag_amount,selectedCoupon,Points||0,selectedFreeCoupon)}</b></div>
+    <div class="total">实付款：<b ref="total">{this.getTotal(bag_amount,full_amount_free,selectedCoupon,Points||0,selectedFreeCoupon)}</b></div>
     <div class="btn_buy" sn-tap="this.createOrder()">立即支付</div>
 </footer>

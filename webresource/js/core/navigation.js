@@ -6,7 +6,7 @@
         View = require('./view'),
         Route = require('./route'),
         appProto = require('./appProto'),
-        Promise = require('./promise');
+        Async = require('./async');
 
     var noop = util.noop,
         slice = Array.prototype.slice,
@@ -38,7 +38,7 @@
 
             that.$mask = $(that.$el[0]).on('click', false);
             that.el = that.$el[1];
-            that.promise = Promise.resolve();
+            that.async = Async.resolve();
         },
 
         start: function () {
@@ -57,7 +57,7 @@
             if (!location.hash) location.hash = '/';
             that.hash = Route.formatUrl(location.hash);
 
-            that.promise.then(function () {
+            that.async.then(function () {
                 that.get(that.hash, function (activity) {
                     activity.$el.show().appendTo(that.el);
                     that._currentActivity = activity;
@@ -66,7 +66,7 @@
                         activity.trigger('Resume').trigger('Show');
 
                         that.trigger('start');
-                        that.promise.resolve();
+                        that.async.resolve();
                     });
                 });
 
@@ -83,7 +83,7 @@
                         that.skip = 0;
                 });
 
-                return that.promise;
+                return that.async;
             });
             return that;
         },
@@ -98,19 +98,19 @@
             url = Route.formatUrl(url);
 
             var that = this,
-                promise = that.promise;
+                async = that.async;
 
-            promise.then(function () {
+            async.then(function () {
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
-                if (promise.queue.length == 0 && !Route.compareUrl(url, location.hash) {
+                if (async.queue.length == 0 && !Route.compareUrl(url, location.hash) {
                     that.navigate(url);
                 }
 
                 if (currentActivity.path == route.path) {
                     checkQueryString(currentActivity, route);
-                    promise.resolve();
+                    async.resolve();
                     return;
                 }
                 that.get(route, function (activity) {
@@ -127,10 +127,10 @@
                             activity.trigger('Resume').trigger('Show');
                         });
                     }
-                    promise.resolve();
+                    async.resolve();
                 });
 
-                return promise;
+                return async;
             });
         }
     }));

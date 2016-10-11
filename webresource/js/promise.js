@@ -1,274 +1,183 @@
-﻿var LinkList = require('./linklist');
-var slice = Array.prototype.slice;
-var rparam = /^\$(\d+)$/;
+﻿var LinkList = require('./core/linklist');
 
-var getCallbackParams = function (args, parameters, fn) {
-    var newArgs = [];
+function isThenable(thenable) {
+    return thenable && typeof thenable.then === 'function';
+}
 
-    for (var i = 0, n = args.length, arg; i < n; i++) {
-        arg = args[i];
-        newArgs.push(typeof arg === 'string' ? (rparam.test(arg) ? parameters[parseInt(arg.match(rparam)[1])] : arg.replace(/^\$\$/, '$')) : arg);
+function tryResolve(thenable, _resolve, _reject) {
+
+    if (isThenable(thenable)) {
+        thenable.then(_resolve, _reject);
+
+    } else {
+        try {
+            if (typeof _resolve == 'function') {
+                _resolve(thenable);
+            }
+
+        } catch (e) {
+            _reject && _reject(e);
+        }
     }
-
-    newArgs.push(fn);
-
-    return newArgs;
 }
 
 function resolve(thenable) {
 
-    if (thenable && typeof thenable.then == 'function') {
+    return new Promise(function (_resolve, _reject) {
+        tryResolve(thenable, _resolve, _reject);
+    });
+}
 
+function reject(value) {
+
+    return new Promise(function (_resolve, _reject) {
+        _reject(value);
+    });
+}
+
+function catchAndContinue(e, onRejected, nextFulfilled, nextRejected) {
+    if (typeof onRejected === 'function') {
+        onRejected(e);
+        nextFulfilled(null);
+
+    } else {
+        nextRejected(e);
     }
 }
 
-var Promise = function (callback, ctx) {
+function subscribe(res, onFulfilled, onRejected, nextFulfilled, nextRejected) {
+    var thenable;
+
+    try {
+        thenable = onFulfilled ? onFulfilled(res) : null;
+
+    } catch (e) {
+        catchAndContinue(e, onRejected, nextFulfilled, nextRejected);
+        return;
+    }
+
+    tryResolve(thenable, nextFulfilled, nextRejected);
+}
+
+Promise.resolve = resolve;
+Promise.reject = reject;
+
+function Promise(callback, ctx) {
     if (!(this instanceof Promise))
         return new Promise(callback, ctx);
 
     var self = this;
+    var queue = new LinkList();
 
-    this.queue = new LinkList();
-    this.state = 2;
-    this.resolveSelf = function () {
-        self.resolve.apply(self, arguments);
-    };
+    this.state = -1;
+    this.queue = queue;
 
-    if (!callback && typeof args == 'number') {
-        this.state = 0;
-        this.start(args);
+    callback(function (res) {
 
-    } else if (args) {
-        this.state = 0;
-        this.then(args, callback, ctx);
-    }
+        self.state = 1;
+        self._result = res;
+
+        for (var next; next = queue.shift();) {
+            subscribe(res, next.onFulfilled, next.onRejected, next.nextFulfilled, next.nextRejected);
+        }
+
+    }, function (e) {
+        self.state = 0;
+        self._error = e;
+
+        for (var next; next = queue.shift();) {
+            catchAndContinue(e, next.onRejected, next.nextFulfilled, next.nextRejected);
+        }
+    });
 }
 
 Promise.prototype = {
-    reject: function (reason) {
-        this.resolve(reason || 'unknow error', null);
-    },
-
-    resolve: function () {
-        var that = this,
-            args = slice.call(arguments),
-            then = that.queue.shift(),
-            next,
-            ctx,
-            promise;
-
-        if (then) {
-            that.state = 1;
-            next = then[0];
-            ctx = then[1];
-
-            if (next instanceof Promise) {
-                next.then(that.resolveSelf);
-
-            } else if (typeof next == 'function') {
-                promise = next.apply(ctx, args);
-
-                if (promise instanceof Promise) {
-                    if (promise !== that) {
-                        promise.then(that.resolveSelf);
-                    }
-
-                } else if (promise instanceof Error)
-                    that.reject(promise);
-                else
-                    that.resolve(null, promise);
-
-            } else if (next instanceof Array) {
-                var errors = [],
-                    result = [],
-                    count = 0;
-
-                for (var i = 0, n = next.length; i < n; i++) {
-                    (function (fn, i, n) {
-
-                        if (typeof fn == 'function') {
-                            fn = fn.apply(ctx, args);
-                        }
-
-                        if (fn instanceof Promise) {
-
-                            fn.then(function (err, obj) {
-                                if (err) errors[i] = err;
-
-                                count++;
-                                result[i] = obj;
-
-                                if (count >= n) that.resolve(errors, result);
-                            });
-
-                        } else {
-                            count++;
-                            result[i] = fn;
-
-                            if (count >= n) that.resolve(null, result);
-                        }
-
-                    })(next[i], i, n);
-                }
-
-            } else {
-                that.resolve(null, args);
-            }
-
-        } else {
-            that.state = 0;
-        }
-
-        return that;
-    },
-
-    map: function (argsList, callback, ctx) {
-        var self = this,
-
-            fn = function () {
-                var parameters = arguments;
-
-                self._count = argsList.length;
-                self.result = [];
-                self.errors = [];
-
-                argsList.forEach(function (args, j) {
-                    if (!(args instanceof Array)) args = [args];
-
-                    callback.apply(this, getCallbackParams(args, parameters, function (err, res) {
-                        self.next(j, err, res);
-                    }));
-                });
-
-                return self;
-            };
-
-        self.queue.append([fn, ctx || this]);
-
-        return self;
-    },
-
-    each: function (argsList, callback, ctx) {
-
-        var self = this,
-            fn = function () {
-                self._count = argsList.length;
-                self.result = [];
-                self.errors = [];
-
-                argsList.forEach(function (args, j) {
-
-                    callback.call(this, j, args);
-                });
-
-                return self;
-            };
-
-        self.queue.append([fn, ctx || this]);
-
-        return self;
-    },
-
-    start: function (number) {
-        var self = this,
-            fn = function () {
-                self._count = number;
-                self.result = [];
-                self.errors = [];
-                return self;
-            };
-
-        self.queue.append([fn, this]);
-
-        return self;
-    },
-
-    next: function (index, err, data) {
-        this._count--;
-
-        if (err)
-            this.errors[index] = err;
-
-        this.result[index] = data;
-
-        if (this._count <= 0) {
-            this.resolve(this.errors.length ? this.errors : null, this.result);
-        }
-    },
-
-    bind: function (fn) {
+    then: function (onFulfilled, onRejected) {
         var self = this;
 
-        return function () {
-            self.then(slice.call(arguments), fn, this);
-        }
+        return new Promise(function (nextFulfilled, nextRejected) {
+
+            switch (self.state) {
+                case -1:
+                    self.queue.append({
+                        nextFulfilled: nextFulfilled,
+                        nextRejected: nextRejected,
+                        onFulfilled: onFulfilled,
+                        onRejected: onRejected
+                    });
+                    break;
+                case 1:
+                    subscribe(self._result, onFulfilled, onRejected, nextFulfilled, nextRejected);
+                    break;
+                case 0:
+                    catchAndContinue(self._error, onRejected, nextFulfilled, nextRejected);
+                    break;
+            }
+        });
+
     },
 
-    then: function (callback, ctx) {
-        var self = this,
-            fn;
-
-        self.queue.append([callback, ctx || this]);
-
-        if (!self.state) {
-            self.resolve();
-        }
-
-        return self;
+    'catch': function (onRejected) {
+        return this.then(null, onRejected);
     }
 };
 
-Promise.resolve = function () {
-    return new Promise().resolve();
+
+Promise.all = function (all) {
+    return this.each(all, null, false);
+}
+
+
+Promise.race = function (all) {
+
+    return this.each(all, false, false);
+}
+
+
+Promise.some = function (some) {
+
+    return this.each(some);
+}
+
+Promise.each = function (all, _resolve, _reject) {
+
+    return new Promise(function (onFulfilled, onRejected) {
+
+        var count = all.length;
+        var results = [];
+        var errors = [];
+
+        var checkNext = function (data, onFinish, each, i) {
+
+            return function (e) {
+
+                if (count == -1) return;
+
+                if (each === false || typeof each === 'function' && each(e, i) === false) {
+                    count = -1;
+
+                    onFinish(e);
+                    return;
+                }
+                data[i] = e;
+
+                count--;
+
+                if (count == 0) {
+                    if (errors.length) {
+                        onRejected(errors);
+                    }
+                    if (results.length) {
+                        onFulfilled(results);
+                    }
+                }
+            }
+        }
+
+        all.forEach(function (item, i) {
+            tryResolve(item, checkNext(results, onFulfilled, _resolve, i), checkNext(errors, onRejected, _reject, i));
+        });
+    });
 }
 
 module.exports = Promise;
-
-/*
-var promise=Promise(function () {
-var that=this;
-
-setTimeout(function () {
-console.log('init');
-
-that.resolve(null,'tes1t');
-
-},2000);
-
-return that;
-});
-
-promise.when(function () {
-var dfd=Promise();
-
-setTimeout(function () {
-console.log('when');
-
-dfd.resolve(null,'test');
-
-},2000);
-
-return dfd;
-})
-.then(function (err,result) {
-setTimeout(function () {
-console.log('then',err,result);
-
-promise.resolve();
-
-},1000);
-
-return promise;
-})
-.then(function (err,result) {
-
-setTimeout(function () {
-console.log('end',err,result);
-
-promise.resolve();
-
-},500);
-
-return promise;
-});
-*/
