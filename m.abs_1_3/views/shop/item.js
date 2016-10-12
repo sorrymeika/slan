@@ -62,8 +62,8 @@ module.exports = Activity.extend({
         var $detail = $(model.refs.detail);
         var $detailScroll = $(model.refs.detailScroll);
 
-        Scroll.bind($main);
-        Scroll.bind($detail);
+        this.bindScrollTo($main);
+        this.bindScrollTo($detail);
 
         var detail = new api.ProductDetailAPI({
             $el: self.$el,
@@ -141,7 +141,7 @@ module.exports = Activity.extend({
 
                     if (!this.loadedDetail) {
                         this.loadedDetail = true;
-                        detail.request();
+                        detail.load();
                     }
 
                 } else {

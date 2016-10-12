@@ -60,7 +60,6 @@
         "core/linklist": "../webresource/js/core/linklist",
         "core/event": "../webresource/js/core/event",
         "core/component": "../webresource/js/core/component",
-        "core/view": "../webresource/js/core/view",
         "core/model": "../webresource/js/core/model",
         "core/page": "../webresource/js/core/page",
         "core/route": "../webresource/js/core/route",
@@ -72,7 +71,6 @@
         "widget/scrollview": "../webresource/m/js/widget/scrollview",
         "widget/scroll": "../webresource/m/js/widget/scroll",
         "widget/tip": "../webresource/js/widget/tip",
-        "widget/dialog": "../webresource/js/widget/dialog",
         "widget/loading": "../webresource/m/js/widget/loading",
         "widget/offline": "../webresource/m/js/widget/offline",
         "anim/default": "../webresource/m/js/anim/default"

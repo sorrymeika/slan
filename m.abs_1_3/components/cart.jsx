@@ -88,7 +88,7 @@ var Cart = Model.extend({
 			}
 		});
 
-		self.cartApi.request();
+		self.cartApi.load();
 
 		var isModifying = false;
 
@@ -219,7 +219,7 @@ var Cart = Model.extend({
 					self.cartDeleteApi.setParam({
 						spbId: id
 
-					}).request(function () {
+					}).load(function () {
 						self.cartApi.reload();
 					});
 
@@ -350,7 +350,7 @@ var Cart = Model.extend({
 				if (count != 0) {
 					apis.forEach(function (item) {
 
-						item.request(function () {
+						item.load(function () {
 
 							count--;
 							if (count == 0) {

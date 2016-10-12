@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var api = require('models/api');
 var userModel = require('models/user');
 
@@ -21,10 +20,9 @@ module.exports = Activity.extend({
             title: '跟踪物流'
         });
 
-        Scroll.bind(self.model.refs.main);
+        this.bindScrollTo(self.model.refs.main);
 
         self.user = userModel.get();
-
 
         var expressApi = new api.ExpressAPI({
             $el: self.$el,

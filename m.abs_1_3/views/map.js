@@ -5,7 +5,6 @@ var bridge = require('bridge');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
 
-var Scroll = require('widget/scroll');
 var api = require('models/api');
 
 module.exports = Activity.extend({
@@ -24,7 +23,7 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction);
         }
 
-        Scroll.bind(model.refs.main);
+        this.bindScrollTo(model.refs.main);
     },
 
     onShow: function () {

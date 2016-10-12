@@ -30,7 +30,7 @@ var Category = {
         };
 
         if (!categories && !(categories = util.store('categories'))) {
-            categoryAPI.load(function (err, res) {
+            categoryAPI.load(function (res) {
                 fn(res.data, res.data2);
             });
         } else {

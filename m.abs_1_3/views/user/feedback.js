@@ -4,7 +4,6 @@ var Activity = require('activity');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
 
-var Scroll = require('widget/scroll');
 var api = require('models/api');
 
 module.exports = Activity.extend({
@@ -24,7 +23,7 @@ module.exports = Activity.extend({
             
         }
 
-        Scroll.bind(model.refs.main);
+        this.bindScrollTo(model.refs.main);
     },
 
     onShow: function () {

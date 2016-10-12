@@ -52,7 +52,7 @@ module.exports = Activity.extend({
             title: 'ABS家居'
         });
 
-        Scroll.bind(self.model.refs.main);
+        self.bindScrollTo(self.model.refs.main);
 
         self.user = userModel.get();
 

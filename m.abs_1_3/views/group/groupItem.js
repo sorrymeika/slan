@@ -62,8 +62,6 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || self.defBackUrl;
-
         self.user = userModel.get();
 
         self.model = new model.ViewModel(self.$el, {
@@ -74,7 +72,7 @@ module.exports = Activity.extend({
             tip: '分享后才能购买哦'
         });
 
-        Scroll.bind(self.model.refs.main);
+        this.bindScrollTo(self.model.refs.main);
 
         self.onResult("Login", function () {
             self.user = userModel.get();
@@ -167,7 +165,7 @@ module.exports = Activity.extend({
                     pspcode: self.user.PSP_CODE,
                     gppid: self.route.params.id
 
-                }).load(function (err, res) {
+                }).load(function (res) {
                     console.log(res);
 
                     self.model.set({

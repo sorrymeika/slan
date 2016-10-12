@@ -23,7 +23,8 @@ define(function (require, exports, module) {
 
             var $main = this.$('.main');
 
-            Scroll.bind($main);
+            this.bindScrollTo($main);
+            
             self.user = util.store('user');
 
             this.model = new model.ViewModel(this.$el, {

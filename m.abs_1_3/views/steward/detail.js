@@ -30,7 +30,7 @@ define(function (require, exports, module) {
 
             self.user = util.store('user');
 
-            this.scroll = Scroll.bind($main);
+            this.bindScrollTo($main);
 
             this.model = new model.ViewModel(this.$el, {
                 back: this.swipeRightBackAction,

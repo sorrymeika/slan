@@ -5,7 +5,6 @@ define(function (require, exports, module) {
     var Activity = require('activity');
     var Loading = require('widget/loader');
     var model = require('core/model');
-    var Scroll = require('widget/scroll');
     var animation = require('animation');
     var api = require('models/api');
 
@@ -21,7 +20,7 @@ define(function (require, exports, module) {
 
             self.swipeRightBackAction = self.route.query.from || '/all';
 
-            Scroll.bind($main);
+            this.bindScrollTo($main);
 
             var categories = util.store('categories');
 

@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require("models/api");
 var discoveryModel = require("models/discovery");
@@ -20,7 +19,7 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
 
-        Scroll.bind(self.$('.main'));
+        this.bindScrollTo(self.$('.main'));
 
         self.user = userModel.get();
 
@@ -41,7 +40,7 @@ module.exports = Activity.extend({
             url: encodeURIComponent(self.route.url)
         });
 
-        Scroll.bind(self.model.refs.productScroll, {
+        this.bindScrollTo(self.model.refs.productScroll, {
             hScroll: true
         });
 

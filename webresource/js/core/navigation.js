@@ -3,7 +3,6 @@
     var $ = require('$'),
         util = require('util'),
         Base = require('./base'),
-        View = require('./view'),
         Route = require('./route'),
         appProto = require('./appProto'),
         Async = require('./async');
@@ -13,7 +12,7 @@
         getPath = util.getPath,
         checkQueryString = appProto.checkQueryString;
 
-    var Navigation = View.extend($.extend(appProto, {
+    var Navigation = Component.extend($.extend(appProto, {
         events: {
             'click a[href]:not(.js-link-default)': function (e) {
                 var that = this,

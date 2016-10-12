@@ -5,7 +5,6 @@ define(function (require, exports, module) {
     var Activity = require('activity');
     var Loading = require('../widget/loader');
     var model = require('../core/model');
-    var Scroll = require('../widget/scroll');
     var animation = require('animation');
 
 
@@ -16,7 +15,7 @@ define(function (require, exports, module) {
 
             var $main = this.$('.main');
 
-            Scroll.bind($main, {
+            this.bindScrollTo($main, {
                 refresh: function (resolve, reject) {
                     self.loading.isShowLoading = false;
                     self.loading.reload(function () {

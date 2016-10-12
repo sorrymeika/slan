@@ -4,7 +4,6 @@ define(function (require, exports, module) {
     var util = require('util');
     var Activity = require('activity');
     var model = require('core/model');
-    var Scroll = require('../widget/scroll');
     var animation = require('animation');
 
     return Activity.extend({
@@ -16,7 +15,7 @@ define(function (require, exports, module) {
 
             var $main = this.$('.main');
 
-            Scroll.bind($main);
+            this.bindScrollTo($main);
 
             this.model = new model.ViewModel(this.$el, {
                 back: '/settings',

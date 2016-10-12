@@ -4,7 +4,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loader = require('../widget/loader');
 var model = require('../core/model');
-var Scroll = require('../widget/scroll');
 var animation = require('animation');
 var userModel = require("models/user");
 var md5 = require("util/md5").md5;
@@ -37,7 +36,7 @@ module.exports = Activity.extend({
 
         this.model = new model.ViewModel(this.$el, {
         });
-        Scroll.bind(this.model.refs.main);
+        this.bindScrollTo(this.model.refs.main);
 
         this.Loader = new Loader({
             url: '/api/user/signin',

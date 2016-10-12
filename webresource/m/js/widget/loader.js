@@ -3,7 +3,7 @@
         _ = require('util'),
         $empty = $();
 
-    var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
+    var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
 
 
     /*
@@ -25,7 +25,6 @@
         this.el = this.$el[0];
 
         this.params = $.extend({}, this.params, options.params);
-        this.error = options.error || this.showError;
         this.$scroll = options.$scroll || this.$el;
         this.$content = options.$content || this.$scroll;
         this.pageEnabled = this.pageEnabled === false || options.pageEnabled === false ? false : (options.pageEnabled || this.append);
@@ -81,8 +80,13 @@
 
         checkEmptyData: false,
 
+        isEmptyData: function (res) {
+
+            return (this._hasData = (this.checkEmptyData === false || this.hasData(res)));
+        },
+
         hasData: function (res) {
-            return res.data && res.data.length;
+            return !!(res.data && res.data.length);
         },
 
         showMoreLoading: function () {
@@ -220,14 +224,28 @@
             return this;
         },
 
-        reload: function (options, callback) {
+        reload: function (resolve, reject) {
             if (!this.isLoading) {
                 this.pageIndex = 1;
-                this.load(options, callback);
+
+                this.request(resolve, reject);
             }
         },
 
-        load: function (options, callback) {
+        request: function (resolve, reject) {
+            var self = this;
+
+            if (typeof resolve === 'function') {
+                self._request(resolve, reject);
+
+            } else
+                return new Promise(function (resolve, reject) {
+
+                    self._request(resolve, reject);
+                });
+        },
+
+        _request: function (resolve, reject) {
             var that = this;
 
             if (that.beforeSend && that.beforeSend() === false) return;
@@ -235,14 +253,10 @@
             if (that.isLoading) return;
             that.isLoading = true;
 
-            if (typeof options == 'function') callback = options, options = null;
             if (that.pageEnabled) {
                 that.params[that.KEY_PAGE] = that.pageIndex;
                 that.params[that.KEY_PAGESIZE] = that.pageSize;
             }
-
-            if (options && options.showLoading !== undefined)
-                that.isShowLoading = options.showLoading;
 
             that.isShowLoading && that.showLoading();
 
@@ -260,14 +274,14 @@
                     var err = that.createError(10001, '网络错误');
                     that.error(err, xhr);
 
-                    callback && callback.call(that, err, xhr);
+                    reject && reject.call(that, err, xhr);
                 },
                 success: function (res, status, xhr) {
                     that.isShowLoading && that.hideLoading();
 
                     if (!that.check || that.check(res)) {
 
-                        if (that.checkEmptyData === false || that.hasData(res)) {
+                        if (that.isEmptyData(res)) {
                             if (that.pageIndex == 1 || !that.append) that.success(res, status, xhr);
                             else that.append(res, status, xhr);
 
@@ -277,11 +291,11 @@
                             that.dataNotFound(res);
                         }
 
-                        callback && callback.call(that, null, res);
+                        resolve && resolve.call(that, res, status, xhr);
 
                     } else {
                         that.error(res, xhr);
-                        callback && callback.call(that, res, xhr);
+                        reject && reject.call(that, res, xhr);
                     }
                 },
                 complete: function () {
@@ -292,6 +306,15 @@
             });
 
             return that;
+        },
+
+        autoLoadMore: function (append) {
+            this.append = append;
+
+            if (this._hasData) {
+                this.pageIndex++;
+                this.enableAutoRefreshing();
+            }
         },
 
         _refresh: function () {
@@ -380,7 +403,8 @@
         }
     };
 
-    Loader.prototype.request = Loader.prototype.load;
+    Loader.prototype.load = Loader.prototype.request;
+
     Loader.extend = _.extend;
 
     module.exports = Loader;

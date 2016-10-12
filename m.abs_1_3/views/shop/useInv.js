@@ -35,7 +35,7 @@ module.exports = Activity.extend({
 
         var $main = this.$('.main');
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         self.user = userModel.get();
 

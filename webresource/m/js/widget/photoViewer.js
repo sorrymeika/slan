@@ -57,7 +57,7 @@ module.exports = Model.extend({
             }
 
             this.refs.items.forEach(function (item) {
-                Scroll.bind(item, {
+                self.bindScrollTo(item, {
                     hScroll: true,
                     vScroll: true
                 });

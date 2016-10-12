@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
 var userModel = require("models/user");
@@ -26,7 +25,7 @@ module.exports = Activity.extend({
             title: '去拼团吧'
         });
 
-        Scroll.bind(self.model.refs.main);
+        this.bindScrollTo(self.model.refs.main);
 
         self.groupListAPI = new api.GroupListAPI({
             $el: self.$el,

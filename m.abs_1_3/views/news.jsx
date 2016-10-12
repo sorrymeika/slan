@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 var ShareOrder = require('components/shareOrder');
 var Month = require('components/month');
@@ -146,7 +145,7 @@ A：使用优惠券订单，如非质量问题，不支持退货退款。<br/>
         component&& (component.view = self);
         
 
-        Scroll.bind(self.$('.main'));
+        this.bindScrollTo(self.$('.main'));
 
         self.model.set({
             type: type,

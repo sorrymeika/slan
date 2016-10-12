@@ -1,7 +1,7 @@
 ﻿define(function (require, exports, module) {
     var $ = require('$'),
         util = require('util'),
-        events = require('../core/view').prototype,
+        events = require('../core/component').prototype,
         Page = require('./page'),
         isIE6 = util.ie && util.osVersion == 6,
         compareData = function (v1, v2, asc) {

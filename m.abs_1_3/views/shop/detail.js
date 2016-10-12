@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
 
@@ -22,7 +21,7 @@ module.exports = Activity.extend({
             id: self.route.params.id
         });
 
-        Scroll.bind(self.$('.main'));
+        this.bindScrollTo(self.$('.main'));
 
         var detail = new api.ProductDetailAPI({
             $el: self.$el,

@@ -25,12 +25,13 @@ var Tab = Model.extend({
     },
 
     viewDidUpdate: function () {
+        var self = this;
         this.wapperW = this.refs.body.offsetWidth;
         this.touch.maxX = this.refs.content.offsetWidth - this.wapperW;
 
         this.refs.items.forEach(function (item) {
             if (!item.scroll)
-                Scroll.bind(item);
+                self.bindScrollTo(item);
         });
     },
 

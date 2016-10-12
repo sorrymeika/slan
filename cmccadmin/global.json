@@ -45,7 +45,6 @@
             "core/linklist": "../webresource/js/core/linklist",
             "core/event": "../webresource/js/core/event",
             "core/component": "../webresource/js/core/component",
-            "core/view": "../webresource/js/core/view",
             "core/model": "../webresource/js/core/model",
             "core/model2": "../webresource/js/core/model2",
             "core/appProto": "../webresource/js/core/appProto",
@@ -64,8 +63,7 @@
             "components/form": "../webresource/js/components/form",
             "components/grid": "../webresource/js/components/grid",
             "components/page": "../webresource/js/components/page",
-            "widget/tip": "../webresource/js/widget/tip",
-            "widget/dialog": "../webresource/js/widget/dialog"
+            "widget/tip": "../webresource/js/widget/tip"
         }
     }
 }

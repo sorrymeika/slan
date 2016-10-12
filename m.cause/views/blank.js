@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 
 module.exports = Activity.extend({
@@ -20,7 +19,7 @@ module.exports = Activity.extend({
             title: '标题'
         });
 
-        Scroll.bind(self.model.refs.main);
+        this.bindScrollTo(self.model.refs.main);
     },
 
     onShow: function () {

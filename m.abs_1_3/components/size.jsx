@@ -168,7 +168,7 @@ var Month = Model.extend({
 		var self = this;
 		self.user = util.store('user');
 
-		Scroll.bind(self.refs.content);
+		this.bindScrollTo(self.refs.content);
 
 		self.cartAddAPI = new api.CartAddAPI({
 			$el: self.$el,

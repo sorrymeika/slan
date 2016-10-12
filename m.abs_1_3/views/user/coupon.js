@@ -4,7 +4,6 @@ var Activity = require('activity');
 var Model = require('core/model2').Model;
 
 var Loading = require('widget/loader');
-var Scroll = require('widget/scroll');
 var Loader = require('widget/loader');
 var Toast = require('widget/toast');
 
@@ -98,7 +97,7 @@ module.exports = Activity.extend({
 
         var $main = this.$('.main');
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         self.user = userModel.get();
 

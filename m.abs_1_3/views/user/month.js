@@ -3,7 +3,6 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Model = require('core/model2').Model;
-var Scroll = require('widget/scroll');
 var Toast = require('widget/toast');
 var Tab = require('widget/tab');
 
@@ -103,7 +102,7 @@ module.exports = Activity.extend({
 
         this.model.getGift = this.getGift.bind(this);
 
-        Scroll.bind(this.model.refs.main);
+        this.bindScrollTo(this.model.refs.main);
 
         this.loadUserInfo();
 

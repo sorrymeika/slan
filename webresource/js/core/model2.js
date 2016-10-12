@@ -3,6 +3,7 @@ var $ = require('$');
 var Base = require('./base');
 var util = require('util');
 var Event = require('./event');
+var Scroll = require('../widget/scroll');
 
 var toString = {}.toString;
 
@@ -1399,6 +1400,22 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         return this.one('viewDidUpdate', callback);
     },
 
+    bindScrollTo: function (el, options) {
+        var sbr = Scroll.bind(el, options);
+
+        if (!this._scrolls) {
+            this._scrolls = sbr;
+
+        } else {
+            this._scrolls.add(sbr);
+        }
+        return sbr;
+    },
+
+    getScrollView: function (el) {
+        return this._scrolls.get(el);
+    },
+
     destory: function () {
         this.$el.off('input change blur', '[' + this.snModelKey + ']')
             .each(function () {
@@ -1418,6 +1435,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 break;
             }
         }
+
+        if (this._scrolls) this._scrolls.destory();
 
         this.$el = null;
     }
@@ -1463,7 +1482,11 @@ exports.Global = Global;
 exports.Collection = Collection;
 
 exports.createModel = function (props) {
-    return Object.assign(new ViewModel, props)
+    var model = Object.assign(new ViewModel, props);
+
+    if (props.defaultData) model.set(props.defaultData);
+
+    return model;
 }
 
 exports.createCollection = function (props) {

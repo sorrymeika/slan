@@ -76,7 +76,7 @@ module.exports = Model.extend({
         this.photoViewer.$el.appendTo($('body'))
 
         var self = this;
-        var scroll = Scroll.bind(this.refs.main).eq(0);
+        var scroll = this.bindScrollTo(this.refs.main).eq(0);
         self.scroll = scroll;
 
         bridge.assets.albums(function (res) {

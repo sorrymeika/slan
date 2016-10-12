@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Model = require('core/model2').Model;
 
-var Scroll = require('widget/scroll');
 var Toast = require('widget/toast');
 
 var api = require('models/api');
@@ -71,7 +70,7 @@ module.exports = Activity.extend({
 
         this.model = model;
 
-        Scroll.bind(model.refs.main);
+        this.bindScrollTo(model.refs.main);
 
         model.goTo = function(item) {
             if (item.LVP_PRD_ID) {

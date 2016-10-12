@@ -14,7 +14,7 @@ var User = {
                 Auth: user.Auth
             }
 
-        }).request(callback);
+        }).load(callback);
     },
 
     getMonth: function (callback, $el) {
@@ -29,7 +29,7 @@ var User = {
                 Auth: user.Auth
             }
 
-        }).request(callback);
+        }).load(callback);
     },
 
     getCouponList: function (callback, $el) {
@@ -45,7 +45,7 @@ var User = {
                 Auth: user.Auth
             }
 
-        }).request(callback);
+        }).load(callback);
     },
     getCoupon: function (csvId, callback, $el) {
         var user = userModel.get();
@@ -61,7 +61,7 @@ var User = {
             },
             error: function () { }
 
-        }).request(callback);
+        }).load(callback);
     },
 
     recieveCoupon: function (csvcode, callback, $el) {
@@ -77,7 +77,7 @@ var User = {
             },
             error: function () { }
 
-        }).request(callback);
+        }).load(callback);
     },
 
     getCouponStatus: function (csvId, callback, $el) {
@@ -93,7 +93,7 @@ var User = {
             },
             error: function () { }
 
-        }).request(callback);
+        }).load(callback);
     }
 };
 

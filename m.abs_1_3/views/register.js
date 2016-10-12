@@ -5,7 +5,6 @@
     var Activity = require('activity');
     var Loading = require('../widget/loader');
     var model = require('../core/model');
-    var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var md5 = require('util/md5');
 
@@ -82,7 +81,7 @@
 
             var $main = this.$('.main');
 
-            Scroll.bind($main);
+           this.bindScrollTo($main);
 
             this.model = new model.ViewModel(this.$el, {
                 title: '注册',

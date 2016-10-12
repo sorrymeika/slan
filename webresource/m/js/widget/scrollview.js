@@ -2,7 +2,7 @@
     animation = require('core/animation'),
     Touch = require('core/touch');
 
-var addScroller = function ($el) {
+var insertScroller = function ($el) {
     return $('<div class="scroller_container" style="width:100%;"></div>').append($el.children()).appendTo($el.html(''));
 };
 
@@ -14,7 +14,7 @@ var ScrollView = function (el, options) {
     that.$el = $(el).css({ overflow: 'hidden' });
     that.el = that.$el[0];
 
-    that.$scroller = addScroller(that.$el);
+    that.$scroller = insertScroller(that.$el);
     that.scroller = that.$scroller[0];
 
     this.touch = new Touch(that.$el, {
@@ -63,6 +63,6 @@ Object.assign(ScrollView.prototype, {
 })
 
 
-ScrollView.addScroller = addScroller;
+ScrollView.insertScroller = insertScroller;
 
 module.exports = ScrollView;

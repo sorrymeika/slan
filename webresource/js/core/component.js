@@ -3,24 +3,24 @@
     Event = require('./event'),
     slice = Array.prototype.slice;
 
+var componentExtends = ['el', 'initialize', 'className', 'events', 'render', 'template'];
+
 var Component = Event.mixin(function (options) {
     var self = this;
 
-    self.options = options = $.extend({}, self.options, options);
-    if (self.options.className) self.className = self.options.className;
-    if (self.options.el) self.el = self.options.el;
+    Object.assign(this, util.pick(options, componentExtends));
+
     self.cid = util.guid();
 
     self.setElement(self.el);
 
     self.onDestroy && self.on('Destroy', self.onDestroy);
 
-    if (self.initialize) {
-        self.initialize.apply(self, arguments);
-    }
+    self.initialize.apply(self, slice.call(arguments));
 
 }, {
-        options: {},
+
+        initialize: util.noop,
 
         setElement: function (element, delegate) {
             if (element) {
@@ -40,7 +40,6 @@ var Component = Event.mixin(function (options) {
 
         delegateEvents: function () {
             this.listen(this.events);
-            this.listen(this.options.events);
             return this;
         },
 

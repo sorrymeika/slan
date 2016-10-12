@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model2');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require('models/api');
 var Category = require("models/category");
@@ -31,7 +30,7 @@ module.exports = Activity.extend({
 
         var $main = this.$('.main');
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         self.productSearchAPI = new api.ProductSearchAPI({
             $el: self.$el,
@@ -123,7 +122,7 @@ module.exports = Activity.extend({
             }).reload();
         }
 
-        Scroll.bind(this.model.refs.cates, {
+        this.bindScrollTo(this.model.refs.cates, {
             useScroll: true,
             vScroll: false,
             hScroll: true
@@ -156,11 +155,6 @@ module.exports = Activity.extend({
 
         console.profileEnd()
         console.timeEnd('cate')
-
-    },
-
-    onStart: function (params) {
-        var self = this;
 
     },
 

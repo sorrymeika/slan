@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loading');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 
 module.exports = Activity.extend({
@@ -18,7 +17,7 @@ module.exports = Activity.extend({
 
         self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         var now = Date.now();
         console.log(now);

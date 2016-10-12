@@ -3,7 +3,6 @@ var $ = require('$'),
     util = require('util'),
     Activity = require('activity'),
     model = require('core/model2'),
-    Scroll = require('../widget/scroll'),
     bridge = require('bridge');
 
 var userModel = require('../models/user');
@@ -60,6 +59,8 @@ module.exports = Activity.extend({
         });
 
         this.model.showCity = this.showCity.bind(this);
+
+        this.bindScrollTo(this.model.refs.main);
 
         this.model.submit = function () {
             this.set('submiting', true);
@@ -130,7 +131,7 @@ module.exports = Activity.extend({
                 self.changeCity(res.province[0].PRV_ID);
             }
 
-        }).request();
+        }).load();
 
     },
 

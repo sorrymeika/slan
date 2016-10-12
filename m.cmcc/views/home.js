@@ -33,6 +33,7 @@ module.exports = Activity.extend({
 
         var loader = this.loader;
         var model = this.model;
+        var self = this;
 
         loader.showLoading();
 
@@ -45,7 +46,7 @@ module.exports = Activity.extend({
 
                 }).next(function () {
 
-                    Scroll.bind(model.refs.recommend, {
+                    self.bindScrollTo(model.refs.recommend, {
                         vScroll: false,
                         hScroll: true
                     });
@@ -64,66 +65,39 @@ module.exports = Activity.extend({
             });
     },
 
-    loadQuan: function ($container) {
+    loadQuan: function ($scroll) {
 
-        if (!this.quanLoader) {
-            var self = this;
+        var self = this;
+        var model = this.model;
+        var quanLoader = self.quanLoader;
 
-            this.quanLoader = new quan.Loader({
-                $el: $container,
+        switch (quanLoader) {
+            case 1:
+                break;
 
-                pageEnabled: false,
+            case undefined:
+                self.quanLoader = 1;
+                quan.getAll().then(function (results) {
+                    self.quanLoader = results[0];
 
-                success: function (res) {
-                    self.model.set("quanData", res.data);
-                },
+                    self.quanLoader.autoLoadMore(function (res) {
+                        model.get("quanData").add(res.data);
+                    });
 
-                append: function (res) {
-                    self.model.get("quanData").add(res.data);
-                },
+                    model.set({
+                        quanData: results[1].data
+                    })
+                });
+                break;
 
-                error: function (e) {
-
-
-                    if (sl.isDebug) {
-                        this.success({
-                            success: true,
-                            data: [{
-                                user_id: 1,
-                                user_name: '小光',
-                                avatars: 'images/logo.png',
-                                content: '阿斯顿发发',
-                                date: 1476101924277,
-                                imgs: ['images/logo.png', 'images/logo.png'],
-                                comments: [{
-                                    user_id: 2,
-                                    user_name: '小智',
-                                    content: '想休息休息',
-                                    at_user_id: 0,
-                                    at_user_name: 'xxx'
-                                }]
-                            }, {
-                                    user_id: 3,
-                                    user_name: '小黑',
-                                    avatars: 'images/logo.png',
-                                    content: '阿斯顿叔叔说发发',
-                                    date: 1476101924277,
-                                    imgs: ['images/logo.png', 'images/logo.png'],
-                                    comments: [{
-                                        user_id: 4,
-                                        user_name: '小煤',
-                                        content: '想休ss息休息',
-                                        at_user_id: 2,
-                                        at_user_name: '小智'
-                                    }]
-                                }]
-                        });
-                    }
-                }
-            });
+            default:
+                quanLoader.reload().then(function (res) {
+                    model.set({
+                        quanData: res.data
+                    })
+                });
+                break;
         }
-
-        this.quanLoader.request();
     },
 
     loadContacts: function () {

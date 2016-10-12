@@ -17,6 +17,25 @@ define(function (require, exports, module) {
         return /^http\:\/\//.test(url) ? url : (this.prototype.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
     }
 
+    Http.post = function (url, params) {
+
+        return new Http({
+            url: url,
+            params: params
+
+        }).request();
+    }
+
+    Http.get = function (url, params) {
+
+        return new Http({
+            url: url,
+            method: 'GET',
+            params: params
+
+        }).request();
+    }
+
     Http.prototype = {
 
         baseUri: $('meta[name="api-base-url"]').attr('content'),
@@ -85,14 +104,26 @@ define(function (require, exports, module) {
             return this;
         },
 
-        request: function (options, callback) {
+        request: function (resolve, reject) {
+            var self = this;
+
+            if (typeof resolve === 'function') {
+                self._request(resolve, reject);
+
+            } else
+                return new Promise(function (resolve, reject) {
+
+                    self._request(resolve, reject);
+                });
+        },
+
+        _request: function (resolve, reject) {
             var that = this;
 
             if (that.beforeSend && that.beforeSend() === false) return;
 
-            this.abort();
-
-            if (typeof options == 'function') callback = options, options = null;
+            if (that.isLoading) return;
+            that.isLoading = true;
 
             that._xhr = $.ajax({
                 url: that.url,
@@ -106,23 +137,25 @@ define(function (require, exports, module) {
                     var err = that.createError(10001, '网络错误');
                     that.error(err, xhr);
 
-                    callback && callback.call(that, err, xhr);
+                    reject && reject(err, xhr);
                 },
                 success: function (res, status, xhr) {
 
                     if (!that.check || that.check(res)) {
                         that.success(res, status, xhr);
-                        callback && callback.call(that, null, res);
+
+                        resolve && resolve(res, status, xhr);
 
                     } else {
                         if (!res.message && res.msg) res.message = res.msg;
                         that.error(res, xhr);
-                        callback && callback.call(that, res, xhr);
+                        reject && reject(res, xhr);
                     }
-
                 },
+
                 complete: function () {
                     that._xhr = null;
+                    that.isLoading = false;
                     that.complete();
                 }
             });

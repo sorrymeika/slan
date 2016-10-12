@@ -5,7 +5,6 @@ define(function (require, exports, module) {
     var Activity = require('activity');
     var Loading = require('../widget/loading');
     var model = require('../core/model');
-    var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var userModel = require("models/user");
     var md5 = require("util/md5").md5;
@@ -38,7 +37,7 @@ define(function (require, exports, module) {
 
             this.model = new model.ViewModel(this.$el, {
             });
-            Scroll.bind(this.model.refs.main);
+            this.bindScrollTo(this.model.refs.main);
 
             this.loading = new Loading({
                 url: '/api/user/signin',

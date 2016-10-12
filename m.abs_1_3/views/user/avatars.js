@@ -5,7 +5,6 @@ var Activity = require('activity');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
 
-var Scroll = require('widget/scroll');
 var Toast = require('widget/toast');
 var api = require('models/api');
 var userModel = require('models/user');
@@ -22,7 +21,7 @@ module.exports = Activity.extend({
         var model = this.model = new Model(this.$el, {
             title: '头像'
         });
-        Scroll.bind(model.refs.main);
+        this.bindScrollTo(model.refs.main);
 
         model.back = function () {
             self.back(self.swipeRightBackAction);

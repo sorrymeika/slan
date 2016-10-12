@@ -99,7 +99,6 @@ var _end = function (e) {
         }
         else bounce();
 
-
         return false;
     }
 }
@@ -125,7 +124,7 @@ var _refresh = function () {
     });
 };
 
-var touchStartEvent={};
+var touchStartEvent = {};
 
 var touchStart = function (e) {
     var el = this,
@@ -195,6 +194,7 @@ var scrollStop = function (el) {
         el._stm = null;
 
         if (!el.__params || el.__params.x != el.scrollLeft || el.__params.y != el.scrollTop) {
+
             $(el).trigger('scrollStop', (el.__params = {
                 x: el.scrollLeft,
                 y: el.scrollTop,
@@ -255,6 +255,115 @@ var touchEnd = function (e) {
     }
 };
 
+function Scroll(el, options) {
+
+    var $el = $(el);
+
+    el.__timestamp = 0;
+
+    if (util.ios) {
+        $el.css({
+            '-webkit-overflow-scrolling': 'touch',
+            overflowY: options.vScroll ? 'scroll' : '',
+            overflowX: options.hScroll ? 'scroll' : ''
+        })
+
+    } else if (util.android) {
+        $el.css({
+            overflowY: options.vScroll ? 'auto' : '',
+            overflowX: options.hScroll ? 'auto' : ''
+        });
+    }
+    $el.on('scroll', scroll)
+        .on('touchstart', touchStart)
+        .on('touchmove', touchMove)
+        .on('touchend', touchEnd);
+
+    el._scrollTop = 0;
+    el.options = options;
+
+    this.el = el;
+    this.$el = $el;
+}
+
+Scroll.prototype = {
+    destory: function () {
+        this.$el.off('touchstart', touchStart)
+            .off('touchmove', touchMove)
+            .off('touchend', touchEnd)
+            .off('scroll', scroll);
+    },
+
+    scrollHeight: function () {
+        return this.el.scrollHeight;
+    },
+
+    scrollTop: function () {
+        return this.el.scrollTop;
+    },
+
+    scrollTo: function (x, y, duration) {
+        var el = this.el;
+
+        if (duration) {
+
+            var startX = el.scrollLeft;
+            var startY = el.scrollTop;
+
+            var distX = x - startX;
+            var distY = y - startY;
+
+            animation.animate(function (step) {
+                el._scrollLeft = el.scrollLeft = startX + animation.step(0, distX, step);
+                el._scrollTop = el.scrollTop = startY + animation.step(0, distY, step);
+
+            }, duration);
+
+        } else {
+            el._scrollLeft = el.scrollLeft = x;
+            el._scrollTop = el.scrollTop = y;
+        }
+    }
+};
+
+function ScrollBindResult() {
+    this.items = [];
+}
+
+ScrollBindResult.prototype = {
+    concat: function (scrollBindResult) {
+        for (var i = 0, j = scrollBindResult.items.length; i < j; i++) {
+            this.items.push(scrollBindResult.items[i]);
+        }
+    },
+
+    get: function (el) {
+        if (typeof el === 'number') return this.items[i];
+
+        return util.first(this.items, typeof el == 'string' ? function (item) {
+            return item.$el.filter(el).length > 0;
+
+        } : function (item) {
+            return item.el == el;
+        });
+    },
+
+    add: function (item) {
+
+        this.items.push(item);
+    },
+
+    eq: function (i) {
+        return this.items[i];
+    },
+
+    destory: function () {
+        this.items.forEach(function (item) {
+            item.destory();
+        });
+    }
+}
+
 exports.bind = function (selector, options) {
 	/*//<--debug
 	options={
@@ -273,101 +382,27 @@ exports.bind = function (selector, options) {
 
     }, options);
 
-    var scrollViews = [];
-    var result = {
-        items: scrollViews,
-        get: function (el) {
-            return util.first(this.items, typeof el == 'string' ? function (item) {
-                return item.$el.filter(el).length > 0;
-
-            } : function (item) {
-                return item.el == el;
-            });
-        },
-        eq: function (i) {
-            return this.items[i];
-        },
-        destory: function () {
-            this.items.forEach(function (item) {
-                item.destory();
-            });
-        }
-    };
+    var result = new ScrollBindResult();
 
     (typeof selector === 'string' || selector.nodeType ? $(selector) : selector).each(function () {
         var el = this,
-            $el = $(el).addClass('scrollview'),
             scrollView,
             ret;
 
         if (el.scroll) return;
 
+        var $el = $(el).addClass('scrollview');
+
         if (options && options.useScroll || util.android && parseFloat(util.osVersion <= 2.3)) {
-            ret = scrollView = new ScrollView(this, options);
+            ret = scrollView = new ScrollView(el, options);
         }
         else {
-            el.__timestamp = 0;
-
-            if (util.ios) {
-                $el.css({
-                    '-webkit-overflow-scrolling': 'touch',
-                    overflowY: options.vScroll ? 'scroll' : '',
-                    overflowX: options.hScroll ? 'scroll' : ''
-                })
-
-            } else if (util.android) {
-                $el.css({
-                    overflowY: options.vScroll ? 'auto' : '',
-                    overflowX: options.hScroll ? 'auto' : ''
-                });
-            }
-            $el.on('scroll', scroll)
-                .on('touchstart', touchStart)
-                .on('touchmove', touchMove)
-                .on('touchend', touchEnd);
-
-            el._scrollTop = 0;
-            el.options = options;
-
-            ret = {
-                el: el,
-                $el: $el,
-                destory: function () {
-                    $el.off('touchstart', touchStart)
-                        .off('touchmove', touchMove)
-                        .off('touchend', touchEnd)
-                        .off('scroll', scroll);
-                },
-                scrollHeight: function () {
-                    return this.el.scrollHeight;
-                },
-                scrollTop: function () {
-                    return this.el.scrollTop;
-                },
-                scrollTo: function (x, y, duration) {
-                    if (duration) {
-
-                        var startX = el.scrollLeft;
-                        var startY = el.scrollTop;
-
-                        var distX = x - startX;
-                        var distY = y - startY;
-
-                        animation.animate(function (step) {
-                            el._scrollLeft = el.scrollLeft = startX + animation.step(0, distX, step);
-                            el._scrollTop = el.scrollTop = startY + animation.step(0, distY, step);
-
-                        }, duration);
-
-                    } else {
-                        el._scrollLeft = el.scrollLeft = x;
-                        el._scrollTop = el.scrollTop = y;
-                    }
-                }
-            };
+            ret = new Scroll(el, options);
         }
 
         el.scroll = ret;
+
+        result.add(ret);
 
         ret.imageLazyLoad = function (options) {
             var images = $('img[data-src]:not([src])', this.$el).css({
@@ -403,8 +438,6 @@ exports.bind = function (selector, options) {
             ret.imageLazyLoad(options);
         });
 
-        scrollViews.push(ret);
-
         if (util.isInApp)
             $el.on('focus', 'input:not(readonly),textarea:not(readonly)', function (e) {
                 var node = e.currentTarget,
@@ -429,7 +462,7 @@ exports.bind = function (selector, options) {
             var $scroller = $el.children('.scroller_container'),
                 $refresh = $('<div class="refresh" style="height:50px;text-align:center;line-height:50px;">下拉刷新</div>');
 
-            if (!$scroller.length) $scroller = ScrollView.addScroller($el);
+            if (!$scroller.length) $scroller = ScrollView.insertScroller($el);
 
             var scroller = $scroller[0];
 

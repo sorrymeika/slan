@@ -1,11 +1,11 @@
 var $ = require('$');
-var View = require('core/view');
+var Component = require('core/component');
 var model = require('core/model');
 var bridge = require('bridge');
 
-var Share = View.extend({
+var Share = Component.extend({
     events: {
-        'tap .js_weixin_timeline': function() {
+        'tap .js_weixin_timeline': function () {
             this.clickToShare(0);
             bridge.wx({
                 type: 'shareLinkURL',
@@ -15,11 +15,11 @@ var Share = View.extend({
                 image: this.model.data.image,
                 description: this.model.data.description,
                 scene: 1
-            }, function(res) {
+            }, function (res) {
                 self.callback(res);
             })
         },
-        'tap .js_weixin_session': function() {
+        'tap .js_weixin_session': function () {
             this.clickToShare(1);
 
             bridge.wx({
@@ -30,11 +30,11 @@ var Share = View.extend({
                 image: this.model.data.image,
                 description: this.model.data.description,
                 scene: 0
-            }, function(res) {
+            }, function (res) {
                 self.callback(res);
             })
         },
-        'tap .js_qq': function() {
+        'tap .js_qq': function () {
             this.clickToShare(2);
 
             bridge.qq({
@@ -43,15 +43,15 @@ var Share = View.extend({
                 title: this.model.data.title,
                 image: this.model.data.image,
                 description: this.model.data.description
-            }, function(res) {
+            }, function (res) {
                 self.callback(res);
             })
         },
 
-        'tap .js_cancel': function() {
+        'tap .js_cancel': function () {
             this.hide();
         },
-        'tap': function(e) {
+        'tap': function (e) {
             if (e.target == this.el) {
                 this.hide();
             }
@@ -70,27 +70,27 @@ var Share = View.extend({
             <div class="ft"><b class="btn js_cancel">取消</b></div>
         </div>
     </div>,
-    clickToShare: function() {
+    clickToShare: function () {
 
     },
-    callback: function() {
+    callback: function () {
 
     },
-    initialize: function() {
+    initialize: function () {
 
         this.model = new model.ViewModel(this.$el, this.options);
 
     },
 
-    set: function(data) {
+    set: function (data) {
         this.model.set(data);
         return this;
     },
-    show: function() {
+    show: function () {
         this.$el.show();
         return this;
     },
-    hide: function() {
+    hide: function () {
         this.$el.hide();
         return this;
     }

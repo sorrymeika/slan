@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 var api = require("models/api");
 var userModel = require('models/user');
@@ -17,7 +16,8 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
 
-        Scroll.bind(self.$('.main'));
+        this.bindScrollTo(self.$('.main'));
+
         self.user = userModel.get();
 
         self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';

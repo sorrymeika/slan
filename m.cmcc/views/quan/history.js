@@ -3,9 +3,7 @@ var util = require('util');
 var Activity = require('activity');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
-
-var Scroll = require('widget/scroll');
-var api = require('models/api');
+var animation = require('animation');
 
 module.exports = Activity.extend({
 
@@ -13,11 +11,11 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '标题'
+            title: '我的历史'
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeRightBackAction)
         }
 
         this.bindScrollTo(model.refs.main);
@@ -28,5 +26,6 @@ module.exports = Activity.extend({
     },
 
     onDestory: function () {
+        this.model.destroy();
     }
 });

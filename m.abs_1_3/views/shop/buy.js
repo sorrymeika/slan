@@ -5,7 +5,6 @@ define(function (require, exports, module) {
     var Activity = require('activity');
     var Loading = require('widget/loader');
     var model = require('core/model2');
-    var Scroll = require('widget/scroll');
     var animation = require('animation');
     var api = require('models/api');
     var bridge = require('bridge');
@@ -19,7 +18,7 @@ define(function (require, exports, module) {
 
             self.user = userModel.get();
 
-            Scroll.bind($main);
+            this.bindScrollTo($main);
 
             self.model = new model.ViewModel(this.$el, {
                 back: self.swipeRightBackAction,
@@ -94,7 +93,7 @@ define(function (require, exports, module) {
                 },
 
                 createOrder: function () {
-                    self.orderCreateApi.request();
+                    self.orderCreateApi.load();
                 }
             });
 
@@ -132,7 +131,7 @@ define(function (require, exports, module) {
                     });
                 }
 
-            }).request();
+            }).load();
 
             self.cart = new api.PreOrderAPI({
                 $el: self.$el,

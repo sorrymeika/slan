@@ -2,7 +2,6 @@
 
     var $ = require('$'),
         util = require('util'),
-        View = require('./view'),
         Route = require('./route');
 
     var Event = require('./event');
@@ -111,7 +110,7 @@
         },
 
         remove: function (url) {
-            this._activities[getPath(url)] = void 0;
+            this._activities[getPath(url)] = null;
         }
     };
 

@@ -335,7 +335,7 @@ module.exports = Activity.extend({
                     });
 
                 model.one('viewDidUpdate', function () {
-                    Scroll.bind(self.$('.js_shop_scroll:not(.s_binded)').addClass('s_binded'), {
+                    self.bindScrollTo(self.$('.js_shop_scroll:not(.s_binded)').addClass('s_binded'), {
                         vScroll: false,
                         hScroll: true,
                         useScroll: true
@@ -367,7 +367,7 @@ module.exports = Activity.extend({
             }
         }).load();
 
-        Scroll.bind(model.refs.cates, {
+        this.bindScrollTo(model.refs.cates, {
             useScroll: true,
             vScroll: false,
             hScroll: true
@@ -423,9 +423,9 @@ module.exports = Activity.extend({
             });
         }
 
-        Scroll.bind(this.$('.main:not(.js_shop)'));
+        this.bindScrollTo(this.$('.main:not(.js_shop)'));
 
-        this.scroll = Scroll.bind(this.$('.js_shop'), {
+        this.scroll = this.bindScrollTo(this.$('.js_shop'), {
             refresh: function (resolve, reject) {
                 self.shopApi.load(function () {
                     resolve();
@@ -438,7 +438,7 @@ module.exports = Activity.extend({
                 self.$open_msg.hide();
             }
         });
-        Scroll.bind(self.$open_msg.find('.msg_bd'));
+        this.bindScrollTo(self.$open_msg.find('.msg_bd'));
 
         var $launchImgs = this.$('.launch img');
         var $mask = this.$('.home_mask').on($.fx.transitionEnd, function (e) {
@@ -484,7 +484,7 @@ module.exports = Activity.extend({
 
             self.getCartQty();
 
-            self.cart.cartApi.request();
+            self.cart.cartApi.load();
         });
 
         setInterval(function () {

@@ -73,7 +73,7 @@ define(function (require, exports, module) {
                         Auth: self.user.Auth,
                         type: index
 
-                    }).request();
+                    }).load();
                 }
 
                 tab.on('tabChange', function (e, index) {
@@ -127,7 +127,7 @@ define(function (require, exports, module) {
                             pur_code: item.PUR_CODE,
                             pspcode: self.user.PSP_CODE
 
-                        }).load(function (err, res) {
+                        }).load(function (res) {
                             if (res && res.success) {
                                 itemModel.set('express', res.data);
                             }

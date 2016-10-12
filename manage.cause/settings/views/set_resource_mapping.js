@@ -75,7 +75,7 @@
                 api.setParam({
                     v: self.model.data.mapping.Version
 
-                }).request();
+                }).load();
             });
 
             var form2 = new Form({
@@ -120,7 +120,7 @@
                         self.$('.js_data').html(JSON.stringify(res.data));
                     }
                 }
-            }).request();
+            }).load();
         },
 
         onShow: function () {

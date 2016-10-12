@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
 var model = require('core/model');
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 
 module.exports = Activity.extend({
@@ -18,7 +17,7 @@ module.exports = Activity.extend({
 
         self.swipeRightBackAction = self.route.query.from || '/settings';
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         self.model = new model.ViewModel(this.$el, {
             back: self.swipeRightBackAction,

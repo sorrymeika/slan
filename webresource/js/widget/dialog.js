@@ -1,6 +1,6 @@
 var $ = require('$'),
     util = require('util'),
-    view = require('./../core/view');
+    view = require('./../core/component');
 
 var mask = null;
 

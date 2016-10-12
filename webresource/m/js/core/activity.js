@@ -6,7 +6,6 @@ var util = require('util'),
     Scroll = require('widget/scroll'),
     Component = require('./component'),
     bridge = require('bridge'),
-    Dialog = require('widget/dialog'),
     slice = Array.prototype.slice,
     indexOf = util.indexOf,
     getUrlPath = util.getPath;
@@ -61,23 +60,26 @@ var Activity = Component.extend({
         return this;
     },
 
-    initialize: function () {
+    initialize: function (options) {
         var self = this,
             async = Async.resolve();
 
         self._async = async;
-        self.className = self.el.className;
 
-        self.application = self.options.application;
+        self.application = options.application;
 
-        self._setReferrer(self.options.route)
-            ._setRoute(self.options.route)
+        if (this.className) {
+            this.className += ' view';
+            this.$el.addClass('view');
+        }
+
+        self._setReferrer(options.route)
+            ._setRoute(options.route)
             .on('Show', self._onShow)
             .on('Destroy', self._onDestroy)
             .on('Pause', self._statusChange)
             .on('QueryChange', self.checkQuery);
 
-        self.onStart && self.on('Start', self.onStart);
         self.onResume && self.on('Resume', self.onResume);
         self.onShow && self.on('Show', self.onShow);
         self.onHide && self.on('Hide', self.onHide);
@@ -95,6 +97,22 @@ var Activity = Component.extend({
         async.then(self.checkQuery, self);
     },
 
+    bindScrollTo: function (el, options) {
+        var sbr = Scroll.bind(el, options);
+
+        if (!this._scrolls) {
+            this._scrolls = sbr;
+
+        } else {
+            this._scrolls.add(sbr);
+        }
+        return sbr;
+    },
+
+    getScrollView: function (el) {
+        return this._scrolls.get(el);
+    },
+
     loadTemplate: function () {
 
         var self = this,
@@ -103,9 +121,6 @@ var Activity = Component.extend({
                 count--;
                 if (count == 0) {
                     self.$el.html(self.razor.html(self.data)).appendTo(self.application.$el);
-
-                    self._scrolls = Scroll.bind(self.$('.scrollview'));
-                    self._isShowed = false;
 
                     self.onCreate();
 
@@ -139,14 +154,13 @@ var Activity = Component.extend({
 
     onCreate: util.noop,
 
-    onStart: null,
-
     //页面准备就绪，可加载数据
     onLoad: null,
 
     waitLoad: function () {
+        var self = this;
 
-        return new Promise(function () {
+        return new Promise(function (resolve, reject) {
 
         });
     },
@@ -157,14 +171,10 @@ var Activity = Component.extend({
     _onShow: function (e) {
         this._statusChange(e);
 
-        if (!this._isShowed) {
-            this.trigger('Start');
-        }
-
-        if (!this._isShowed || this.isForward) {
+        if (!this._isShown || this.isForward) {
             this.onLoad && this.onLoad();
         }
-        this._isShowed = true;
+        this._isShown = true;
     },
 
     _statusChange: function (e) {

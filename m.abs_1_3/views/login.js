@@ -3,7 +3,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loading = require('../widget/loader');
 var model = require('../core/model');
-var Scroll = require('../widget/scroll');
 var animation = require('animation');
 var userModel = require("models/user");
 
@@ -79,7 +78,7 @@ module.exports = Activity.extend({
 
         this.swipeRightBackAction = this.query.from || this.referrer || '/';
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         this.model = new model.ViewModel(this.$el, {
             title: '快速登录 / 注册',

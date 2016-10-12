@@ -20,7 +20,7 @@ module.exports = Activity.extend({
 
         self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
 
-        Scroll.bind($main);
+        this.bindScrollTo($main);
 
         model2.Global.set({
             title: 'sssss',

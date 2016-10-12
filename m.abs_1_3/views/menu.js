@@ -4,8 +4,7 @@
         util = require('util'),
         Activity = require('activity'),
         bridge = require('bridge'),
-        model = require('core/model'),
-        Scroll = require('../widget/scroll');
+        model = require('core/model');
     var Loading = require('../widget/loader');
 
     return Activity.extend({
@@ -23,7 +22,7 @@
         onCreate: function () {
             var self = this;
 
-            Scroll.bind(this.$('.menu_bd'));
+            this.bindScrollTo(this.$('.menu_bd'));
 
             if (bridge.hasStatusBar) {
                 this.$el.find('.fix_statusbar').addClass("fix_statusbar");

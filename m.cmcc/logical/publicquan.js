@@ -4,45 +4,35 @@ var Http = require('core/http');
 
 var publicquan = {
     recommend: function () {
-        return new Promise(function (resolve, reject) {
-
-            if (sl.isDebug) {
-                resolve({
-                    success: true,
-                    data: [{
-                        quan_id: 1,
-                        quan_name: '福建移动',
+        if (sl.isDebug) {
+            return Promise.resolve({
+                success: true,
+                data: [{
+                    quan_id: 1,
+                    quan_name: '福建移动',
+                    quan_pic: 'images/logo.png'
+                }, {
+                        quan_id: 2,
+                        quan_name: '和生活',
                         quan_pic: 'images/logo.png'
                     }, {
-                            quan_id: 2,
-                            quan_name: '和生活',
-                            quan_pic: 'images/logo.png'
-                        }, {
-                            quan_id: 3,
-                            quan_name: '和生活',
-                            quan_pic: 'images/logo.png'
-                        }, {
-                            quan_id: 4,
-                            quan_name: '和生活',
-                            quan_pic: 'images/logo.png'
-                        }]
-                });
-                return;
-            }
+                        quan_id: 3,
+                        quan_name: '和生活',
+                        quan_pic: 'images/logo.png'
+                    }, {
+                        quan_id: 4,
+                        quan_name: '和生活',
+                        quan_pic: 'images/logo.png'
+                    }]
+            });
+        }
 
-            new Http({
-                url: '/publicquan/recommend',
-                success: resolve,
-                error: reject
-
-            }).request()
-        });
+        return Http.post('/publicquan/recommend');
     },
 
     myrecommend: function () {
-        return new Promise(function (resolve, reject) {
-
-            if (sl.isDebug) {
+        if (sl.isDebug) {
+            return new Promise(function (resolve, reject) {
 
                 setTimeout(function () {
                     resolve({
@@ -65,22 +55,15 @@ var publicquan = {
                         }]
                     });
                 }, 100)
-                return;
-            }
+            });
+        }
 
-            new Http({
-                url: '/publicquan/myrecommend',
-                success: resolve,
-                error: reject
-
-            }).request()
-        });
+        return Http.post('/publicquan/myrecommend');
     },
 
     myfollow: function () {
-        return new Promise(function (resolve, reject) {
-
-            if (sl.isDebug) {
+        if (sl.isDebug)
+            return new Promise(function (resolve, reject) {
 
                 setTimeout(function () {
                     resolve({
@@ -103,16 +86,9 @@ var publicquan = {
                         }]
                     });
                 }, 100)
-                return;
-            }
+            });
 
-            new Http({
-                url: '/publicquan/myfollow',
-                success: resolve,
-                error: reject
-
-            }).request()
-        });
+        return Http.post('/publicquan/myfollow');
     }
 }
 

@@ -12,7 +12,7 @@ var Product = {
                 id: prhId
             }
 
-        }).request(callback);
+        }).load(callback);
     }
 };
 

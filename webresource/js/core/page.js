@@ -2,8 +2,7 @@ var $ = require('$'),
     util = require('util'),
     Base = require('./base'),
     Component = require('./component'),
-    Async = require('./async'),
-    Dialog = require('../widget/dialog');
+    Async = require('./async');
 
 require('../widget/tip');
 
@@ -64,16 +63,15 @@ var Page = Component.extend({
         return that._promise;
     },
 
-    initialize: function () {
+    initialize: function (options) {
         var that = this,
             async = Async.resolve();
 
         that._promise = async;
-        that.className = that.el.className;
 
-        that._setRoute(that.options.route);
+        that._setRoute(options.route);
 
-        that.application = that.options.application;
+        that.application = options.application;
 
         that.on('Resume', that.onResume)
             .on('Show', that.onShow)

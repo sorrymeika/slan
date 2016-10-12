@@ -70,14 +70,6 @@
 
             this.model.before('.js_action', form.$el);
 
-
-            form.$el.on('change', '[name="Version"]', function () {
-                api.setParam({
-                    v: self.model.data.mapping.Version
-
-                }).request();
-            });
-
             var form2 = new Form({
                 model: this.model,
                 name: 'upload',

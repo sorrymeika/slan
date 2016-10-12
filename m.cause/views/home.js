@@ -4,7 +4,6 @@ var Activity = require('activity');
 var bridge = require('bridge');
 var Loading = require('../widget/loading');
 var vm = require('core/model');
-var Scroll = require('../widget/scroll');
 var Slider = require('../widget/slider');
 var animation = require('animation');
 var Confirm = require("components/confirm");
@@ -23,8 +22,8 @@ module.exports = Activity.extend({
             title: '缘起之因'
         });
 
-        Scroll.bind(this.$('.main'));
-        Scroll.bind(model.refs.interest, {
+        this.bindScrollTo(this.$('.main'));
+        this.bindScrollTo(model.refs.interest, {
             vScroll: false,
             hScroll: true
         });

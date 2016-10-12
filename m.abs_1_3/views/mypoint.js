@@ -4,7 +4,6 @@ var util = require('util');
 var Activity = require('activity');
 var Loader = require('../widget/loader');
 var model = require('../core/model2');
-var Scroll = require('../widget/scroll');
 var Tab = require('../widget/tab');
 var animation = require('animation');
 var bridge = require('bridge');
@@ -26,7 +25,7 @@ module.exports = Activity.extend({
             }
         });
 
-        Scroll.bind(this.model.refs.main);
+        this.bindScrollTo(this.model.refs.main);
     },
 
     onShow: function () {
@@ -53,7 +52,7 @@ module.exports = Activity.extend({
                     })
                 }
 
-            }).request();
+            }).load();
 
         } else {
             this.forward('/login');

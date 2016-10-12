@@ -2,7 +2,6 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Model = require('core/model2').Model;
-var Scroll = require('widget/scroll');
 var animation = require('animation');
 
 module.exports = Activity.extend({
@@ -18,7 +17,7 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
-        Scroll.bind(model.refs.main);
+        this.bindScrollTo(model.refs.main);
     },
 
     onShow: function () {

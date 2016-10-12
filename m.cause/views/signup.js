@@ -5,7 +5,6 @@ define(function(require, exports, module) {
     var Activity = require('activity');
     var api = require('models/api');
     var model = require('../core/model');
-    var Scroll = require('../widget/scroll');
     var animation = require('animation');
     var userModel = require("models/user");
     var md5 = require("util/md5").md5;
@@ -56,7 +55,7 @@ define(function(require, exports, module) {
                 validcodeImg: api.url("/api/user/captcha?token=" + util.store('token'))
             });
 
-            Scroll.bind(this.model.refs.main);
+            this.bindScrollTo(this.model.refs.main);
 
             this.request = new api.API({
                 url: '/api/user/signup',
