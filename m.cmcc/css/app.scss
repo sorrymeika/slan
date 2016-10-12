@@ -91,6 +91,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .pd_xl { padding: 20px; }
 
 .pt_1 { padding-top: 1px; }
+.pt_s { padding-top: 5px; }
 
 .pl_s { padding-left: 5px; }
 .pl_m { padding-left: 10px; }
@@ -132,6 +133,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 
 .cl_app { color: $color; }
 .cl_dark { color: $colordark; }
+.cl_light { color: $colorlight; }
 .cl_fff { color: #fff; }
 .cl_999 { color: #999; }
 .cl_000 { color: #000; }
@@ -149,6 +151,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .lh_l { line-height: 50px; }
 .lh_xl { line-height: 60px; }
 .lh_bar { line-height: 44px; }
+.lh_1 { line-height: 1; }
 
 .cir { border-radius: 50%; overflow: hidden; }
 .cir_m { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; }

@@ -224,6 +224,8 @@ Async.prototype = {
     }
 };
 
+Async.prototype.await = Async.prototype.then;
+
 Async.resolve = function () {
     return new Async().resolve();
 }

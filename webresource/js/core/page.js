@@ -78,17 +78,13 @@ var Page = Component.extend({
             .on('Show', that._statusChange)
             .on('Pause', that.onPause)
             .on('Pause', that._statusChange)
-            .on('QueryChange', that.onQueryChange)
-            .on('QueryChange', that.checkQuery);
+            .on('QueryChange', that.onQueryChange);
 
         if (!that.$el.data('path')) {
             that.$el.data('url', that.url).data('path', that.path);
             async.then(that.loadTemplate, that);
         }
-        async.then(that.onCreate, that)
-            .then(function () {
-                that.checkQuery();
-            });
+        async.then(that.onCreate, that);
     },
 
     onCreate: noop,
@@ -129,27 +125,6 @@ var Page = Component.extend({
         var query = $.param(this.route.query);
 
         this.application.navigate(this.route.path + (query ? '?' + query : ''));
-    },
-
-    _queryActions: {},
-    checkQuery: function () {
-        var that = this;
-        var query = that.query;
-        var prevQueries = that._query;
-        var actionName;
-
-        $.each(that._queryActions, function (name, option) {
-            actionName = query[name] || '';
-
-            if ((actionName && !prevQueries) || (prevQueries && actionName != prevQueries[name])) {
-                var action = option.map[actionName];
-                if (!action.exec) {
-                    action.fn.apply(option.ctx);
-                } else {
-                    action.exec = false;
-                }
-            }
-        });
     },
 
     onResult: function (event, fn) {

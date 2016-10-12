@@ -13,6 +13,7 @@ var Promise = require('promise');
 
 var publicquan = require('../logical/publicquan');
 var quan = require('../logical/quan');
+var messagesList = require('../models/messagesList');
 
 util.cnNum = function (num) {
     if (num > 10000) {
@@ -110,7 +111,8 @@ module.exports = Activity.extend({
         var loader = this.loader = new Loader(this.$el);
 
         var model = self.model = new Model(this.$el, {
-            title: ''
+            title: '',
+            messagesList: messagesList
         });
 
         model.next(function () {

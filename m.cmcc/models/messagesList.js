@@ -7,6 +7,7 @@ var messagesList = model2.createModel({
         list: [{
             user_id: 1,
             user_name: '小黑',
+            avatars: "images/logo.png",
             date: 1476211314511,
             msg: '[图片]',
             unread: 3,
@@ -15,6 +16,7 @@ var messagesList = model2.createModel({
         }, {
                 user_id: 2,
                 user_name: '小白',
+                avatars: "images/logo.png",
                 date: 1476211314511,
                 msg: '[图片]',
                 unread: 0,
@@ -23,6 +25,5 @@ var messagesList = model2.createModel({
 
     } : util.store('messagesList')
 });
-
 
 module.exports = messagesList;

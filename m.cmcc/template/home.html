@@ -113,7 +113,14 @@
                 <p class="ml_l">我的好友</p>
             </li>
         </ul>
-        <ul class="bd_tb mt_10">
+        <ul class="bd_t mt_l pt_1 hm_contacts__messages">
+            <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list">
+                <p class="img ml_m"><img sn-src="{item.avatars}" /></p>
+                <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
+                    <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
+                </p>
+                <p class="date h_bar mr_m pt_s">{util.formatDate(item.date,"short")}</p>
+            </li>
         </ul>
     </div>
 </div>

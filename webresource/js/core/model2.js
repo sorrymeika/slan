@@ -141,11 +141,14 @@ function setRefs(viewModel, el) {
 function updateRequireView(viewModel, el) {
     var id = el.getAttribute('sn-data');
     var data = !id ? null : viewModel.fns[id].call(viewModel, viewModel.formatData(el.snData, el));
-    var instance
+    var instance;
 
     if (el.snRequireInstance) {
         instance = el.snRequireInstance;
-        data && instance.set(data)
+        if (data && util.isDiffObject(data, instance._originData)) {
+            instance._originData = data;
+            instance.set(data);
+        }
 
     } else {
         var children = [];
@@ -161,6 +164,8 @@ function updateRequireView(viewModel, el) {
         }
 
         el.snRequireInstance = instance = new el.snRequire(data, children);
+
+        instance._originData = data;
 
         instance.$el.appendTo(el);
     }
@@ -302,23 +307,45 @@ var Model = function (parent, key, data) {
 var ModelProto = {
 
     findByKey: function (key) {
-        var model = this.model;
+        var model = this;
+        var keys = key.split('.');
+        var result;
 
-        for (var k in model) {
-            var mod = model[k];
+        key = keys.shift();
 
-            if (mod && (mod.key == key || mod.keys && mod.keys.indexOf(key) != -1)) {
-                return mod;
+        while (key && model) {
+            result = null;
+
+            if (model.key == key || model.keys && model.keys.indexOf(key) != -1) {
+                result = model;
+                key = keys.shift();
+
+            } else {
+                model = model.model;
+
+                for (var k in model) {
+                    var mod = model[k];
+
+                    if (mod instanceof Model) {
+                        if (mod.key == key || mod.keys && mod.keys.indexOf(key) != -1) {
+                            result = mod;
+                            key = keys.shift();
+                            break;
+                        }
+
+                    } else if (mod instanceof Collection) {
+                        if (mod._key == key || mod.keys && mod.keys.indexOf(key) != -1) {
+                            result = mod;
+                            key = keys.shift();
+                            break;
+                        }
+                    }
+                }
             }
-            if (mod instanceof Model) {
-                mod = mod.findByKey(key);
 
-                if (mod)
-                    return mod;
-            }
+            model = result;
         }
-
-        return null;
+        return result;
     },
 
     getModel: function (key) {
@@ -438,8 +465,7 @@ var ModelProto = {
                     model[attr] = value;
                     data[attr] = value.data;
 
-                    if (value instanceof Collection)
-                        (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
+                    (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
 
                     (value.root.parents || (value.root.parents = [])).push(this.root);
 
@@ -929,13 +955,13 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                 if (model instanceof Model || model instanceof Collection) {
                     data[key] = model.data;
-                    data['$' + key] = model;
 
                 } else {
                     data[key] = model;
                 }
             }
         }
+
         return data
     },
 
@@ -955,6 +981,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var attrs = el.snAttrs || (el.snAttrs = {});
 
         for (var attr in attrsBinding) {
+
             var val = self.fns[attrsBinding[attr]].call(self, data);
 
             if (attrs[attr] === val) continue;

@@ -19,6 +19,9 @@ module.exports = Activity.extend({
         }
 
         this.bindScrollTo(model.refs.main);
+
+        this.waitLoad(function () {
+        })
     },
 
     onShow: function () {

@@ -75,26 +75,28 @@ var Activity = Component.extend({
 
         self._setReferrer(options.route)
             ._setRoute(options.route)
-            .on('Show', self._onShow)
-            .on('Destroy', self._onDestroy)
+            .on('Show', self._statusChange)
             .on('Pause', self._statusChange)
-            .on('QueryChange', self.checkQuery);
+            .on('Destroy', self._onDestroy);
 
-        self.onResume && self.on('Resume', self.onResume);
         self.onShow && self.on('Show', self.onShow);
+        self.onResume && self.on('Resume', self.onResume);
+        self.onLoad && self.one('Show', self.onLoad);
         self.onHide && self.on('Hide', self.onHide);
         self.onPause && self.on('Pause', self.onPause);
         self.onQueryChange && self.on('QueryChange', self.onQueryChange);
+
+        self._waitLoad = new Promise(function (resolve, reject) {
+            self.one('Show', resolve);
+        });
 
         if (!self.$el.data('path')) {
             self.$el.data('url', self.url).data('path', self.path);
             async.then(self.loadTemplate, self);
 
-        } else {
-            self.onCreate();
         }
 
-        async.then(self.checkQuery, self);
+        async.then(self.onCreate, self);
     },
 
     bindScrollTo: function (el, options) {
@@ -117,14 +119,12 @@ var Activity = Component.extend({
 
         var self = this,
             count = 1,
+            async = self._async,
             callback = function () {
                 count--;
                 if (count == 0) {
                     self.$el.html(self.razor.html(self.data)).appendTo(self.application.$el);
-
-                    self.onCreate();
-
-                    self._async.resolve();
+                    async.resolve();
                 }
             };
 
@@ -149,7 +149,7 @@ var Activity = Component.extend({
             callback();
         });
 
-        return self._async;
+        return async;
     },
 
     onCreate: util.noop,
@@ -157,25 +157,12 @@ var Activity = Component.extend({
     //页面准备就绪，可加载数据
     onLoad: null,
 
-    waitLoad: function () {
-        var self = this;
-
-        return new Promise(function (resolve, reject) {
-
-        });
+    waitLoad: function (fn) {
+        return typeof fn === 'function' ? this._waitLoad.then(fn) : this._waitLoad;
     },
 
     //进入动画结束时触发
     onShow: null,
-
-    _onShow: function (e) {
-        this._statusChange(e);
-
-        if (!this._isShown || this.isForward) {
-            this.onLoad && this.onLoad();
-        }
-        this._isShown = true;
-    },
 
     _statusChange: function (e) {
         if (this._status == 'Pause') {
@@ -252,27 +239,6 @@ var Activity = Component.extend({
         this.trigger(new Event('QueryChange', {
             data: data
         }));
-    },
-
-    _queryActions: {},
-    checkQuery: function () {
-        var self = this;
-        var query = self.query;
-        var prevQueries = self._query;
-        var actionName;
-
-        $.each(self._queryActions, function (name, option) {
-            actionName = query[name] || '';
-
-            if ((actionName && !prevQueries) || (prevQueries && actionName != prevQueries[name])) {
-                var action = option.map[actionName];
-                if (!action.exec) {
-                    action.fn.apply(option.ctx);
-                } else {
-                    action.exec = false;
-                }
-            }
-        });
     },
 
     isExiting: false,

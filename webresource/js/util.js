@@ -22,7 +22,47 @@ var pad = function (num, n) {
     return a.substr(a.length - (n || 2));
 };
 
+function isDiffObject(a, b) {
+    var typeA = toString.call(a);
+    var typeB = toString.call(b);
+
+    if (typeA != typeB) return true;
+
+    switch (typeA) {
+        case '[object Object]':
+            var keysA = Object.keys(a);
+            var keysB = Object.keys(b);
+
+            if (keysA.length != keysB.length) {
+                return true;
+            }
+
+            for (var i = keysA.length; i >= 0; i--) {
+                var key = keysA[i];
+
+                if (isDiffObject(a[key], b[key])) return true;
+            }
+            break;
+
+        case '[object Array]':
+            if (a.length != b.length) {
+                return true;
+            }
+
+            for (var i = a.length; i >= 0; i--) {
+                if (isDiffObject(a[i], b[i])) return true;
+            }
+            break;
+
+        default:
+            if (a != b) return true;
+    }
+
+    return false;
+}
+
 var util = {
+    isDiffObject: isDiffObject,
     isInApp: /SLApp/.test(ua),
     ios: !!ios,
     ie: !!ie,
