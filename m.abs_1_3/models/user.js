@@ -31,17 +31,16 @@ var User = {
         return this;
     },
 
-    request: function (callback, ivcode) {
+    request: function (ivcode) {
         var self = this;
         var user = this.get();
 
-        userApi.setParam({
+        return userApi.setParam({
             UserID: user.ID,
             Auth: user.Auth,
             ivcode: ivcode ? ivcode : ''
 
-        }).load(callback);
-        return this;
+        }).load();
     }
 };
 

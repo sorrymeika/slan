@@ -303,7 +303,6 @@ module.exports = Activity.extend({
                 self.back(self.query.from || self.referrer);
             }
         });
-        product.load();
 
         var colorAndSpec = new api.ProductColorAndSpec({
             $el: self.$el,
@@ -349,7 +348,10 @@ module.exports = Activity.extend({
             }
         });
 
-        packageRelativeAPI.load();
+        this.waitLoad().then(function () {
+            product.load();
+            packageRelativeAPI.load();
+        });
     },
 
     onShow: function () {

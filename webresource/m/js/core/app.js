@@ -238,7 +238,7 @@ var Application = Component.extend(Object.assign(appProto, {
         $(window).on('back', function () {
 
             var hash = location.hash;
-            if (hash == '' || hash === '#' || hash === "/" || hash === "#/") {
+            if (!that._currentActivity || that._currentActivity.path == "/") {
                 if (prepareExit) {
                     bridge.exit();
                 } else {
@@ -250,7 +250,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 }
 
             } else {
-                that.back(that.history[that.history.length - 2]);
+                that.back(that._currentActivity.referrer || '/');
             }
         });
     },
@@ -266,18 +266,6 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.queue = new Async();
 
-        if (delay) {
-            setTimeout(function () {
-                $el.appendTo(document.body);
-                delay.resolve();
-            }, delay);
-
-            delay = new Async();
-
-        } else {
-            $el.appendTo(document.body);
-        }
-
         that.$el = $(that.el);
 
         if (bridge.hasStatusBar) {
@@ -286,9 +274,21 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.hash = Route.formatUrl(location.hash);
 
-        that.historyPromise = new Async().resolve();
+        that.historyAsync = new Async().resolve();
 
         that.get(that.hash, function (activity) {
+
+            if (delay) {
+                setTimeout(function () {
+                    $el.appendTo(document.body);
+                    delay.resolve();
+                }, delay);
+
+                delay = new Async();
+
+            } else {
+                $el.appendTo(document.body);
+            }
 
             that.history.push(that.hash);
 
@@ -310,10 +310,10 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 if (that.hashChanged) {
                     that.hashChanged = false;
-                    that.historyPromise.resolve();
+                    that.historyAsync.resolve();
 
                 } else {
-                    that.historyPromise.then(function () {
+                    that.historyAsync.then(function () {
 
                         hashIndex = lastIndexOf(that.history, hash);
                         if (hashIndex == -1) {
@@ -412,7 +412,7 @@ var Application = Component.extend(Object.assign(appProto, {
     navigate: function (url, isForward) {
         var that = this;
 
-        that.historyPromise.then(function () {
+        that.historyAsync.then(function () {
             var index,
                 hashChanged = !Route.compareUrl(url, location.hash);
 
@@ -432,7 +432,10 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 } else {
                     var go = index + 1 - that.history.length;
-                    hashChanged && go && history.go(go);
+
+                    hashChanged && go && setTimeout(function () {
+                        history.go(go);
+                    }, 0);
                     that.history.length = index + 1;
                 }
             }

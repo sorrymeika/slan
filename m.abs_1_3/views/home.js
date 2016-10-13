@@ -290,7 +290,7 @@ module.exports = Activity.extend({
             },
             error: function () { }
         });
-        update.load();
+        update.load().catch(function () { });
 
         this.stewardQtyApi = new api.StewardQtyAPI({
             checkData: false,
@@ -540,16 +540,7 @@ module.exports = Activity.extend({
     requestUser: function () {
         var self = this;
 
-        userModel.request(function (err, res) {
-
-            if (err) {
-                if (err.error_code == 503) {
-                    userModel.set(null);
-                    self.model.set('isLogin', false);
-                }
-                self.model.set('isOffline', true);
-                return;
-            }
+        userModel.request(util.store('ivcode') || '0000').then(function (res) {
             res.data.ID = res.data.UserID;
 
             userModel.set(res.data);
@@ -592,7 +583,16 @@ module.exports = Activity.extend({
                 }
             });
 
-        }, util.store('ivcode') || '0000');
+        }, function (err) {
+            if (err) {
+                if (err.error_code == 503) {
+                    userModel.set(null);
+                    self.model.set('isLogin', false);
+                }
+                self.model.set('isOffline', true);
+                return;
+            }
+        });
     },
 
     showMessageDialog: function (message) {

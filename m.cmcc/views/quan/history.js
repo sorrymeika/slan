@@ -2,8 +2,14 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Loader = require('widget/loader');
+var Toast = require('widget/toast');
+var popup = require('widget/popup');
 var Model = require('core/model2').Model;
-var animation = require('animation');
+var Promise = require('promise');
+
+var quan = require('logical/quan');
+var user = require('models/user');
+
 
 module.exports = Activity.extend({
 
@@ -15,10 +21,52 @@ module.exports = Activity.extend({
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction)
+            self.back(self.swipeRightBackAction);
         }
 
-        this.bindScrollTo(model.refs.main);
+        model.date = function (date) {
+
+            return "<b>今天</b>";
+        }
+
+        model.del = function () {
+            popup.confirm({
+                title: '温馨提醒',
+                content: '您确定要删除吗',
+                confirmText: "确定",
+                confirmAction: function () {
+                    var pop = this;
+
+                    Loader.showLoading();
+
+                    quan.deleteQuan(function () {
+                        pop.hide();
+
+                    }).catch(function (e) {
+                        Toast.showToast(e.message);
+
+                    }).then(function () {
+                        Loader.hideLoading();
+                    });
+                },
+                cancelText: "取消",
+                cancelAction: function () { }
+            })
+        }
+
+        Promise.all([quan.getHistory(), this.waitLoad()]).then(function (results) {
+
+            var res = results[0];
+
+            model.set({
+                data: res.data
+            })
+
+            self.bindScrollTo(model.refs.main);
+
+        }).catch(function (e) {
+            Toast.showToast(e.message);
+        });
     },
 
     onShow: function () {

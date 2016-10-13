@@ -359,6 +359,7 @@ ScrollBindResult.prototype = {
 
     destory: function () {
         this.items.forEach(function (item) {
+
             item.destory();
         });
     }

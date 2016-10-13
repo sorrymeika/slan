@@ -11,6 +11,8 @@ var Toast = require('../widget/toast');
 var animation = require('animation');
 var Promise = require('promise');
 
+var Menu = require('../components/menu');
+
 var publicquan = require('../logical/publicquan');
 var quan = require('../logical/quan');
 var messagesList = require('../models/messagesList');
@@ -105,6 +107,22 @@ module.exports = Activity.extend({
 
     },
 
+    menu: function () {
+
+        if (!this._menu) {
+            this._menu = new Menu();
+
+            this._menu.$el.prependTo(this.$el)[0].clientHeight;
+        }
+        $(this.model.refs.home).addClass('menu_aexit');
+        this._menu.$el.addClass('menu_enter');
+    },
+
+    exitMenu: function () {
+        this._menu && this._menu.$el.removeClass('menu_enter');
+        $(this.model.refs.home).removeClass('menu_aexit');
+    },
+
     onCreate: function () {
         var self = this;
 
@@ -114,6 +132,12 @@ module.exports = Activity.extend({
             title: '',
             messagesList: messagesList
         });
+
+        model.menu = this.menu.bind(this);
+        model.exitMenu = function (e) {
+            if ($(e.target).hasClass('hm_home'))
+                self.exitMenu();
+        }
 
         model.next(function () {
             var tab = self.tab = this.refs.tab;
@@ -160,6 +184,7 @@ module.exports = Activity.extend({
     },
 
     onHide: function () {
+        this.exitMenu();
     },
 
     onDestory: function () {

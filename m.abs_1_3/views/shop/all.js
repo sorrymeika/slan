@@ -128,33 +128,7 @@ module.exports = Activity.extend({
             hScroll: true
         });
 
-        console.profile('cate')
-        console.time('cate')
 
-        Category.list(function (res, navs) {
-
-            console.log('navs', navs)
-            console.log('categories', res)
-
-            var cpCategory = new CpCategory({
-                data: res,
-                goto: function (e, id) {
-
-                    self.model.selectCate(null, id);
-
-                    cpCategory.hide();
-                }
-            });
-
-            cpCategory.$el.appendTo('body');
-
-            self.cpCategory = cpCategory;
-
-            self.setCategories(res, navs);
-        });
-
-        console.profileEnd()
-        console.timeEnd('cate')
 
     },
 
@@ -186,6 +160,25 @@ module.exports = Activity.extend({
 
     onLoad: function () {
         var self = this;
+
+        Category.list(function (res, navs) {
+
+            var cpCategory = new CpCategory({
+                data: res,
+                goto: function (e, id) {
+
+                    self.model.selectCate(null, id);
+
+                    cpCategory.hide();
+                }
+            });
+
+            cpCategory.$el.appendTo('body');
+
+            self.cpCategory = cpCategory;
+
+            self.setCategories(res, navs);
+        });
 
     },
 

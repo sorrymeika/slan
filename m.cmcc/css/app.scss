@@ -3,6 +3,10 @@
 .cp_tab__head_item.curr { color: $color; }
 .cp_tab__cursor { background-color: $color; }
 
+.cp_popup__action { margin: 20px 0 0 0; @extend .bd_t; padding-top: 1px; }
+.cp_popup__action .btn {background-color: #fff; color: $color; }
+.cp_popup__action .btn_cancel { color: #333; }
+
 .bd_b,.bd_t { background-image: url(../images/border-bottom.png); background-repeat: repeat-x; background-position: 0 bottom; background-size: auto 1px; }
 .bd_t { background-position: 0 top; background-image: url(../images/border-top.png); }
 .bd_r,.bd_l { background-image: url(../images/border-right.png); background-repeat: repeat-y; background-position: right 0; background-size: 1px auto; }
@@ -131,6 +135,11 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .fs_m { font-size: 14px; }
 .fs_l { font-size: 16px; }
 
+.fw_xs { font-weight: 100; }
+.fw_s { font-weight: 200; }
+.fw_m,.fw_n { font-weight: normal; }
+.fw_b { font-weight: bold; }
+
 .cl_app { color: $color; }
 .cl_dark { color: $colordark; }
 .cl_light { color: $colorlight; }
@@ -175,5 +184,8 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .w_l { width: 50px; }
 .w_xl { width: 60px; }
 .w_bar { width: 44px; }
+
+.gl_avatars { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; }
+.gl_img { max-height: 80px; max-width: 300px; }
 
 @import "sprite.scss";

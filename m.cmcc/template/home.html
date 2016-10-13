@@ -1,140 +1,142 @@
-<header class="flex">
-    <img sn-src="{user.avatars}" class="cir ml_m" />
-    <div class="ml_m flexitem flex hm_quan__search">
-        <div class="icon-search sqr_s"></div>
-        <input type="text" class="flexitem fs_m" placeholder="公众圈、朋友圈、通讯录" />
-    </div>
-    <div class="icon-bill h_bar pl_m" sn-if="quanTab.index==0"></div>
-    <div class="icon-scan h_bar pl_m pr_m" sn-if="quanTab.index==0||quanTab.index==2"></div>
-    <div class="icon-camera h_bar pl_m pr_m" sn-if="quanTab.index==1"></div>
-</header>
-<div class="hm_quan__main" ref="tab" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">
-    <div class="hm_pubquan">
-        <div class="bd_tb mt_l bg_fff">
-            <div class="bd_b lh_s ml_l">推荐圈子</div>
-            <div class="hm_pubquan__recommend">
-                <div ref="recommend" class="con">
-                    <ul class="list" style="width:{recommendPublicQuan.length*95+15}px">
-                        <li sn-repeat="item in recommendPublicQuan" data-forward="/publicquan/{item.quan_id}">
-                            <img sn-src="item.quan_pic" />
-                            <p class="name">{item.quan_name}</p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+<div class="hm_home dock" ref="home" sn-tap="this.exitMenu()">
+    <header class="flex">
+        <a href="javascript:;" sn-tap="this.menu()"><img sn-src="{user.avatars}" class="cir ml_m" /></a>
+        <div class="ml_m flexitem flex hm_quan__search">
+            <div class="icon-search sqr_s"></div>
+            <input type="text" class="flexitem fs_m" placeholder="公众圈、朋友圈、通讯录" />
         </div>
-
-        <div class="bd_t mt_l bg_fff">
-            <div class="bd_b lh_s ml_l">我推荐的</div>
-            <div class="hm_pubquan__myrecommend bd_b" sn-repeat="item in myrecommendPublicQuan">
-                <div class="hd">
-                    <p class="img">
-                        <img sn-src="{item.quan.quan_pic}" />
-                    </p>
-                    <p class="name">{item.quan.quan_name}</p>
-                    <p class="date">{util.formatDate(item.lastMsg.date,"MM-dd")}</p>
-                </div>
-                <div class="bd mt_m">
-                    <ul class="imgs clearfix">
-                        <li class="img fl_l ml_m" sn-repeat="img in item.lastMsg.imgs"><img sn-src="{img}" /></li>
-                    </ul>
-                </div>
-                <div class="ft flex lh_s">
-                    <p class="icon-see flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.see)}</span></p>
-                    <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.like)}</span></p>
-                    <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.comment)}</span></p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bd_t mt_l bg_fff">
-            <div class="bd_b lh_s ml_l">我关注的</div>
-            <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in myfollowPublicQuan">
-                <div class="hd">
-                    <p class="img">
-                        <img sn-src="{item.quan.quan_pic}" />
-                    </p>
-                    <p class="name">{item.quan.quan_name}</p>
-                    <p class="date">{util.formatDate(item.lastMsg.date,"MM-dd")}</p>
-                </div>
-                <div class="bd mt_m">
-                    <ul class="imgs clearfix">
-                        <li class="img fl_l ml_m" sn-repeat="img in item.lastMsg.imgs"><img sn-src="{img}" /></li>
-                    </ul>
-                </div>
-                <div class="ft flex lh_s">
-                    <p class="icon-see flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.see)}</span></p>
-                    <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.like)}</span></p>
-                    <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.comment)}</span></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="hm_quan">
-        <div class="hm_quan__item bd_b" sn-repeat="quan in quanData">
-            <div class="flexstart pt_m pb_m">
-                <p class="avatars ml_m mr_m"><img src="{quan.avatars}" /></p>
-                <div class="bd flexitem lh_xxs">
-                    <p class="name cl_dark fs_m">{quan.user_name}</p>
-                    <p class="con fs_m" sn-html="{quan.content}"></p>
-                    <ul class="imgs clearfix mt_s">
-                        <li class="img fl_l mr_m" sn-repeat="img in quan.imgs"><img sn-src="{img}" /></li>
-                    </ul>
-                    <div class="bar flex fs_s mt_s">
-                        <p class="date flexitem">{util.formatDate(quan.date,"short")}</p>
-                        <p class="icon-closeye mr_m"><span class="va_m ml_m">屏蔽</span></p>
-                        <p class="icon-heart mr_m"><span class="va_m ml_m">赞</span></p>
-                        <p class="icon-comment2 mr_m"><span class="va_m ml_m">评论</span></p>
+        <div class="icon-bill h_bar pl_m" sn-if="quanTab.index==0"></div>
+        <div class="icon-scan h_bar pl_m pr_m" sn-if="quanTab.index==0||quanTab.index==2"></div>
+        <div class="icon-camera h_bar pl_m pr_m" sn-if="quanTab.index==1" data-forward="/quan/history"></div>
+    </header>
+    <div class="hm_quan__main" ref="tab" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">
+        <div class="hm_pubquan">
+            <div class="bd_tb mt_l bg_fff">
+                <div class="bd_b lh_s ml_l">推荐圈子</div>
+                <div class="hm_pubquan__recommend">
+                    <div ref="recommend" class="con">
+                        <ul class="list" style="width:{recommendPublicQuan.length*95+15}px">
+                            <li sn-repeat="item in recommendPublicQuan" data-forward="/publicquan/{item.quan_id}">
+                                <img sn-src="item.quan_pic" />
+                                <p class="name">{item.quan_name}</p>
+                            </li>
+                        </ul>
                     </div>
-                    <ul class="comment fs_s">
-                        <li sn-repeat="item in quan.comments"><a href="javascript:;"><i class="cl_dark">{item.user_name}</i>：<span>{item.content}</span></a></li>
-                    </ul>
                 </div>
+            </div>
+
+            <div class="bd_t mt_l bg_fff">
+                <div class="bd_b lh_s ml_l">我推荐的</div>
+                <div class="hm_pubquan__myrecommend bd_b" sn-repeat="item in myrecommendPublicQuan">
+                    <div class="hd">
+                        <p class="img">
+                            <img sn-src="{item.quan.quan_pic}" />
+                        </p>
+                        <p class="name">{item.quan.quan_name}</p>
+                        <p class="date">{util.formatDate(item.lastMsg.date,"MM-dd")}</p>
+                    </div>
+                    <div class="bd mt_m">
+                        <ul class="imgs clearfix">
+                            <li class="img fl_l ml_m" sn-repeat="img in item.lastMsg.imgs"><img sn-src="{img}" /></li>
+                        </ul>
+                    </div>
+                    <div class="ft flex lh_s">
+                        <p class="icon-see flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.see)}</span></p>
+                        <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.like)}</span></p>
+                        <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.comment)}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bd_t mt_l bg_fff">
+                <div class="bd_b lh_s ml_l">我关注的</div>
+                <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in myfollowPublicQuan">
+                    <div class="hd">
+                        <p class="img">
+                            <img sn-src="{item.quan.quan_pic}" />
+                        </p>
+                        <p class="name">{item.quan.quan_name}</p>
+                        <p class="date">{util.formatDate(item.lastMsg.date,"MM-dd")}</p>
+                    </div>
+                    <div class="bd mt_m">
+                        <ul class="imgs clearfix">
+                            <li class="img fl_l ml_m" sn-repeat="img in item.lastMsg.imgs"><img sn-src="{img}" /></li>
+                        </ul>
+                    </div>
+                    <div class="ft flex lh_s">
+                        <p class="icon-see flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.see)}</span></p>
+                        <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.like)}</span></p>
+                        <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.lastMsg.comment)}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hm_quan">
+            <div class="hm_quan__item bd_b" sn-repeat="quan in quanData">
+                <div class="flexstart pt_m pb_m">
+                    <p class="avatars ml_m mr_m"><img src="{quan.avatars}" /></p>
+                    <div class="bd flexitem lh_xxs">
+                        <p class="name cl_dark fs_m">{quan.user_name}</p>
+                        <p class="con fs_m" sn-html="{quan.content}"></p>
+                        <ul class="imgs clearfix mt_s">
+                            <li class="img fl_l mr_m" sn-repeat="img in quan.imgs"><img sn-src="{img}" /></li>
+                        </ul>
+                        <div class="bar flex fs_s mt_s">
+                            <p class="date flexitem">{util.formatDate(quan.date,"short")}</p>
+                            <p class="icon-closeye mr_m"><span class="va_m ml_m">屏蔽</span></p>
+                            <p class="icon-heart mr_m"><span class="va_m ml_m">赞</span></p>
+                            <p class="icon-comment2 mr_m"><span class="va_m ml_m">评论</span></p>
+                        </div>
+                        <ul class="comment fs_s">
+                            <li sn-repeat="item in quan.comments"><a href="javascript:;"><i class="cl_dark">{item.user_name}</i>：<span>{item.content}</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
+        <div class="hm_contacts">
+            <ul class="bd_tb pt_1">
+                <li class="flex pl_m h_bar bg_fff bd_b">
+                    <p class="icon-newfriend"></p>
+                    <p class="ml_l">新的朋友</p>
+                </li>
+                <li class="flex pl_m h_bar bg_fff bd_b">
+                    <p class="icon-person2"></p>
+                    <p class="ml_l flexitem">手机联系人</p>
+                    <p class="hm_contacts__backup">备份</p>
+                </li>
+                <li class="flex pl_m h_bar bg_fff">
+                    <p class="icon-person3"></p>
+                    <p class="ml_l">我的好友</p>
+                </li>
+            </ul>
+            <ul class="bd_t mt_l pt_1 hm_contacts__messages">
+                <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list">
+                    <p class="img ml_m"><img sn-src="{item.avatars}" /></p>
+                    <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
+                        <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
+                    </p>
+                    <p class="date h_bar mr_m pt_s">{util.formatDate(item.date,"short")}</p>
+                </li>
+            </ul>
+        </div>
     </div>
 
-    <div class="hm_contacts">
-        <ul class="bd_tb pt_1">
-            <li class="flex pl_m h_bar bg_fff bd_b">
-                <p class="icon-newfriend"></p>
-                <p class="ml_l">新的朋友</p>
+    <footer class="footer bd_t">
+        <ul>
+            <li class="icon-life">
+                <span>生活</span>
             </li>
-            <li class="flex pl_m h_bar bg_fff bd_b">
-                <p class="icon-person2"></p>
-                <p class="ml_l flexitem">手机联系人</p>
-                <p class="hm_contacts__backup">备份</p>
+            <li class="icon-ent">
+                <span>娱乐</span>
             </li>
-            <li class="flex pl_m h_bar bg_fff">
-                <p class="icon-person3"></p>
-                <p class="ml_l">我的好友</p>
+            <li class="icon-quan_curr curr">
+                <span>圈子</span>
             </li>
         </ul>
-        <ul class="bd_t mt_l pt_1 hm_contacts__messages">
-            <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list">
-                <p class="img ml_m"><img sn-src="{item.avatars}" /></p>
-                <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
-                    <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
-                </p>
-                <p class="date h_bar mr_m pt_s">{util.formatDate(item.date,"short")}</p>
-            </li>
-        </ul>
-    </div>
+    </footer>
 </div>
-
-<footer class="footer bd_t">
-    <ul>
-        <li class="icon-life">
-            <span>生活</span>
-        </li>
-        <li class="icon-ent">
-            <span>娱乐</span>
-        </li>
-        <li class="icon-quan_curr curr">
-            <span>圈子</span>
-        </li>
-    </ul>
-</footer>

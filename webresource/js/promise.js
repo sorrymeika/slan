@@ -36,6 +36,7 @@ function reject(value) {
 }
 
 function catchAndContinue(e, onRejected, nextFulfilled, nextRejected) {
+
     if (typeof onRejected === 'function') {
         onRejected(e);
         nextFulfilled(null);

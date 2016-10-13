@@ -48,7 +48,7 @@ var ScrollView = function (el, options) {
     })
 }
 
-Object.assign(ScrollView.prototype, {
+ScrollView.prototype = {
     scrollTo: function (x, y, duration) {
         this.touch.trigger('start').scrollTo(x, y, duration);
     },
@@ -59,8 +59,13 @@ Object.assign(ScrollView.prototype, {
 
     scrollTop: function () {
         return this.touch.y;
+    },
+
+    destory: function () {
+
+        this.touch.destory();
     }
-})
+}
 
 
 ScrollView.insertScroller = insertScroller;

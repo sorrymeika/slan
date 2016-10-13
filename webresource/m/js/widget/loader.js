@@ -3,8 +3,9 @@
         _ = require('util'),
         $empty = $();
 
-    var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
+    var Promise = require("promise");
 
+    var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
 
     /*
     @options = { 
@@ -35,6 +36,18 @@
 
     Loader.url = function (url) {
         return /^http\:\/\//.test(url) ? url : (this.prototype.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
+    }
+
+    var _loader;
+
+    Loader.showLoading = function () {
+        !_loader && (_loader = new Loader($("body")));
+
+        _loader.showLoading();
+    }
+
+    Loader.hideLoading = function () {
+        _loader && _loader.hideLoading();
     }
 
     Loader.prototype = {
@@ -69,7 +82,7 @@
             return {
                 success: false,
                 code: errorCode,
-                msg: errorMsg
+                message: errorMsg
             }
         },
 
@@ -294,6 +307,8 @@
                         resolve && resolve.call(that, res, status, xhr);
 
                     } else {
+                        if (!res.message && res.msg) res.message = res.msg;
+
                         that.error(res, xhr);
                         reject && reject.call(that, res, xhr);
                     }

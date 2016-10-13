@@ -3,7 +3,9 @@ var util = require('util');
 var Activity = require('activity');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
-var animation = require('animation');
+var Promise = require('promise');
+var Toast = require('widget/toast');
+var popup = require('widget/popup');
 
 module.exports = Activity.extend({
 
@@ -18,7 +20,13 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
-        this.bindScrollTo(model.refs.main);
+        Promise.all([this.waitLoad()]).then(function (results) {
+
+            self.bindScrollTo(model.refs.main);
+
+        }).catch(function (e) {
+            Toast.showToast(e.message);
+        });
     },
 
     onShow: function () {

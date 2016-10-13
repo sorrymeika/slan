@@ -179,7 +179,7 @@ function updateElement(viewModel, el) {
         return { isBreak: true, nextSibling: el.snIfOrigin };
 
     } else {
-        viewModel.updateElement(el);
+        el.snBinding && viewModel.updateElement(el);
 
         if (el.nodeType == 1) {
             if (el.snRequire) {
@@ -284,9 +284,11 @@ var Model = function (parent, key, data) {
 
     if (parent instanceof Model) {
         this.key = parent.key ? parent.key + '.' + key : key;
+        this._key = key;
 
     } else if (parent instanceof Collection) {
         this.key = parent.key + '^child';
+        this._key = parent._key + '^child';
 
     } else {
         throw new Error('Model\'s parent mast be Collection or Model');
@@ -295,7 +297,6 @@ var Model = function (parent, key, data) {
     this.type = typeof data == 'object' ? 'object' : 'value';
     parent.data[key] = this.data = this.type == 'object' ? $.extend({}, data) : data;
 
-    this._key = key;
     this.model = {};
     this.parent = parent;
     this.root = parent.root;
@@ -311,39 +312,34 @@ var ModelProto = {
         var keys = key.split('.');
         var result;
 
+        // var isLog = key === 'myrecommendPublicQuan^child.lastMsg.imgs';
+
         key = keys.shift();
 
-        while (key && model) {
+        var models = model.model;
+
+        if (model._key == key || model.keys && model.keys.indexOf(key) != -1) {
+            key = keys.shift();
+            result = model;
+            models = model.model;
+        }
+
+        while (key) {
             result = null;
 
-            if (model.key == key || model.keys && model.keys.indexOf(key) != -1) {
-                result = model;
-                key = keys.shift();
+            for (var k in models) {
+                var mod = models[k];
 
-            } else {
-                model = model.model;
-
-                for (var k in model) {
-                    var mod = model[k];
-
-                    if (mod instanceof Model) {
-                        if (mod.key == key || mod.keys && mod.keys.indexOf(key) != -1) {
-                            result = mod;
-                            key = keys.shift();
-                            break;
-                        }
-
-                    } else if (mod instanceof Collection) {
-                        if (mod._key == key || mod.keys && mod.keys.indexOf(key) != -1) {
-                            result = mod;
-                            key = keys.shift();
-                            break;
-                        }
+                if (mod instanceof Collection || mod instanceof Model) {
+                    if (mod._key == key || mod.keys && mod.keys.indexOf(key) != -1) {
+                        result = mod;
+                        models = mod.model;
+                        key = keys.shift();
+                        break;
                     }
                 }
             }
-
-            model = result;
+            if (result == null || models == null) break;
         }
         return result;
     },
@@ -966,9 +962,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     updateElement: function (el, attribute) {
-
-        if (!el.snBinding) return;
-
         var self = this;
         var attrsBinding;
         var data = this.formatData(el, el.snData);
@@ -1260,7 +1253,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     updateView: function () {
-        // console.time('updateView')
         this._nextTick = null;
         this.trigger('viewWillUpdate');
 
@@ -1275,8 +1267,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             return updateElement(self, el);
         });
-
-        //console.timeEnd('updateView');
 
         if (this.parents) {
             this.parents.forEach(function (parent) {

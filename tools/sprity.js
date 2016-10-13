@@ -43,12 +43,12 @@ function combineImages(out, srcs, callback) {
 
                     img.top = height;
 
-                    height += img.h + margin;
+                    height += (img.h + margin);
 
                     if (img.w > maxWidth) maxWidth = img.w;
                 }
 
-                var outImageWidth = maxWidth + 2;
+                var outImageWidth = maxWidth + margin * 2;
                 var canvas = new Canvas(outImageWidth, height);
                 var ctx = canvas.getContext('2d');
                 var results = [];
@@ -58,13 +58,13 @@ function combineImages(out, srcs, callback) {
 
                     results.push({
                         name: path.basename(img.alt).replace(/\.(png|jpg|jpeg|gif)$/, ''),
-                        x: img.left - 1,
-                        y: img.top - 1,
+                        x: img.left - margin,
+                        y: img.top - margin,
                         width: img.w + margin * 2,
                         height: img.h + margin * 2
                     })
 
-                    ctx.drawImage(img, img.left, img.top, img.w + margin, img.h + margin);
+                    ctx.drawImage(img, img.left, img.top, img.w, img.h);
                 }
 
                 var outDir = path.dirname(out);
