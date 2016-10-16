@@ -398,7 +398,7 @@ var Cart = Model.extend({
 						<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
 					</div>
 					<div class="ft">
-						<p class="js_delete" data-id="{item.SPB_ID}" sn-tap="this.del()"></p>
+						<p class="js_delete sp_cart__delete" data-id="{item.SPB_ID}" sn-tap="this.del()"></p>
 					</div>
 				</li>
 			</ul>

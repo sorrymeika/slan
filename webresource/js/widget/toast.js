@@ -12,7 +12,7 @@ var $el = $('<div class="tip" style="display:none"></div>')
     .appendTo(document.body),
     timer;
 
-exports.async = Async.resolve();
+var async = Async.done();
 
 exports.msec = 2000;
 
@@ -24,7 +24,7 @@ exports.show = function () {
 exports.msg = function (msg) {
     var self = this;
 
-    self.async.then(function () {
+    self.async.await(function (err, res, done) {
         $el.html(msg);
         self.show();
 
@@ -32,7 +32,7 @@ exports.msg = function (msg) {
 
             self.hide();
 
-            self.async.resolve();
+            done();
 
         }, self.msec);
 

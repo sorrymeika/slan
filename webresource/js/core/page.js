@@ -27,7 +27,7 @@ var Page = Component.extend({
         this.query = $.extend({}, route.query);
     },
 
-    loadTemplate: function () {
+    _template: function (res, err, done) {
         var that = this,
             count = 1,
             callback = function () {
@@ -35,7 +35,8 @@ var Page = Component.extend({
                 if (count == 0) {
                     that.$el.html(that.razor.html(that.data)).appendTo(that.application.$el);
                     that.trigger("Create");
-                    that._promise.resolve();
+
+                    done();
                 }
             };
 
@@ -60,14 +61,14 @@ var Page = Component.extend({
             callback();
         });
 
-        return that._promise;
+        return that.async;
     },
 
     initialize: function (options) {
         var that = this,
-            async = Async.resolve();
+            async = Async.done();
 
-        that._promise = async;
+        that.async = async;
 
         that._setRoute(options.route);
 
@@ -82,9 +83,9 @@ var Page = Component.extend({
 
         if (!that.$el.data('path')) {
             that.$el.data('url', that.url).data('path', that.path);
-            async.then(that.loadTemplate, that);
+            async.await(that._template, that);
         }
-        async.then(that.onCreate, that);
+        async.await(that.onCreate, that);
     },
 
     onCreate: noop,
@@ -109,7 +110,7 @@ var Page = Component.extend({
     onQueryChange: noop,
 
     then: function (fn) {
-        this._promise.then(fn, this);
+        this.async.await(fn, this);
         return this;
     },
 

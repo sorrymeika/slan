@@ -13,7 +13,7 @@
         .appendTo(document.body),
         timer;
 
-    exports.async = Async.resolve();
+    var async = Async.done();
 
     exports.msec = 2000;
 
@@ -25,7 +25,7 @@
     exports.msg = function (msg) {
         var self = this;
 
-        self.async.then(function () {
+        async.then(function (err, res, done) {
             $el.html(msg);
             self.show();
 
@@ -33,7 +33,7 @@
 
                 self.hide();
 
-                self.async.resolve();
+                done();
 
             }, self.msec);
 

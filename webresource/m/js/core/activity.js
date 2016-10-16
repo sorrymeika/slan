@@ -62,7 +62,7 @@ var Activity = Component.extend({
 
     initialize: function (options) {
         var self = this,
-            async = Async.resolve();
+            async = Async.done();
 
         self._async = async;
 
@@ -92,14 +92,14 @@ var Activity = Component.extend({
 
         if (!self.$el.data('path')) {
             self.$el.data('url', self.url).data('path', self.path);
-            async.then(self.loadTemplate, self);
-
+            async.then(self._template, self);
         }
 
         async.then(self.onCreate, self);
     },
 
     bindScrollTo: function (el, options) {
+
         var sbr = Scroll.bind(el, options);
 
         if (!this._scrolls) {
@@ -115,7 +115,7 @@ var Activity = Component.extend({
         return this._scrolls.get(el);
     },
 
-    loadTemplate: function () {
+    _template: function (err, res, done) {
 
         var self = this,
             count = 1,
@@ -124,7 +124,7 @@ var Activity = Component.extend({
                 count--;
                 if (count == 0) {
                     self.$el.html(self.razor.html(self.data)).appendTo(self.application.$el);
-                    async.resolve();
+                    done();
                 }
             };
 

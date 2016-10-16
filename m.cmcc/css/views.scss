@@ -19,7 +19,7 @@
 .menu_enter { -webkit-transform: translate3d(0%,0%,0); }
 
 .menu_user { margin-top: 60px; margin-left: 20px; }
-.menu_list { top: 130px; position: absolute; left: 0; right: 0; bottom: 40px; }
+.menu_list { top: 152px; position: absolute; left: 0; right: 0; bottom: 40px; }
 .menu_list li { height: 44px; line-height: 44px; padding-left: 15px; position: relative; }
 .menu_list li:after { width: 200%; height: 87px; background: rgba(255,255,255,.1); content: ''; display: block; top: 0; left: 0; position: absolute; -webkit-transform: scale(.5); -webkit-transform-origin: 0% 0%; }
 .menu_list li>span { font-size: 14px; font-weight: 100; margin-left: 6px; position: relative; z-index: 1; }

@@ -191,11 +191,12 @@ var Month = Model.extend({
 			},
 			success: function (res) {
 				if (res.success) {
-                    Application.getCurrentActivity().setResult('CartChange');
-
 					sl.tip('加入购物车成功！');
 					self.hide();
 					//self.forward('/cart?from=' + self.route.url);
+
+                    Application.getCurrentActivity().setResult('CartChange');
+					
 				} else {
                     sl.tip(res.msg);
                 }

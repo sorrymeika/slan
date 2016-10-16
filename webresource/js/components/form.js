@@ -1,4 +1,4 @@
-﻿define(function(require, exports, module) {
+﻿define(function (require, exports, module) {
     var $ = require('$');
     var form = require('./form.html');
     var util = require('util');
@@ -10,7 +10,7 @@
     var valid_keys = ["stringifyData", 'emptyAble', 'emptyText', 'regex', 'regexText', 'compare', 'compareText', 'validate', 'validateText', 'success', 'msg'];
     var guid = 0;
 
-    module.exports = exports = function(options) {
+    module.exports = exports = function (options) {
         var self = this,
             option,
             fields;
@@ -68,7 +68,7 @@
         this.valid = new Validator(validator, this.model.data.data);
 
         this.$el.on('blur', '[name]', $.proxy(this._validInput, this))
-            .on('focus', '[name]', function(e) {
+            .on('focus', '[name]', function (e) {
                 var $target = $(e.currentTarget);
                 var name = $target.attr('name');
                 var valid = validator[name];
@@ -89,8 +89,8 @@
             if (value !== undefined && value !== null)
                 compo.val(value);
 
-            this.model.on('change:data/' + plugin.field, (function(compo, plugin) {
-                return function(e, value) {
+            this.model.on('change:data/' + plugin.field, (function (compo, plugin) {
+                return function (e, value) {
                     compo.val(value.data[plugin.field]);
                 }
             })(compo, plugin))
@@ -107,21 +107,21 @@
         method: "post",
         fields: [],
 
-        set: function(arg0, arg1, arg2) {
+        set: function (arg0, arg1, arg2) {
             this.model.getModel('data').set(arg0, arg1, arg2);
 
             return this;
         },
 
-        get: function(key) {
+        get: function (key) {
             return this.model.getModel('data').get(key);
         },
 
-        data: function() {
+        data: function () {
             return $.extend({}, this.model.data.data);
         },
 
-        reset: function() {
+        reset: function () {
             for (var key in this.compo) {
                 this.compo[key].val('');
             }
@@ -130,10 +130,10 @@
             return this;
         },
 
-        submit: function(success, error) {
+        submit: function (success, error) {
             var self = this;
 
-            this.$el.find('select').each(function() {
+            this.$el.find('select').each(function () {
                 if (this.selectedIndex == -1) {
                     this.selectedIndex = 0;
                 }
@@ -150,7 +150,7 @@
                     var resultText;
                     var $iframe = $('<iframe style="top:-999px;left:-999px;position:absolute;display:none;" frameborder="0" width="0" height="0" name="' + target + '"></iframe>')
                         .appendTo(document.body)
-                        .on('load', function() {
+                        .on('load', function () {
                             var result = $.trim((this.contentWindow.document.body.innerHTML));
                             if (!resultText || result != resultText) {
                                 resultText = result;
@@ -181,14 +181,14 @@
             }
         },
 
-        validate: function() {
+        validate: function () {
             var res = this.valid.validate();
             this.model.set(res);
 
             return res;
         },
 
-        _validInput: function(e) {
+        _validInput: function (e) {
             var $target = $(e.currentTarget);
             var name = $target.attr('name');
             var res = this.valid.validate(name);
@@ -198,21 +198,21 @@
             this.model.set('result.' + name, res);
         },
 
-        destory: function() {
+        destory: function () {
             this.$el.on('off', '[name]', this._validInput);
         }
     };
 
     var plugins = {};
-    exports.define = function(id, Func) {
+    exports.define = function (id, Func) {
         plugins[id.toLowerCase()] = Func;
     };
 
-    exports.require = function(id) {
+    exports.require = function (id) {
         return plugins[id.toLowerCase()];
     };
 
-    var RichTextBox = function($input, options) {
+    var RichTextBox = function ($input, options) {
         var self = this;
         self.$input = $input;
         self.id = 'UMEditor' + (RichTextBox.guid++);
@@ -220,19 +220,18 @@
         var $script = $('<script type="text/plain" id="' + self.id + '" style="width:' + (options.width || 640) + 'px;height:300px;"></script>').insertBefore($input);
 
         window.UMEDITOR_HOME_URL = seajs.resolve('components/umeditor/');
-        self.async = Async();
 
-        (function(fn) {
-            window.jQuery ? fn() : seajs.use(['components/umeditor/third-party/jquery.min'], fn);
+        self.async = new Async(function (done) {
+            window.jQuery ? done(window.jQuery) : seajs.use(['components/umeditor/third-party/jquery.min'], done);
 
-        })(function() {
-            seajs.use(['components/umeditor/umeditor.config', 'components/umeditor/umeditor', 'components/umeditor/themes/default/css/umeditor.css'], function(a) {
+        }).then(function (res, err, done) {
+            seajs.use(['components/umeditor/umeditor.config', 'components/umeditor/umeditor', 'components/umeditor/themes/default/css/umeditor.css'], function (a) {
                 var editorOptions = {};
                 if (options.toolbar) editorOptions.toolbar = options.toolbar;
                 else if (options.simple) editorOptions.toolbar = ['source | undo redo | bold italic underline strikethrough | removeformat | justifyleft justifycenter justifyright justifyjustify | link unlink | image'];
 
                 var editor = UM.getEditor(self.id, editorOptions);
-                editor.addListener('blur', function() {
+                editor.addListener('blur', function () {
                     var content = editor.getContent();
                     var original = $input[0].value;
 
@@ -242,17 +241,18 @@
                 });
 
                 self.editor = editor;
-                editor.ready(function() {
-                    self.async.resolve();
+                editor.ready(function () {
+                    done();
                 });
             });
         });
+
     };
 
     RichTextBox.prototype = {
-        val: function(val) {
+        val: function (val) {
             var self = this;
-            self.async.then(function() {
+            self.async.await(function () {
                 self.editor.setContent(val, false);
             });
             self.$input.val(val).trigger('change');
@@ -264,20 +264,20 @@
     exports.define('RichTextBox', RichTextBox);
     exports.define('TimePicker', TimePicker);
 
-    var CheckBoxList = function($input, options) {
+    var CheckBoxList = function ($input, options) {
         var self = this;
         self.$input = $input;
         self.options = options;
 
-        options.options.forEach(function(item) {
+        options.options.forEach(function (item) {
             $('<input pname="' + options.field + '" type="checkbox" value="' + item.value + '" /><span style="margin-right: 10px">' + item.text + '</span>').insertBefore($input);
         })
 
         self.$checkBoxList = self.$input.siblings('[pname="' + self.options.field + '"]');
 
-        self.$checkBoxList.on('click', function() {
+        self.$checkBoxList.on('click', function () {
             var res = [];
-            self.$checkBoxList.each(function() {
+            self.$checkBoxList.each(function () {
                 if (this.checked) {
                     res.push(this.value);
                 }
@@ -293,16 +293,16 @@
         console.log(options)
     }
     CheckBoxList.prototype = {
-        val: function(val) {
+        val: function (val) {
             var self = this;
 
-            self.$input.siblings('[pname="' + self.options.field + '"]').removeAttr('checked').each(function() {
+            self.$input.siblings('[pname="' + self.options.field + '"]').removeAttr('checked').each(function () {
                 this.checked = false;
 
-            }).filter((val || 'null').split('|').map(function(item) {
+            }).filter((val || 'null').split('|').map(function (item) {
                 return '[value="' + item + '"]';
 
-            }).join(',')).attr('checked', 'checked').each(function() {
+            }).join(',')).attr('checked', 'checked').each(function () {
                 this.checked = true;
             });
 

@@ -14,6 +14,9 @@ var Menu = Model.extend({
             </p>
             <p class="user-qrcode mr_m"></p>
         </div>
+        <div class="menu_sign h_s ml_l mt_m fw_xs">
+        {user.sign_text}
+        </div>
         <ul class="menu_list" ref="list">
             <li class="user-fav">
                 <span class="va_m">我的收藏</span>

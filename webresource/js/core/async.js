@@ -2,144 +2,107 @@
 var slice = Array.prototype.slice;
 var rparam = /^\$(\d+)$/;
 
-var getCallbackParams = function (args, parameters, fn) {
-    var newArgs = [];
 
-    for (var i = 0, n = args.length, arg; i < n; i++) {
-        arg = args[i];
-        newArgs.push(typeof arg === 'string' ? (rparam.test(arg) ? parameters[parseInt(arg.match(rparam)[1])] : arg.replace(/^\$\$/, '$')) : arg);
+function done(async, err, res) {
+    var doneSelf = async.doneSelf,
+        then = async.queue.shift(),
+        next,
+        ctx,
+        promise;
+
+    if (then) {
+        next = then[0];
+        ctx = then[1];
+
+        if (next instanceof Async) {
+            next.then(doneSelf, ctx);
+
+        } else if (typeof next == 'function') {
+            var nextReturn = next.call(ctx, err, res, doneSelf);
+
+            if (nextReturn instanceof Async) {
+                if (nextReturn !== async) {
+                    nextReturn.then(doneSelf);
+                }
+
+            } else {
+                done(async, null, nextReturn);
+            }
+
+        } else if (next instanceof Array) {
+            var errors = [],
+                result = [],
+                count = 0;
+
+            for (var i = 0, n = next.length; i < n; i++) {
+                (function (fn, i, n) {
+
+                    if (typeof fn == 'function') {
+                        fn = fn.call(ctx, err, res, doneSelf);
+                    }
+
+                    if (fn instanceof Async) {
+
+                        fn.then(function (err, obj) {
+                            if (err) errors[i] = err;
+
+                            count++;
+                            result[i] = obj;
+
+                            if (count >= n) done(async, errors, result);
+                        });
+
+                    } else {
+                        count++;
+                        result[i] = fn;
+
+                        if (count >= n) done(async, null, result);
+                    }
+
+                })(next[i], i, n);
+            }
+
+        } else {
+            done(async, null, next);
+        }
+
+    } else {
+        async.state = STATUS.DONE;
     }
+};
 
-    newArgs.push(fn);
+var STATUS = {
+    INIT: 2,
+    PENDDING: 0,
+    DONE: 1
+};
 
-    return newArgs;
-}
 
-var Async = function (args, callback, ctx) {
+var Async = function (callback, ctx) {
     if (!(this instanceof Async))
-        return new Async(args, callback, ctx);
+        return new Async(callback, ctx);
 
     var self = this;
 
     this.queue = new LinkList();
-    this.state = 2;
-    this.resolveSelf = function () {
-        self.resolve.apply(self, arguments);
+    this.state = STATUS.PENDDING;
+
+    this.doneSelf = function (err, res) {
+        done(self, err, res);
     };
 
     if (!callback && typeof args == 'number') {
-        this.state = 0;
+        this.state = STATUS.PENDDING;
         this.start(args);
 
-    } else if (args) {
-        this.state = 0;
-        this.then(args, callback, ctx);
+    } else if (callback) {
+        this.state = STATUS.PENDDING;
+
+        callback.call(ctx || this, this.doneSelf);
     }
 }
 
 Async.prototype = {
-    reject: function (reason) {
-        this.resolve(reason || 'unknow error', null);
-    },
-
-    resolve: function () {
-        var that = this,
-            args = slice.call(arguments),
-            then = that.queue.shift(),
-            next,
-            ctx,
-            async;
-
-        if (then) {
-            that.state = 1;
-            next = then[0];
-            ctx = then[1];
-
-            if (next instanceof Async) {
-                next.then(that.resolveSelf);
-
-            } else if (typeof next == 'function') {
-                async = next.apply(ctx, args);
-
-                if (async instanceof Async) {
-                    if (async !== that) {
-                        async.then(that.resolveSelf);
-                    }
-
-                } else if (async instanceof Error)
-                    that.reject(async);
-                else
-                    that.resolve(null, async);
-
-            } else if (next instanceof Array) {
-                var errors = [],
-                    result = [],
-                    count = 0;
-
-                for (var i = 0, n = next.length; i < n; i++) {
-                    (function (fn, i, n) {
-
-                        if (typeof fn == 'function') {
-                            fn = fn.apply(ctx, args);
-                        }
-
-                        if (fn instanceof Async) {
-
-                            fn.then(function (err, obj) {
-                                if (err) errors[i] = err;
-
-                                count++;
-                                result[i] = obj;
-
-                                if (count >= n) that.resolve(errors, result);
-                            });
-
-                        } else {
-                            count++;
-                            result[i] = fn;
-
-                            if (count >= n) that.resolve(null, result);
-                        }
-
-                    })(next[i], i, n);
-                }
-
-            } else {
-                that.resolve(null, args);
-            }
-
-        } else {
-            that.state = 0;
-        }
-
-        return that;
-    },
-
-    map: function (argsList, callback, ctx) {
-        var self = this,
-
-            fn = function () {
-                var parameters = arguments;
-
-                self._count = argsList.length;
-                self.result = [];
-                self.errors = [];
-
-                argsList.forEach(function (args, j) {
-                    if (!(args instanceof Array)) args = [args];
-
-                    callback.apply(this, getCallbackParams(args, parameters, function (err, res) {
-                        self.next(j, err, res);
-                    }));
-                });
-
-                return self;
-            };
-
-        self.queue.append([fn, ctx || this]);
-
-        return self;
-    },
 
     each: function (argsList, callback, ctx) {
 
@@ -185,7 +148,7 @@ Async.prototype = {
         this.result[index] = data;
 
         if (this._count <= 0) {
-            this.resolve(this.errors.length ? this.errors : null, this.result);
+            done(this, this.errors.length ? this.errors : null, this.result);
         }
     },
 
@@ -197,62 +160,54 @@ Async.prototype = {
         }
     },
 
-    then: function (args, callback, ctx) {
-        var self = this,
-            fn;
-
-        if (!(args instanceof Array)) {
-            ctx = callback;
-            callback = args;
-            args = null;
-
-        } else {
-            fn = callback;
-            callback = function () {
-                fn.apply(this, getCallbackParams(args, arguments, self.resolveSelf));
-                return self;
-            };
-        }
+    then: function (callback, ctx) {
+        var self = this;
 
         self.queue.append([callback, ctx || this]);
 
-        if (!self.state) {
-            self.resolve();
+        if (self.state === STATUS.DONE) {
+            self.state = STATUS.PENDDING;
+
+            done(self);
         }
 
         return self;
     }
 };
 
-Async.prototype.await = Async.prototype.then;
+Async.prototype['await'] = Async.prototype.then;
 
-Async.resolve = function () {
-    return new Async().resolve();
+Async.done = function (data) {
+
+    return new Async(function (done) {
+
+        data instanceof Async ? data.await(done) : done(this, data);
+    });
 }
 
 module.exports = Async;
 
 /*
-var async=Async(function () {
+var promise=Async(function () {
 var that=this;
 
 setTimeout(function () {
 console.log('init');
 
-that.resolve(null,'tes1t');
+that.done(null,'tes1t');
 
 },2000);
 
 return that;
 });
 
-async.when(function () {
+promise.when(function () {
 var dfd=Async();
 
 setTimeout(function () {
 console.log('when');
 
-dfd.resolve(null,'test');
+dfd.done(null,'test');
 
 },2000);
 
@@ -262,21 +217,21 @@ return dfd;
 setTimeout(function () {
 console.log('then',err,result);
 
-async.resolve();
+promise.done();
 
 },1000);
 
-return async;
+return promise;
 })
 .then(function (err,result) {
 
 setTimeout(function () {
 console.log('end',err,result);
 
-async.resolve();
+promise.done();
 
 },500);
 
-return async;
+return promise;
 });
 */

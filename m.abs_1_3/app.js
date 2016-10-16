@@ -3,7 +3,7 @@
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
 
-var Async = require('../core/async');
+var Async = require('../webresource/js/core/async');
 var fs = require('fs');
 var fsc = require('../core/fs');
 var path = require('path');
@@ -54,29 +54,48 @@ function combineRouters(config) {
 }
 
 exports.loadConfig = function (callback) {
-    var async = new Async();
 
-    fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
-        var globalConfig = JSON.parse(globalStr);
-        var subPromise = new Async().resolve();
-        globalConfig.routes = {};
+    var async = new Async(function (done) {
+        var exec = require('child_process').exec;
 
-        subPromise.each(globalConfig.projects, function (i, project) {
+        exec('ifconfig', (err, stdout, stderr) => {
+            if (err) {
+                done(err);
+                return;
+            }
+            var matchIp = stdout.match(/\sen0\:[\s\S]+?\sinet\s(\d+\.\d+\.\d+\.\d+)/);
 
-            fs.readFile(path.join(project, 'config.json'), { encoding: 'utf-8' }, function (err, data) {
-                var config = JSON.parse(data);
-                config.root = project;
-
-                subPromise.next(i, err, config);
-            });
-
-        }).then(function (err, result) {
-            globalConfig.projects = result;
-
-            async.resolve(null, callback(err, globalConfig));
+            console.log(matchIp[1]);
+            done(null, matchIp);
         });
 
-    });
+    }).await(function (err, ip, done) {
+
+        fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
+            var globalConfig = JSON.parse(globalStr);
+
+            var subPromise = Async.done();
+            globalConfig.routes = {};
+
+            subPromise.each(globalConfig.projects, function (i, project) {
+
+                fs.readFile(path.join(project, 'config.json'), { encoding: 'utf-8' }, function (err, data) {
+                    var config = JSON.parse(data);
+                    config.root = project;
+
+                    subPromise.next(i, err, config);
+                });
+
+            }).then(function (err, result) {
+
+                globalConfig.projects = result;
+
+                async.doneSelf(null, callback(err, globalConfig));
+            });
+        });
+
+        return this;
+    })
 
     return async;
 }
@@ -86,7 +105,8 @@ exports.createIndex = function (config, callback) {
 
         var T = razor.nodeFn(html.replace(/^\uFEFF/i, ''));
 
-        var async = new Async().resolve();
+        var async = Async.done();
+
         var rimg = /url\(("|'|)([^\)]+)\1\)/g;
 
         async.each(config.css, function (i, cssPath) {
@@ -291,7 +311,7 @@ if (args.build) {
 
         //打包业务代码
         config.projects.forEach(function (project) {
-            var async = new Async().resolve();
+            var async = Async.done();
             var codes = '';
             var requires = [];
 
@@ -328,7 +348,7 @@ if (args.build) {
                             Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
                         });
 
-                    })(key, project.js[key], new Async().resolve());
+                    })(key, project.js[key], Async.done());
                 }
             }
 
@@ -362,7 +382,7 @@ if (args.build) {
                             Tools.save(path.join(destDir, project.root, key), results.join(''));
                         });
 
-                    })(key, project.css[key], new Async().resolve());
+                    })(key, project.css[key], Async.done());
                 }
             }
 
@@ -388,7 +408,7 @@ if (args.build) {
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
 
-                    async.then(function () {
+                    async.then(function (err, result, done) {
                         //打包模版
                         fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
                             if (!err && contains.indexOf(fileName) == -1) {
@@ -398,12 +418,12 @@ if (args.build) {
                                 codes += text;
                             }
 
-                            async.resolve();
+                            done();
                         });
 
-                        return async;
+                        return this;
 
-                    }).then(function () {
+                    }).then(function (err, result, done) {
                         //打包控制器
                         fsc.readFirstExistentFile([controllerPath + '.js', controllerPath + '.jsx'], function (err, text, fileName) {
                             if (!err && contains.indexOf(fileName) == -1) {
@@ -412,10 +432,10 @@ if (args.build) {
                                 codes += text;
                             }
 
-                            async.resolve();
+                            done();
                         });
 
-                        return async;
+                        return this;
                     });
 
                 })(project.route[key]);
@@ -429,7 +449,7 @@ if (args.build) {
 
 
         //复制图片资源
-        var imgPromise = new Async().resolve();
+        var imgPromise = Async.done();
         imgPromise.each(config.images, function (i, imgDir) {
             fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function (err, result) {
                 imgPromise.next(i, err, result);

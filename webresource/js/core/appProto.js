@@ -89,9 +89,11 @@
                             }
 
                             activity = new Activity(options);
+                            
                             that.set(path, activity);
 
                             activity.then(function () {
+                                
                                 callback.call(that, activity, route);
                             });
 

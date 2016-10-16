@@ -35,11 +35,11 @@ function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
         css: anim[type + 'EnterAnimationTo'],
         ease: ease
     }, {
-            el: currentActivity.$el,
-            start: exitFrom,
-            css: anim[type + 'ExitAnimationTo'],
-            ease: ease
-        }];
+        el: currentActivity.$el,
+        start: exitFrom,
+        css: anim[type + 'ExitAnimationTo'],
+        ease: ease
+    }];
 }
 
 function adjustActivity(currentActivity, activity) {
@@ -98,19 +98,20 @@ function bindBackGesture(application) {
         }
 
         if (action) {
-            that.swiperAsync = new Async();
+            that.swiperAsync = new Async(function (done) {
 
-            application.mask.show();
-            application.get(action, function (activity) {
-                that.needRemove = activity.el.parentNode === null;
-                adjustActivity(currentActivity, activity);
+                application.mask.show();
+                application.get(action, function (activity) {
+                    that.needRemove = activity.el.parentNode === null;
+                    adjustActivity(currentActivity, activity);
 
-                that.isSwipeOpen = isForward;
+                    that.isSwipeOpen = isForward;
 
-                that.swiper = new animation.Animation(getToggleAnimation(isForward, currentActivity, activity));
-                that.swipeActivity = activity;
+                    that.swiper = new animation.Animation(getToggleAnimation(isForward, currentActivity, activity));
+                    that.swipeActivity = activity;
 
-                that.swiperAsync.resolve();
+                    done();
+                });
             });
 
         } else {
@@ -123,7 +124,7 @@ function bindBackGesture(application) {
 
         if (!that.swiperAsync) return;
 
-        that.swiperAsync.then(function () {
+        that.swiperAsync.await(function () {
             that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
                 0 :
                 (Math.abs(deltaX) * 100 / that.width));
@@ -138,41 +139,46 @@ function bindBackGesture(application) {
             application._currentActivity.trigger('Pause');
 
         if (that.swiperAsync) {
-            that.swiperAsync.then(function () {
+            that.swiperAsync.await(function () {
 
                 that._isInAnim = true;
 
-                application.queue.then([200, that.isCancelSwipe ? 0 : 100, function () {
-                    var activity = that.swipeActivity,
-                        currentActivity = application._currentActivity;
+                application.queue.await(function (err, res, done) {
 
-                    that._isInAnim = false;
+                    that.swiper.animate(200, that.isCancelSwipe ? 0 : 100, function () {
+                        var activity = that.swipeActivity,
+                            currentActivity = application._currentActivity;
 
-                    if (that.isCancelSwipe) {
-                        currentActivity.isPrepareExitAnimation = false;
-                        currentActivity.$el.addClass('active');
-                        that.needRemove && activity.$el.remove();
-                        application.mask.hide();
+                        that._isInAnim = false;
 
-                    } else {
-                        activity.isForward = that.isSwipeOpen;
+                        if (that.isCancelSwipe) {
+                            currentActivity.isPrepareExitAnimation = false;
+                            currentActivity.$el.addClass('active');
+                            that.needRemove && activity.$el.remove();
+                            application.mask.hide();
 
-                        application._currentActivity = that.swipeActivity;
-                        application.navigate(activity.url, that.isSwipeOpen);
-
-                        currentActivity.trigger('Hide');
-                        activity._enterAnimationEnd();
-
-                        if (that.isSwipeOpen) {
-                            activity.referrer = currentActivity.url;
-                            activity.referrerDir = that.isSwipeLeft ? "Right" : "Left";
                         } else {
-                            currentActivity.destroy();
-                        }
-                    }
-                    application.queue.resolve();
+                            activity.isForward = that.isSwipeOpen;
 
-                }], that.swiper.animate, that.swiper);
+                            application._currentActivity = that.swipeActivity;
+                            application.navigate(activity.url, that.isSwipeOpen);
+
+                            currentActivity.trigger('Hide');
+                            activity._enterAnimationEnd();
+
+                            if (that.isSwipeOpen) {
+                                activity.referrer = currentActivity.url;
+                                activity.referrerDir = that.isSwipeLeft ? "Right" : "Left";
+                            } else {
+                                currentActivity.destroy();
+                            }
+                        }
+
+                        done();
+                    });
+
+                    return this;
+                });
 
                 that.swiperAsync = null;
                 that.swiper = null;
@@ -224,8 +230,6 @@ var Application = Component.extend(Object.assign(appProto, {
         var that = this;
         //var preventEvents = 'tap click touchmove touchstart';
 
-        window.Application = this;
-
         that.el = that.$el[0];
         that.mask = that.$el.children('.screen'); //.off(preventEvents).on(preventEvents, false);
 
@@ -264,6 +268,8 @@ var Application = Component.extend(Object.assign(appProto, {
         var $win = $(window);
         var $el = that.$el;
 
+        window.Application = this;
+
         that.queue = new Async();
 
         that.$el = $(that.el);
@@ -274,21 +280,25 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.hash = Route.formatUrl(location.hash);
 
-        that.historyAsync = new Async().resolve();
+        that.historyAsync = Async.done();
+
+        console.log(delay);
+
+        if (delay) {
+            setTimeout(function () {
+                $el.appendTo(document.body);
+
+                delay.doneSelf();
+
+            }, delay);
+
+            delay = new Async();
+
+        } else {
+            $el.appendTo(document.body);
+        }
 
         that.get(that.hash, function (activity) {
-
-            if (delay) {
-                setTimeout(function () {
-                    $el.appendTo(document.body);
-                    delay.resolve();
-                }, delay);
-
-                delay = new Async();
-
-            } else {
-                $el.appendTo(document.body);
-            }
 
             that.history.push(that.hash);
 
@@ -296,13 +306,20 @@ var Application = Component.extend(Object.assign(appProto, {
             that._currentActivity = activity;
 
             activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
-            activity.then(delay).then(function () {
-                activity.$el.addClass('active');
-                activity.trigger('Appear').trigger('Show');
 
-                that.trigger('Start');
-                that.queue.resolve();
-            });
+            console.log("on get activity", activity._async)
+
+            activity.then(delay)
+                .then(function (err, res, done) {
+                    activity.$el.addClass('active');
+                    activity.trigger('Appear').trigger('Show');
+
+                    that.trigger('Start');
+
+                    done();
+
+                    that.queue.doneSelf();
+                });
 
             $win.on('hashchange', function () {
                 var hash = that.hash = Route.formatUrl(location.hash);
@@ -310,7 +327,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 if (that.hashChanged) {
                     that.hashChanged = false;
-                    that.historyAsync.resolve();
+                    that.historyAsync.doneSelf();
 
                 } else {
                     that.historyAsync.then(function () {
@@ -331,7 +348,7 @@ var Application = Component.extend(Object.assign(appProto, {
         });
     },
 
-    _toggle: function (route, options, callback) {
+    _toggle: function (route, options, toggleFinish, queueDone) {
 
         var that = this,
             currentActivity = that._currentActivity,
@@ -343,7 +360,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
         if (currentActivity.path == route.path) {
             that.checkQueryString(currentActivity, route);
-            that.queue.resolve();
+            queueDone();
             return;
         }
 
@@ -378,8 +395,8 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 currentActivity.trigger('Hide');
                 activity._enterAnimationEnd();
-                callback && callback.call(that, activity);
-                that.queue.resolve();
+                toggleFinish && toggleFinish.call(that, activity);
+                queueDone();
             };
 
             for (var i = 0, n = anims.length; i < n; i++) {
@@ -451,7 +468,9 @@ var Application = Component.extend(Object.assign(appProto, {
         if (route) {
             var queue = this.queue;
 
-            queue.then(function () {
+            console.log(queue);
+
+            queue.await(function (err, res, queueDone) {
                 var options = {};
 
                 if (typeof duration == "string") data = toggleAnim, toggleAnim = duration, duration = 400;
@@ -470,9 +489,9 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 self._toggle(route, options, isForward ? null : function () {
                     currentActivity.destroy();
-                });
+                }, queueDone);
 
-                return queue;
+                return this;
             });
 
         } else {

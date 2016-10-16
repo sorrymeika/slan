@@ -37,7 +37,7 @@
 
             that.$mask = $(that.$el[0]).on('click', false);
             that.el = that.$el[1];
-            that.async = Async.resolve();
+            that.async = Async.done();
         },
 
         start: function () {
@@ -56,7 +56,7 @@
             if (!location.hash) location.hash = '/';
             that.hash = Route.formatUrl(location.hash);
 
-            that.async.then(function () {
+            that.async.then(function (err, res, done) {
                 that.get(that.hash, function (activity) {
                     activity.$el.show().appendTo(that.el);
                     that._currentActivity = activity;
@@ -65,7 +65,7 @@
                         activity.trigger('Resume').trigger('Show');
 
                         that.trigger('start');
-                        that.async.resolve();
+                        done();
                     });
                 });
 
@@ -82,8 +82,9 @@
                         that.skip = 0;
                 });
 
-                return that.async;
+                return this;
             });
+
             return that;
         },
 
@@ -99,7 +100,7 @@
             var that = this,
                 async = that.async;
 
-            async.then(function () {
+            async.await(function (err, res, done) {
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
@@ -109,7 +110,7 @@
 
                 if (currentActivity.path == route.path) {
                     checkQueryString(currentActivity, route);
-                    async.resolve();
+                    done();
                     return;
                 }
                 that.get(route, function (activity) {
@@ -126,7 +127,7 @@
                             activity.trigger('Resume').trigger('Show');
                         });
                     }
-                    async.resolve();
+                    done();
                 });
 
                 return async;

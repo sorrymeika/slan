@@ -177,6 +177,8 @@ module.exports = Activity.extend({
         self.user = userModel.get();
         self.$tabs = self.$('.hm_tab_con');
 
+        console.log("home onCreate");
+
         sl.activity = self;
 
         this.startMakeLog();
@@ -484,7 +486,7 @@ module.exports = Activity.extend({
 
             self.getCartQty();
 
-            self.cart.cartApi.load();
+            self.cart && self.cart.cartApi.load();
         });
 
         setInterval(function () {
