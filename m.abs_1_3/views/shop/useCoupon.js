@@ -37,16 +37,14 @@ module.exports = Activity.extend({
             return false;
         }
 
-        user.recieveCoupon(code, function (err, res) {
+        user.recieveCoupon(code, function (res) {
 
-            if (res.success) {
-                self.showToast('suc', '领取成功');
-                self.loadData();
+            self.showToast('suc', '领取成功');
+            self.loadData();
 
-            } else {
-                self.showToast('error', err.msg);
-            }
-        }, this.$el);
+        }, this.$el).catch(function (err) {
+            self.showToast('error', err.msg);
+        });
     },
 
     showToast: function (type, msg) {

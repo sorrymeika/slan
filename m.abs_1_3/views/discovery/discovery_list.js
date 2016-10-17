@@ -24,7 +24,7 @@ module.exports = Activity.extend({
 
         self.model = new model.ViewModel(this.$el, {
             back: self.swipeRightBackAction,
-            title: self.route.query.name || '态度'
+            title: self.route.query.name || '会生活'
         });
 
         self.model.sortBy = function (e, sort) {

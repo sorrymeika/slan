@@ -31,7 +31,7 @@
         <div class="head_search head_search_holder" sn-click="this.showSearch()" sn-display="{tab==0&&bottomTab==0}">
             <em class="icon-search icon_cm"></em>
         </div>
-        <div class="head_title" sn-display="{bottomTab==3}" style="display:none">购物车</div>
+        <div class="head_title" sn-display="{bottomTab==3}" style="display:none">我的购物车</div>
         <div class="head_right">
             <button sn-if="bottomTab==3" class="btn_s" sn-tap="cart.isEdit=!cart.isEdit">{cart.isEdit?'完成':'编辑'}</button>
             <em class="icon-message head_msg" data-forward="{isLogin?'/messages':'/login'}">
@@ -123,14 +123,14 @@
                 <div class="hm_msg_list" data-forward="/messages">通知<i sn-display="{msg_count!=0}">{msg_count}</i></div>
                 <div class="hm_msg_service" data-forward="/news/100">联系客服</div>
                 <div class="hm_msg_discovery">
-                    <div class="hd">更多态度</div>
+                    <div class="hd">更多会生活</div>
                     <ul class="disc_list">
                         <li sn-repeat="item in rec" data-forward="/discovery/{item.DCV_ID}">
                             <img sn-src="{item.DCV_REC_PIC}" />
                             <em class="see">点击查看</em>
                         </li>
                     </ul>
-                    <div class="ft" data-forward="/discovery/list/0">查看更多态度>></div>
+                    <div class="ft" data-forward="/discovery/list/0">查看更多会生活>></div>
                 </div>
             </div>
         </div>

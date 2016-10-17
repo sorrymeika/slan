@@ -14,42 +14,36 @@ var user = require('logical/user');
 
 module.exports = Activity.extend({
 
-    shareCoupon: function(item, e) {
+    shareCoupon: function (item, e) {
         var self = this;
         if (this.isLoading) return;
         this.isLoading = true;
 
-        user.getCouponStatus(item.CSV_ID, function(err, res) {
+        user.getCouponStatus(item.CSV_ID, function (res) {
             self.isLoading = false;
 
-            if (!err) {
-                if (res.overdue) {
-                    return;
-                }
-                self.share.set({
-                    linkURL: res.url,
-                    title: '两情相悦就送券！',
-                    description: item.VCA_NAME
-
-                }).show();
-
-            } else {
-                Toast.showToast(err.msg);
+            if (res.overdue) {
+                return;
             }
+            self.share.set({
+                linkURL: res.url,
+                title: '两情相悦就送券！',
+                description: item.VCA_NAME
+
+            }).show();
+
+        }).catch(function (err) {
+
+            Toast.showToast(err.msg);
         });
 
         return false;
     },
 
-    loadData: function() {
+    loadData: function () {
         var self = this;
 
-        user.getCoupon(this.route.params.id, function(err, res) {
-
-            if (err) {
-                Toast.showToast(err.msg);
-                return;
-            }
+        user.getCoupon(this.route.params.id, function (res) {
 
             self.model.set({
                 data: res.data
@@ -58,7 +52,7 @@ module.exports = Activity.extend({
         }, this.$el);
     },
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         self.user = userModel.get();
@@ -72,14 +66,14 @@ module.exports = Activity.extend({
 
         this.bindScrollTo(model.refs.main);
 
-        model.goTo = function(item) {
+        model.goTo = function (item) {
             if (item.LVP_PRD_ID) {
                 self.forward("/item/" + item.LVP_PRD_ID + "?from=" + encodeURIComponent(self.route.url));
                 return false;
             }
         }
 
-        model.use = function(prods) {
+        model.use = function (prods) {
             if (prods && prods[0].LVP_PRD_ID) {
                 self.forward("/item/" + prods[0].LVP_PRD_ID + "?from=" + encodeURIComponent(self.route.url));
             } else {
@@ -93,7 +87,7 @@ module.exports = Activity.extend({
         self.share = new Share({
             head: '分享这张优惠券'
         });
-        self.share.callback = function(res) {
+        self.share.callback = function (res) {
             if (!res.success) {
                 sl.tip(res.msg);
             } else {
@@ -107,12 +101,12 @@ module.exports = Activity.extend({
         self.loadData();
     },
 
-    onShow: function() {
+    onShow: function () {
         if (!userModel.get()) {
             this.forward('/login?success=' + this.route.url + "&from=/");
         }
     },
 
-    onDestory: function() {
+    onDestory: function () {
     }
 });

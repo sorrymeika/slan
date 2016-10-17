@@ -117,12 +117,7 @@ module.exports = Activity.extend({
 
         bridge.statusBar('dark');
 
-        user.getMonth(function (err, res) {
-
-            if (err) {
-                Toast.showToast(err.msg);
-                return;
-            }
+        user.getMonth(function (res) {
 
             model.set({
                 data: res.data,
@@ -153,7 +148,9 @@ module.exports = Activity.extend({
                 }, self.$el);
             }
 
-        }, this.$el);
+        }, this.$el).catch(function (err) {
+            Toast.showToast(err.msg);
+        });
     },
 
     onPause: function () {

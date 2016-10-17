@@ -56,12 +56,36 @@ function combineRouters(config) {
 exports.loadConfig = function (callback) {
 
     return new Promise(function (resolve) {
+        var exec = require('child_process').exec;
 
-        fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
-            var globalConfig = JSON.parse(globalStr);
-            globalConfig.routes = {};
+        exec('ifconfig', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            var matchIp = stdout.match(/\sen0\:[\s\S]+?\sinet\s(\d+\.\d+\.\d+\.\d+)/);
 
-            resolve(globalConfig);
+            resolve(matchIp[1]);
+        });
+
+    }).then(function (ip) {
+        console.log(ip);
+
+        var map = {
+            ip: ip
+        }
+
+        return new Promise(function (resolve) {
+
+            fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
+                var globalConfig = JSON.parse(globalStr.replace(/\$\{(\w+)\}/, function (match, key) {
+
+                    return key in map ? map[key] : match;
+                }));
+                globalConfig.routes = {};
+
+                resolve(globalConfig);
+            })
         })
 
     }).then(function (globalConfig) {
@@ -305,6 +329,7 @@ if (args.build) {
         config.projects.forEach(function (project) {
             var codes = '';
             var requires = [];
+            var excludes = [];
 
             for (var key in project.js) {
 
@@ -324,7 +349,7 @@ if (args.build) {
                         Promise.all(fileList.map(function (file, i) {
                             var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
 
-                            console.log(file);
+                            excludes.push(path.relative(baseDir, combinePath(project.root, "./" + file)));
 
                             return new Promise(function (resolve) {
                                 fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
@@ -412,6 +437,9 @@ if (args.build) {
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
 
+                    excludes = excludes.concat(Object.keys(config.framework))
+                        .concat(['animation', '$', 'zepto', 'activity']);
+
                     promise = promise.then(function () {
 
                         return new Promise(function (resolve) {
@@ -436,7 +464,7 @@ if (args.build) {
                             fsc.readFirstExistentFile([controllerPath + '.js', controllerPath + '.jsx'], function (err, text, fileName) {
                                 if (!err && contains.indexOf(fileName) == -1) {
                                     text = formatJs(text);
-                                    text = Tools.compressJs(Tools.replaceDefine(controller, text, requires, Object.keys(config.framework).concat(['animation', 'zepto', 'activity'])));
+                                    text = Tools.compressJs(Tools.replaceDefine(controller, text, requires, excludes));
                                     codes += text;
                                 }
 

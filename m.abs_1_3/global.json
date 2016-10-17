@@ -50,7 +50,7 @@
             "useLocal": true
         },
         "dev": {
-            "api": "http://127.0.0.1:5559/proxy1",
+            "api": "http://127.0.0.1:5559/proxy3",
             "shopApi": "http://127.0.0.1:5559/proxy",
             "updateApi": "http://127.0.0.1:5559/proxy2"
         }
@@ -87,6 +87,7 @@
         "widget/scrollview": "../webresource/m/js/widget/scrollview",
         "widget/scroll": "../webresource/m/js/widget/scroll",
         "widget/tip": "../webresource/js/widget/tip",
+        "widget/popup": "../webresource/js/widget/popup",
         "widget/loader": "../webresource/m/js/widget/loader",
         "widget/offline": "../webresource/m/js/widget/offline",
         "widget/slider": "../webresource/m/js/widget/slider",

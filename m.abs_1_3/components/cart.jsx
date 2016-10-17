@@ -27,7 +27,7 @@ var Cart = Model.extend({
 			checkData: false,
 
 			params: {
-                pspcode: self.user.PSP_CODE
+				pspcode: self.user.PSP_CODE
 			},
 
 			success: function (res) {
@@ -55,6 +55,10 @@ var Cart = Model.extend({
 
 				res.total = count;
 				res.loading = false;
+
+				Global.set({
+					cartQty: count
+				});
 
 				self.set(res);
 
@@ -201,7 +205,8 @@ var Cart = Model.extend({
 		var self = this;
 
 		popup.confirm({
-			title: '温馨提示', content: '确认要移除该商品吗?',
+			title: '温馨提示',
+			content: '确认要移除该商品吗?',
 			cancelAction: function () {
 			},
 			cancelText: '不删除',
@@ -376,9 +381,9 @@ var Cart = Model.extend({
 					<div class="sp_cart__listitem_con js_delete_item" data-forward="{item.SPB_WAC_ID==10?'/group/'+item.SPB_GROUP:('/item/'+item.PRD_ID)}">
 						<img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" />
 						<div class="con">
-							<b class="name">{ item.PRD_NAME }</b>
-							<p class="size">尺寸：{ item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
-							<p class="price">￥{ Math.round(item.SPB_AMOUNT * 100) / 100 }</p>
+							<b class="name">{item.PRD_NAME}</b>
+							<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]}颜色：{item.PRD_COLOR}</p>
+							<p class="price">￥{Math.round(item.SPB_AMOUNT * 100) / 100}</p>
 						</div>
 						<div class="ft">
 							<p class="qty">x{item.SPB_QTY}</p>
@@ -388,14 +393,14 @@ var Cart = Model.extend({
 				</li>
 				<li sn-repeat="item in data_baglist|filter:isEdit" class="sp_cart__listitem_mod sp_cart__listitem_con" data-id="{item.SPB_ID}">
 					<div class="{item.checked?'radio checked':'radio'}" sn-tap="item.checked=!item.checked"></div>
-					<img sn-src="{item.ProductOBJ.WPP_LIST_PIC}"  sn-tap="item.checked=!item.checked"/>
+					<img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" sn-tap="item.checked=!item.checked" />
 					<div class="con">
 						<p class="qty">
 							<span class="minus" sn-tap="this.changeQty(item,Math.max(!item.SPB_QTY?1:(parseInt(item.SPB_QTY)-1),1))">-</span>
-							<input type="text" value="{item.SPB_QTY||1}"  />
+							<input type="text" value="{item.SPB_QTY||1}" />
 							<span class="plus" sn-tap="this.changeQty(item,(parseInt(item.SPB_QTY)||1)+1)">+</span>
 						</p>
-						<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
+						<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]}颜色：{item.PRD_COLOR}</p>
 					</div>
 					<div class="ft">
 						<p class="js_delete sp_cart__delete" data-id="{item.SPB_ID}" sn-tap="this.del()"></p>
@@ -407,16 +412,16 @@ var Cart = Model.extend({
 				<dl class="js_delete_item">
 					<dt class="sp_cart__pkgitem_hd bottom_border">
 						<div sn-if="{isEdit}" class="{ppg.checked?'radio checked':'radio'}" sn-tap="ppg.checked=!ppg.checked"></div>
-						{ ppg.PPG_NAME }
-						<b class="price">￥{ Math.round(ppg.PPG_PRICE * 100) / 100 }</b>
+						{ppg.PPG_NAME}
+						<b class="price">￥{Math.round(ppg.PPG_PRICE * 100) / 100}</b>
 					</dt>
 					<dd sn-repeat="item in ppg.PackageList" class="sp_cart__listitem bottom_border">
 						<div class="sp_cart__listitem_con" data-forward="/item/{item.PRD_ID}">
 							<img sn-src="{item.PRD_PIC}" />
 							<div class="con">
-								<b class="name">{ item.PRD_NAME }</b>
-								<p class="size">尺寸：{ item.PRD_SPEC.split('|')[0]} 颜色：{ item.PRD_COLOR }</p>
-								<p class="price">￥{ Math.round(item.PRD_MEMBER_PRICE * (item.SPB_QTY || 1) * 100) / 100 }</p>
+								<b class="name">{item.PRD_NAME}</b>
+								<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]}颜色：{item.PRD_COLOR}</p>
+								<p class="price">￥{Math.round(item.PRD_MEMBER_PRICE * (item.SPB_QTY || 1) * 100) / 100}</p>
 							</div>
 							<div class="ft">
 								<p class="qty">x{item.SPB_QTY}</p>

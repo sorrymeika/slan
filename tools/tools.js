@@ -143,15 +143,21 @@ var replaceDefine = function (id, code, requires, exclude) {
         if (exclude && exclude.length) {
 
             for (var i = param.length - 1; i >= 0; i--) {
+                var pathA = param[i];
+                pathA = /^(\.)/.test(pathA) ? path.resolve(path.dirname(id + ".js"), pathA) : path.resolve(pathA);
+
                 for (var j = 0; j < exclude.length; j++) {
-                    if (param[i] == exclude[j]) {
+
+                    var pathB = exclude[j];
+                    pathB = /^(\.)/.test(pathB) ? path.resolve(path.dirname(id + ".js"), pathB) : path.resolve(pathB);
+
+                    if (pathA == pathB) {
                         param.splice(i, 1);
                         break;
                     }
                 }
             }
         }
-
 
         return pre + 'define(' + '"' + id + '",' + (JSON.stringify(param) + ',');
     });
