@@ -1809,7 +1809,7 @@ var qrcode = function () {
 
     //---------------------------------------------------------------------
     // returns qrcode function.
-
+    //@options={ typeNumber: 4, errorCorrectLevel: "M", width: 4, margin: 4 }
     qrcode.create_qrcode = function (text, options) {
         if (!options) options = {};
 

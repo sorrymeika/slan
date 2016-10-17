@@ -1,6 +1,8 @@
 {
     "root": "/",
-    "js": {},
+    "js": {
+        
+    },
     "css": {
         "css/app.css": [
             "css/app.css",
@@ -37,6 +39,18 @@
         "/login": "login",
         "/licence": "licence",
         "/publicquan/{id:\\d+}": "publicquan/item",
-        "/quan/history": "quan/history"
+        "/quan/history": "quan/history",
+        "/user/person": "user/person",
+        "/user/qrcode": "user/qrcode",
+        "/user/fav": "user/fav",
+        "/user/like": "user/like",
+        "/user/messages": "user/messages",
+        "/user/settings": "user/settings",
+        "/user/set/{type:\\w+}": "user/set",
+        "/user/remind": "user/remind",
+        "/user/remind/{type:\\w+}": "user/remind_one",
+        "/user/privacy": "user/privacy",
+        "/user/qa": "user/qa",
+        "/user/about": "user/about"
     }
 }

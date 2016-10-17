@@ -1,0 +1,20 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div ref="main" class="main">
+    <ul class="bd_t uc_fav mt_l">
+        <li class="bd_b flexstart bg_fff uc_fav__item" sn-repeat="item in data">
+            <p class="img avatars"><img sn-src="{item.type==0?item.avatars:item.quan_pic}" class="dp_b" /></p>
+            <div class="con flexitem mt_m fs_m">
+                <p class="name">{item.type==0?item.user_name:item.quan_name}</p>
+                <p class="summary">{item.type==0?item.content:item.summary}</p>
+                <ul class="clearfix" sn-if="item.imgs.length">
+                    <li class="fl_l mr_m mt_m" sn-repeat="img in item.imgs"><img sn-src="{img}" class="gl_img" /></li>
+                </ul>
+            </div>
+            <p class="date">今天</p>
+            <p class="icon-del"></p>
+        </li>
+    </ul>
+</div>

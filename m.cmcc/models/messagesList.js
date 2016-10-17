@@ -3,7 +3,7 @@ var model2 = require('core/model2');
 
 
 var messagesList = model2.createModel({
-    defaultData: sl.isDebug ? {
+    defaultData: sl.isDev ? {
         list: [{
             user_id: 1,
             user_name: '小黑',

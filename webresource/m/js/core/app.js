@@ -282,8 +282,6 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.historyAsync = Async.done();
 
-        console.log(delay);
-
         if (delay) {
             setTimeout(function () {
                 $el.appendTo(document.body);
@@ -306,8 +304,6 @@ var Application = Component.extend(Object.assign(appProto, {
             that._currentActivity = activity;
 
             activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
-
-            console.log("on get activity", activity._async)
 
             activity.then(delay)
                 .then(function (err, res, done) {

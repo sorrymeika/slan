@@ -1,5 +1,6 @@
 {
     "debug": true,
+    "useLocal": true,
     "dest": "./dest",
     "api": "http://127.0.0.1:6006",
     "proxy": {
@@ -39,13 +40,22 @@
     },
     "js": {
         "components": {
-            "components/share": null,
-            "models/api": null
+            "components/menu": "./components/menu"
+        },
+        "logical": {
+            "logical/user": "./logical/user",
+            "logical/chat": "./logical/chat",
+            "logical/publicquan": "./logical/publicquan",
+            "logical/quan": "./logical/quan"
+        },
+        "models": {
+            "models/user": "./models/user",
+            "models/messagesList": "./models/messagesList"
         }
     },
     "framework": {
         "seajs": "../webresource/js/seajs/sea",
-        "zepto": "../webresource/js/zepto",
+        "$": "../webresource/js/zepto",
         "promise": "../webresource/js/promise",
         "extend/touch": "../webresource/m/js/extend/touch",
         "extend/fx": "../webresource/js/extend/fx",
@@ -53,6 +63,7 @@
         "extend/ortchange": "../webresource/m/js/extend/ortchange",
         "util": "../webresource/js/util",
         "util/md5": "../webresource/js/util/md5",
+        "util/qrcode": "../webresource/js/util/qrcode",
         "bridge": "../webresource/m/js/bridge",
         "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
         "graphics/matrix2d": "../webresource/js/graphics/matrix2d",
@@ -62,13 +73,13 @@
         "core/linklist": "../webresource/js/core/linklist",
         "core/event": "../webresource/js/core/event",
         "core/component": "../webresource/js/core/component",
-        "core/model": "../webresource/js/core/model",
+        "core/model2": "../webresource/js/core/model2",
         "core/page": "../webresource/js/core/page",
         "core/route": "../webresource/js/core/route",
         "core/animation": "../webresource/js/core/animation",
         "core/appProto": "../webresource/js/core/appProto",
         "core/app": "../webresource/m/js/core/app",
-        "core/http": "../webresource/m/js/core/http",
+        "core/http": "../webresource/js/core/http",
         "core/activity": "../webresource/m/js/core/activity",
         "core/touch": "../webresource/m/js/core/touch",
         "widget/scrollview": "../webresource/m/js/widget/scrollview",
@@ -77,6 +88,9 @@
         "widget/loader": "../webresource/m/js/widget/loader",
         "widget/offline": "../webresource/m/js/widget/offline",
         "widget/tab": "../webresource/m/js/widget/tab",
+        "widget/toast": "../webresource/js/widget/toast",
+        "widget/popup": "../webresource/js/widget/popup",
+        "widget/slider": "../webresource/m/js/widget/slider",
         "anim/default": "../webresource/m/js/anim/default"
     }
 }

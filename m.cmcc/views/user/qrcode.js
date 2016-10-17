@@ -8,18 +8,23 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 var user = require('models/user');
 
+var qrcode = require('util/qrcode');
+
 module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '个人资料',
-            user: user
+            title: '我的二维码',
+            qrcode: qrcode.create_qrcode("cmccfj://user/" + user.get('user_id'), {
+                width: 4,
+                margin: 1
+            })
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeRightBackAction)
         }
 
         Promise.all([this.waitLoad()]).then(function (results) {

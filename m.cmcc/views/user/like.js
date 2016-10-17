@@ -6,7 +6,6 @@ var Model = require('core/model2').Model;
 var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
-var user = require('models/user');
 
 module.exports = Activity.extend({
 
@@ -14,12 +13,11 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '个人资料',
-            user: user
+            title: '我的喜好'
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeRightBackAction)
         }
 
         Promise.all([this.waitLoad()]).then(function (results) {

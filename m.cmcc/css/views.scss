@@ -78,3 +78,32 @@
 .qn_history__item .ref { background-color: #efefef; padding-left: 5px; padding-top: 5px; padding-bottom: 5px; margin-right: 5px; }
 .qn_history__item .ref+.icon-del { right: 11px; bottom: -4px; }
 .qn_history__item .icon-del { position: absolute; width: 40px; bottom: 0px; right: 6px; text-align: right; height: 40px; padding-top: 10px; }
+
+
+//个人信息 - 设置信息
+.uc_set__sign { margin: 10px; }
+.uc_set__sign textarea { border-radius: 4px; padding: 8px; font-size: 14px; border: 0; }
+
+.uc_qrcode { margin-top: 40px; }
+
+.uc_fav__item { padding-bottom: 10px; position: relative; }
+.uc_fav__item .img { width: 42px; height: 42px; overflow: hidden; margin: 10px; }
+.uc_fav__item .name { font-weight: bold; font-size: 16px; }
+.uc_fav__item .summary { color: #999; margin-top: 2px; }
+.uc_fav__item .date { margin-top: 10px; margin-right: 5px; font-weight: normal; font-size: 14px; }
+.uc_fav__item .icon-del { position: absolute; bottom: 0px; right: 5px; width: 44px; height: 44px; text-align: right; padding-top: 5px; }
+
+//个人信息 - 我的消息
+.uc_messages__head { margin: 15px 15px 0 15px; border: 1px solid $color; height: 35px; line-height: 35px; text-align: center; }
+.uc_messages__head .curr { background: $color; color: #fff; height: 100%; }
+.uc_messages__item { position: relative; height: 48px; padding-top: .1px; padding-left: 10px; }
+.uc_messages__item .date { position: absolute; background: #fff; right: 10px; top: 5px; }
+.uc_messages__bd { top: 50px; }
+
+.uc_remind { line-height: 1; }
+
+
+.uc_qa__search { background-color: $bgcolor; height: 33px; position: relative; border-radius: 33px; }
+.uc_qa__search:before { @include border(#ccc,33px); }
+.uc_qa__search .icon-search{ text-align: center; }
+.uc_qa__search .icon-search:before { vertical-align: -8px; margin-left: 6px; }

@@ -57,9 +57,9 @@
     }
 
     window.sl = window.slan = {
-        isDebug: /(^|\?|&)debug=1(?=&|$)/.test(location.search)
+        isDev: /(^|\?|&)debug=1(?=&|$)/.test(location.search)
     };
-    console.log(sl.isDebug);
+    console.log(sl.isDev);
 
     module.exports = sl;
 });

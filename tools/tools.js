@@ -139,14 +139,19 @@ var replaceDefine = function (id, code, requires, exclude) {
 
         if (exclude !== true) {
             param = concat(param, parseDependencies(code));
+        }
+        if (exclude && exclude.length) {
 
-        } else if (exclude && exclude.length) {
             for (var i = param.length - 1; i >= 0; i--) {
-                if (exclude.indexOf(param[i]) != -1) {
-                    param.splice(i, 1);
+                for (var j = 0; j < exclude.length; j++) {
+                    if (param[i] == exclude[j]) {
+                        param.splice(i, 1);
+                        break;
+                    }
                 }
             }
         }
+
 
         return pre + 'define(' + '"' + id + '",' + (JSON.stringify(param) + ',');
     });
@@ -164,35 +169,48 @@ var compressHTML = function (html) {
 var path = require('path');
 var fs = require('fs');
 var fse = require('fs-extra');
-var Async = require('./../core/async');
 
 var _save = function (savePath, data, isCopy, callback) {
 
-    var async = new Async();
     var dir = path.dirname(savePath);
 
-    fs.exists(dir, function (exists) {
-        if (!exists) {
-            fse.mkdirs(dir, function (err, r) {
-                async.resolve(null, data);
-            });
-        } else {
-            async.resolve(null, data);
-        }
-    });
+    var promise = new Promise(function (resolve) {
 
-    if (isCopy) {
-        async.then([data], fs.readFile, fs);
-    }
-
-    async.then([savePath, '$1'], fs.writeFile)
-        .then(function () {
-            console.log('save', savePath)
+        fs.exists(dir, function (exists) {
+            if (!exists) {
+                fse.mkdirs(dir, function (err, r) {
+                    resolve(data);
+                });
+            } else {
+                resolve(data);
+            }
         });
+    }).then(function () {
 
-    if (callback) async.then(callback);
+        if (isCopy) {
 
-    return async;
+            return new Promise(function (resolve) {
+
+                fs.readFile(data, function (err, res) {
+                    resolve(res);
+                });
+            })
+        }
+        return data;
+
+    }).then(function (buffer) {
+
+        return new Promise(function (resolve) {
+
+            fs.writeFile(savePath, buffer, resolve);
+
+        })
+    }).then(function () {
+        console.log('save', savePath)
+
+    }).then(callback);
+
+    return promise;
 };
 
 var save = function (savePath, data, callback) {
@@ -207,7 +225,7 @@ var Tools = function (baseDir, destDir) {
     this.baseDir = baseDir;
     this.destDir = destDir;
 
-    this.async = new Async().resolve();
+    this.async = Promise.resolve();
 }
 
 Tools.prototype = {
@@ -250,32 +268,51 @@ Tools.prototype = {
             if (fileList.length) {
 
                 (function (fileList, ids, isCss, destPath) {
-                    var async = new Async().resolve();
 
-                    async.map(fileList, fs.readFile, fs)
-                        .then(function (err, result) {
-                            if (err) {
-                                console.log(err)
-                                return;
-                            }
+                    var promise = Promise.all(fileList.map(function (fileName) {
 
-                            var text = '';
+                        return new Promise(function (resolve) {
 
-                            result.forEach(function (data, i) {
-                                data = data.toString('utf-8');
+                            fs.readFile(fileName, 'utf8', function (err, res) {
 
-                                if (/\.(tpl|html|cshtml)$/.test(fileList[i]))
-                                    data = razor.web(data);
+                                if (err) {
+                                    if (/\.js$/.test(fileName)) {
 
-                                text += isCss ?
-                                    compressCss(data) :
-                                    compressJs(replaceDefine(ids[i], formatJs(data)));
+                                        fs.readFile(fileName + "x", 'utf8', function (err, res) {
+
+                                            if (err) {
+                                                console.error(fileName, err);
+                                            }
+
+                                            resolve(res);
+                                        });
+                                        return;
+
+                                    } else
+                                        console.error(fileName, err);
+                                }
+
+                                resolve(res);
                             });
-
-                            return self.save(destPath, text);
                         });
 
-                    self.async.then(async);
+                    })).then(function (result) {
+
+                        var text = '';
+
+                        result.forEach(function (data, i) {
+                            if (/\.(tpl|html|cshtml)$/.test(fileList[i]))
+                                data = razor.web(data);
+
+                            text += isCss ?
+                                compressCss(data) :
+                                compressJs(replaceDefine(ids[i], formatJs(data)));
+                        });
+
+                        return self.save(destPath, text);
+                    });
+
+                    self.async = self.async.then(promise);
 
                 })(fileList, ids, isCss, path.join(self.destDir, isCss || /\.js$/.test(destPath) ? destPath : (destPath + '.js')));
 
@@ -295,52 +332,57 @@ Tools.prototype = {
             now = new Date().getTime();
 
         fileList.forEach(function (fileName) {
-            var async = new Async();
+            var promise = new Promise(function (resolve) {
 
-            fs.readFile(path.join(self.baseDir, fileName), { encoding: 'utf-8' }, function (err, html) {
+                fs.readFile(path.join(self.baseDir, fileName), { encoding: 'utf-8' }, function (err, html) {
 
-                html = html.replace(/<script[^>]+debug[^>]*>[\S\s]*?<\/script>/img, '')
-                    .replace(/<link[^>]+debug[^>]*\/*\s*>/img, '')
-                    .replace(/<head>/i, '<head>' + api);
+                    html = html.replace(/<script[^>]+debug[^>]*>[\S\s]*?<\/script>/img, '')
+                        .replace(/<link[^>]+debug[^>]*\/*\s*>/img, '')
+                        .replace(/<head>/i, '<head>' + api);
 
-                if (combinedPathDict) {
-                    var combinedFiles = '';
-                    for (var destCombinePath in combinedPathDict) {
-                        var isCss = /\.css$/.test(destCombinePath);
+                    if (combinedPathDict) {
+                        var combinedFiles = '';
+                        for (var destCombinePath in combinedPathDict) {
+                            var isCss = /\.css$/.test(destCombinePath);
 
-                        combinedFiles += isCss ? '<link href="' + destCombinePath + '?v=' + now + '" rel="stylesheet" type="text/css" />'
-                            : ('<script src="' + destCombinePath + '.js?v=' + now + '"></script>');
+                            combinedFiles += isCss ? '<link href="' + destCombinePath + '?v=' + now + '" rel="stylesheet" type="text/css" />'
+                                : ('<script src="' + destCombinePath + '.js?v=' + now + '"></script>');
+                        }
+
+                        combinedFiles += '<script data-template="razor" src="' + self.razorUri + '?v=' + now + '"></script>';
+
+                        html = html.replace(/<\/head>/i, combinedFiles + '</head>');
                     }
 
-                    combinedFiles += '<script data-template="razor" src="' + self.razorUri + '?v=' + now + '"></script>';
+                    html = compressHTML(html);
 
-                    html = html.replace(/<\/head>/i, combinedFiles + '</head>');
-                }
+                });
 
-                html = compressHTML(html);
 
-                self.save(path.join(self.destDir, fileName), html, async.resolveSelf);
+            }).then(function (html) {
+
+                return self.save(path.join(self.destDir, fileName), html);
             });
 
-            self.async.then(async);
+            self.async = self.async.then(promise);
         });
 
         return this;
     },
 
     resource: function (resourceDir) {
-
         var self = this;
-        var async = new Async().resolve();
-        var pathArr = [];
 
-        resourceDir.forEach(function (dir, i) {
-            pathArr.push([path.join(self.baseDir, dir), path.join(self.destDir, dir)]);
-        });
+        this.async.then(Promise.all(resourceDir.map(function (dir) {
 
-        async.map(pathArr, fse.copy, fse);
+            return new Promise(function (resolve) {
 
-        this.async.then(async);
+                fse.copy(path.join(self.baseDir, dir), path.join(self.destDir, dir), function () {
+
+                    resolve();
+                })
+            })
+        })));
     },
 
     compress: function (fileList) {
@@ -360,41 +402,51 @@ Tools.prototype = {
 
         for (var key in dict) {
             (function (fileName, readPath) {
-                var async = new Async();
+                var promise;
 
                 if (/\.css$/.test(fileName)) {
 
-                    fs.readFile(path.join(self.baseDir, readPath || fileName), {
-                        encoding: 'utf-8'
+                    promise = new Promise(function (resolve) {
 
-                    }, function (err, text) {
-                        self.save(path.join(self.destDir, fileName), compressCss(text), async.resolveSelf);
-                    });
+                        fs.readFile(path.join(self.baseDir, readPath || fileName), {
+                            encoding: 'utf-8'
+
+                        }, function (err, text) {
+                            self.save(path.join(self.destDir, fileName), resolve);
+                        });
+                    })
 
                 } else if (/\.html/.test(fileName)) {
 
-                    fs.readFile(path.join(self.baseDir, readPath || fileName), {
-                        encoding: 'utf-8'
+                    promise = new Promise(function (resolve) {
 
-                    }, function (err, text) {
-                        self.save(path.join(self.destDir, fileName), compressHTML(text), async.resolveSelf);
+                        fs.readFile(path.join(self.baseDir, readPath || fileName), {
+                            encoding: 'utf-8'
+
+                        }, function (err, text) {
+                            self.save(path.join(self.destDir, fileName), compressHTML(text), resolve);
+                        });
                     });
 
                 } else {
-                    var jsFileName = fileName + '.js';
 
-                    fs.readFile(path.join(self.baseDir, readPath ? readPath + '.js' : jsFileName), {
-                        encoding: 'utf-8'
-                    }, function (err, text) {
-                        if (err) console.log(path.join(self.baseDir, readPath || jsFileName));
+                    promise = new Promise(function (resolve) {
 
-                        text = compressJs(replaceDefine(fileName, text));
+                        var jsFileName = fileName + '.js';
 
-                        self.save(path.join(self.destDir, jsFileName), text, async.resolveSelf);
+                        fs.readFile(path.join(self.baseDir, readPath ? readPath + '.js' : jsFileName), {
+                            encoding: 'utf-8'
+                        }, function (err, text) {
+                            if (err) console.log(path.join(self.baseDir, readPath || jsFileName));
+
+                            text = compressJs(replaceDefine(fileName, text));
+
+                            self.save(path.join(self.destDir, jsFileName), text, resolve);
+                        });
                     });
                 }
 
-                self.async.then(async);
+                self.async = self.async.then(promise);
 
             })(key, dict[key]);
         }
@@ -408,29 +460,32 @@ Tools.prototype = {
     razor: function (fileList) {
         var self = this;
 
-        var async = new Async().resolve();
         var result = '';
 
-        fileList.forEach(async.bind(function (fileName, i) {
+        var promise = Promise.all(fileList.map(function (fileName, i) {
 
-            fs.readFile(path.join(self.baseDir, fileName + '.tpl'), {
-                encoding: 'utf-8'
+            return new Promise(function (resolve) {
 
-            }, function (err, text) {
-                if (err) console.log(fileName)
+                fs.readFile(path.join(self.baseDir, fileName + '.tpl'), {
+                    encoding: 'utf-8'
 
-                text = compressJs(replaceDefine(fileName, razor.web(replaceBOM(text))));
+                }, function (err, text) {
+                    if (err) console.log(fileName)
 
-                result += text;
+                    text = compressJs(replaceDefine(fileName, razor.web(replaceBOM(text))));
 
-                self.save(path.join(self.destDir, 'js/' + fileName + '.js'), text, async.resolveSelf);
-            });
-        }));
+                    result += text;
 
-        self.async.then(async)
-            .then(function () {
-                return self.save(path.join(self.destDir, self.razorUri), result);
-            });
+                    self.save(path.join(self.destDir, 'js/' + fileName + '.js'), text, resolve);
+                });
+
+            })
+
+        })).then(function () {
+            return self.save(path.join(self.destDir, self.razorUri), result);
+        });
+
+        self.async = self.async.then(promise);
 
         return this;
     },
@@ -445,7 +500,7 @@ Tools.prototype = {
         options.compress && this.compress(options.compress);
         options.razor && this.razor(options.razor);
 
-        this.async.then(function () {
+        this.async = this.async.then(function () {
             console.log('finish')
         });
     }

@@ -3,7 +3,6 @@
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
 
-var Async = require('../webresource/js/core/async');
 var fs = require('fs');
 var fsc = require('../core/fs');
 var path = require('path');
@@ -50,80 +49,73 @@ function combineRouters(config) {
             result[regexStr] = router;
         }
     });
+
     return result;
 }
 
 exports.loadConfig = function (callback) {
 
-    var async = new Async(function (done) {
-        var exec = require('child_process').exec;
-
-        exec('ifconfig', (err, stdout, stderr) => {
-            if (err) {
-                done(err);
-                return;
-            }
-            var matchIp = stdout.match(/\sen0\:[\s\S]+?\sinet\s(\d+\.\d+\.\d+\.\d+)/);
-
-            console.log(matchIp[1]);
-            done(null, matchIp);
-        });
-
-    }).await(function (err, ip, done) {
+    return new Promise(function (resolve) {
 
         fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
             var globalConfig = JSON.parse(globalStr);
-
-            var subPromise = Async.done();
             globalConfig.routes = {};
 
-            subPromise.each(globalConfig.projects, function (i, project) {
+            resolve(globalConfig);
+        })
+
+    }).then(function (globalConfig) {
+
+        return Promise.all(globalConfig.projects.map(function (project, i) {
+
+            return new Promise(function (resolve) {
 
                 fs.readFile(path.join(project, 'config.json'), { encoding: 'utf-8' }, function (err, data) {
                     var config = JSON.parse(data);
                     config.root = project;
 
-                    subPromise.next(i, err, config);
+                    resolve(config);
                 });
-
-            }).then(function (err, result) {
-
-                globalConfig.projects = result;
-
-                async.doneSelf(null, callback(err, globalConfig));
             });
-        });
 
-        return this;
+        })).then(function (results) {
+            globalConfig.projects = results;
+
+            callback(globalConfig);
+
+            return globalConfig;
+        })
     })
-
-    return async;
 }
 
 exports.createIndex = function (config, callback) {
     fs.readFile('./root.html', { encoding: 'utf-8' }, function (err, html) {
 
         var T = razor.nodeFn(html.replace(/^\uFEFF/i, ''));
-
-        var async = Async.done();
-
         var rimg = /url\(("|'|)([^\)]+)\1\)/g;
 
-        async.each(config.css, function (i, cssPath) {
-            fs.readFile(cssPath, { encoding: 'utf-8' }, function (err, style) {
-                async.next(i, err, style.replace(/^\uFEFF/i, ''));
+        Promise.all(config.css.map(function (cssPath, i) {
+
+            return new Promise(function (resolve) {
+
+                fs.readFile(cssPath, { encoding: 'utf-8' }, function (err, style) {
+                    resolve(style.replace(/^\uFEFF/i, ''));
+                });
             });
 
-        }).then(function (err, styles) {
+
+        })).then(function (styles) {
 
             var style = styles.join('').replace(rimg, function (r0, r1, r2) {
                 return /^data\:image\//.test(r2) ? r0 : ("url(images/" + r2 + ")");
             });
 
-            callback(null, T.html(_.extend({}, config, {
+            var result = T.html(_.extend({}, config, {
                 style: "<style>" + style + "</style>",
                 routes: combineRouters(config)
-            })));
+            }));
+
+            callback(null, result);
         });
     });
 }
@@ -211,13 +203,12 @@ exports.startWebServer = function (config) {
         var filePath = req.url;
         var isRazorTpl = /\.(html|tpl|cshtml)\.js$/.test(filePath);
 
-        console.log(filePath);
-
         fsc.readFirstExistentFile(_.map(config.projects, 'root').concat(config.path), isRazorTpl ? [filePath.replace(/\.js$/, '')] : [filePath, filePath + 'x'], function (err, text) {
             if (err) {
                 next();
                 return;
             }
+
             text = text.replace(/^\uFEFF/i, '');
             if (isRazorTpl) text = razor.web(text);
             text = formatJs(text);
@@ -285,7 +276,7 @@ for (var i = 2, arg, length = argv.length; i < length; i++) {
 
 //打包
 if (args.build) {
-    exports.loadConfig(function (err, config) {
+    exports.loadConfig(function (config) {
         console.log("start:", util.formatDate(new Date()));
 
         _.extend(config, config.env[args.build === true ? 'production' : args.build], {
@@ -294,6 +285,7 @@ if (args.build) {
 
         var baseDir = path.join(__dirname, './');
         var destDir = path.join(__dirname, config.dest);
+
         var tools = new Tools(baseDir, destDir);
 
         //打包框架
@@ -311,16 +303,16 @@ if (args.build) {
 
         //打包业务代码
         config.projects.forEach(function (project) {
-            var async = Async.done();
             var codes = '';
             var requires = [];
 
             for (var key in project.js) {
+
                 requires.push(combinePath(project.root, key));
 
                 if (project.js[key]) {
                     //打包项目引用js                
-                    (function (key, fileList, filePromise) {
+                    (function (key, fileList) {
                         var ids;
                         if (!_.isArray(fileList)) {
                             ids = _.keys(fileList);
@@ -329,62 +321,74 @@ if (args.build) {
                             });
                         }
 
-                        filePromise.each(fileList, function (i, file) {
+                        Promise.all(fileList.map(function (file, i) {
                             var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
 
                             console.log(file);
 
-                            fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
+                            return new Promise(function (resolve) {
+                                fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
 
-                                if (isRazorTpl) text = razor.web(text);
-                                text = formatJs(text);
-                                text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
+                                    if (isRazorTpl) text = razor.web(text);
+                                    text = formatJs(text);
+                                    text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
 
-                                filePromise.next(i, err, text);
-                            });
+                                    resolve(text);
+                                });
+                            })
 
-                        }).then(function (err, results) {
+                        })).then(function (results) {
 
                             Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
                         });
 
-                    })(key, project.js[key], Async.done());
+                    })(key, project.js[key]);
                 }
             }
 
             for (var key in project.css) {
+
                 requires.push(combinePath(project.root, key));
 
                 if (project.css[key] && project.css[key].length) {
+
                     //打包项目引用css
-                    (function (key, fileList, filePromise) {
-                        filePromise.each(fileList, function (i, file) {
+                    (function (key, fileList) {
 
-                            fsc.firstExistentFile([path.join(project.root, file), path.join(project.root, file).replace(/\.css$/, '.scss')], function (file) {
+                        Promise.all(fileList.map(function (file) {
 
-                                if (/\.css$/.test(file)) {
-                                    fs.readFile(file, 'utf-8', function (err, text) {
-                                        text = Tools.compressCss(text);
-                                        filePromise.next(i, err, text);
-                                    });
-                                } else {
-                                    sass.render({
-                                        file: file
+                            return new Promise(function (resolve) {
 
-                                    }, function (err, result) {
-                                        result = Tools.compressCss(result.css.toString());
-                                        filePromise.next(i, err, result);
-                                    });
-                                }
+                                fsc.firstExistentFile([path.join(project.root, file), path.join(project.root, file).replace(/\.css$/, '.scss')], function (file) {
+
+                                    if (/\.css$/.test(file)) {
+                                        fs.readFile(file, 'utf-8', function (err, text) {
+                                            text = Tools.compressCss(text);
+                                            resolve(text);
+                                        });
+                                    } else {
+                                        sass.render({
+                                            file: file
+
+                                        }, function (err, result) {
+                                            result = Tools.compressCss(result.css.toString());
+
+                                            resolve(result);
+                                        });
+                                    }
+                                });
+
                             });
 
-                        }).then(function (err, results) {
+                        })).then(function (results) {
                             Tools.save(path.join(destDir, project.root, key), results.join(''));
                         });
 
-                    })(key, project.css[key], Async.done());
+                    })(key, project.css[key]);
                 }
             }
+
+            var promise = Promise.resolve();
 
             //打包template和controller
             var contains = [];
@@ -408,54 +412,64 @@ if (args.build) {
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
 
-                    async.then(function (err, result, done) {
-                        //打包模版
-                        fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
-                            if (!err && contains.indexOf(fileName) == -1) {
-                                contains.push(fileName);
-                                text = razor.web(text);
-                                text = Tools.compressJs(Tools.replaceDefine(template, text));
-                                codes += text;
-                            }
+                    promise = promise.then(function () {
 
-                            done();
-                        });
+                        return new Promise(function (resolve) {
 
-                        return this;
+                            //打包模版
+                            fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
+                                if (!err && contains.indexOf(fileName) == -1) {
+                                    contains.push(fileName);
+                                    text = razor.web(text);
+                                    text = Tools.compressJs(Tools.replaceDefine(template, text));
+                                    codes += text;
+                                }
+                                console.log("打包模版", fileName);
 
-                    }).then(function (err, result, done) {
-                        //打包控制器
-                        fsc.readFirstExistentFile([controllerPath + '.js', controllerPath + '.jsx'], function (err, text, fileName) {
-                            if (!err && contains.indexOf(fileName) == -1) {
-                                text = formatJs(text);
-                                text = Tools.compressJs(Tools.replaceDefine(controller, text, requires, true));
-                                codes += text;
-                            }
+                                resolve();
+                            });
+                        })
+                    }).then(function () {
+                        return new Promise(function (resolve) {
 
-                            done();
-                        });
+                            //打包控制器
+                            fsc.readFirstExistentFile([controllerPath + '.js', controllerPath + '.jsx'], function (err, text, fileName) {
+                                if (!err && contains.indexOf(fileName) == -1) {
+                                    text = formatJs(text);
+                                    text = Tools.compressJs(Tools.replaceDefine(controller, text, requires, Object.keys(config.framework).concat(['animation', 'zepto', 'activity'])));
+                                    codes += text;
+                                }
 
-                        return this;
+                                console.log("打包控制器", fileName);
+
+                                resolve();
+                            });
+                        })
                     });
 
                 })(project.route[key]);
             }
 
             //保存合并后的业务代码
-            async.then(function () {
+            promise.then(function () {
+                console.log('保存合并后的业务代码');
+
                 Tools.save(path.join(destDir, project.root, 'controller.js'), codes);
             });
         });
 
 
         //复制图片资源
-        var imgPromise = Async.done();
-        imgPromise.each(config.images, function (i, imgDir) {
-            fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function (err, result) {
-                imgPromise.next(i, err, result);
-            });
+        Promise.all(config.images.map(function (imgDir, i) {
 
-        }).then(function () {
+            return new Promise(function (resolve, reject) {
+
+                fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function (err, result) {
+                    resolve(result);
+                });
+            })
+
+        })).then(function () {
             config.projects.forEach(function (proj) {
 
                 if (proj.images) {
@@ -466,11 +480,17 @@ if (args.build) {
                     });
                 }
             });
+
+        }).then(function () {
+
+            console.log('copy resources success');
+
         });
     });
 
 } else {
-    exports.loadConfig(function (err, config) {
+    exports.loadConfig(function (config) {
+
         exports.startWebServer(config);
     });
 }

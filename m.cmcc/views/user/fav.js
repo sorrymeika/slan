@@ -6,7 +6,9 @@ var Model = require('core/model2').Model;
 var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
-var user = require('models/user');
+
+var userLogical = require('logical/user');
+
 
 module.exports = Activity.extend({
 
@@ -14,20 +16,28 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '个人资料',
-            user: user
+            title: '我的收藏'
         });
 
         model.back = function () {
             self.back(self.swipeRightBackAction);
         }
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Loader.showLoading();
+
+        Promise.all([userLogical.getFav(), this.waitLoad()]).then(function (results) {
+
+            model.set({
+                data: results[0].data
+            })
 
             self.bindScrollTo(model.refs.main);
 
         }).catch(function (e) {
             Toast.showToast(e.message);
+
+        }).then(function () {
+            Loader.hideLoading();
         });
     },
 

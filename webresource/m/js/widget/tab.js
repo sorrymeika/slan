@@ -33,18 +33,16 @@ var Tab = Model.extend({
             if (!item.scroll)
                 self.bindScrollTo(item);
         });
+
+        if (!this.data.cursorWidth)
+            this.refs.heads[this.data.index] && this.set({
+                cursorWidth: this.refs.heads[this.data.index].offsetWidth
+            });
     },
 
     initialize: function (data) {
 
         var self = this;
-
-        this.next(function () {
-
-            this.set({
-                cursorWidth: this.refs.heads[this.data.index].offsetWidth
-            });
-        });
 
         this.touch = new Touch(this.refs.body, {
             enableVertical: false,

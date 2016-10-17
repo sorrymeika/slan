@@ -23,6 +23,12 @@ module.exports = {
     //@params={title: '结束咨询',content: '您是否确认结束本次咨询?',btn: '确定',action: function(){} }
     alert: function (params) {
 
+        params = Object.assign({
+            title: "温馨提醒",
+            btn: '确定',
+            action: function () { }
+        }, params)
+
         var content = '<div class="cp_popup__title">' + params.title + '</div>\
         <div class="cp_popup__desc">'+ params.content + '</div>\
         <div class="cp_popup__action"><button class="btn" click="action">'+ params.btn + '</button></div>';
@@ -38,6 +44,13 @@ module.exports = {
 
     //@params={title: '结束咨询',content: '您是否确认结束本次咨询?', cancelAction: function(){}, cancelText: '继续咨询', confirmAction: function(){}, confirmText: '结束咨询' }
     confirm: function (params) {
+
+        params = Object.assign({
+            title: "温馨提醒",
+            confirmText: '确定',
+            cancelText: '取消',
+            cancelAction: function () { }
+        }, params)
 
         var content = '<div class="cp_popup__title">' + params.title + '</div>\
         <div class="cp_popup__desc">'+ params.content + '</div>\

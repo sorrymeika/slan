@@ -4,7 +4,7 @@
 .cp_tab__cursor { background-color: $color; }
 
 .cp_popup__action { margin: 20px 0 0 0; @extend .bd_t; padding-top: 1px; }
-.cp_popup__action .btn {background-color: #fff; color: $color; }
+.cp_popup__action .btn { background-color: #fff; color: $color; }
 .cp_popup__action .btn_cancel { color: #333; }
 
 .bd_b,.bd_t { background-image: url(../images/border-bottom.png); background-repeat: repeat-x; background-position: 0 bottom; background-size: auto 1px; }
@@ -28,6 +28,7 @@ header img { display: block; width: 33px; height: 33px; }
 .head_title { color: $fontcolor; font-size: 16px; font-weight: 400; position: absolute; left: 0px; top: 0; right: 0; bottom: 0; }
 .head_left { position: absolute; left: 0px; top: 0; z-index: 10; text-align: center; display: -webkit-box; }
 .head_right { position: absolute; right: 0px; top: 0; text-align: center; display: -webkit-box; }
+.head_right button { display: block; height: 44px; padding: 0 10px; min-width: 44px; font-size: 14px; background-color: #fff; }
 .head_back { width: 44px; height: 44px; z-index: 1000; position: absolute; top: 0; left: 0; }
 .head_back:before { content: ""; @include arrow_left(#999); top: -1px; }
 
@@ -131,6 +132,10 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .mb_m { margin-bottom: 10px; }
 .mb_l { margin-bottom: 15px; }
 
+.to_e { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.to_e2 { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.to_e3 { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+
 .fs_s { font-size: 12px; }
 .fs_m { font-size: 14px; }
 .fs_l { font-size: 16px; }
@@ -178,6 +183,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .h_l { height: 50px; }
 .h_xl { height: 60px; }
 .h_bar { height: 44px; }
+.h_full { height: 100%; }
 
 .w_s { width: 30px; }
 .w_m { width: 40px; }
@@ -187,5 +193,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 
 .gl_avatars { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; }
 .gl_img { max-height: 80px; max-width: 300px; }
+.gl_arrow { position: relative; }
+.gl_arrow:after { @include arrow(#ccc,10px); content: ""; display: block; position: absolute; top: 50%; margin-top: -5px; right: 10px; }
 
 @import "sprite.scss";

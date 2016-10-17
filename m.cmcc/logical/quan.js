@@ -16,7 +16,7 @@ var quan = {
             pageEnabled: false
         });
 
-        if (sl.isDebug) {
+        if (sl.isDev) {
             return Promise.all([loader, Promise.resolve({
                 success: true,
                 data: [{
@@ -67,7 +67,7 @@ var quan = {
     },
 
     getHistory: function () {
-        if (sl.isDebug)
+        if (sl.isDev)
             return Promise.resolve({
                 success: true,
                 data: [{

@@ -4,7 +4,7 @@ var Http = require('core/http');
 
 var publicquan = {
     recommend: function () {
-        if (sl.isDebug) {
+        if (sl.isDev) {
             return Promise.resolve({
                 success: true,
                 data: [{
@@ -12,18 +12,18 @@ var publicquan = {
                     quan_name: '福建移动',
                     quan_pic: 'images/logo.png'
                 }, {
-                        quan_id: 2,
-                        quan_name: '和生活',
-                        quan_pic: 'images/logo.png'
-                    }, {
-                        quan_id: 3,
-                        quan_name: '和生活',
-                        quan_pic: 'images/logo.png'
-                    }, {
-                        quan_id: 4,
-                        quan_name: '和生活',
-                        quan_pic: 'images/logo.png'
-                    }]
+                    quan_id: 2,
+                    quan_name: '和生活',
+                    quan_pic: 'images/logo.png'
+                }, {
+                    quan_id: 3,
+                    quan_name: '和生活',
+                    quan_pic: 'images/logo.png'
+                }, {
+                    quan_id: 4,
+                    quan_name: '和生活',
+                    quan_pic: 'images/logo.png'
+                }]
             });
         }
 
@@ -31,7 +31,7 @@ var publicquan = {
     },
 
     myrecommend: function () {
-        if (sl.isDebug) {
+        if (sl.isDev) {
             return new Promise(function (resolve, reject) {
 
                 setTimeout(function () {
@@ -44,6 +44,7 @@ var publicquan = {
                                 quan_pic: 'images/logo.png'
                             },
                             lastMsg: {
+                                msg_id: 10,
                                 date: 1476101924277,
                                 see: 100000,
                                 like: 10000,
@@ -62,7 +63,7 @@ var publicquan = {
     },
 
     myfollow: function () {
-        if (sl.isDebug)
+        if (sl.isDev)
             return new Promise(function (resolve, reject) {
 
                 setTimeout(function () {
@@ -75,12 +76,13 @@ var publicquan = {
                                 quan_pic: 'images/logo.png'
                             },
                             lastMsg: {
+                                msg_id: 10,
                                 date: 1476101924277,
                                 see: 100000,
                                 like: 10000,
                                 comment: 999,
                                 title: '最新消息',
-                                content: 'sub',
+                                content: '最最最最最新消息',
                                 imgs: ['images/logo.png', 'images/logo.png']
                             }
                         }]
