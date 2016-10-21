@@ -42,9 +42,7 @@ module.exports = Activity.extend({
             self.showToast('suc', '领取成功');
             self.loadData();
 
-        }, this.$el).catch(function (err) {
-            self.showToast('error', err.msg);
-        });
+        }, this.$el);
     },
 
     showToast: function (type, msg) {

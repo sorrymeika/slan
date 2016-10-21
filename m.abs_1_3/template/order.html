@@ -10,7 +10,8 @@
             <div class="loc">收货地址：{data.CTY_DESC}{data.REG_DESC}{data.ORA_ADDRESS}</div>
         </div>
         <div class="sp_buy__cart uc_order__prodlist" sn-repeat="store in list">
-            <div class="hd bottom_border"><div class="icon-shop dp_ib"></div> <span class="va_m">{store.tagname||'商品信息'}</span></div>
+            <div class="hd bottom_border">
+                <div class="icon-shop dp_ib"></div> <span class="va_m">{store.TAG_DESC||'商品信息'}</span></div>
             <div class="sp_cart__listitem_con" sn-repeat="prd in store.Children" data-forward="/item/{prd.PRD_ID}">
                 <img sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
                 <div class="con">
@@ -22,15 +23,18 @@
                     <p class="qty">x{prd.LPK_QTY}</p>
                 </div>
             </div>
+            <div class="ft bg_fff pd_m ta_r">
+                <div class="mb_s"><span class="fs_s cl_999 va_m">共{this.getQty(store.Children)}件商品</span> <b class="va_m fs_m">合计</b><em class="va_m cl_app">{util.currency(store.PUR_AMOUNT+store.PUR_EXP_IN_AMOUNT,'￥')}</em></div>
+                <b class="btn_m" sn-if="{store.XPU_EXPRESS_CODE}" data-forward="/user/express/{store.PUR_CODE}">查看物流</b>
+            </div>
         </div>
         <ul class="sp_buy__info sp_buy__bill top_bottom_border">
             <li class="hd bottom_border">订单信息</li>
+            <li class="bottom_border"><span>购买渠道</span><em>{data.CNL_DESC}</em></li>
             <li class="bottom_border"><span>订单号</span><em>{data.PUR_CODE}</em></li>
             <li class="bottom_border"><span>订单状态</span><em>{data.PUS_DESC}</em></li>
             <li class="bottom_border"><span>下单日期</span><em>{util.formatDate(data.PUR_DT)}</em></li>
-            <li class="bottom_border"><span>订单金额</span><em>{util.currency(data.PUR_AMOUNT,'￥')}</em></li>
-            <li class="bottom_border"><span>运费</span><em>{util.currency(data.PUR_EXP_IN_AMOUNT,'￥')}</em></li>
-            <li><span>总计</span><b>{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}</b></li>
+            <li><span>实付款</span><b>{this.getAmount()}</b></li>
         </ul>
         <div class="sp_buy__pay" sn-if="{data.PUS_DESC=='待付款'}">
             <ul class="sp_buy__info top_bottom_border">
@@ -44,11 +48,9 @@
 </div>
 <footer class="sp_buy__action uc_order__footer">
     <div class="total">
-        总计：<b>{util.currency(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT,'￥')}</b>
     </div>
     <div class="btn js_pay" sn-if="{data.PUS_DESC=='待付款'}">立即支付</div>
 
-    <b class="btn" sn-if="{data.XPU_EXPRESS_CODE}" data-forward="/user/express/{data.PUR_CODE}">查看物流</b>
     <b class="btn" sn-if="{data.PUR_PAS_ID==2&&data.isShowShare}" data-forward="/news/order{data.PUR_ID}?from={url}">分享有惊喜</b>
     <b class="btn btn_dark" sn-if="{data.PUS_DESC=='待付款'||(data.PUR_PUS_ID==1&&(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT)==0&&data.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(data)">取消订单</b>
 </footer>

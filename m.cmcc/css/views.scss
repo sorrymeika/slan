@@ -14,11 +14,11 @@
 .hm_home { -webkit-transition: all 300ms ease-out 0ms; }
 .menu_aexit { -webkit-transform: translate3d(80%,0%,0); }
 .menu_aexit:before { position: absolute; z-index: 2000; content: ""; top: 0; left: 0; right: 0; bottom: 0; }
-.menu { width: 80%; -webkit-transition: all 300ms ease-out 0ms; height: 100%; background: url(../images/menu_layer.jpg) no-repeat; background-size: auto 100%; color: #fff; padding-top: .1px; }
+.menu { width: 80%; -webkit-transition: all 300ms ease-out 0ms; height: 100%; background: url(../images/menu_layer.jpg) no-repeat; background-size: auto 100%; color: #fff; padding-top: 60px; }
 .menu_exit { -webkit-transform: translate3d(-100%,0%,0); }
 .menu_enter { -webkit-transform: translate3d(0%,0%,0); }
 
-.menu_user { margin-top: 60px; margin-left: 20px; }
+.menu_user { margin-left: 20px; }
 .menu_list { top: 152px; position: absolute; left: 0; right: 0; bottom: 40px; }
 .menu_list li { height: 44px; line-height: 44px; padding-left: 15px; position: relative; }
 .menu_list li:after { width: 200%; height: 87px; background: rgba(255,255,255,.1); content: ''; display: block; top: 0; left: 0; position: absolute; -webkit-transform: scale(.5); -webkit-transform-origin: 0% 0%; }
@@ -80,6 +80,32 @@
 .qn_history__item .icon-del { position: absolute; width: 40px; bottom: 0px; right: 6px; text-align: right; height: 40px; padding-top: 10px; }
 
 
+//公众圈
+button.pq_item__header_btn { background: transparent; border: 1px solid #fff; border-radius: 30px; height: 32px; margin: 6px 8px 0 0; color: #fff; }
+.pq_item.main { background: #eeefef url(../images/pubquan_header.png) no-repeat; background-size: 100% auto; }
+.pq_item__info { padding-top: 50px; color: #fff; height: 1.94rem; }
+.pq_item__info img { width: 60px; height: 60px; border-radius: 4px; overflow: hidden; }
+.pq_item__info .follow { color: #b2b2b2; }
+.pq_item__articles .hd { height: 44px; color: $color; line-height: 44px; font-size: 14px; padding-left: 10px; }
+.pq_item__articles_item { }
+
+
+.pq_article__action { }
+.pq_article__action .cir_l { border: 1px solid #ddd; padding-top: 10px; }
+.pq_article__action .icon-newssee{ margin-left: 10px; }
+.pq_article__action .icon-newssee:before { margin-left: 3px; }
+
+.pq_article__comments { margin-bottom: 65px; }
+.pq_article__comments .sort { padding-right: 10px; height: 100%; }
+.pq_article__comments_item a { width: 20px; height: 44px; padding-top: 8px; display: block; text-align: left; }
+
+.pq_article__chatbox { position: absolute; right: 0; left: 0; bottom: 0; height: 50px; background-color: #fff; }
+.pq_article__chatbox .sqr_l { width: 44px; text-align: center; padding-top: 12px; }
+.pq_article__chatbox .icon-comment3 { padding-left: 12px; }
+.pq_article__chatbox .text { margin: 0px 0 0 10px; position: relative; height: 28px; }
+.pq_article__chatbox .text:before { border: 1px solid #ccc; content: ''; position: absolute; width: 200%; height: 200%; top: 0; left: 0; -webkit-transform: scale(.5); -webkit-transform-origin: 0% 0%; border-radius: 28px; }
+.pq_article__chatbox textarea { border: 0; width: 100%; margin-left: 8px; height: 98%; width: 96%; margin-top: 1px; background: rgba(0,0,0,0); position: relative; z-index: 1; line-height: 24px; }
+
 //个人信息 - 设置信息
 .uc_set__sign { margin: 10px; }
 .uc_set__sign textarea { border-radius: 4px; padding: 8px; font-size: 14px; border: 0; }
@@ -96,14 +122,60 @@
 //个人信息 - 我的消息
 .uc_messages__head { margin: 15px 15px 0 15px; border: 1px solid $color; height: 35px; line-height: 35px; text-align: center; }
 .uc_messages__head .curr { background: $color; color: #fff; height: 100%; }
-.uc_messages__item { position: relative; height: 48px; padding-top: .1px; padding-left: 10px; }
+.uc_messages__item { position: relative; height: 48px; padding-top: 1px; padding-left: 10px; }
 .uc_messages__item .date { position: absolute; background: #fff; right: 10px; top: 5px; }
 .uc_messages__bd { top: 50px; }
 
 .uc_remind { line-height: 1; }
 
-
 .uc_qa__search { background-color: $bgcolor; height: 33px; position: relative; border-radius: 33px; }
 .uc_qa__search:before { @include border(#ccc,33px); }
 .uc_qa__search .icon-search{ text-align: center; }
 .uc_qa__search .icon-search:before { vertical-align: -8px; margin-left: 6px; }
+
+
+//通讯录
+.ct_new__search { position: relative; margin: 10px; height: 34px; }
+.ct_new__search:before { position: absolute; left: 0px; top: 0px; width: 200%; height: 200%; background: #fff; border: 1px solid #ccc; -webkit-transform: scale(.5); -webkit-transform-origin: 0% 0%; content: ''; border-radius: 28px; }
+.ct_new__search .icon-search { margin-top: -2px; }
+.ct_new__search input { display: block; font-size: 14px; height: 34px; margin-left: 5px; }
+.ct_new__item .icon-xx { background: transparent; width: 40px; height: 48px; }
+
+//通讯录 - 查看用户详情
+.ct_person__actions { margin: 40px 15px 0 15px; }
+.ct_person__actions .btn_reject { background: #d9862e; margin-top: 18px; }
+
+.ct_contactlist__search { margin: 15px 10px 0 10px; height: 28px; position: relative; overflow: hidden; }
+.ct_contactlist__search:after { @include border(#ccc,28px); background-color: #fff; }
+.ct_contactlist__search input { width: 90%; display: block; height: 26px; margin-top: 1px; }
+.ct_contactlist__list > li { padding: 8px; }
+
+//通讯录 - 备份
+.ct_backup__con { margin-top: -50px; }
+.ct_backup__bu,.ct_backup__recover { width: 2.25rem; height: .74rem; background: $color; color: #fff; border-radius: 6px; }
+.ct_backup__recover { margin-top: 20px; }
+.ct_backup__recover .quan-upload { -webkit-transform: rotate(180deg); }
+
+//通讯录 - 好友
+.ct_friends__letters { color: $color; position: absolute; padding-right: 10px; right: 0px; width: 60px; padding-left: 40px; top: 90px; z-index: 1000; font-size: 12px; line-height: 16px; text-align: center; }
+.ct_friends__letters a { color: $color; }
+
+//通讯录 - 好友
+.ct_memo__input { width: 100%; padding: 0 10px; height: 40px; margin: 10px 0; background-color: #fff; position: relative; }
+.ct_memo__input input { display: block; width: 100%; height: 100%; background: rgba(0,0,0,0); border: 0; font-size: 14px; }
+.ct_memo__input .icon-reset { position: absolute; width: 44px; height: 44px; right: 0px; top: 0px; text-align: center; padding-top: 7px; }
+
+
+//通讯录 - 聊天
+.ct_chat.main { bottom: 50px; }
+.ct_chat__item { margin-top: 15px; padding: 0 8px; }
+.ct_chat__item .con { margin-right: 8px; margin-left: 8px; padding: .06rem; border-radius: 6px; background: #fff; max-width: 2rem; font-size: 0; min-height: 20px; position: relative; }
+.ct_chat__item .con img { max-width: 1.88rem; display: block; }
+.ct_chat__item .con div,.ct_chat__item .con img { position: relative; z-index: 1; }
+.ct_chat__item .con:before { display: block; background: #fff; width: 10px; content: ''; -webkit-transform: rotate(33deg) skew(-32deg); top: 8px; left: -2px; height: 10px; position: absolute; border-radius: 2px; }
+.ct_chat__item.curr .con { background-color: $color; }
+.ct_chat__item.curr .con:before{ background-color: $color; left: auto; right: -2px; }
+
+.ct_chat__footer { background-color: #f7f7f7; }
+.ct_chat__footer .icon-face { background-color: #f7f7f7; margin-left: 10px; }
+.ct_chat__textbox { }

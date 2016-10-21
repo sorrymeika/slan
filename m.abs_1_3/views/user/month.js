@@ -1,6 +1,7 @@
 ﻿
 var $ = require('$');
 var util = require('util');
+var Promise = require('promise');
 var Activity = require('activity');
 var Model = require('core/model2').Model;
 var Toast = require('widget/toast');
@@ -111,46 +112,103 @@ module.exports = Activity.extend({
         this.size.$el.appendTo($('body'));
     },
 
+    filterGifts: function (data) {
+
+        var result = [];
+        for (var i = 0; i < data.length; i++) {
+            if (util.indexOf(result, function (item) {
+                return item.PRH_ID == data[i].PRH_ID;
+            }) == -1) {
+                result.push(data[i]);
+            }
+        }
+
+        return result;
+    },
+
     onShow: function () {
         var self = this;
         var model = this.model;
 
         bridge.statusBar('dark');
 
+        user.getMonthOverdue().then(function (res) {
+
+            if (!res.data) return null;
+
+            return Promise.all(res.data.map(function (freId) {
+
+                return new Promise(function (resolve) {
+
+                    user.getMonthGifts(freId, function (res) {
+
+                        resolve(res.data);
+                    })
+                })
+            }));
+
+        }).then(function (results) {
+
+            var arr = [];
+            results.forEach(function (data) {
+                arr = arr.concat(data);
+            });
+
+            results = self.filterGifts(arr);
+
+            model.set({
+                overdue: results
+            })
+        });
+
+        user.getMonthGot().then(function (res) {
+
+            if (!res.data) return null;
+
+            return Promise.all(res.data.map(function (freId) {
+
+                return new Promise(function (resolve) {
+
+                    user.getMonthGifts(freId, function (res) {
+
+                        resolve(res.data);
+                    })
+                })
+            }));
+
+        }).then(function (results) {
+
+            var arr = [];
+            results.forEach(function (data) {
+                arr = arr.concat(data);
+            });
+
+            results = self.filterGifts(arr);
+
+            model.set({
+                got: results
+            })
+        });
+
         user.getMonth(function (res) {
 
             model.set({
                 data: res.data,
                 hasNextMonthGift: res.hasNextMonthGift
-            })
+            });
 
-            if (res.data.FRE_ID) {
-                user.getMonthGifts(res.data.FRE_ID, function (err, res) {
+            if (res.data && res.data.FRE_ID) {
+                user.getMonthGifts(res.data.FRE_ID, function (res) {
 
-                    if (err) {
-                        Toast.showToast(err.msg);
-                        return;
-                    }
-
-                    var result = [];
-                    for (var i = 0; i < res.data.length; i++) {
-                        if (util.indexOf(result, function (item) {
-                            return item.PRH_ID == res.data[i].PRH_ID;
-                        }) == -1) {
-                            result.push(res.data[i]);
-                        }
-                    }
                     model.set({
-                        list: result,
+                        list: self.filterGifts(res.data),
                         products: res.data
                     });
 
                 }, self.$el);
             }
 
-        }, this.$el).catch(function (err) {
-            Toast.showToast(err.msg);
-        });
+        }, this.$el);
     },
 
     onPause: function () {

@@ -1,0 +1,29 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main" ref="main">
+    <div class="bd_tb mt_m pd_m flex_t bg_fff">
+        <img class="sqr_l dp_b" sn-src="{person.avatars}" />
+        <div class="ml_l flexitem">
+            <p class="name fs_l">{person.user_name}</p>
+            <p class="fs_s mt_m">我信ID:{person.user_id}</p>
+        </div>
+    </div>
+    <ul class="mt_l bd_t fs_m bg_fff">
+        <li class="bd_b lh_l pl_m">
+            地区：{person.address}
+        </li>
+        <li class="bd_b lh_l pl_m">
+            个性签名：{person.sign_text}
+        </li>
+        <li class="bd_b lh_l pl_m" sn-if="person.status==-1">
+            验证消息：{person.msg}
+        </li>
+    </ul>
+
+    <div class="ct_person__actions">
+        <div class="btn_xl" sn-if="person.status==-1">接受</div>
+        <div class="btn_xl btn_reject" sn-if="person.status==-1">拒绝</div>
+    </div>
+</div>

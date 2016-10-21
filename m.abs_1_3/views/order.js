@@ -74,6 +74,22 @@ module.exports = Activity.extend({
             payType: 1
         });
 
+        self.model.getQty = function (items) {
+            var res = 0;
+            items.forEach(function (item) {
+                res += item.LPK_QTY
+            })
+
+            return res;
+        }
+
+        self.model.getAmount = function () {
+            var amount = 0;
+            this.data.list && this.data.list.forEach(function (data) {
+                amount += data.PUR_AMOUNT + data.PUR_EXP_IN_AMOUNT;
+            });
+            return util.currency(amount, '￥');
+        }
         self.model.cancelOrder = function (e, order) {
 
             popup.confirm({
@@ -93,8 +109,6 @@ module.exports = Activity.extend({
             e.stopPropagation();
             e.preventDefault();
         };
-
-        console.log(self.referrer)
 
         self.orderApi = new api.OrderAPI({
             $el: self.$el,

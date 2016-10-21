@@ -17,18 +17,6 @@ var publicquan = require('../logical/publicquan');
 var quan = require('../logical/quan');
 var messagesList = require('../models/messagesList');
 
-util.cnNum = function (num) {
-    if (num > 10000) {
-        num = (num + '');
-        return num.substr(0, num.length - 4) + "万";
-    } else if (num > 1000) {
-
-        num = (num + '');
-        return num.substr(0, num.length - 4) + 'k';
-    } else {
-        return num;
-    }
-}
 
 module.exports = Activity.extend({
 
@@ -109,22 +97,32 @@ module.exports = Activity.extend({
 
     menu: function () {
 
+        var self = this;
+
         if (!this._menu) {
             this._menu = new Menu();
-
             this._menu.$el.prependTo(this.$el)[0].clientHeight;
         }
-        $(this.model.refs.home).addClass('menu_aexit');
-        this._menu.$el.addClass('menu_enter');
+
+        requestAnimationFrame(function () {
+
+            $(self.model.refs.home).addClass('menu_aexit');
+            self._menu.$el.addClass('menu_enter');
+        });
+
+        Application.addBackAction(this.exitMenu);
     },
 
     exitMenu: function () {
         this._menu && this._menu.$el.removeClass('menu_enter');
         $(this.model.refs.home).removeClass('menu_aexit');
+        Application.removeBackAction(this.exitMenu);
     },
 
     onCreate: function () {
         var self = this;
+
+        this.exitMenu = this.exitMenu.bind(this);
 
         var loader = this.loader = new Loader(this.$el);
 

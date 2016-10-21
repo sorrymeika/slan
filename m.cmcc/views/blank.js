@@ -20,12 +20,20 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
+        var loader = this.loader = new Loader(this.$el);
+
+        loader.showLoading();
+
         Promise.all([this.waitLoad()]).then(function (results) {
+
 
             self.bindScrollTo(model.refs.main);
 
         }).catch(function (e) {
             Toast.showToast(e.message);
+
+        }).then(function () {
+            loader.hideLoading();
         });
     },
 

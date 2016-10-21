@@ -32,9 +32,6 @@ module.exports = Activity.extend({
 
             }).show();
 
-        }).catch(function (err) {
-
-            Toast.showToast(err.msg);
         });
 
         return false;

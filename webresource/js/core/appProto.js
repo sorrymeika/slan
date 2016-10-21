@@ -16,8 +16,6 @@
                 Object.assign(activity.route.data, route.data);
             }
 
-            console.log(activity.route.url, route.url)
-
             if (activity.route.url != route.url) {
                 route.data = activity.route.data;
 
@@ -89,11 +87,11 @@
                             }
 
                             activity = new Activity(options);
-                            
+
                             that.set(path, activity);
 
                             activity.then(function () {
-                                
+
                                 callback.call(that, activity, route);
                             });
 

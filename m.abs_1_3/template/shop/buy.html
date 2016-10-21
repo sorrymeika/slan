@@ -17,6 +17,7 @@
         <ul class="sp_buy__info top_bottom_border" sn-tap="this.useInv()">
             <li><span>发票信息</span><span>{requireInv?isCompany?'公司':'个人':'不需要'}</span></li>
         </ul>
+        <div class="cl_blue pd_m mt_m fs_m" style="margin-bottom:-10px" sn-if="data.length">此订单为合并支付订单，为了您能尽快收货，订单将分成多个配送</div>
         <div class="sp_buy__cart" sn-repeat="store in data">
             <div class="hd bottom_border">
                 <div class="icon-shop dp_ib"></div> <span class="va_m">{store.tagname}</span>

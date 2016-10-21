@@ -125,6 +125,7 @@ Promise.prototype = {
 
 
 Promise.all = function (all) {
+
     return this.each(all, null, false);
 }
 

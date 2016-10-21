@@ -3,7 +3,7 @@
     <div class="head_title">{title}</div>
 </header>
 <div ref="main" class="main qn_history bg_fff">
-    <div class="qn_history__item flexstart mt_l" sn-repeat="item in data">
+    <div class="qn_history__item flex_t mt_l" sn-repeat="item in data">
         <p class="date" sn-html="{this.date(item.date)}"></p>
         <div class="con ml_m flexitem fw_s {item.imgs.length?'':' ref'}">
             <p class="text">{item.content}</p>

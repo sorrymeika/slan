@@ -292,7 +292,7 @@ module.exports = Activity.extend({
             },
             error: function () { }
         });
-        update.load().catch(function () { });
+        update.request().catch(function () { });
 
         this.stewardQtyApi = new api.StewardQtyAPI({
             checkData: false,

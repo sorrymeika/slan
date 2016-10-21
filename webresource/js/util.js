@@ -406,4 +406,18 @@ var util = {
     }
 };
 
+
+util.cnNum = function (num) {
+    if (num > 10000) {
+        num = (num + '');
+        return num.substr(0, num.length - 4) + "万";
+    } else if (num > 1000) {
+
+        num = (num + '');
+        return num.substr(0, num.length - 4) + 'k';
+    } else {
+        return num;
+    }
+}
+
 module.exports = util;

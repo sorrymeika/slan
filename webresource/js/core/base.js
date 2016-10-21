@@ -11,6 +11,11 @@
 
     if (!Array.isArray) Array.isArray = $.isArray;
 
+    if (Array.prototype.map) Array.prototype.map = function (fn) {
+        return $.map(this, fn);
+    }
+
+
     if (!Date.now) Date.now = function () {
         return +new Date;
     };

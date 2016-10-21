@@ -234,12 +234,18 @@ var Application = Component.extend(Object.assign(appProto, {
         that.mask = that.$el.children('.screen'); //.off(preventEvents).on(preventEvents, false);
 
         that.history = [];
+        that._backAction = [];
 
         if (that.backGesture) bindBackGesture(this);
 
         var prepareExit = false;
 
         $(window).on('back', function () {
+
+            if (that._backAction.length) {
+                that._backAction.pop()();
+                return;
+            }
 
             var hash = location.hash;
             if (!that._currentActivity || that._currentActivity.path == "/") {
@@ -257,6 +263,25 @@ var Application = Component.extend(Object.assign(appProto, {
                 that.back(that._currentActivity.referrer || '/');
             }
         });
+    },
+
+    addBackAction: function (fn) {
+        this._backAction.push(fn);
+    },
+
+    removeBackAction: function (fn) {
+
+        if (fn === undefined) {
+            this._backAction.length = 0;
+            return;
+        }
+
+        for (var i = this._backAction.length; i >= 0; i--) {
+            if (this._backAction[i] === fn) {
+                this._backAction.splice(i, 1);
+                break;
+            }
+        }
     },
 
     getCurrentActivity: function () {
@@ -374,45 +399,48 @@ var Application = Component.extend(Object.assign(appProto, {
             adjustActivity(currentActivity, activity);
 
             that.checkQueryString(activity, route);
-            activity.then(function () {
-                activity.trigger('Appear');
-            });
 
             currentActivity.trigger('Pause');
 
-            var ease = 'cubic-bezier(.34,.86,.54,.99)';
-            var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
-            var anim;
+            activity.then(function () {
+                activity.trigger('Appear');
 
-            var executedFinish = false;
-            var finish = function () {
-                if (executedFinish) return;
-                executedFinish = true;
+                var ease = 'cubic-bezier(.34,.86,.54,.99)';
+                var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
+                var anim;
 
-                currentActivity.trigger('Hide');
-                activity._enterAnimationEnd();
-                toggleFinish && toggleFinish.call(that, activity);
-                queueDone();
-            };
+                var executedFinish = false;
+                var finish = function () {
+                    if (executedFinish) return;
+                    executedFinish = true;
 
-            for (var i = 0, n = anims.length; i < n; i++) {
-                anim = anims[i];
+                    currentActivity.trigger('Hide');
+                    activity._enterAnimationEnd();
+                    toggleFinish && toggleFinish.call(that, activity);
+                    queueDone();
+                };
 
-                if (!duration) {
-                    anim.el.css(animation.transform(anim.css).css);
+                requestAnimationFrame(function () {
+                    for (var i = 0, n = anims.length; i < n; i++) {
+                        anim = anims[i];
 
-                } else {
-                    anim.ease = ease;
-                    anim.duration = duration;
+                        if (!duration) {
+                            anim.el.css(animation.transform(anim.css).css);
 
-                    anim.el.css(animation.transform(anim.start).css)
-                        .animate(animation.transform(anim.css).css, duration, ease, finish);
-                }
-            }
+                        } else {
+                            anim.ease = ease;
+                            anim.duration = duration;
 
-            if (!duration) {
-                finish();
-            }
+                            anim.el.css(animation.transform(anim.start).css)
+                                .animate(animation.transform(anim.css).css, duration, ease, finish);
+                        }
+                    }
+                    if (!duration) {
+                        finish();
+                    }
+                });
+            });
+
 
             //setTimeout(finish, duration + 300);
 

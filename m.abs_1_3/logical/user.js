@@ -32,6 +32,37 @@ var User = {
         }).load(callback);
     },
 
+     getMonthOverdue: function (callback, $el) {
+        var user = userModel.get();
+
+        return new Loader({
+            $el: $el,
+            url: "/api/user/get_month_overdue",
+            params: {
+
+                UserID: user.ID,
+                Auth: user.Auth
+            }
+
+        }).request();
+    },
+
+    getMonthGot: function (callback, $el) {
+        var user = userModel.get();
+
+        return new Loader({
+            $el: $el,
+            url: "/api/user/get_month_got",
+            params: {
+
+                UserID: user.ID,
+                Auth: user.Auth
+            }
+
+        }).request();
+    },
+
+
     getCouponList: function (callback, $el) {
         var user = userModel.get();
 
@@ -83,7 +114,7 @@ var User = {
     getCouponStatus: function (csvId, callback, $el) {
         var user = userModel.get();
 
-        new Loader({
+        return new Loader({
             $el: $el,
             url: "/api/user/get_coupon_status",
             params: {

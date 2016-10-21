@@ -1,0 +1,24 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main ct_new" ref="main">
+    <div class="ct_new__search">
+        <form class="flex ps_r">
+            <p class="icon-search ml_m"></p>
+            <input type="text" placeholder="手机号/昵称/我信ID" class="flexitem" />
+        </form>
+    </div>
+    <div class="ml_m mt_m fs_m">新的朋友</div>
+    <div class="mt_m bd_t bg_fff">
+        <div class="ct_new__item flex bd_b" sn-repeat="item in newFriends" data-forward="/contact/person/{item.user_id}?type=new">
+            <img src="{item.avatars}" alt="" class="sqr_s dp_b ml_m">
+            <div class="flexitem ml_m">
+                <div class="fs_m">{item.user_name}</div>
+                <div class="fs_s">{item.msg}</div>
+            </div>
+            <button class="btn_xs" sn-tap="false">接受</button>
+            <button class="icon-xx" sn-tap="false"></button>
+        </div>
+    </div>
+</div>

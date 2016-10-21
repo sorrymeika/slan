@@ -46,7 +46,8 @@
             "logical/user": "./logical/user",
             "logical/chat": "./logical/chat",
             "logical/publicquan": "./logical/publicquan",
-            "logical/quan": "./logical/quan"
+            "logical/quan": "./logical/quan",
+            "logical/contact": "./logical/contact"
         },
         "models": {
             "models/user": "./models/user",
@@ -64,6 +65,7 @@
         "util": "../webresource/js/util",
         "util/md5": "../webresource/js/util/md5",
         "util/qrcode": "../webresource/js/util/qrcode",
+        "util/firstLetter": "../webresource/js/util/firstLetter",
         "bridge": "../webresource/m/js/bridge",
         "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
         "graphics/matrix2d": "../webresource/js/graphics/matrix2d",

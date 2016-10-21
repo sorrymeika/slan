@@ -1,0 +1,54 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{data.title}</div>
+</header>
+<div class="main pq_article" ref="main">
+    <div class="pd_m bg_fff bd_b">
+        <p class="fs_l">{data.title}</p>
+        <div class="flex mt_m"><img sn-src="{data.quan.quan_pic}" alt="" class="cir_m sp_b">
+            <div class="flexitem ml_m">
+                <p class="fs_m">{data.quan.quan_name}</p>
+                <p class="fs_s cl_999">{util.formatDate(data.date)}</p>
+            </div>
+            <button class="btn_bd_s dp_b"><i class="va_m">＋</i><span class="va_m">关注</span></button>
+        </div>
+        <div class="mt_l mb_l fs_m lh_xs" sn-html="{data.content}"></div>
+        <div class="mt_xxl mb_l ta_c pq_article__action">
+            <div class="icon-newslike dp_ib cir_l">
+                <p class="fs_s">{util.cnNum(data.like)}</p>
+            </div>
+            <div class="icon-newssee dp_ib cir_l">
+                <p class="fs_s">{util.cnNum(data.see)}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="pq_article__comments bd_tb bg_fff mt_l" ref="comments">
+        <div class="lh_m pl_m bd_b fs_m flex">
+            <div class="flexitem">评论</div>
+            <p class="icon-refresh sqr_m ta_r pr_m"></p>
+            <p class="sort"><span>倒序</span>
+                <i class="icon-sort"></i></p>
+        </div>
+        <div class="pq_article__comments_item bd_b ml_m" sn-repeat="item in comments">
+            <div class="flex pt_m">
+                <img sn-src="{item.avatars}" class="cir_s" />
+                <div class="flexitem ml_m">
+                    <p class="fs_m">{item.user_name}</p>
+                    <p class="fs_s cl_999">{util.formatDate(item.date)}</p>
+                </div>
+                <a class="icon-comment dp_b" href="javascript:;"></a>
+                <a class="icon-del2 dp_b" href="javascript:;"></a>
+            </div>
+            <div class="mt_s pb_m fs_m">{item.content}</div>
+        </div>
+    </div>
+
+</div>
+<footer class="pq_article__chatbox bd_t flex">
+    <form class="text flexitem">
+        <textarea placeholder="说几句话吧..." ref="chatbox" />
+    </form>
+    <div class="icon-comment3 sqr_l"></div>
+    <div class="icon-heart3 sqr_l"></div>
+</footer>

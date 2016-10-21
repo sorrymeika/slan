@@ -126,8 +126,8 @@ define(function (require, exports, module) {
                     self.model.set({
                         bag_amount: res.bag_amount,
                         full_amount_free: parseInt(res.full_amount_free),
-                        coupon: coupon,
-                        freight: freight
+                        coupon: res.coupon,
+                        freight: res.freight
                     });
                 }
 

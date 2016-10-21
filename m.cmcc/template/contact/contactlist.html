@@ -1,0 +1,34 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main ct_contactlist" ref="main">
+
+    <div class="ct_contactlist__search">
+        <form class="ps_r zi_1 flex">
+            <p class="icon-search ml_m"></p>
+            <input type="text" class="bd_n ml_s flexitem fs_m" placeholder="搜索手机通讯录" />
+        </form>
+    </div>
+
+    <div class="bd_tb bg_fff pl_m lh_l mt_l gl_arrow" data-forward="/contact/backup">手机通讯录备份</div>
+
+    <div class="ct_contactlist__group" sn-repeat="group in groups">
+        <div class="hd fs_m pd_s ml_m">{group.letter}</div>
+        <ul class="ct_contactlist__list bd_t bg_fff">
+            <li class="bd_b flex" sn-repeat="item in group.list">
+                <img sn-src="{item.contactImage||item.avatars}" class="dp_b sqr_s" />
+                <div class="flexitem ml_m">
+                    <p class="fs_l">
+                        {item.contactName}
+                    </p>
+                    <p class="fs_s" sn-if="item.user_id">和生活昵称：{item.user_name}</p>
+                </div>
+                <button class="btn_xs" sn-if="item.user_id&&item.status!=1">添加</button>
+                <button class="btn_xs" sn-if="!item.user_id">邀请</button>
+                <span class="cl_app fs_m mr_m" sn-if="item.user_id&&item.status==1">好友</span>
+            </li>
+        </ul>
+    </div>
+
+</div>

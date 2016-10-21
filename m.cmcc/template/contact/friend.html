@@ -1,0 +1,44 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main" ref="main">
+    <div class="bd_tb mt_m pd_m flex_t bg_fff ps_r">
+        <img class="sqr_l dp_b" sn-src="{person.avatars}" />
+        <div class="ml_l flexitem">
+            <p class="name fs_l">{person.user_name}</p>
+            <p class="fs_s mt_xs">我信ID:{person.user_id}</p>
+            <p class="fs_s mt_xs">个性签名：{person.sign_text}</p>
+        </div>
+        <p class="dock_tr fs_s mr_s mt_xs pt_s">{person.address}</p>
+    </div>
+    <ul class="mt_l bd_t fs_m bg_fff">
+        <li class="bd_b lh_l pl_m gl_arrow" data-forward="/contact/memo">
+            备注：{person.memo}
+        </li>
+    </ul>
+
+    <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m flex">
+        <p class="flexitem">好友留言信息</p>
+        <p class="mr_m cp_switch{person.enable_leave_msg?' cp_switch_on':''}" sn-tap="person.enable_leave_msg=!person.enable_leave_msg"></p>
+    </div>
+
+    <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m flex">
+        <p class="flexitem">推送到生活首页</p>
+        <p class="mr_m cp_switch{person.enable_push?' cp_switch_on':''}" sn-tap="person.enable_push=!person.enable_push"></p>
+    </div>
+
+
+    <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m">
+        清空聊天记录
+    </div>
+
+    <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m" sn-tap="this.deleteFriend()">
+        删除联系人
+    </div>
+
+    <div class="mg_m mb_l">
+        <div class="btn_xl">拨号</div>
+        <div class="btn_xl mt_m">发消息</div>
+    </div>
+</div>
