@@ -20,14 +20,14 @@ if (!util.store('quan_messages')) {
         imgs: ['images/logo.png', 'images/logo.png'],
         comments: [{
             comment_id: 111,
-            user_id: 2,
+            user_id: 30007,
             user_name: '小智',
             content: '想休息休息',
             at_user_id: 0,
             at_user_name: 'xxx'
         }],
         likes: [{
-            user_id: 2,
+            user_id: 30007,
             user_name: '小智'
         }, {
             user_id: 3,
@@ -46,7 +46,7 @@ if (!util.store('quan_messages')) {
             user_id: 4,
             user_name: '小煤',
             content: '想休ss息休息',
-            at_user_id: 2,
+            at_user_id: 30007,
             at_user_name: '小智'
         }]
     }, {
@@ -62,7 +62,7 @@ if (!util.store('quan_messages')) {
             user_id: 4,
             user_name: '小煤',
             content: '想休ss息休息',
-            at_user_id: 2,
+            at_user_id: 30007,
             at_user_name: '小智'
         }]
     }]);

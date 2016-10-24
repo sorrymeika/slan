@@ -26,7 +26,7 @@ var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURICom
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
-var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*(orderBy|orderByDesc)\:(.+)){0,1}(\s|$)/;
+var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9\(\,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*(orderBy|orderByDesc)\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
@@ -579,7 +579,6 @@ var ModelProto = {
 
 Model.prototype = ModelProto;
 
-
 var Collection = function (parent, attr, data) {
     if ($.isArray(parent)) {
         data = parent;
@@ -587,7 +586,9 @@ var Collection = function (parent, attr, data) {
     }
     if (!parent) {
         parent = new ViewModel(false);
-        attr = '$list';
+    }
+    if (!attr) {
+        attr = "$list";
     }
 
     this.models = [];
@@ -619,7 +620,7 @@ Collection.prototype = {
             var modelsLen = this.models.length;
 
             if (data.length < modelsLen) {
-                this.remove(data.length, modelsLen - data.length)
+                this.splice(data.length, modelsLen - data.length)
             }
 
             var i = 0;
@@ -755,7 +756,7 @@ Collection.prototype = {
 }
 
 
-function RepeatSource(el, parent) {
+function RepeatSource(viewModel, el, parent) {
     var self = this;
     var attrRepeat = el.getAttribute('sn-repeat');
     var match = attrRepeat.match(rrepeat);
@@ -797,6 +798,12 @@ function RepeatSource(el, parent) {
 
         attrs.shift();
         collectionKey = attrs.join('.');
+
+    } else if (parentAlias == 'this') {
+        this.isFn = true;
+        this.fid = viewModel.getFunctionId('{' + collectionKey + '}').id;
+
+        collectionKey = collectionKey.replace(/\./, '|');
 
     } else {
         this.isGlobal = false;
@@ -1235,6 +1242,25 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var orderBy = repeatSource.orderBy;
         var isDesc = repeatSource.orderByType == "orderByDesc";
 
+
+        var parentSnData = {};
+
+        if (repeatSource.parent) {
+            closestElement(el, function (parentNode) {
+                if (parentNode.snRepeatSource == repeatSource.parent && parentNode.snData) {
+                    Object.assign(parentSnData, parentNode.snData);
+                    return true;
+                }
+            });
+        }
+
+        var collectionData;
+
+        if (repeatSource.isFn) {
+
+            collectionData = this.fns[repeatSource.fid].call(this, this.formatData(parentSnData, el));
+        }
+
         if (!collection) {
 
             if (repeatSource.isGlobal) {
@@ -1252,11 +1278,20 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 })
             }
 
-            collection = model && model.findByKey(repeatSource.collectionKey);
+            if (repeatSource.isFn) {
+                collection = new Collection(collectionData, repeatSource.collectionKey);
+
+            } else {
+                collection = model && model.findByKey(repeatSource.collectionKey);
+            }
 
             if (!collection) return;
 
             el.snCollection = collection;
+
+        } else if (repeatSource.isFn) {
+
+            collection.set(collectionData)
         }
 
         var elements = el.snElements || (el.snElements = []);
@@ -1286,16 +1321,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
 
             if (!hasElem) {
-                snData = {};
-
-                if (repeatSource.parent) {
-                    closestElement(el, function (parentNode) {
-                        if (parentNode.snRepeatSource == repeatSource.parent && parentNode.snData) {
-                            Object.assign(snData, parentNode.snData);
-                            return true;
-                        }
-                    });
-                }
+                snData = Object.assign({}, parentSnData);
                 snData[repeatSource.alias] = model;
 
             } else {
@@ -1432,7 +1458,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 if (node.snIf) throw new Error('can not use sn-if and sn-repeat at the same time!!please use filter instead!!');
 
                 var nextSibling = node.nextSibling;
-                var repeatSource = new RepeatSource(node, parentRepeatSource);
+                var repeatSource = new RepeatSource(self, node, parentRepeatSource);
 
                 node.snRepeatSource = repeatSource;
 
@@ -1627,5 +1653,9 @@ exports.createModel = function (props) {
 }
 
 exports.createCollection = function (props) {
-    return Object.assign(new Collection, props)
+    var model = Object.assign(new Collection, props);
+
+    if (props.defaultData) model.set(props.defaultData);
+
+    return model;
 }

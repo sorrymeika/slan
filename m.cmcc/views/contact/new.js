@@ -27,7 +27,6 @@ module.exports = Activity.extend({
                 person.set({
                     status: 1
                 });
-                Toast.showToast("已接受");
 
             }).catch(function (e) {
                 Toast.showToast(e.message);

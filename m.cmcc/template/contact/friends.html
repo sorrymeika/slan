@@ -10,7 +10,7 @@
         </form>
     </div>
 
-    <div class="ct_contactlist__group" sn-repeat="group in groups">
+    <div class="ct_contactlist__group" sn-repeat="group in this.groups()">
         <div class="hd fs_m pd_s ml_m">{group.letter}</div>
         <ul class="ct_contactlist__list bd_t bg_fff">
             <li class="bd_b flex" sn-repeat="item in group.list" data-forward="/contact/friend/{item.user_id}">

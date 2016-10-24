@@ -1,6 +1,7 @@
 var $ = require('$');
 var sl = require('core/base');
 var util = require('util');
+var bridge = require('bridge');
 var Loader = require('widget/loader');
 var Promise = require('promise');
 var Toast = require('widget/toast');
@@ -19,6 +20,45 @@ util.cnNum = function (num) {
         return num;
     }
 }
+
+//cmccBridge
+bridge.cmcc = {
+
+    //@bizType="register"|"resetPwd"|"smsLogin"
+    sendSms: function (phoneNo, bizType) {
+        if (!bizType) throw new Error('require bizType!!');
+
+        bridge.exec('cmcc', {
+            type: 'sendSms',
+            phoneNo: phoneNo,
+            bizType: bizType
+        });
+    },
+
+    registerUser: function (phoneNo, password, validCode, callback) {
+
+        bridge.exec('cmcc', {
+            type: 'registerUser',
+            phoneNo: phoneNo,
+            password: password,
+            bizType: bizType
+
+        }, callback);
+
+    },
+
+    //@loginType="sms"|"password"
+    login: function (phoneNo, password, loginType, callback) {
+
+        bridge.exec('cmcc', {
+            type: 'login',
+            phoneNo: phoneNo,
+            password: password,
+            loginType: loginType
+
+        }, callback);
+    }
+};
 
 function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 

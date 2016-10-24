@@ -61,6 +61,10 @@ ScrollView.prototype = {
         return this.touch.y;
     },
 
+    scrollToEnd: function (duration) {
+        this.scrollTo(0, this.scroller.offsetHeight, duration);
+    },
+
     destory: function () {
 
         this.touch.destory();

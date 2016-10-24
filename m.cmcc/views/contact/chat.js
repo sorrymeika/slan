@@ -24,6 +24,16 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
+        model.send = function () {
+            if (!this.data.content) return;
+
+            chat.send({
+                type: chat.MESSAGETYPE.TEXT,
+                content: this.data.content,
+                user_id: personId
+            });
+        }
+
         var loader = this.loader = new Loader(this.$el);
 
         loader.showLoading();
@@ -38,7 +48,15 @@ module.exports = Activity.extend({
                 messages: data.data
             });
 
-            self.bindScrollTo(model.refs.main);
+            self.scroll = self.bindScrollTo(model.refs.main).eq(0);
+
+            console.log(self.scroll);
+
+            self.scroll.scrollToEnd();
+
+            model.scrollToEnd = function () {
+                self.scroll.scrollToEnd();
+            }
 
         }).catch(function (e) {
             Toast.showToast(e.message);

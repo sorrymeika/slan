@@ -43,6 +43,15 @@
             "components/menu": "./components/menu",
             "components/imagePicker": "./components/imagePicker"
         },
+        "crypto": {
+            "cryptojs/core": "../webresource/js/cryptojs/core",
+            "cryptojs/mode-ecb": "../webresource/js/cryptojs/mode-ecb",
+            "cryptojs/enc-base64": "../webresource/js/cryptojs/enc-base64",
+            "cryptojs/cipher-core": "../webresource/js/cryptojs/cipher-core",
+            "cryptojs/aes": "../webresource/js/cryptojs/aes",
+            "util/aes": "../webresource/js/util/aes",
+            "util/rsa": "../webresource/js/util/rsa"
+        },
         "logical": {
             "logical/user": "./logical/user",
             "logical/chat": "./logical/chat",

@@ -302,6 +302,10 @@ Scroll.prototype = {
         return this.el.scrollTop;
     },
 
+    scrollToEnd: function (duration) {
+        this.scrollTo(0, this.el.scrollHeight, duration);
+    },
+
     scrollTo: function (x, y, duration) {
         var el = this.el;
 

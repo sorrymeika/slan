@@ -15,6 +15,6 @@
 </div>
 <div class="ct_chat__footer dock_blr flex bd_t h_l">
     <button class="icon-face"></button>
-    <form class="ct_chat__textbox flexitem ml_m"><input type="text"></form>
-    <button class="send pd_m bg_trans fs_m cl_333">发送</button>
+    <form class="ct_chat__textbox flexitem ml_m"><input sn-model="content" type="text" ref="text" sn-focus="this.scrollToEnd()" /></form>
+    <button class="send pd_m bg_trans fs_m cl_333" disabled="{!content}" sn-tap="this.send()">发送</button>
 </div>

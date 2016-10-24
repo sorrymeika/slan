@@ -1,70 +1,108 @@
-
 var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
-var Loader = require('../widget/loader');
-var model = require('../core/model');
-var animation = require('animation');
-var userModel = require("models/user");
-var md5 = require("util/md5").md5;
+var Loader = require('widget/loader');
+var Model = require('core/model2').Model;
+var Promise = require('promise');
+var Toast = require('widget/toast');
+var popup = require('widget/popup');
+
+var bridge = require('bridge');
+
+var aes = require('util/aes');
+
+
+var key = aes.genKey();
+
+console.log(key);
+
+var en = aes.encrypt(key, '我们');
+
+var de = aes.decrypt(key, en);
+
+console.log(en, 'de:', de);
+
 
 module.exports = Activity.extend({
-    events: {
-        'tap .js_login:not(.disabled)': function () {
-            var email = this.model.get('email');
-            var password = this.model.get('password');
-
-            if (!email || !util.validateEmail(email)) {
-                sl.tip('请输入正确的邮箱地址');
-                return;
-            }
-            if (!password) {
-                sl.tip('请输入密码');
-                return;
-            }
-
-            this.Loader.setParam({
-                email: email,
-                password: md5(password)
-
-            }).load();
-        }
-    },
 
     onCreate: function () {
         var self = this;
 
-        this.model = new model.ViewModel(this.$el, {
+        var model = this.model = new Model(this.$el, {
+            smsTime: 0
         });
-        this.bindScrollTo(this.model.refs.main);
 
-        this.Loader = new Loader({
-            url: '/api/user/signin',
-            check: false,
-            checkData: false,
-            $el: this.$el,
-            success: function (res) {
-                if (!res.success) {
-                    sl.tip(res.msg);
+        model.back = function () {
+            self.back(self.swipeRightBackAction)
+        }
+
+        model.login = function () {
+            var phoneNo = this.data.phoneNo;
+            var password = this.data.password;
+
+            if (!phoneNo) {
+                Toast.showToast('请填写手机号！');
+                return;
+            }
+
+            if (!password) {
+                Toast.showToast('请填写验证码！');
+                return;
+            }
+
+            bridge.cmcc.login(phoneNo, password, "sms", function (res) {
+                if (res.success) {
+                    model.back();
 
                 } else {
-                    userModel.set(res.user);
-
-                    self.back(self.route.query.success || "/");
-
-                    self.setResult("Login");
+                    Toast.showToast(res.message);
                 }
-            },
-            error: function (res) {
-                sl.tip(res.msg);
+            });
+        }
+
+        model.sendSms = function () {
+            if (this.data.smsTime > 0) return;
+
+            var phoneNo = this.data.phoneNo;
+
+            if (!phoneNo) {
+                Toast.showToast('请填写手机号！');
+                return;
             }
-        });
+
+            bridge.cmcc.sendSms(phoneNo, "smsLogin");
+
+            this.leftTime = Date.now() + 60 * 1000;
+
+            this.timer = setInterval(function () {
+
+                var left = Math.round((model.leftTime - Date.now()) / 1000);
+
+                if (left <= 0) {
+                    clearInterval(model.timer)
+                } else {
+                    model.set({
+                        smsTime: left
+                    })
+                }
+
+            }, 1000)
+
+            this.set({
+                smsTime: 59
+            })
+        }
+
+        var loader = this.loader = new Loader(this.$el);
+
+        self.bindScrollTo(model.refs.main);
     },
 
     onShow: function () {
-        var that = this;
+        var self = this;
     },
 
     onDestory: function () {
+        this.model.destroy();
     }
 });

@@ -33,9 +33,9 @@ var Util = {
         return min + Math.floor(Math.random() * (max - min + 1));
     },
 
-    uuid: function () {
+    randomString: function (len) {
         var chars = CHARS, uuid = '', rnd = 0, r;
-        for (var i = 0; i < 36; i++) {
+        for (var i = 0; i < len; i++) {
             if (i == 8 || i == 13 || i == 18 || i == 23) {
                 uuid += '-';
             } else if (i == 14) {
@@ -48,6 +48,10 @@ var Util = {
             }
         }
         return uuid;
+    },
+
+    uuid: function () {
+        return this.randomString(36);
     },
 
     indexOf: function (arr, key, val) {

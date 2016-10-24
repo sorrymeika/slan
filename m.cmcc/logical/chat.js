@@ -64,6 +64,10 @@ var chat = {
             page: page || 1,
             pageSize: 20
         });
+    },
+
+    send: function () {
+
     }
 
 };

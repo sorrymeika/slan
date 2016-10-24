@@ -10,7 +10,7 @@
                 <p class="fs_m">{data.quan.quan_name}</p>
                 <p class="fs_s cl_999">{util.formatDate(data.date)}</p>
             </div>
-            <button class="btn_bd_s dp_b" sn-tap="this.follow()"><i class="va_m">{data.quan.is_follow?'－':'＋'}</i><span class="va_m">{data.quan.is_follow?'取消关注':'关注'}</span></button>
+            <button class="btn_bd_s dp_b" sn-tap="this.follow()"><i class="va_m">{data.quan.is_follow?' ':'＋'}</i><span class="va_m">{data.quan.is_follow?'取消关注':'关注'}</span></button>
         </div>
         <div class="mt_l mb_l fs_m lh_xs" sn-html="{data.content}"></div>
         <div class="mt_xxl mb_l ta_c pq_article__action">

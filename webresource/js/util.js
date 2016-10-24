@@ -87,12 +87,9 @@ var util = {
         return ++guid;
     },
 
-    uuid: function () {
-        var chars = CHARS,
-            uuid = '',
-            rnd = 0,
-            r;
-        for (var i = 0; i < 36; i++) {
+    randomString: function (len) {
+        var chars = CHARS, uuid = '', rnd = 0, r;
+        for (var i = 0; i < len; i++) {
             if (i == 8 || i == 13 || i == 18 || i == 23) {
                 uuid += '-';
             } else if (i == 14) {
@@ -105,6 +102,10 @@ var util = {
             }
         }
         return uuid;
+    },
+
+    uuid: function () {
+        return this.randomString(36);
     },
 
     isFalse: function (value) {

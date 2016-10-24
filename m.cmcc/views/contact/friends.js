@@ -13,6 +13,34 @@ var contact = require('logical/contact');
 
 module.exports = Activity.extend({
 
+    groups: function () {
+        var model = this.model;
+        var groups = {};
+        var data = model.data.friendList;
+
+        if (!data) return;
+
+        data.forEach(function (item) {
+            var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
+
+            if (!groups[letter]) {
+                groups[letter] = [];
+            }
+
+            groups[letter].push(item);
+        });
+
+        groups = Object.keys(groups).map(function (key) {
+
+            return {
+                letter: key,
+                list: groups[key]
+            };
+        });
+
+        return groups;
+    },
+
     onCreate: function () {
         var self = this;
 
@@ -20,6 +48,8 @@ module.exports = Activity.extend({
             title: '我的好友',
             letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('')
         });
+
+        model.groups = this.groups.bind(this);
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
@@ -31,33 +61,12 @@ module.exports = Activity.extend({
 
         Promise.all([contact.friends(), this.waitLoad()]).then(function (results) {
 
-            console.log(results);
-
-            var data = results[0].data;
-
-            var groups = {};
-
-            data.forEach(function (item) {
-                var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
-
-                if (!groups[letter]) {
-                    groups[letter] = [];
-                }
-
-                groups[letter].push(item);
-            });
-
-            groups = Object.keys(groups).map(function (key) {
-
-                return {
-                    letter: key,
-                    list: groups[key]
-                };
-            });
+            var friendList = results[0].data;
 
             model.set({
-                groups: groups
+                friendList: friendList
             });
+
             self.bindScrollTo(model.refs.main);
 
         }).catch(function (e) {
