@@ -66,6 +66,11 @@ footer { position: absolute; bottom: 0px; left: 0px; width: 100%; z-index: 200; 
 .cp_popup__action { text-align: center; margin: 15px 15px; display: -webkit-box; }
 .cp_popup__action .btn { color: #fff; border: 0px; height: 38px; margin: 0 8px; display: block; -webkit-box-flex: 1; font-size: 14px; width: 0; }
 .cp_popup__action .btn_cancel { background: #9fa7a9; }
+.cp_popup__up { width: auto; -webkit-transform: translate(0%,100%); -webkit-transform-origin: 0% 0%; top: auto; left: 15px; right: 15px; bottom: 15px; }
+.cp_popup__up.show{ opacity: 1; -webkit-transform: translate(0%,0%); }
+.cp_popup__option { height: 44px; line-height: 44px; text-align: center; position: relative; }
+.cp_popup__option:after { content: ''; display: block; width: 200%; border-bottom: 1px solid #ddd; -webkit-transform: scale(.5); -webkit-transform-origin: 0% 0%;}
+
 
 .cp_tab { width: 100%; right: 0; left: 0; bottom: 0; position: absolute; z-index: 2; top: 0; background-color: #fff; overflow: hidden; }
 .cp_tab__head { width: 100%; position: relative; background-color: #fff; height: 40px; line-height: 40px; text-align: center; }
@@ -90,9 +95,9 @@ footer { position: absolute; bottom: 0px; left: 0px; width: 100%; z-index: 200; 
 .cp_photoviewer__item img { max-width: 3.2rem; height: auto; display: block; position: absolute; top: 50%; left: 50%; }
 
 
-.cp_switch { width: 40px; height: 20px; border-radius: 15px; background: #ccc; position: relative; }
-.cp_switch:before { width: 20px; height: 20px; border-radius: 50%; -webkit-box-shadow: #999 0px 0px 5px inset; box-shadow: #999 0px 0px 5px ; content: ''; display: block; background-color: #fff; -webkit-transition: all 200ms ease-out 0ms; position: absolute; left: 0; top: 0; z-index: 2; }
-.cp_switch:after { width: 40px; height: 20px; border-radius: 15px; background-color: #42be52; -webkit-transition: all 200ms ease-out 0ms; z-index: 0; position: absolute; content: ''; display: block; width: 20px; overflow: hidden; left: 0; top: 0; }
+.cp_switch { width: 40px; height: 24px; border-radius: 12px; background: #ccc; position: relative; }
+.cp_switch:before { width: 24px; height: 24px; border-radius: 50%; -webkit-box-shadow: #999 0px 0px 5px inset; box-shadow: #999 0px 0px 5px ; content: ''; display: block; background-color: #fff; -webkit-transition: all 200ms ease-out 0ms; position: absolute; left: 0; top: 0; z-index: 2; }
+.cp_switch:after { width: 40px; height: 24px; border-radius: 15px; background-color: #42be52; -webkit-transition: all 200ms ease-out 0ms; z-index: 0; position: absolute; content: ''; display: block; width: 24px; overflow: hidden; left: 0; top: 0; }
 .cp_switch_on:after { width: 40px; }
 .cp_switch_on:before { -webkit-transform: translate(20px,0%); }
 

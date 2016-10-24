@@ -7,13 +7,26 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var ONES = {
+    heduohao: '和多号'
+}
+
 module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
 
+        var type = this.route.params.type;
+
         var model = this.model = new Model(this.$el, {
-            title: '系统设置'
+            setting: {
+                enable_push: true,
+                enable_mcpush: true,
+                enable_apppush: true,
+                enable_smspush: true,
+                enable_pushsound: false
+            },
+            title: ONES[type] || '系统设置'
         });
 
         model.back = function () {

@@ -7,55 +7,48 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
-var contact = require('logical/contact');
-
+var publicquan = require('logical/publicquan');
 
 module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
-        var type = this.route.query.type;
-        var personId = this.route.params.id;
 
         var model = this.model = new Model(this.$el, {
-            title: '详细资料'
+            title: '选择公众圈'
         });
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.acceptFriend = function () {
-            contact.acceptFriend(personId).then(function () {
-                contact.trigger('acceptFriend', personId);
+        model.save = function () {
+            var list = this.data.list;
 
-                self.forward("/contact/chat/" + personId + "?from=/contact/new");
-
-            }).catch(function (e) {
-                Toast.showToast(e.message);
-
-            });
-        }
-
-        model.rejectFriend = function () {
-            contact.rejectFriend(personId).then(function () {
-                contact.trigger('rejectFriend', personId);
-
-                self.back();
-
-            }).catch(function (e) {
-                Toast.showToast(e.message);
-            });
+            self.back(self.swipeRightBackAction, {
+                list: util.filter(list, 'isSelected', true).map(function (item) {
+                    return item.quan;
+                })
+            })
         }
 
         var loader = this.loader = new Loader(this.$el);
+        var routeData = this.route.data;
+
+        console.log(routeData);
 
         loader.showLoading();
 
-        Promise.all([contact.person(personId), this.waitLoad()]).then(function (results) {
+        Promise.all([publicquan.myfollow(), this.waitLoad()]).then(function (results) {
+            var list = results[0].data;
+
+            if (routeData.list)
+                list.forEach(function (item) {
+                    item.isSelected = util.indexOf(routeData.list, 'quan_id', item.quan_id) == -1;
+                });
 
             model.set({
-                person: results[0].data
+                list: list
             })
 
             self.bindScrollTo(model.refs.main);

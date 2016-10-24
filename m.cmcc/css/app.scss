@@ -15,6 +15,9 @@
 .bd_all { background-image: url(../images/border-bottom.png),url(../images/border-top.png),url(../images/border-left.png),url(../images/border-right.png); background-repeat: repeat-x,repeat-x, repeat-y, repeat-y; background-position: 0 bottom,0 top, left 0, right 0; background-size: auto 1px, auto 1px, 1px auto, 1px auto; }
 .bd_n { border: 0; }
 
+.radio.checked:before { border-color: $color; }
+.radio.checked:after { background: $color; }
+
 
 .icon_arrow { @include arrow(#fff,10px); }
 .icon_cm,.icon_vm { position: relative; }
@@ -30,8 +33,9 @@ header img { display: block; width: 33px; height: 33px; }
 .head_title { color: $fontcolor; font-size: 16px; font-weight: 400; position: absolute; left: 0px; top: 0; right: 0; bottom: 0; }
 .head_left { position: absolute; left: 0px; top: 0; z-index: 10; text-align: center; display: -webkit-box; }
 .head_right { position: absolute; right: 0px; top: 0; text-align: center; display: -webkit-box; }
-.head_right button { display: block; height: 44px; padding: 0 10px; min-width: 44px; font-size: 14px; background-color: #fff; }
-.head_back { width: 44px; height: 44px; z-index: 1000; position: absolute; top: 0; left: 0; }
+.head_right button,.head_left button { display: block; height: 44px; padding: 0 10px; min-width: 44px; font-size: 14px; background-color: transparent; }
+.head_back { width: 44px; height: 44px; z-index: 1000; position: absolute; top: 0; left: 0; background-color: transparent; }
+.head_back:active { background-color: #ddd; height: 43px; }
 .head_back:before { content: ""; @include arrow_left(#999); top: -1px; }
 
 .head_right .btn_xs { color: $color; }
@@ -69,11 +73,17 @@ header img { display: block; width: 33px; height: 33px; }
 .flexavg { display: block; -webkit-box-flex: 1; width: 0px; }
 input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 
-.flex,.flex_t,.flex_re { display: -webkit-box; display: flex; }
+.flex,.flex_t,.flex_re {
+    display: -webkit-box; display: flex;
+    > a { display: block }
+    > a:active { background-color: rgba(0,0,0,.1); border-radius: 4px; }
+}
 .flex { -webkit-box-align: center; align-items: center; }
 .flex_t { align-items: flex-start; }
-.flex_re { -webkit-box-direction: reverse; flex-direction: row-reverse; }
+.flex_re { -webkit-box-direction: reverse; -webkit-box-pack: end; flex-direction: row-reverse; }
 
+.of_h { overflow: hidden; }
+.of_v { overflow: visible; }
 
 .dp_b { display: block; }
 .dp_i { display: inline; }
@@ -89,6 +99,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .va_m { vertical-align: middle; }
 .ta_c { text-align: center; }
 .ta_r { text-align: right; }
+.ta_l { text-align: left; }
 
 .dock { position: absolute; bottom: 0; left: 0; right: 0; top: 0; }
 .dock_t { position: absolute; top: 0; }
@@ -110,6 +121,8 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 
 .pt_1 { padding-top: 1px; }
 .pt_s { padding-top: 5px; }
+.pt_m { padding-top: 10px; }
+.pt_l { padding-top: 15px; }
 
 .pl_s { padding-left: 5px; }
 .pl_m { padding-left: 10px; }
@@ -117,8 +130,8 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .pr_s { padding-right: 5px; }
 .pr_m { padding-right: 10px; }
 
+.pb_s { padding-bottom: 5px; }
 .pb_m { padding-bottom: 10px; }
-.pt_m { padding-top: 10px; }
 
 .mg_s { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
 .mg_m { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
@@ -150,9 +163,13 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .to_e2 { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .to_e3 { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 
+.fs_xxs { font-size: 8px}
+.fs_xs { font-size: 10px}
 .fs_s { font-size: 12px; }
 .fs_m { font-size: 14px; }
 .fs_l { font-size: 16px; }
+.fs_xl { font-size: 18px; }
+.fs_xxl { font-size: 20px; }
 
 .fw_xs { font-weight: 100; }
 .fw_s { font-weight: 200; }
@@ -163,12 +180,16 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .cl_dark { color: $colordark; }
 .cl_light { color: $colorlight; }
 .cl_fff { color: #fff; }
+.cl_ccc { color: #ccc; }
 .cl_999 { color: #999; }
+.cl_666 { color: #666; }
+.cl_333 { color: #333; }
 .cl_000 { color: #000; }
-.cl_s { color: #FF931E; }
 
-.bg_non,.transparent { background-color: rgba(0,0,0,0); }
+.bg_non,.bg_0000,.transparent,.bg_trans { background-color: rgba(0,0,0,0); }
 .bg_fff { background-color: #fff; }
+.bg_f7 { background-color: #f7f7f7; }
+.bg_eee { background-color: #eee; }
 .bg_ddd { background-color: #ddd; }
 .bg_000 { background-color: #000; }
 
@@ -181,16 +202,21 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .lh_bar { line-height: 44px; }
 .lh_1 { line-height: 1; }
 
+.cir_d { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; }
 .cir { border-radius: 50%; overflow: hidden; }
+.cir_xs { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; }
 .cir_s { width: 30px; height: 30px; border-radius: 50%; overflow: hidden; }
-.cir_m { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; }
-.cir_l { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; }
-.cir_xl { width: 90px; height: 90px; border-radius: 50%; }
-.cir_xxl { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; }
+.cir_m { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; }
+.cir_l { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; }
+.cir_xl { width: 60px; height: 60px; border-radius: 50%; }
+.cir_xxl { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; }
 
+.sqr_d { width: 44px; height: 44px; }
 .sqr_s { width: 33px; height: 33px; }
-.sqr_m { width: 44px; height: 44px; }
-.sqr_l { width: 60px; height: 60px; }
+.sqr_m { width: 40px; height: 40px; }
+.sqr_l { width: 50px; height: 50px; }
+.sqr_xl { width: 60px; height: 60px; }
+.sqr_xxl { width: 90px; height: 90px; }
 
 .zi_1 { z-index: 1; }
 .zi_2 { z-index: 2; }

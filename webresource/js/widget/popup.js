@@ -33,7 +33,7 @@ module.exports = {
         <div class="cp_popup__desc">'+ params.content + '</div>\
         <div class="cp_popup__action"><button class="btn" click="action">'+ params.btn + '</button></div>';
 
-        this.popup({
+        return this.popup({
             content: content,
             action: function () {
                 this.hide();
@@ -56,7 +56,7 @@ module.exports = {
         <div class="cp_popup__desc">'+ params.content + '</div>\
         <div class="cp_popup__action"><button class="btn btn_cancel" click="cancelAction">'+ params.cancelText + '</button><button class="btn" click="confirmAction">' + params.confirmText + '</button></div>';
 
-        this.popup({
+        return this.popup({
             content: content,
             confirmAction: params.confirmAction,
             cancelAction: function () {
@@ -73,7 +73,7 @@ module.exports = {
         <div class="cp_popup__desc"><input class="cp_popup__input" placeholder="'+ params.placeholder + '"></div>\
         <div class="cp_popup__action"><button class="btn btn_cancel" click="cancelAction">'+ params.cancelText + '</button><button class="btn" click="confirmAction">' + params.confirmText + '</button></div>';
 
-        this.popup({
+        return this.popup({
             content: content,
             confirmAction: function () {
                 var value = this.find('.cp_popup__input').val();
@@ -88,7 +88,33 @@ module.exports = {
 
     },
 
-    //@params={content:'内容<button click="confirm"></button>',initialize:function(){},confirm:function(){}}
+    //@params={ options: [{ text: 'xxx', click: function(){} }] }
+    options: function (params) {
+        var options = params.options;
+        var content = '';
+
+        var popupParams = {
+            className: 'cp_popup__up',
+            tapMaskToHide: true
+        };
+
+        options.forEach(function (item, i) {
+            var click = '';
+            if (typeof item.click === 'function') {
+                popupParams["optionClick" + i] = item.click;
+                click = ' click="optionClick' + i + '"';
+            }
+
+            content += '<div class="cp_popup__option"' + click + '>' + item.text + '</div>';
+        })
+
+        popupParams.content = content;
+
+        return this.popup(popupParams)
+
+    },
+
+    //@params={ className: 'xxx', content:'内容<button click="confirm"></button>',initialize:function(){},confirm:function(){}}
     popup: function (params) {
         var ret = {
 
@@ -96,9 +122,17 @@ module.exports = {
                 return ret.$container.find(selector)
             },
 
+            show: function () {
+
+                this.$container.addClass('show');
+                $mask.addClass('show');
+            },
+
             hide: function () {
 
                 this.promise.then(function () {
+
+                    params.tapMaskToHide && $mask.off('tap', ret.hide);
 
                     (popups.length <= 1) && $mask.removeClass('show');
                     ret.$container.removeClass('show');
@@ -120,7 +154,7 @@ module.exports = {
             return new Promise(function (resolve, reject) {
                 ret.resolve = resolve;
 
-                var $container = $('<div class="cp_popup__container"></div>')
+                var $container = $('<div class="cp_popup__container' + (params.className ? ' ' + params.className : '') + '"></div>')
                     .on($.fx.transitionEnd, function () {
                         if (!$(this).hasClass('show')) {
 
@@ -146,6 +180,10 @@ module.exports = {
 
                 showMask();
                 $container.addClass('show');
+
+                if (params.tapMaskToHide) {
+                    $mask.one('tap', $.proxy(ret.hide, ret));
+                }
 
                 popups.push(ret);
             });

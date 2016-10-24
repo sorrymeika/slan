@@ -4,13 +4,13 @@
 </header>
 <div ref="main" class="main qn_history bg_fff">
     <div class="qn_history__item flex_t mt_l" sn-repeat="item in data">
-        <p class="date" sn-html="{this.date(item.date)}"></p>
+        <p class="date" sn-html="{this.date(item.date)}" data-forward="/contact/"></p>
         <div class="con ml_m flexitem fw_s {item.imgs.length?'':' ref'}">
             <p class="text">{item.content}</p>
             <ul class="clearfix" sn-if="item.imgs.length">
                 <li class="fl_l mr_m mt_m" sn-repeat="img in item.imgs"><img sn-src="{img}" class="gl_img" /></li>
             </ul>
         </div>
-        <p class="icon-del" sn-tap="this.del()"></p>
+        <p class="icon-del" sn-tap="this.del(item.msg_id)"></p>
     </div>
 </div>

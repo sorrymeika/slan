@@ -7,7 +7,8 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
-var contact = require('logical/contact');
+var publicquan = require('logical/publicquan');
+
 
 module.exports = Activity.extend({
 
@@ -15,47 +16,38 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '新的朋友'
         });
-
-        model.acceptFriend = function (personId, e) {
-            contact.acceptFriend(personId).then(function () {
-                contact.trigger('acceptFriend', personId);
-
-                var person = model.getModel('newFriends').find("user_id", personId);
-
-                person.set({
-                    status: 1
-                });
-                Toast.showToast("已接受");
-
-            }).catch(function (e) {
-                Toast.showToast(e.message);
-            });
-
-            return false;
-        }
-
-        model.del = function (personId, e) {
-
-            var person = model.getModel('newFriends').remove("user_id", personId);
-
-
-            return false;
-        }
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
+        }
+
+        model.refs.searchform.onsubmit = function () {
+            if (model.data.search) {
+
+                publicquan.search(model.data.search)
+                    .then(function (res) {
+                        model.set({
+                            isSearch: true,
+                            searchResult: res.data
+                        })
+
+                    }).catch(function (e) {
+                        Toast.showToast(e.message);
+                    });
+
+            }
+            return false;
         }
 
         var loader = this.loader = new Loader(this.$el);
 
         loader.showLoading();
 
-        Promise.all([contact.newFriends(), this.waitLoad()]).then(function (results) {
+        Promise.all([publicquan.recommend(), this.waitLoad()]).then(function (results) {
 
             model.set({
-                newFriends: results[0].data
+                recommend: results[0].data
             })
 
             self.bindScrollTo(model.refs.main);
@@ -66,11 +58,11 @@ module.exports = Activity.extend({
         }).then(function () {
             loader.hideLoading();
         });
-
     },
 
     onShow: function () {
         var self = this;
+        this.model.refs.search.focus();
     },
 
     onDestory: function () {

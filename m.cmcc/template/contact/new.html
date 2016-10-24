@@ -17,8 +17,8 @@
                 <div class="fs_m">{item.user_name}</div>
                 <div class="fs_s">{item.msg}</div>
             </div>
-            <button class="btn_xs" sn-tap="false">接受</button>
-            <button class="icon-xx" sn-tap="false"></button>
+            <button sn-if="item.status==-1" class="btn_xs" sn-tap="this.acceptFriend(item.user_id)">接受</button>
+            <button class="icon-xx" sn-tap="this.del(item.user_id)"></button>
         </div>
     </div>
 </div>

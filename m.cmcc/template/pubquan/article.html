@@ -10,14 +10,14 @@
                 <p class="fs_m">{data.quan.quan_name}</p>
                 <p class="fs_s cl_999">{util.formatDate(data.date)}</p>
             </div>
-            <button class="btn_bd_s dp_b"><i class="va_m">＋</i><span class="va_m">关注</span></button>
+            <button class="btn_bd_s dp_b" sn-tap="this.follow()"><i class="va_m">{data.quan.is_follow?'－':'＋'}</i><span class="va_m">{data.quan.is_follow?'取消关注':'关注'}</span></button>
         </div>
         <div class="mt_l mb_l fs_m lh_xs" sn-html="{data.content}"></div>
         <div class="mt_xxl mb_l ta_c pq_article__action">
-            <div class="icon-newslike dp_ib cir_l">
+            <div class="icon-newslike dp_ib cir_xl" sn-tap="this.likePubQuanMsg()">
                 <p class="fs_s">{util.cnNum(data.like)}</p>
             </div>
-            <div class="icon-newssee dp_ib cir_l">
+            <div class="icon-newssee dp_ib cir_xl">
                 <p class="fs_s">{util.cnNum(data.see)}</p>
             </div>
         </div>
@@ -26,19 +26,19 @@
     <div class="pq_article__comments bd_tb bg_fff mt_l" ref="comments">
         <div class="lh_m pl_m bd_b fs_m flex">
             <div class="flexitem">评论</div>
-            <p class="icon-refresh sqr_m ta_r pr_m"></p>
+            <p class="icon-refresh sqr_d ta_r pr_m"></p>
             <p class="sort"><span>倒序</span>
                 <i class="icon-sort"></i></p>
         </div>
-        <div class="pq_article__comments_item bd_b ml_m" sn-repeat="item in comments">
+        <div class="pq_article__comments_item bd_b ml_m" sn-repeat="item in comments|orderByDesc:date">
             <div class="flex pt_m">
                 <img sn-src="{item.avatars}" class="cir_s" />
                 <div class="flexitem ml_m">
                     <p class="fs_m">{item.user_name}</p>
                     <p class="fs_s cl_999">{util.formatDate(item.date)}</p>
                 </div>
-                <a class="icon-comment dp_b" href="javascript:;"></a>
-                <a class="icon-del2 dp_b" href="javascript:;"></a>
+                <a class="icon-comment dp_b" href="javascript:;" sn-tap="this.comment(item.user_id,item.user_name)"></a>
+                <a sn-if="item.user_id==user.user_id" sn-tap="this.delComment(item.comment_id)" class="icon-del2 dp_b" href="javascript:;"></a>
             </div>
             <div class="mt_s pb_m fs_m">{item.content}</div>
         </div>
@@ -46,9 +46,9 @@
 
 </div>
 <footer class="pq_article__chatbox bd_t flex">
-    <form class="text flexitem">
-        <textarea placeholder="说几句话吧..." ref="chatbox" />
-    </form>
-    <div class="icon-comment3 sqr_l"></div>
-    <div class="icon-heart3 sqr_l"></div>
+    <div class="text flexitem pt_s pl_m" sn-tap="this.comment()">
+        <span class="fs_m cl_ccc dp_b">说几句话吧...</span>
+    </div>
+    <div class="icon-comment3 sqr_l" data-forward="/pubquan/myarticles"></div>
+    <div class="icon-heart3 sqr_l" sn-tap="this.fav()"></div>
 </footer>

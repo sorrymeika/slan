@@ -1,23 +1,21 @@
 <header class="header_trans">
     <div class="head_back" sn-tap="this.back()"></div>
-    <div class="head_right">
-        <button class="pq_item__header_btn">取消关注</button>
-    </div>
 </header>
 <div class="main pq_item" ref="main">
     <div class="pq_item__info">
-        <div class="flex_t">
-            <div class="img ml_l mt_l"><img sn-src="{quanInfo.quan_m_pic}" /></div>
-            <div class="flexitem ml_l mt_l">
+        <div class="flex_t pt_l">
+            <div class="img ml_l"><img sn-src="{quanInfo.quan_m_pic}" /></div>
+            <div class="flexitem ml_l">
                 <div class="name fs_m">{quanInfo.quan_name}</div>
                 <div class="follow fs_s mt_l">{util.cnNum(quanInfo.follow_num)}关注 | 8新帖</div>
             </div>
+            <button class="pq_item__header_btn" sn-tap="this.follow()">{quanInfo.is_follow?'取消关注':'关注'}</button>
         </div>
-        <div class="cl_fff lh_xs fs_m mt_s ml_m mr_m">{quanInfo.summary}</div>
+        <div class="cl_fff lh_xs fs_m pt_s ml_m mr_m">{quanInfo.summary}</div>
     </div>
     <div class="pq_item__articles">
         <div class="hd">最新帖子</div>
-        <div class="pq_item__articles_item bd_tb bg_fff mb_l" sn-repeat="item in newArticles" data-forward="/pubquan/article/{item.msg_id}">
+        <div class="pq_item__articles_item bd_tb bg_fff mb_l" sn-repeat="item in newArticles|orderByDesc:date" data-forward="/pubquan/article/{item.msg_id}">
             <p class="title fs_m h_m lh_m ta_e ml_m mr_m">{item.title}</p>
             <ul class="imgs clearfix">
                 <li class="img fl_l ml_m" sn-repeat="img in item.imgs"><img sn-src="{img}" /></li>

@@ -26,7 +26,7 @@ var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURICom
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
-var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
+var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*(orderBy|orderByDesc)\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
@@ -222,6 +222,7 @@ function updateNode(viewModel, el) {
                         }
                         nextElement = currentElement.nextSibling;
                     }
+
                     return currentElement.nextSibling;
                 }
             }
@@ -352,7 +353,7 @@ var Model = function (parent, key, data) {
     }
 
     this.type = typeof data == 'object' ? 'object' : 'value';
-    parent.data[key] = this.data = this.type == 'object' ? $.extend({}, data) : data;
+    this.data = this.type == 'object' ? $.extend({}, data) : data;
 
     this.model = {};
     this.parent = parent;
@@ -484,6 +485,8 @@ var ModelProto = {
 
                     if (!(model[key] instanceof Model)) {
                         model = model[key] = new Model(this, key, {});
+                        this.data[key] = model.data;
+
                     } else {
                         model = model[key];
                     }
@@ -641,13 +644,46 @@ Collection.prototype = {
         return this;
     },
 
-    find: function (fn) {
+    find: function (key, val) {
+        var fn;
+
+        if (typeof key === 'string' && val !== undefined) {
+            fn = function (item) {
+                return item[key] == val;
+            }
+        }
+        else fn = key;
+
         for (var i = 0; i < this.models.length; i++) {
             if (fn.call(this, this.data[i], i)) {
                 return this.models[i];
             }
         }
         return null;
+    },
+
+
+    add: function (data) {
+        var model;
+        var length;
+
+        if (!$.isArray(data)) {
+            data = [data];
+        }
+
+        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
+            var dataItem = data[i];
+            length = this.models.length;
+            model = new Model(this, length, dataItem);
+
+            this.models.push(model);
+            this.data.push(model.data);
+        }
+        this.root.updateViewNextTick();
+    },
+
+    unshift: function (data) {
+        this.insert(0, data);
     },
 
     insert: function (index, data) {
@@ -666,45 +702,46 @@ Collection.prototype = {
             model = new Model(this, count, dataItem);
 
             this.models.splice(count, 0, model);
+            this.data.splice(count, 0, model.data);
         }
+
+        console.log(this.data);
 
         this.root.updateViewNextTick();
     },
 
-    add: function (data) {
-        var model;
-        var length;
 
-        if (!$.isArray(data)) {
-            data = [data];
-        }
+    splice: function (start, count, data) {
+        if (!count) count = 1;
 
-        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
-            var dataItem = data[i];
-            length = this.models.length;
-            model = new Model(this, length, dataItem);
-            this.models.push(model);
-        }
-        this.root.updateViewNextTick();
+        this.models.splice(start, count);
+        this.data.splice(start, count);
+
+        if (data)
+            this.insert(start, data);
+        else
+            this.root.updateViewNextTick();
     },
 
-    remove: function (start, count) {
-        var models;
+    remove: function (key, val) {
+        var fn;
 
-        if (typeof start == 'function') {
-            models = [];
-            for (var i = this.models.length - 1; i >= 0; i--) {
-                if (start.call(this, this.data[i], i)) {
-                    models.push(this.models.splice(i, 1)[0]);
-                    this.data.splice(i, 1);
-                }
+        if (typeof key === 'string' && val !== undefined) {
+            fn = function (item) {
+                console.log(item);
+
+                return item[key] == val;
             }
+        }
+        else fn = key;
 
-        } else {
-            if (!count) count = 1;
+        var models = [];
 
-            models = this.models.splice(start, count);
-            this.data.splice(start, count);
+        for (var i = this.models.length - 1; i >= 0; i--) {
+            if (fn.call(this, this.data[i], i)) {
+                models.push(this.models.splice(i, 1)[0]);
+                this.data.splice(i, 1);
+            }
         }
 
         this.root.updateViewNextTick();
@@ -742,7 +779,8 @@ function RepeatSource(el, parent) {
     this.parent = parent;
     this.source = el;
     this.children = [];
-    this.orderBy = match[5];
+    this.orderByType = match[5];
+    this.orderBy = match[6];
     this.attrs = attrs;
     this.parentAlias = parentAlias;
 
@@ -859,6 +897,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var eventCode = target.getAttribute('sn-' + this.cid + e.type);
         var fn;
         var ctx;
+
 
         if (eventCode == 'false') {
             return false;
@@ -1194,6 +1233,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var model;
         var offsetParent = repeatSource.offsetParent;
         var orderBy = repeatSource.orderBy;
+        var isDesc = repeatSource.orderByType == "orderByDesc";
 
         if (!collection) {
 
@@ -1292,8 +1332,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             list.sort(function (a, b) {
                 a = a.model.data[orderBy];
                 b = b.model.data[orderBy];
-                return a > b ? 1 : a < b ? -1 : 0;
+                return isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
             });
+
 
         list.forEach(function (item, index) {
             var elem = item.el;
@@ -1378,7 +1419,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             self.twoWayBinding(node);
 
             var parentRepeatSource;
-            for (var parentNode = (node.snIf || node).parentNode; parentNode && !parentNode.snViewModel; parentNode = parentNode.parentNode) {
+            for (var parentNode = (node.snIf || node).parentNode; parentNode && !parentNode.snViewModel;
+                parentNode = (parentNode.snIf || parentNode).parentNode) {
+
                 if (parentNode.snRepeatSource) {
                     parentRepeatSource = parentNode.snRepeatSource;
                     break;

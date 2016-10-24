@@ -1,0 +1,22 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">发帖</div>
+    <div class="head_right"><button sn-tap="this.submit()">发送</button></div>
+</header>
+<div class="main pq_publish pr_m pl_m" ref="main">
+    <div class="h_m bd_b">
+        <input sn-model="title" type="text" class="pq_publish__title" placeholder="输入帖子标题" />
+    </div>
+    <div class="pq_publish__con">
+        <textarea sn-model="content" placeholder="输入帖子正文" /></textarea>
+    </div>
+    <div class="pq_publish__img clearfix">
+        <button class="quan-addimage fl_l" sn-tap="this.selectImage()"></button>
+        <img sn-src="{item.thumbnail}" class="fl_l" sn-repeat="item in images" />
+    </div>
+    <div class="pq_publish__quan clearfix">
+        <p class="fs_m fl_l" sn-repeat="item in quan">{item.quan_name}</p>
+        <button class="btn_add" sn-tap="this.addQuan()">添加圈子</button>
+    </div>
+
+</div>

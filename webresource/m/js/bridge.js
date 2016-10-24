@@ -94,12 +94,24 @@
                     }, callback);
                 }
             },
+
             getDeviceToken: function (callback) {
                 hybrid('getDeviceToken', callback);
             },
 
             statusBar: function (type) {
                 hybrid('statusBar', type);
+            },
+
+            qrcode: {
+
+                //@callback=function({code:xxxx}){}
+                scan: function (callback) {
+                    hybrid('qrcode', {
+                        type: 'scan'
+
+                    }, callback);
+                }
             },
 
             assets: {

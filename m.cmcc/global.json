@@ -40,7 +40,8 @@
     },
     "js": {
         "components": {
-            "components/menu": "./components/menu"
+            "components/menu": "./components/menu",
+            "components/imagePicker": "./components/imagePicker"
         },
         "logical": {
             "logical/user": "./logical/user",
@@ -93,6 +94,7 @@
         "widget/toast": "../webresource/js/widget/toast",
         "widget/popup": "../webresource/js/widget/popup",
         "widget/slider": "../webresource/m/js/widget/slider",
-        "anim/default": "../webresource/m/js/anim/default"
+        "anim/default": "../webresource/m/js/anim/default",
+        "entry": "entry"
     }
 }

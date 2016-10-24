@@ -50,9 +50,17 @@ var Util = {
         return uuid;
     },
 
-    indexOf: function (arr, val) {
-        var isFn = typeof val === 'function',
-            length = arr.length;
+    indexOf: function (arr, key, val) {
+        if (typeof key === 'string' && val !== undefined) {
+            var compare = val;
+            val = function (item) {
+                return item[key] == compare;
+            }
+        }
+        else val = key;
+
+        var isFn = typeof val === 'function';
+        var length = arr.length;
 
         for (var i = 0; i < length; i++) {
             if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;
@@ -60,7 +68,15 @@ var Util = {
         return -1;
     },
 
-    lastIndexOf: function (arr, val) {
+    lastIndexOf: function (arr, key, val) {
+        if (typeof key === 'string' && val !== undefined) {
+            var compare = val;
+            val = function (item) {
+                return item[key] == compare;
+            }
+        }
+        else val = key;
+
         var isFn = typeof val === 'function';
         for (var i = arr.length - 1; i >= 0; i--) {
             if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;

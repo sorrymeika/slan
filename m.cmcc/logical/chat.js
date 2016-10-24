@@ -1,6 +1,7 @@
 var util = require('util');
 var model2 = require('core/model2');
 var Http = require('core/http');
+var Promise = require('promise');
 
 var MESSAGETYPE = {
     TEXT: 1,
@@ -37,7 +38,7 @@ var chat = {
                         fromId: 1,
                         toId: 30001,
                         //是否显示时间小标记
-                        isShowDate: true,
+                        isShowTime: true,
                         date: 1477017801802,
                         content: "万万没想到万万没想到万万没\n想到万万没想到万万没想到万万没想到万万没想到"
                     }, {

@@ -8,6 +8,9 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 var user = require('models/user');
 
+var imagePicker = require('components/imagePicker');
+
+
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -20,6 +23,14 @@ module.exports = Activity.extend({
 
         model.back = function () {
             self.back(self.swipeRightBackAction);
+        }
+
+        model.changeAvatars = function () {
+            imagePicker.show('更换头像', function (res) {
+                user.set({
+                    avatars: res.thumbnail
+                })
+            });
         }
 
         Promise.all([this.waitLoad()]).then(function (results) {

@@ -60,7 +60,6 @@
           if (delta > 0 && delta <= 250) touch.isDoubleTap = true
           touch.last = now
           longTapTimeout = setTimeout(longTap, longTapDelay)
-
       })
       .on(events[1], function (e) {
           if (e.type == 'mousemove' && !('last' in touch)) return
@@ -87,6 +86,7 @@
 
               // normal tap
           else if ('last' in touch)
+          
 
               // don't fire tap when delta position changed by more than 30 pixels,
               // for instance when moving to a point and back to origin
@@ -97,7 +97,6 @@
 
                   // trigger universal 'tap' with the option to cancelTouch()
                   // (cancelTouch cancels processing of single vs double taps for faster 'tap' response)
-                  
 
                   var event = $.Event('tap')
                   event.cancelTouch = cancelAll

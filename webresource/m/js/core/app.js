@@ -43,7 +43,6 @@ function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
 }
 
 function adjustActivity(currentActivity, activity) {
-    currentActivity._startExit();
     currentActivity.$el.siblings('.view:not([data-path="' + activity.path + '"])').hide();
     if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
 }
@@ -101,6 +100,8 @@ function bindBackGesture(application) {
             that.swiperAsync = new Async(function (done) {
 
                 application.mask.show();
+                currentActivity._startExit();
+
                 application.get(action, function (activity) {
                     that.needRemove = activity.el.parentNode === null;
                     adjustActivity(currentActivity, activity);
@@ -215,6 +216,7 @@ var Application = Component.extend(Object.assign(appProto, {
             this.back($(e.currentTarget).attr('data-back'));
         },
         'tap [data-forward]': function (e) {
+            
             this.forward($(e.currentTarget).attr('data-forward'));
         },
         'focus input': function (e) {
@@ -393,6 +395,8 @@ var Application = Component.extend(Object.assign(appProto, {
             route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
         }
 
+        currentActivity._startExit();
+
         that.get(route, function (activity) {
             that._currentActivity = activity;
 
@@ -408,7 +412,6 @@ var Application = Component.extend(Object.assign(appProto, {
                 var ease = 'cubic-bezier(.34,.86,.54,.99)';
                 var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
                 var anim;
-
                 var executedFinish = false;
                 var finish = function () {
                     if (executedFinish) return;
@@ -491,8 +494,6 @@ var Application = Component.extend(Object.assign(appProto, {
 
         if (route) {
             var queue = this.queue;
-
-            console.log(queue);
 
             queue.await(function (err, res, queueDone) {
                 var options = {};

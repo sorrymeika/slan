@@ -79,6 +79,7 @@ var Activity = Component.extend({
             .on('Pause', self._statusChange)
             .on('Destroy', self._onDestroy);
 
+        self.onAppear && self.on('Appear', self.onAppear);
         self.onShow && self.on('Show', self.onShow);
         self.onResume && self.on('Resume', self.onResume);
         self.onLoad && self.one('Show', self.onLoad);
@@ -211,7 +212,7 @@ var Activity = Component.extend({
     },
 
     back: function (url, duration, toggleAnim, data) {
-        this.application.back(url, duration, toggleAnim, data);
+        this.application.back(url || this.swipeRightBackAction, duration, toggleAnim, data);
     },
 
     queryString: function (key, val) {

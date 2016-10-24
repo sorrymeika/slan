@@ -1,8 +1,10 @@
 var util = require('util');
 var model2 = require('core/model2');
 var bridge = require('bridge');
+var Promise = require('promise');
+var Event = require('core/event');
 
-var contact = {
+var contact = Event.mixin({
     newFriends: function () {
 
         if (sl.isDev)
@@ -103,6 +105,39 @@ var contact = {
         });
     },
 
+    acceptFriend: function (user_id) {
+        if (sl.isDev)
+            return new Promise(function (resolve, reject) {
+
+                setTimeout(function () {
+                    resolve({
+                        success: true
+                    });
+                }, 100)
+            });
+
+        return Http.post('/contact/acceptFriend', {
+            friend_id: user_id
+        });
+    },
+
+    rejectFriend: function (user_id) {
+
+        if (sl.isDev)
+            return new Promise(function (resolve, reject) {
+
+                setTimeout(function () {
+                    resolve({
+                        success: true
+                    });
+                }, 100)
+            });
+
+        return Http.post('/contact/rejectFriend', {
+            user_id: user_id
+        });
+    },
+
     friends: function () {
 
         if (sl.isDev)
@@ -173,7 +208,7 @@ var contact = {
             user_id: user_id
         });
     }
-};
+});
 
 
 module.exports = contact;

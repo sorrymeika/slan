@@ -29,7 +29,8 @@ module.exports = Activity.extend({
             return "<b>今天</b>";
         }
 
-        model.del = function () {
+        model.del = function (msg_id) {
+
             popup.confirm({
                 title: '温馨提醒',
                 content: '您确定要删除吗',
@@ -39,8 +40,11 @@ module.exports = Activity.extend({
 
                     Loader.showLoading();
 
-                    quan.deleteQuan(function () {
+                    quan.deleteQuan(msg_id).then(function () {
+
                         pop.hide();
+
+                        model.getModel('data').remove('msg_id', msg_id);
 
                     }).catch(function (e) {
                         Toast.showToast(e.message);

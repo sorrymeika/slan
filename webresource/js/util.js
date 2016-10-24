@@ -171,7 +171,16 @@ var util = {
         this.$log.html(msg + '<br>' + this.$log.html());
     },
 
-    indexOf: function (arr, val) {
+    indexOf: function (arr, key, val) {
+        if (typeof key === 'string' && val !== undefined) {
+            var compare = val;
+
+            val = function (item) {
+                return item[key] == compare;
+            }
+        }
+        else val = key;
+
         var isFn = typeof val === 'function',
             length = arr.length;
 
@@ -181,7 +190,15 @@ var util = {
         return -1;
     },
 
-    lastIndexOf: function (arr, val) {
+    lastIndexOf: function (arr, key, val) {
+        if (typeof key === 'string' && val !== undefined) {
+            var compare = val;
+            val = function (item) {
+                return item[key] == compare;
+            }
+        }
+        else val = key;
+
         var isFn = typeof val === 'function';
         for (var i = arr.length - 1; i >= 0; i--) {
             if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;
@@ -189,7 +206,16 @@ var util = {
         return -1;
     },
 
-    first: function (arr, fn) {
+    first: function (arr, key, val) {
+        var fn;
+
+        if (typeof key === 'string' && val !== undefined) {
+            fn = function (item) {
+                return item[key] == val;
+            }
+        }
+        else fn = key;
+
         var item;
 
         for (var i = 0, len = arr.length; i < len; i++) {
@@ -200,7 +226,16 @@ var util = {
         return null;
     },
 
-    find: function (arr, fn) {
+    find: function (arr, key, val) {
+        var fn;
+
+        if (typeof key === 'string' && val !== undefined) {
+            fn = function (item) {
+                return item[key] == val;
+            }
+        }
+        else fn = key;
+
         var result = [],
             item;
 
@@ -279,6 +314,53 @@ var util = {
             d = new Date(d);
         } else {
             return '';
+        }
+
+        if (f === 'minutes') {
+            var now = new Date();
+            var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            var res = '';
+            if (today - date == 86400000) {
+                res += '昨天 ';
+            } else if (today - date == 0) {
+                //res += '今天';
+            } else {
+                res += pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + " ";
+            }
+            res += pad(d.getHours()) + ':' + pad(d.getMinutes());
+            return res;
+
+        } else if (f === 'short') {
+            var now = new Date();
+            var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            if (today - date == 86400000) {
+                return '昨天' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+
+            } else if (today - date == 0) {
+                var minutes = Math.round((now - d) / 60000);
+
+                console.log(minutes, d);
+
+                if (minutes <= 2) {
+                    return '刚刚';
+
+                } else if (minutes < 60) {
+                    return minutes + '分钟前';
+
+                } else {
+                    var hours = Math.round(minutes / 60);
+                    if (hours < 12) {
+                        return hours + '小时前';
+                    } else {
+                        return pad(d.getHours()) + ':' + pad(d.getMinutes());
+                    }
+                }
+
+            } else {
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+            }
         }
 
         var y = d.getFullYear() + "",
@@ -406,18 +488,6 @@ var util = {
     }
 };
 
-
-util.cnNum = function (num) {
-    if (num > 10000) {
-        num = (num + '');
-        return num.substr(0, num.length - 4) + "万";
-    } else if (num > 1000) {
-
-        num = (num + '');
-        return num.substr(0, num.length - 4) + 'k';
-    } else {
-        return num;
-    }
-}
+util.filter = util.find;
 
 module.exports = util;

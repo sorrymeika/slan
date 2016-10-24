@@ -16,6 +16,7 @@ var Menu = require('../components/menu');
 var publicquan = require('../logical/publicquan');
 var quan = require('../logical/quan');
 var messagesList = require('../models/messagesList');
+var user = require('../models/user');
 
 
 module.exports = Activity.extend({
@@ -37,10 +38,12 @@ module.exports = Activity.extend({
 
                 }).next(function () {
 
-                    self.bindScrollTo(model.refs.recommend, {
-                        vScroll: false,
-                        hScroll: true
-                    });
+                    /*
+                                        self.bindScrollTo(model.refs.recommend, {
+                                            vScroll: false,
+                                            hScroll: true
+                                        });
+                                        */
                 });
 
                 model.set({
@@ -119,6 +122,12 @@ module.exports = Activity.extend({
         Application.removeBackAction(this.exitMenu);
     },
 
+    scan: function () {
+        bridge.qrcode.scan(function (res) {
+            alert(res.code);
+        });
+    },
+
     onCreate: function () {
         var self = this;
 
@@ -128,9 +137,24 @@ module.exports = Activity.extend({
 
         var model = self.model = new Model(this.$el, {
             title: '',
-            messagesList: messagesList
+            messagesList: messagesList,
+            user: user
         });
 
+        model.showQuanMenu = function () {
+            $(this.refs.quanMenuMask).show();
+            $(this.refs.quanMenu).show();
+        }
+
+        model.hideQuanMenu = function (url, e) {
+            $(this.refs.quanMenuMask).hide();
+            $(this.refs.quanMenu).hide();
+
+            if (typeof url == 'string') {
+                self.forward(url);
+            }
+        }
+        model.scan = this.scan.bind(this);
         model.menu = this.menu.bind(this);
         model.exitMenu = function (e) {
             if ($(e.target).hasClass('hm_home'))
@@ -154,6 +178,80 @@ module.exports = Activity.extend({
                 switch (index) {
 
                     case 1:
+                        quan.on('sendComment', function (e, data) {
+
+                            var msg = model.getModel('quanData').find('msg_id', data.msg_id);
+
+                            var comments = msg.getModel('comments');
+
+                            data = $.extend(data, user.data);
+
+                            if (comments) {
+                                comments.add([data]);
+
+                            } else {
+                                comments.set([data]);
+                            }
+                        });
+
+                        quan.on('publish', function (e, data) {
+                            var quanData = model.getModel('quanData');
+
+                            quanData.unshift(data);
+                        });
+
+                        model.commentQuanMsg = function (msg_id, user_id, user_name) {
+                            self.forward('/quan/comment?msg_id=' + msg_id, user_name && user_id != user.data.user_id ? {
+                                user_id: user_id,
+                                user_name: user_name
+
+                            } : undefined);
+                        }
+
+                        model.blackQuanMsg = function (msg_id) {
+                            var quanData = model.getModel('quanData');
+
+                            quan.black(msg_id).then(function () {
+                                Toast.showToast('屏蔽成功');
+
+                                quanData.remove('msg_id', msg_id);
+
+                            }).catch(function (e) {
+                                Toast.showToast(e.message);
+                            });
+                        }
+
+                        model.likeQuanMsg = function (msg_id) {
+                            var msg = model.getModel('quanData').find('msg_id', msg_id);
+                            var likes = msg.getModel('likes');
+
+                            if (likes && likes.find('user_id', user.data.user_id)) {
+                                Toast.showToast('你已点赞！');
+                                return;
+                            }
+
+                            quan.like(msg_id).then(function () {
+
+                                var res = {
+                                    user_id: user.data.user_id,
+                                    user_name: user.data.user_name
+                                }
+
+                                if (!likes) {
+                                    msg.set({
+                                        likes: [res]
+                                    })
+
+                                } else {
+                                    likes.add(res);
+                                }
+
+                                Toast.showToast('点赞成功');
+
+                            }).catch(function (e) {
+                                Toast.showToast(e.message);
+                            });
+                        }
                         self.loadQuan(this.refs.items[index]);
                         break;
 
@@ -170,7 +268,6 @@ module.exports = Activity.extend({
             });
         }
 
-        this.loadPublicQuan();
     },
 
     onLoad: function () {
@@ -179,6 +276,8 @@ module.exports = Activity.extend({
 
     onShow: function () {
         var self = this;
+
+        this.loadPublicQuan();
     },
 
     onHide: function () {

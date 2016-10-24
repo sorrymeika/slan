@@ -24,7 +24,34 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
-        Promise.all([publicquan.item(quanId), publicquan.newArticles(), this.waitLoad()]).then(function (results) {
+        model.follow = function () {
+
+            var follow = function () {
+                publicquan.follow(quanId).then(function (res) {
+
+                    console.log(res);
+
+                    model.getModel('quanInfo').set({
+                        is_follow: res.is_follow
+                    })
+
+                }).catch(function (e) {
+                    Toast.showToast(e.message);
+                })
+            }
+
+            if (model.get('quanInfo').is_follow)
+                popup.confirm({
+                    content: '确定不关注该圈了吗？',
+                    confirmAction: function(){
+                        follow()
+                        this.hide();
+                    }
+                })
+            else follow();
+        }
+
+        Promise.all([publicquan.item(quanId), publicquan.newArticles(quanId), this.waitLoad()]).then(function (results) {
 
             model.set({
                 quanInfo: results[0].data,

@@ -48,7 +48,7 @@
             }
         });
 
-        seajs.use(['$', 'util', 'core/app', 'bridge', 'widget/loader', 'widget/offline'], function($, util, App, bridge, Loader, Offline) {
+        seajs.use(['entry', '$', 'util', 'core/app', 'widget/loader', 'widget/offline'], function(entry, $, util, App, Loader, Offline) {
             var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
             sl.isDebug = @debug;
             sl.buildVersion = @(Date.now());
@@ -57,48 +57,16 @@
 
             $(window).on('ortchange', adjustPx);
 
-            function startApp(res) {
-                var resourceMapping = res.data;
-                var routes = $.extend(@(JSON.stringify(routes)), res.routes || {});
-                var combineMapping = @(JSON.stringify(resourceMapping));
-
-                seajs.on('fetch', function(emitData) {
-
-                    var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
-
-                    if (resourceMapping && resourceMapping[id]) {
-                        emitData.requestUri = resourceMapping[id];
-
-                    } else if (combineMapping) {
-
-                        for (var key in combineMapping) {
-                            if (combineMapping[key].indexOf(id) != -1) {
-                                emitData.requestUri = resourceMapping && resourceMapping[key] ? resourceMapping[key] : seajs.resolve(key);
-                                break;
-                            }
-                        }
-                    }
-                });
-                seajs.on("error", function(errorData) {
-                    errorData.pause = true;
-
-                    Offline.getInstance().show(function() {
-                        this.hide();
-                        seajs.request(errorData.uri, errorData.callback);
-                    });
-                });
-
-                new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
-            }
+            var routes = @(JSON.stringify(routes));
+            var combineMapping = @(JSON.stringify(resourceMapping));
 
             @if(!debug && !useLocal) {
-
                 function loadResourceMapping() {
                     loader.reload();
                 }
 
                 var loader = new Loader({
-                    url: bridge.url('/api/settings/resourceMapping'),
+                    url: '/api/settings/resourceMapping',
                     params: {
                         v: sl.appVersion
                     },
@@ -111,14 +79,14 @@
                     success: function(res) {
                         Offline.getInstance().hide();
 
-                        startApp(res);
+                        entry.startApp(routes, combineMapping, res.routes, res.data);
                     }
 
                 });
                 loadResourceMapping();
 
             } else {
-                startApp({});
+                entry.startApp(routes, combineMapping);
             }
 
         });
