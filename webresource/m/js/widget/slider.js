@@ -183,6 +183,7 @@
                 dotsHtml += '<li class="slider-nav-item"></li>';
             }
 
+
             $slider = self.$slider.html(itemsHtml);
             self.$items = $slider.children();
 

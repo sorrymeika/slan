@@ -15,10 +15,12 @@ var Share = Component.extend({
                 image: this.model.data.image,
                 description: this.model.data.description,
                 scene: 1
+
             }, function (res) {
                 self.callback(res);
             })
         },
+
         'tap .js_weixin_session': function () {
             this.clickToShare(1);
 

@@ -47,6 +47,11 @@
 
         template: util.template('<li><%=text%></li>'),
 
+        /*//覆盖老数据
+        @data=[{
+            value: 1,
+            text: '1人'
+        }]*/
         set: function (data) {
             var that = this;
             var html = '';
@@ -82,18 +87,36 @@
             return this;
         },
 
-        val: function (val) {
-            if (typeof val === 'undefined')
-                return this.selectedData.value;
+        val: function (key, val) {
 
-            var index = util.indexOf(this.data, function (item) {
-                return item.value == val;
-            });
+            if (val === undefined) val = key, key = "value";
+
+            if (typeof val === 'undefined')
+                return this.selectedData[key];
+
+            var index = util.indexOf(this.data, key, val);
 
             this.index(index);
         }
     };
 
+    /*@options = {
+        options: [{
+            template: '<li><%=text%></li>',
+            data: [{
+                value: 1,
+                text: '1人'
+            },{
+                value: 2,
+                text: '2人'
+            }],
+            onChange: function(i, selectedData) {
+            }
+        }],
+        complete: function (results=[{value: 1, text: '1人'}]) {
+            var data = results[0];
+        }
+    }*/
     var Selector = function (options) {
         options = $.extend({
             complete: function () { },

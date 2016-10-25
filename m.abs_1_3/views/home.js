@@ -177,6 +177,7 @@ module.exports = Activity.extend({
         self.user = userModel.get();
         self.$tabs = self.$('.hm_tab_con');
 
+
         console.log("home onCreate");
 
         sl.activity = self;
@@ -204,6 +205,8 @@ module.exports = Activity.extend({
             },
             searchHistory: util.store("searchHistory")
         });
+
+
 
         this.model.showHome = function () {
             if (this.data.bottomTab != 0) {
@@ -411,17 +414,17 @@ module.exports = Activity.extend({
 
             util.store('IS_SHOW_GUIDE', 1);
 
-            model.set('showGuide', true);
-
-            this.guideSlider = new Slider({
-                container: self.$('.hm_guide'),
-                itemTemplate: '<img class="guide<%=id%>" src="http://appuser.abs.cn/dest1.2.0/images/guide<%=id%>.jpg" />',
-                data: [{
-                    id: 0
-                }, {
+            model.set('showGuide', true).next(function () {
+                self.guideSlider = new Slider({
+                    container: self.$('.hm_guide'),
+                    itemTemplate: '<img class="guide<%=id%>" src="http://appuser.abs.cn/dest1.2.0/images/guide<%=id%>.jpg" />',
+                    data: [{
+                        id: 0
+                    }, {
                         id: 1
                     }],
-                onChange: function (index) { }
+                    onChange: function (index) { }
+                });
             });
         }
 
@@ -674,8 +677,6 @@ module.exports = Activity.extend({
             this.showEnergy();
             this.doWhenLogin();
         }
-
-        this.setResult('ResetCart');
 
         setTimeout(function () {
             self.guideSlider && self.guideSlider._adjustWidth();

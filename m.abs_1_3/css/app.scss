@@ -63,6 +63,7 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 
 .pt_1 { padding-top: 1px; }
 .pt_s { padding-top: 5px; }
+.pt_m { padding-top: 10px; }
 
 .pl_s { padding-left: 5px; }
 .pl_m { padding-left: 10px; }
@@ -71,7 +72,6 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .pr_m { padding-right: 10px; }
 
 .pb_m { padding-bottom: 10px; }
-.pt_m { padding-top: 10px; }
 
 .mg_s { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
 .mg_m { margin-left: 10px; margin-top: 10px; margin-right: 10px; }
@@ -118,8 +118,6 @@ input.flexitem { border: 0; height: 100%; background-color: rgba(0,0,0,0); }
 .cl_000 { color: #000; }
 .cl_s { color: #FF931E; }
 .cl_blue { color: #3FA9F5; }
-
-
 
 .bg_non,.transparent { background-color: rgba(0,0,0,0); }
 .bg_fff { background-color: #fff; }

@@ -94,7 +94,7 @@ module.exports = {
         var content = '';
 
         var popupParams = {
-            className: 'cp_popup__up',
+            className: 'cp_popup__up cp_popup__options',
             tapMaskToHide: true
         };
 
@@ -111,7 +111,17 @@ module.exports = {
         popupParams.content = content;
 
         return this.popup(popupParams)
+    },
 
+    //@params={ className: xxx, content: "<div>asdfaf</div>" }
+    up: function (params) {
+        if (params.className) params.className += ' cp_popup__up';
+
+        return this.popup(Object.assign({
+            tapMaskToHide: true,
+            className: "cp_popup__up"
+
+        }, params))
     },
 
     //@params={ className: 'xxx', content:'内容<button click="confirm"></button>',initialize:function(){},confirm:function(){}}

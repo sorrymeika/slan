@@ -139,7 +139,7 @@
                 <div class="hm_user__body">
                     <div class="hm_user__base">
                         <div class="avatars" data-forward="/avatars"><img sn-src="{$global.user.Avatars||'/images/default.jpg'}" sn-error="this.src='/images/default.jpg'" /></div>
-                        <div class="name">{user.UserName}</div>
+                        <div class="name" data-forward="/member">{user.UserName}</div>
                         <div class="addr" data-forward="/address">收货地址<em class="icon_arrow"></em></div>
                     </div>
                     <div class="hm_user__card">

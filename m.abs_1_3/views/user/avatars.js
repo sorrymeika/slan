@@ -19,7 +19,7 @@ module.exports = Activity.extend({
         })
 
         var model = this.model = new Model(this.$el, {
-            title: '头像'
+            title: '个人信息'
         });
         this.bindScrollTo(model.refs.main);
 
@@ -58,8 +58,7 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         bridge.image.upload(api.ShopAPI.url('/api/user/uploadGravatar'), {
-            ID: user.ID,
-            pspcode: user.Auth
+            pspcode: user.PSP_CODE
         }, {
                 absgravatar: imageId
 

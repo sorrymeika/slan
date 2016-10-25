@@ -61,29 +61,24 @@ module.exports = Activity.extend({
     loadData: function () {
         var self = this;
 
-        user.getCouponList(function (err, res) {
-
-            if (err) {
-                Toast.showToast(err.msg);
-                return;
-            }
-
+        user.getCouponList(this.$el).then(function (res) {
             var data = [];
             var cannotuse = [];
-            var coupons = self.route.data.coupon;
+            var coupons = self.route.data.coupon || [];
             var isFree = self.route.data.isFree;
 
-            res.data.forEach(function (item) {
-                if (!item.isOverdue && (isFree ? item.VCA_VCT_ID == 4 : (item.VCA_VCT_ID != 4))) {
-                    if (-1 == util.indexOf(coupons, function (a) {
-                        return a.CSV_ID == item.CSV_ID;
-                    })) {
-                        cannotuse.push(item);
-                    } else {
-                        data.push(item);
+            if (res.data)
+                res.data.forEach(function (item) {
+                    if (!item.isOverdue && (isFree ? item.VCA_VCT_ID == 4 : (item.VCA_VCT_ID != 4))) {
+                        if (-1 == util.indexOf(coupons, function (a) {
+                            return a.CSV_ID == item.CSV_ID;
+                        })) {
+                            cannotuse.push(item);
+                        } else {
+                            data.push(item);
+                        }
                     }
-                }
-            });
+                });
 
             data.sort(function (a, b) {
                 return a.CSV_END_DT > b.CSV_END_DT ? 1 : a.CSV_END_DT == b.CSV_END_DT ? 0 : -1;
@@ -94,7 +89,9 @@ module.exports = Activity.extend({
                 cannotuse: cannotuse
             });
 
-        }, this.$el);
+        }, function (err) {
+            Toast.showToast(err.message);
+        });
     },
     useCoupon: function () {
 

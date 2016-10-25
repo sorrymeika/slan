@@ -5,11 +5,12 @@
 </header>
 <div ref="main" class="main">
     <div class="uc_feedback__con surround_border">
-        <textarea placeholder="请输入您的宝贵意见与建议，我们将不断优化。"></textarea>
+        <textarea sn-model="content" placeholder="请输入您的宝贵意见与建议，我们将不断优化。"></textarea>
         <div class="num">0/250</div>
     </div>
-    <div class="uc_feedback__tit">图片（选填，提供问题截图）</div>
-    <ul class="uc_feedback__imgs ">
-        <li class="add icon-plus-rem surround_border"></li>
+    <div class="uc_feedback__tit">图片（选填，提供问题截图）<em>{imgs.length||0}/4</em></div>
+    <ul class="uc_feedback__imgs">
+        <li class="add icon-plus-rem surround_border" sn-tap="this.selectImage()"></li>
+        <li sn-repeat="img in imgs"><img sn-src="{img.thumbnail}"></li>
     </ul>
 </div>

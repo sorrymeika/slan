@@ -4,6 +4,7 @@
         Selector = require('./selector');
 
 
+    //@options={ onChange: function(date='2018-01-02'){ } }
     var Calendar = function (options) {
         var self = this;
 
@@ -38,7 +39,7 @@
             options: [{
                 template: '<li><%=text%></li>',
                 data: years,
-                onChange: function (e, i, data) {
+                onChange: function (i, data) {
                     self.year = data.value;
                     self.dateChange();
                 }
@@ -46,7 +47,7 @@
             }, {
                 template: '<li><%=text%></li>',
                 data: months,
-                onChange: function (e, i, data) {
+                onChange: function (i, data) {
                     self.month = data.value;
                     self.dateChange();
                 }
@@ -115,14 +116,18 @@
         }
 
         this.dateChange();
+
+        return this;
     }
 
     Calendar.prototype.show = function (date) {
         this.selector.show();
+        return this;
     }
 
     Calendar.prototype.hide = function (date) {
         this.selector.hide();
+        return this;
     }
 
     return Calendar;

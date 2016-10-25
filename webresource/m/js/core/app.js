@@ -216,7 +216,7 @@ var Application = Component.extend(Object.assign(appProto, {
             this.back($(e.currentTarget).attr('data-back'));
         },
         'tap [data-forward]': function (e) {
-            
+
             this.forward($(e.currentTarget).attr('data-forward'));
         },
         'focus input': function (e) {
@@ -423,25 +423,23 @@ var Application = Component.extend(Object.assign(appProto, {
                     queueDone();
                 };
 
-                requestAnimationFrame(function () {
-                    for (var i = 0, n = anims.length; i < n; i++) {
-                        anim = anims[i];
+                for (var i = 0, n = anims.length; i < n; i++) {
+                    anim = anims[i];
 
-                        if (!duration) {
-                            anim.el.css(animation.transform(anim.css).css);
-
-                        } else {
-                            anim.ease = ease;
-                            anim.duration = duration;
-
-                            anim.el.css(animation.transform(anim.start).css)
-                                .animate(animation.transform(anim.css).css, duration, ease, finish);
-                        }
-                    }
                     if (!duration) {
-                        finish();
+                        anim.el.css(animation.transform(anim.css).css);
+
+                    } else {
+                        anim.ease = ease;
+                        anim.duration = duration;
+
+                        anim.el.css(animation.transform(anim.start).css)
+                            .animate(animation.transform(anim.css).css, duration, ease, finish);
                     }
-                });
+                }
+                if (!duration) {
+                    finish();
+                }
             });
 
 

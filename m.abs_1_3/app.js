@@ -1,4 +1,4 @@
-﻿var http_proxy = require('../core/http_proxy');
+var http_proxy = require('../core/http_proxy');
 //app.all('*', http_proxy('m.abs.cn', 7788));
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
@@ -78,10 +78,13 @@ exports.loadConfig = function (callback) {
         return new Promise(function (resolve) {
 
             fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
-                var globalConfig = JSON.parse(globalStr.replace(/\$\{(\w+)\}/, function (match, key) {
 
-                    return key in map ? map[key] : match;
-                }));
+                globalStr = globalStr.replace(/\$\{(\w+)\}/g, function (match, key) {
+
+                    return (key in map) ? map[key] : match;
+                })
+
+                var globalConfig = JSON.parse(globalStr);
                 globalConfig.routes = {};
 
                 resolve(globalConfig);

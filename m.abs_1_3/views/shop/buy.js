@@ -172,7 +172,7 @@ define(function (require, exports, module) {
                         sl.tip("生成订单成功！");
 
                         self.setResult('OrderChange')
-                            .setResult('ResetCart')
+                            .setResult('CartChange')
                             .setResult('UserChange');
 
                         if (res.pur_amount != 0) {

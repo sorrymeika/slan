@@ -2,13 +2,19 @@
 var $ = require('$'),
     util = require('util'),
     Activity = require('activity'),
-    model = require('core/model2'),
+    vm = require('core/model2'),
     bridge = require('bridge');
 
 var userModel = require('../models/user');
+var user = require('../logical/user');
+
 var Loader = require('../widget/loader');
 var Selector = require('../widget/selector');
+var Calendar = require('../widget/calendar');
 var guid = 0;
+
+var Toast = require('widget/toast');
+
 
 module.exports = Activity.extend({
 
@@ -53,48 +59,119 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
 
-        this.model = new model.Model(this.$el, {
+        var model = this.model = new vm.Model(this.$el, {
             title: '个人信息',
             back: self.swipeRightBackAction
         });
 
-        this.model.showCity = this.showCity.bind(this);
-
         this.bindScrollTo(this.model.refs.main);
 
-        this.model.submit = function () {
-            this.set('submiting', true);
-            var user = this.data.user;
-            self.update.setParam({
-                ID: user.ID,
-                Auth: user.Auth,
-                UserName: user.UserName,
-                Gender: user.Gender,
-                BirthDay: user.BirthDay && util.formatDate(user.BirthDay),
-                ChildBirthDay: user.ChildBirthDay && util.formatDate(user.ChildBirthDay),
-                CityID: user.CityID,
-                FamilySize: user.FamilySize,
-                HasChild: user.HasChild
+        var userInfo = userModel.get();
 
-            }).load();
+        var calendar = new Calendar();
+
+        model.setBirthDay = function () {
+            calendar.set(userInfo.BirthDay || "1990-01-01").show();
+
+            calendar.onChange = function (date) {
+                user.updateBirthDay(date).then(function () {
+
+                    userModel.set({
+                        BirthDay: Date.parse(date)
+                    });
+                    self.model.set('user.BirthDay', Date.parse(date));
+
+                }).catch(function (err) {
+                    Toast.showToast(err.message);
+                });
+            }
         }
 
-        this.update = new Loader({
-            url: '/api/user/update',
-            check: false,
-            checkData: false,
-            $el: this.$el,
-            success: function (res) {
-                if (res.success) {
-                    util.store('user', self.model.data.user);
-                    sl.tip('修改成功');
+        model.setChildBirthDay = function () {
+            calendar.set(userInfo.ChildBirthDay || "1990-01-01").show();
 
-                } else {
-                    sl.tip(res.msg);
-                }
-                self.model.set('submiting', false);
+            calendar.onChange = function (date) {
+                user.updateChildBirthDay(date).then(function () {
+
+                    userModel.set({
+                        ChildBirthDay: Date.parse(date)
+                    });
+                    self.model.set('user.ChildBirthDay', Date.parse(date));
+
+                }).catch(function (err) {
+                    Toast.showToast(err.message);
+                });
+            }
+        }
+
+        var familys = [];
+        for (var i = 1; i <= 10; i++) {
+            familys.push({
+                value: i,
+                text: i + '人'
+            });
+        }
+
+        var family = new Selector({
+            options: [{
+                template: '<li><%=text%></li>',
+                data: familys
+            }],
+
+            complete: function (results) {
+                var res = results[0];
+
+                user.updateUser('familySize', res.value).then(function () {
+
+                    userModel.set({
+                        FamilySize: res.value
+                    });
+                    self.model.set('user.FamilySize', res.value);
+
+                }).catch(function (err) {
+                    Toast.showToast(err.message);
+                });
             }
         });
+
+        model.setFamily = function () {
+            family.show();
+        }
+
+        var hasChildren = new Selector({
+            options: [{
+                template: '<li><%=text%></li>',
+                data: [{
+                    text: '有小孩',
+                    value: 1
+                }, {
+                    text: '无小孩',
+                    value: 0
+                }]
+            }],
+
+            complete: function (results) {
+                var res = results[0];
+
+                user.updateUser('hasChild', res.value).then(function () {
+
+                    userModel.set({
+                        HasChild: res.value
+                    });
+                    self.model.set('user.HasChild', res.value);
+
+                }).catch(function (err) {
+                    Toast.showToast(err.message);
+                });
+            }
+        });
+
+        model.setChildren = function () {
+            hasChildren.show().eq(0).val(userInfo.HasChild);
+        }
+
+
+        this.model.showCity = this.showCity.bind(this);
 
         this.city = new Selector({
             options: [{
@@ -104,16 +181,32 @@ module.exports = Activity.extend({
                     self.changeCity(res.PRV_ID)
                 }
             }, {
-                    template: '<li><%=CTY_DESC%></li>',
-                    data: []
-                }],
+                template: '<li><%=CTY_DESC%></li>',
+                data: []
+            }],
 
             complete: function (res) {
-                self.model.set('user.City', res[1].CTY_DESC);
+                var cityId = res[1].CTY_ID;
+
+                self.model.set('user.CityName', res[1].CTY_DESC);
                 self.model.set('user.CityID', res[1].CTY_ID);
                 self.model.set('user.ProvID', res[1].CTY_PRV_ID);
+
+                user.updateCity(cityId).then(function () {
+
+                    userModel.set({
+                        CityID: cityId,
+                        CityName: res[1].CTY_DESC,
+                        ProvID: res[1].CTY_PRV_ID
+                    });
+
+                }).catch(function (err) {
+                    Toast.showToast(err.message);
+                });
             }
         });
+
+
 
         new Loader({
             url: '/api/user/get_city',

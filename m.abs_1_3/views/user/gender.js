@@ -11,13 +11,6 @@ var userModel = require('models/user');
 
 var user = require('logical/user');
 
-var UpdateType = {
-    userName: {
-        key: 'UserName',
-        title: '修改会员名'
-    }
-}
-
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -29,28 +22,25 @@ module.exports = Activity.extend({
             $el: this.$el
         });
 
-        var props = UpdateType[this.route.params.type];
-
-        var model = this.model = new Model(this.$el, Object.assign({
-            text: userInfo[props.key],
-            origin: userInfo[props.key]
-
-        }, props));
-
-        model.refs.text.focus();
+        var model = this.model = new Model(this.$el, {
+            title: '修改性别',
+            gender: userInfo.Gender
+        });
 
         model.back = function () {
             self.back(self.swipeRightBackAction);
         }
 
-        model.save = function () {
-            var userName = this.get('text');
+        model.save = function (gender) {
 
-            user.updateUserName(userName).then(function (res) {
+            user.updateGender(gender).then(function (res) {
+                if (gender == userInfo.Gender) return;
 
                 userModel.set({
-                    UserName: userName
+                    Gender: gender
                 });
+
+                Toast.showToast('修改成功');
 
                 self.back();
 
@@ -62,7 +52,6 @@ module.exports = Activity.extend({
 
     onShow: function () {
         var self = this;
-
 
     },
 

@@ -71,7 +71,7 @@ module.exports = Activity.extend({
     loadData: function () {
         var self = this;
 
-        user.getCouponList(function (res) {
+        user.getCouponList(this.$el).then(function (res) {
 
             res.data.sort(function (a, b) {
                 return a.IsOverdue && !b.IsOverdue ? 1 : !a.IsOverdue && b.IsOverdue ? -1 : a.CSV_END_DT > b.CSV_END_DT ? 1 : a.CSV_END_DT == b.CSV_END_DT ? 0 : -1;
@@ -81,8 +81,7 @@ module.exports = Activity.extend({
                 closeNumber: res.closeNumber,
                 data: res.data
             });
-
-        }, this.$el);
+        });
     },
 
     onCreate: function () {

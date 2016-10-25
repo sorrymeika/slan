@@ -4,7 +4,6 @@
         "components": {
             "components/activity": null,
             "components/share": null,
-            "components/confirm": null,
             "components/month": null,
             "components/shareOrder": null,
             "components/size": null,
@@ -12,7 +11,6 @@
             "components/package": null,
             "components/banner": null,
             "components/category": null,
-            "components/cart": null,
             "models/api": null,
             "models/user": null,
             "models/discovery": null,
@@ -81,6 +79,7 @@
         "/avatars": "user/avatars",
         "/feedback": "user/feedback",
         "/user/update/{type:\\w+}": "user/update",
+        "/user/gender": "user/gender",
         "/coupon/{id:\\d+}": "user/couponItem",
         "/coupon": {
             "controller": "user/coupon",

@@ -2,9 +2,9 @@
     "debug": true,
     "useLocal": false,
     "dest": "./dest",
-    "api": "http://127.0.0.1:5559/proxy3",
-    "shopApi": "http://127.0.0.1:5559/proxy",
-    "updateApi": "http://127.0.0.1:5559/proxy2",
+    "api": "http://${ip}:5559/proxy3",
+    "shopApi": "http://${ip}:5559/proxy",
+    "updateApi": "http://${ip}:5559/proxy2",
     "proxy": {
         "/proxy/*": "testappapi-1-3-2.abs.cn",
         "/proxy1/*": "172.16.168.185:6005",
@@ -50,12 +50,21 @@
             "useLocal": true
         },
         "dev": {
-            "api": "http://127.0.0.1:5559/proxy3",
-            "shopApi": "http://127.0.0.1:5559/proxy",
-            "updateApi": "http://127.0.0.1:5559/proxy2"
+            "api": "http://${ip}:5559/proxy3",
+            "shopApi": "http://${ip}:5559/proxy",
+            "updateApi": "http://${ip}:5559/proxy2"
         }
     },
-    "js": {},
+    "js": {
+        "common": {
+            "components/confirm": "./components/confirm",
+            "components/cart": "./components/cart",
+            "components/imagePicker": "./components/imagePicker"
+        },
+        "widget/calendar": {
+            "widget/calendar": "../webresource/m/js/widget/calendar"
+        }
+    },
     "framework": {
         "seajs": "../webresource/js/seajs/sea",
         "zepto": "../webresource/js/zepto",

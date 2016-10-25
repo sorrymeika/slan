@@ -1,8 +1,47 @@
 var Loader = require('widget/loader');
+var Http = require('core/http');
 var userModel = require('models/user');
 var api = require('models/api');
 
 var User = {
+    updateUserName: function (userName) {
+        return this.updateUser('userName', userName);
+    },
+
+    updateGender: function (gender) {
+
+        return this.updateUser('gender', gender);
+    },
+
+    updateBirthDay: function (birthDay) {
+
+        return this.updateUser('birthDay', birthDay);
+    },
+
+    updateChildBirthDay: function (birthDay) {
+
+        return this.updateUser('childBirthDay', birthDay);
+    },
+
+    updateCity: function (cityId) {
+
+        return this.updateUser('cityId', cityId);
+    },
+
+    updateUser: function (type, value) {
+        var user = userModel.get();
+
+        var data = {
+            type: type,
+            ID: user.ID,
+            Auth: user.Auth
+        };
+
+        data[type] = value;
+
+        return Http.post('/api/user/update', data)
+    },
+
     getMonthGifts: function (freId, callback) {
         var user = userModel.get();
 
@@ -32,7 +71,7 @@ var User = {
         }).load(callback);
     },
 
-     getMonthOverdue: function (callback, $el) {
+    getMonthOverdue: function (callback, $el) {
         var user = userModel.get();
 
         return new Loader({
@@ -63,10 +102,10 @@ var User = {
     },
 
 
-    getCouponList: function (callback, $el) {
+    getCouponList: function ($el) {
         var user = userModel.get();
 
-        new Loader({
+        return new Loader({
             $el: $el,
             url: "/api/user/voucher_list",
             params: {
@@ -76,7 +115,7 @@ var User = {
                 Auth: user.Auth
             }
 
-        }).load(callback);
+        }).request();
     },
     getCoupon: function (csvId, callback, $el) {
         var user = userModel.get();
@@ -99,9 +138,8 @@ var User = {
 
         var user = userModel.get();
 
-        new Loader({
+        new api.CouponAPI({
             $el: $el,
-            url: "/api/user/GetCoupon",
             params: {
                 csvcode: csvcode,
                 pspcode: user.PSP_CODE

@@ -1,5 +1,8 @@
 ﻿define(function () {
 
+    var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
+    function int2char(n) { return BI_RM.charAt(n); }
+
     //下面是64个基本的编码
     var base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     var base64DecodeChars = new Array(
@@ -158,7 +161,6 @@
         return ret;
     }
 
-
     // convert a base64 string to hex
     function b64tohex(s) {
         var ret = ""
@@ -166,38 +168,39 @@
         var k = 0; // b64 state, 0-3
         var slop;
         for (i = 0; i < s.length; ++i) {
-            if (s.charAt(i) == b64pad) break;
-            v = b64map.indexOf(s.charAt(i));
+            if (s.charAt(i) == b64padchar) break;
+            v = base64EncodeChars.indexOf(s.charAt(i));
             if (v < 0) continue;
             if (k == 0) {
-                ret += base64EncodeChars.charAt(v >> 2);
+                ret += int2char(v >> 2);
                 slop = v & 3;
                 k = 1;
             }
             else if (k == 1) {
-                ret += base64EncodeChars.charAt((slop << 2) | (v >> 4));
+                ret += int2char((slop << 2) | (v >> 4));
                 slop = v & 0xf;
                 k = 2;
             }
             else if (k == 2) {
-                ret += base64EncodeChars.charAt(slop);
-                ret += base64EncodeChars.charAt(v >> 2);
+                ret += int2char(slop);
+                ret += int2char(v >> 2);
                 slop = v & 3;
                 k = 3;
             }
             else {
-                ret += base64EncodeChars.charAt((slop << 2) | (v >> 4));
-                ret += base64EncodeChars.charAt(v & 0xf);
+                ret += int2char((slop << 2) | (v >> 4));
+                ret += int2char(v & 0xf);
                 k = 0;
             }
         }
         if (k == 1)
-            ret += base64EncodeChars.charAt(slop << 2);
+            ret += int2char(slop << 2);
         return ret;
     }
 
     return {
         hex2b64: hex2b64,
+        b64tohex: b64tohex,
         encode: function (src) { return base64encode(utf16to8(src)); },
         decode: function (src) { return utf8to16(base64decode(src)); }
     };
