@@ -2,7 +2,7 @@
     "debug": true,
     "useLocal": true,
     "dest": "./dest",
-    "api": "http://127.0.0.1:6006",
+    "api": "http://${ip}:10009",
     "proxy": {
         "/proxy/*": "testappapi-1-2-0.abs.cn"
     },

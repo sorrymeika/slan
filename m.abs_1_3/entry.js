@@ -7,7 +7,6 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 var App = require('core/app');
-
 var Scroll = require('widget/scroll');
 var Model = require('core/model2').Model;
 
@@ -35,59 +34,6 @@ ModelProto.destory = function () {
 
     if (this._scrolls) this._scrolls.destory();
 }
-
-
-util.cnNum = function (num) {
-    if (num > 10000) {
-        num = (num + '');
-        return num.substr(0, num.length - 4) + "万";
-    } else if (num > 1000) {
-
-        num = (num + '');
-        return num.substr(0, num.length - 4) + 'k';
-    } else {
-        return num;
-    }
-}
-
-//cmccBridge
-bridge.cmcc = {
-
-    //@bizType="register"|"resetPwd"|"smsLogin"
-    sendSms: function (phoneNo, bizType) {
-        if (!bizType) throw new Error('require bizType!!');
-
-        bridge.exec('cmcc', {
-            type: 'sendSms',
-            phoneNo: phoneNo,
-            bizType: bizType
-        });
-    },
-
-    registerUser: function (phoneNo, password, validCode, callback) {
-
-        bridge.exec('cmcc', {
-            type: 'registerUser',
-            phoneNo: phoneNo,
-            password: password,
-            bizType: bizType
-
-        }, callback);
-
-    },
-
-    //@loginType="sms"|"password"
-    login: function (phoneNo, password, loginType, callback) {
-
-        bridge.exec('cmcc', {
-            type: 'login',
-            phoneNo: phoneNo,
-            password: password,
-            loginType: loginType
-
-        }, callback);
-    }
-};
 
 
 function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {

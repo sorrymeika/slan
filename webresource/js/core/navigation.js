@@ -1,10 +1,11 @@
-﻿define(function (require, exports, module) {
+define(function (require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
         Base = require('./base'),
         Route = require('./route'),
         appProto = require('./appProto'),
+        Component = require('./component'),
         Async = require('./async');
 
     var noop = util.noop,
@@ -104,7 +105,7 @@
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
-                if (async.queue.length == 0 && !Route.compareUrl(url, location.hash) {
+                if (async.queue.length == 0 && !Route.compareUrl(url, location.hash)) {
                     that.navigate(url);
                 }
 

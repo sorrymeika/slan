@@ -50,7 +50,7 @@
             }
         });
 
-        seajs.use(['$', 'util', 'core/app', 'bridge', 'widget/loader', 'widget/offline'], function($, util, App, bridge, Loader, Offline) {
+        seajs.use(['entry', '$', 'util'], function(entry, $, util) {
             var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
             sl.isDebug = @debug;
             sl.buildVersion = @(Date.now());
@@ -58,66 +58,15 @@
             sl.appVersion = matchUA ? matchUA[1] : '1.3.2';
 
             $(window).on('ortchange', adjustPx);
+
+            var routes = @(JSON.stringify(routes));
+            var combineMapping = @(JSON.stringify(resourceMapping));
+
             @if(!debug && !useLocal) {
-
-                function loadResourceMapping() {
-                    loader.reload();
-                }
-
-                var loader = new Loader({
-                    url: bridge.url('/api/settings/resourceMapping'),
-                    params: {
-                        v: sl.appVersion
-                    },
-                    timeout: 5000,
-                    checkData: false,
-                    $el: $('body'),
-                    error: function() {
-                        Offline.getInstance().show(loadResourceMapping);
-                        console.log("cantload: /api/settings/resourceMapping");
-                    },
-                    success: function(res) {
-                        Offline.getInstance().hide();
-
-                        var resourceMapping = res.data;
-                        var routes = $.extend(@(JSON.stringify(routes)), res.routes || {});
-                        var combineMapping = @(JSON.stringify(resourceMapping));
-
-                        seajs.on('fetch', function(emitData) {
-                            var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
-
-                            if (resourceMapping && resourceMapping[id]) {
-                                emitData.requestUri = resourceMapping[id];
-
-                            } else if (combineMapping) {
-                                for (var key in combineMapping) {
-                                    if (combineMapping[key].indexOf(id) != -1) {
-                                        emitData.requestUri = resourceMapping && resourceMapping[key] ? resourceMapping[key] : seajs.resolve(key);
-                                        break;
-                                    }
-                                }
-                            }
-                        });
-                        seajs.on("error", function(errorData) {
-                            errorData.pause = true;
-
-                            console.log(errorData.uri);
-                            alert(errorData.uri);
-
-                            Offline.getInstance().show(function() {
-                                this.hide();
-                                seajs.request(errorData.uri, errorData.callback);
-                            });
-                        });
-
-                        new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
-                    }
-
-                });
-                loadResourceMapping();
+                entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, combineMapping);
 
             } else {
-                new App().mapRoute(@(JSON.stringify(routes))).start(sl.isInApp ? 2000 : 0);
+                entry.startApp(routes, combineMapping);
             }
 
         });

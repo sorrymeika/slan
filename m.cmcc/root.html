@@ -48,7 +48,7 @@
             }
         });
 
-        seajs.use(['entry', '$', 'util', 'core/app', 'widget/loader', 'widget/offline'], function(entry, $, util, App, Loader, Offline) {
+        seajs.use(['entry', '$', 'util'], function(entry, $, util) {
             var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
             sl.isDebug = @debug;
             sl.buildVersion = @(Date.now());
@@ -61,29 +61,7 @@
             var combineMapping = @(JSON.stringify(resourceMapping));
 
             @if(!debug && !useLocal) {
-                function loadResourceMapping() {
-                    loader.reload();
-                }
-
-                var loader = new Loader({
-                    url: '/api/settings/resourceMapping',
-                    params: {
-                        v: sl.appVersion
-                    },
-                    timeout: 5000,
-                    checkData: false,
-                    $el: $('body'),
-                    error: function() {
-                        Offline.getInstance().show(loadResourceMapping);
-                    },
-                    success: function(res) {
-                        Offline.getInstance().hide();
-
-                        entry.startApp(routes, combineMapping, res.routes, res.data);
-                    }
-
-                });
-                loadResourceMapping();
+                entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, combineMapping);
 
             } else {
                 entry.startApp(routes, combineMapping);

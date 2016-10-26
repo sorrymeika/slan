@@ -3,7 +3,6 @@ var $ = require('$');
 var Base = require('./base');
 var util = require('util');
 var Event = require('./event');
-var Scroll = require('../widget/scroll');
 
 var toString = {}.toString;
 
@@ -29,7 +28,7 @@ var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
 var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9\(\,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*(orderBy|orderByDesc)\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
-var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\:|$)/g;
+var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
 var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
 var rSnAttr = /^sn-/;
 
@@ -452,7 +451,8 @@ var ModelProto = {
             model = self.model,
             parent,
             keys,
-            coverChild = false;
+            coverChild = false,
+            root = this.root;
 
         if (typeof cover != "boolean")
             val = key, key = cover, cover = false;
@@ -556,6 +556,7 @@ var ModelProto = {
 
                         default:
                             data[attr] = model[attr] = value;
+                            root.trigger("change:" + (this.key ? this.key + "." + attr : attr), value);
                             break;
                     }
                     model[attr] = value;
@@ -563,7 +564,7 @@ var ModelProto = {
             }
         }
 
-        this.root.updateViewNextTick();
+        root.updateViewNextTick();
 
         return self;
     },
@@ -706,8 +707,6 @@ Collection.prototype = {
             this.data.splice(count, 0, model.data);
         }
 
-        console.log(this.data);
-
         this.root.updateViewNextTick();
     },
 
@@ -729,7 +728,6 @@ Collection.prototype = {
 
         if (typeof key === 'string' && val !== undefined) {
             fn = function (item) {
-                console.log(item);
 
                 return item[key] == val;
             }
@@ -1042,7 +1040,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                     }
                                     return $1 + $2 + ($2 ? ',e)' : 'e)');
 
-                                }).replace(rset, 'this.setDataFromElement(e.currentTarget,"$1",$2)');
+                                })/*.replace(rset, function (match, $1, $2) {
+                                    //test
+                                    return match;
+
+                                })*/.replace(rset, 'this.setDataFromElement(e.currentTarget,"$1",$2)');
+
 
                                 var fid = self.getFunctionId('{' + content + '}');
                                 if (fid) {
@@ -1439,6 +1442,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         this._codes = [];
 
+
         eachElement($el, function (node) {
             if (node.snViewModel) return false;
 
@@ -1564,22 +1568,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         return this.one('viewDidUpdate', callback);
     },
 
-    bindScrollTo: function (el, options) {
-        var sbr = Scroll.bind(el, options);
-
-        if (!this._scrolls) {
-            this._scrolls = sbr;
-
-        } else {
-            this._scrolls.add(sbr);
-        }
-        return sbr;
-    },
-
-    getScrollView: function (el) {
-        return this._scrolls.get(el);
-    },
-
     destory: function () {
         this.$el.off('input change blur', '[' + this.snModelKey + ']')
             .each(function () {
@@ -1599,8 +1587,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 break;
             }
         }
-
-        if (this._scrolls) this._scrolls.destory();
 
         this.$el = null;
     }

@@ -2,9 +2,7 @@
 //app.all('*', http_proxy('m.abs.cn', 7788));
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
-var bodyParser = require('body-parser');
 
-var Async = require('../core/async');
 var fs = require('fs');
 var fsc = require('../core/fs');
 var path = require('path');
@@ -12,6 +10,7 @@ var razor = require('../core/razor');
 var _ = require('underscore');
 var Tools = require('../tools/tools');
 var sass = require('node-sass');
+var sprity = require('../tools/sprity');
 
 var Util = require('util');
 var util = require('../core/util');
@@ -50,60 +49,100 @@ function combineRouters(config) {
             result[regexStr] = router;
         }
     });
+
     return result;
 }
 
 exports.loadConfig = function (callback) {
-    var async = new Async();
 
-    fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
-        var globalConfig = JSON.parse(globalStr);
-        var subPromise = new Async().resolve();
-        globalConfig.routes = {};
+    return new Promise(function (resolve) {
+        var exec = require('child_process').exec;
 
-        subPromise.each(globalConfig.projects, function (i, project) {
+        exec('ifconfig', (err, stdout, stderr) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            var matchIp = stdout.match(/\sen0\:[\s\S]+?\sinet\s(\d+\.\d+\.\d+\.\d+)/);
 
-            fs.readFile(path.join(project, 'config.json'), { encoding: 'utf-8' }, function (err, data) {
-                var config = JSON.parse(data);
-                config.root = project;
-
-                subPromise.next(i, err, config);
-            });
-
-        }).then(function (err, result) {
-            globalConfig.projects = result;
-
-            async.resolve(null, callback(err, globalConfig));
+            resolve(matchIp[1]);
         });
 
-    });
+    }).then(function (ip) {
+        console.log(ip);
 
-    return async;
+        var map = {
+            ip: ip
+        }
+
+        return new Promise(function (resolve) {
+
+            fs.readFile('./global.json', { encoding: 'utf-8' }, function (err, globalStr) {
+
+                globalStr = globalStr.replace(/\$\{(\w+)\}/g, function (match, key) {
+
+                    return (key in map) ? map[key] : match;
+                })
+
+                var globalConfig = JSON.parse(globalStr);
+                globalConfig.routes = {};
+
+                resolve(globalConfig);
+            })
+        })
+
+    }).then(function (globalConfig) {
+
+        return Promise.all(globalConfig.projects.map(function (project, i) {
+
+            return new Promise(function (resolve) {
+
+                fs.readFile(path.join(project, 'config.json'), { encoding: 'utf-8' }, function (err, data) {
+                    var config = JSON.parse(data);
+                    config.root = project;
+
+                    resolve(config);
+                });
+            });
+
+        })).then(function (results) {
+            globalConfig.projects = results;
+
+            callback(globalConfig);
+
+            return globalConfig;
+        })
+    })
 }
 
 exports.createIndex = function (config, callback) {
     fs.readFile('./root.html', { encoding: 'utf-8' }, function (err, html) {
 
         var T = razor.nodeFn(html.replace(/^\uFEFF/i, ''));
-
-        var async = new Async().resolve();
         var rimg = /url\(("|'|)([^\)]+)\1\)/g;
 
-        async.each(config.css, function (i, cssPath) {
-            fs.readFile(cssPath, { encoding: 'utf-8' }, function (err, style) {
-                async.next(i, err, style.replace(/^\uFEFF/i, ''));
+        Promise.all(config.css.map(function (cssPath, i) {
+
+            return new Promise(function (resolve) {
+
+                fs.readFile(cssPath, { encoding: 'utf-8' }, function (err, style) {
+                    resolve(style.replace(/^\uFEFF/i, ''));
+                });
             });
 
-        }).then(function (err, styles) {
+
+        })).then(function (styles) {
 
             var style = styles.join('').replace(rimg, function (r0, r1, r2) {
-                return "url(images/" + r2 + ")";
+                return /^data\:image\//.test(r2) ? r0 : ("url(images/" + r2 + ")");
             });
 
-            callback(null, T.html(_.extend({}, config, {
+            var result = T.html(_.extend({}, config, {
                 style: "<style>" + style + "</style>",
                 routes: combineRouters(config)
-            })));
+            }));
+
+            callback(null, result);
         });
     });
 }
@@ -112,6 +151,10 @@ exports.createIndex = function (config, callback) {
 exports.startWebServer = function (config) {
     var express = require('express');
     var app = express();
+
+    config.resourceMapping = {};
+
+    app.use('/dest', express.static(config.dest));
 
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
@@ -127,9 +170,7 @@ exports.startWebServer = function (config) {
             var fileList = project.js[key];
             if (fileList) {
                 if (!_.isArray(fileList)) {
-                    fileList = _.map(fileList, function (value, id) {
-                        return value || id;
-                    })
+                    fileList = _.keys(fileList);
                 }
                 fileList.forEach(function (file) {
                     requires.push(combinePath(project.root, file));
@@ -141,6 +182,14 @@ exports.startWebServer = function (config) {
             project.css[key] && project.css[key].forEach(function (file) {
                 requires.push(combinePath(project.root, file));
             });
+        }
+
+        var sprite = project.sprite;
+        if (sprite) {
+            sprite.out = path.join(root, sprite.out);
+            sprite.src = path.join(root, sprite.src);
+            sprite.template = path.join(root, sprite.template);
+            sprity.create(sprite);
         }
 
         app.all((root && root != '.' ? "/" + root : '') + '/template/[\\S\\s]+.js', function (req, res, next) {
@@ -186,6 +235,7 @@ exports.startWebServer = function (config) {
                 next();
                 return;
             }
+
             text = text.replace(/^\uFEFF/i, '');
             if (isRazorTpl) text = razor.web(text);
             text = formatJs(text);
@@ -228,16 +278,11 @@ exports.startWebServer = function (config) {
         });
     });
 
-    app.use('/dest', express.static(config.dest));
 
     for (var key in config.proxy) {
         var proxy = config.proxy[key].split(':');
         app.all(key, http_proxy(proxy[0], proxy[1] ? parseInt(proxy[1]) : 80));
     }
-    
-    app.use(bodyParser.urlencoded({ extended: true }));
-
-    app.use('/api', require('./api/router'));
 
     console.log("start with", config.port, process.argv);
 
@@ -258,17 +303,25 @@ for (var i = 2, arg, length = argv.length; i < length; i++) {
 
 //打包
 if (args.build) {
-    exports.loadConfig(function (err, config) {
+    exports.loadConfig(function (config) {
+        console.log("start:", util.formatDate(new Date()));
+
         _.extend(config, config.env[args.build === true ? 'production' : args.build], {
             debug: false
         });
 
         var baseDir = path.join(__dirname, './');
         var destDir = path.join(__dirname, config.dest);
+
         var tools = new Tools(baseDir, destDir);
 
         //打包框架
-        tools.combine(config.framework);
+        tools.combine({
+            "slan.m": config.framework
+        });
+
+        //合并js、css
+        config.resourceMapping = tools.combine(config.js);
 
         //生成首页
         exports.createIndex(config, function (err, html) {
@@ -277,16 +330,17 @@ if (args.build) {
 
         //打包业务代码
         config.projects.forEach(function (project) {
-            var async = new Async().resolve();
             var codes = '';
             var requires = [];
+            var excludes = [];
 
             for (var key in project.js) {
+
                 requires.push(combinePath(project.root, key));
 
-                if (project.js[key]) { 
+                if (project.js[key]) {
                     //打包项目引用js                
-                    (function (key, fileList, filePromise) {
+                    (function (key, fileList) {
                         var ids;
                         if (!_.isArray(fileList)) {
                             ids = _.keys(fileList);
@@ -295,60 +349,74 @@ if (args.build) {
                             });
                         }
 
-                        filePromise.each(fileList, function (i, file) {
+                        Promise.all(fileList.map(function (file, i) {
                             var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
 
-                            fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
+                            excludes.push(path.relative(baseDir, combinePath(project.root, "./" + file)));
 
-                                if (isRazorTpl) text = razor.web(text);
-                                text = formatJs(text);
-                                text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
+                            return new Promise(function (resolve) {
+                                fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
 
-                                filePromise.next(i, err, text);
-                            });
+                                    if (isRazorTpl) text = razor.web(text);
+                                    text = formatJs(text);
+                                    text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
 
-                        }).then(function (err, results) {
+                                    resolve(text);
+                                });
+                            })
+
+                        })).then(function (results) {
 
                             Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
                         });
 
-                    })(key, project.js[key], new Async().resolve());
+                    })(key, project.js[key]);
                 }
             }
 
             for (var key in project.css) {
+
                 requires.push(combinePath(project.root, key));
 
-                if (project.css[key] && project.css[key].length) { 
+                if (project.css[key] && project.css[key].length) {
+
                     //打包项目引用css
-                    (function (key, fileList, filePromise) {
-                        filePromise.each(fileList, function (i, file) {
+                    (function (key, fileList) {
 
-                            fsc.firstExistentFile([path.join(project.root, file), path.join(project.root, file).replace(/\.css$/, '.scss')], function (file) {
+                        Promise.all(fileList.map(function (file) {
 
-                                if (/\.css$/.test(file)) {
-                                    fs.readFile(file, 'utf-8', function (err, text) {
-                                        text = Tools.compressCss(text);
-                                        filePromise.next(i, err, text);
-                                    });
-                                } else {
-                                    sass.render({
-                                        file: file
+                            return new Promise(function (resolve) {
 
-                                    }, function (err, result) {
-                                        result = Tools.compressCss(result.css.toString());
-                                        filePromise.next(i, err, result);
-                                    });
-                                }
+                                fsc.firstExistentFile([path.join(project.root, file), path.join(project.root, file).replace(/\.css$/, '.scss')], function (file) {
+
+                                    if (/\.css$/.test(file)) {
+                                        fs.readFile(file, 'utf-8', function (err, text) {
+                                            text = Tools.compressCss(text);
+                                            resolve(text);
+                                        });
+                                    } else {
+                                        sass.render({
+                                            file: file
+
+                                        }, function (err, result) {
+                                            result = Tools.compressCss(result.css.toString());
+
+                                            resolve(result);
+                                        });
+                                    }
+                                });
+
                             });
 
-                        }).then(function (err, results) {
+                        })).then(function (results) {
                             Tools.save(path.join(destDir, project.root, key), results.join(''));
                         });
 
-                    })(key, project.css[key], new Async().resolve());
+                    })(key, project.css[key]);
                 }
             }
+
+            var promise = Promise.resolve();
 
             //打包template和controller
             var contains = [];
@@ -372,54 +440,67 @@ if (args.build) {
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
 
-                    async.then(function () { 
-                        //打包模版
-                        fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
-                            if (!err && contains.indexOf(fileName) == -1) {
-                                contains.push(fileName);
-                                text = razor.web(text);
-                                text = Tools.compressJs(Tools.replaceDefine(template, text));
-                                codes += text;
-                            }
+                    excludes = excludes.concat(Object.keys(config.framework))
+                        .concat(['animation', '$', 'zepto', 'activity']);
 
-                            async.resolve();
-                        });
+                    promise = promise.then(function () {
 
-                        return async;
+                        return new Promise(function (resolve) {
 
+                            //打包模版
+                            fsc.readFirstExistentFile([templatePath + '.html', templatePath + '.cshtml', templatePath + '.tpl'], function (err, text, fileName) {
+                                if (!err && contains.indexOf(fileName) == -1) {
+                                    contains.push(fileName);
+                                    text = razor.web(text);
+                                    text = Tools.compressJs(Tools.replaceDefine(template, text));
+                                    codes += text;
+                                }
+                                console.log("打包模版", fileName);
+
+                                resolve();
+                            });
+                        })
                     }).then(function () {
-                        //打包控制器
-                        fsc.readFirstExistentFile([controllerPath + '.js', controllerPath + '.jsx'], function (err, text, fileName) {
-                            if (!err && contains.indexOf(fileName) == -1) {
-                                text = formatJs(text);
-                                text = Tools.compressJs(Tools.replaceDefine(controller, text, requires, true));
-                                codes += text;
-                            }
+                        return new Promise(function (resolve) {
 
-                            async.resolve();
-                        });
+                            //打包控制器
+                            fsc.readFirstExistentFile([controllerPath + '.js', controllerPath + '.jsx'], function (err, text, fileName) {
+                                if (!err && contains.indexOf(fileName) == -1) {
+                                    text = formatJs(text);
+                                    text = Tools.compressJs(Tools.replaceDefine(controller, text, requires, excludes));
+                                    codes += text;
+                                }
 
-                        return async;
+                                console.log("打包控制器", fileName);
+
+                                resolve();
+                            });
+                        })
                     });
 
                 })(project.route[key]);
             }
 
             //保存合并后的业务代码
-            async.then(function () {
+            promise.then(function () {
+                console.log('保存合并后的业务代码');
+
                 Tools.save(path.join(destDir, project.root, 'controller.js'), codes);
             });
         });
-        
-        
-        //复制图片资源
-        var imgPromise = new Async().resolve();
-        imgPromise.each(config.images, function (i, imgDir) {
-            fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png)', function (err, result) {
-                imgPromise.next(i, err, result);
-            });
 
-        }).then(function () {
+
+        //复制图片资源
+        Promise.all(config.images.map(function (imgDir, i) {
+
+            return new Promise(function (resolve, reject) {
+
+                fsc.copy(path.join(baseDir, imgDir), path.join(config.dest, 'images'), '*.(jpg|png|eot|svg|ttf|woff)', function (err, result) {
+                    resolve(result);
+                });
+            })
+
+        })).then(function () {
             config.projects.forEach(function (proj) {
 
                 if (proj.images) {
@@ -430,12 +511,17 @@ if (args.build) {
                     });
                 }
             });
+
+        }).then(function () {
+
+            console.log('copy resources success');
+
         });
     });
 
 } else {
-    exports.loadConfig(function (err, config) {
+    exports.loadConfig(function (config) {
+
         exports.startWebServer(config);
     });
 }
-    

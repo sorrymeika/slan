@@ -23,6 +23,10 @@ var Discovery = require('./discovery/discovery_index');
 
 var trimHash = require('core/route').formatUrl;
 
+window.onerror=function(e){
+    alert(e);
+}
+
 Global.set({
     msg_count: 0,
     cartQty: 0

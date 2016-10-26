@@ -6,7 +6,8 @@
     "css": [
         "../webresource/images/reset.css",
         "../webresource/images/manage.css",
-        "../webresource/images/datepicker.css"
+        "../webresource/images/datepicker.css",
+        "./css/app.scss"
     ],
     "images": [
         "../webresource/images"

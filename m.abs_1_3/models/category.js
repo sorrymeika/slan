@@ -14,8 +14,6 @@ var categoryAPI = new api.CategoryAPI({
     }
 });
 
-console.log(categoryAPI);
-
 var Category = {
     get: function (callback) {
 
