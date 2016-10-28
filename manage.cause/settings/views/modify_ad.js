@@ -42,7 +42,7 @@
                 model: this.model,
                 name: 'data',
                 title: 'test',
-                useIframe: true,
+                useIFrame: true,
                 url: '/api/manage/modify_ad',
                 validator: 'userValid',
                 enctype: '',

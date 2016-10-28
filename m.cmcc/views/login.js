@@ -15,7 +15,7 @@ var RSA = require('util/rsa');
 var rsa = new RSA();
 
 
-var res = rsa.setPrivateKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCczoLxjmckSX9oJBNSXY1rKWK5\
+var res = rsa.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCczoLxjmckSX9oJBNSXY1rKWK5\
 urp3WzPiLhctBOahVSaSeWhVKif1Q1VSfDhnEw93pNRX6vxwsZ215x8iAFU/Xp8q\
 Pdj+S3mVjefkHZQRBohnJ1Bs7qGf+794yKOXyeUOUXqMbeIBuZu7MmZkNcnjLU8r\
 Y9SWbWtJmH6pjEYS5QIDAQAB")

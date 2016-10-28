@@ -80,7 +80,7 @@ var valueCode = function (str, variables) {
 function eachElement(el, fn) {
     if (!el) return;
 
-    if ('length' in el && el.nodeType !== 3) {
+    if (Array.isArray(el) || el instanceof $.fn.constructor) {
         for (var i = 0, len = el.length; i < len; i++) {
             eachElement(el[i], fn);
         }
@@ -1245,7 +1245,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var orderBy = repeatSource.orderBy;
         var isDesc = repeatSource.orderByType == "orderByDesc";
 
-
         var parentSnData = {};
 
         if (repeatSource.parent) {
@@ -1442,8 +1441,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         this._codes = [];
 
-
         eachElement($el, function (node) {
+
             if (node.snViewModel) return false;
 
             self.twoWayBinding(node);

@@ -6,6 +6,7 @@ var Loader = require('widget/loader');
 var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
+var Offline = require('widget/offline');
 var App = require('core/app');
 var Scroll = require('widget/scroll');
 var Model = require('core/model2').Model;
@@ -91,7 +92,7 @@ function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {
         success: function (res) {
             Offline.getInstance().hide();
 
-            entry.startApp(routes, resourceMapping, res.routes, res.data);
+            startApp(routes, resourceMapping, res.routes, res.data);
         }
 
     });

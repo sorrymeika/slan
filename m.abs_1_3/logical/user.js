@@ -42,6 +42,20 @@ var User = {
         return Http.post('/api/user/update', data)
     },
 
+
+    getCart: function () {
+        var user = userModel.get();
+        
+        return new api.CartAPI({
+            $el: self.$el,
+            checkData: false,
+            params: {
+                pspcode: user.PSP_CODE
+            }
+
+        }).load();
+    },
+
     getMonthGifts: function (freId, callback) {
         var user = userModel.get();
 
@@ -134,11 +148,11 @@ var User = {
         }).load(callback);
     },
 
-    recieveCoupon: function (csvcode, callback, $el) {
+    recieveCoupon: function (csvcode, $el) {
 
         var user = userModel.get();
 
-        new api.CouponAPI({
+        return new api.CouponAPI({
             $el: $el,
             params: {
                 csvcode: csvcode,
@@ -146,7 +160,7 @@ var User = {
             },
             error: function () { }
 
-        }).load(callback);
+        }).load();
     },
 
     getCouponStatus: function (csvId, callback, $el) {

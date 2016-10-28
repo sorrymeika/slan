@@ -33,7 +33,7 @@
             var form = new Form({
                 model: this.model,
                 name: 'data',
-                useIframe: true,
+                useIFrame: true,
                 url: '/api/manage/set_update',
                 validator: 'updateValid',
                 enctype: '',

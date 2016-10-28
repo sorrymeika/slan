@@ -430,7 +430,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .sp_buy__info li em { display: block; margin-right: 8px; color: #ccc; font-size: 14px; }
 .sp_buy__info li b { display: block; margin-right: 5px; color: $color; font-weight: normal; }
 .sp_buy__info li span+span { display: block; -webkit-box-flex: 0; margin-right: 5px; }
-.sp_buy__info li:not(.ico_alipay,.ico_wxpay,.ico_cmbpay,.hd):after, .sp_buy__addr:after { position: absolute; right: 10px; width: 10px; height: 10px; content: ''; border-top: 2px solid #ccc; border-right: 2px solid #ccc; -webkit-transform: rotate(45deg); top: 50%; margin-top: -5px; }
+.sp_buy__info li:not(.check):after { position: absolute; right: 10px; width: 10px; height: 10px; content: ''; border-top: 2px solid #ccc; border-right: 2px solid #ccc; -webkit-transform: rotate(45deg); top: 50%; margin-top: -5px; }
 .sp_buy__info .hd, .sp_buy__cart .hd { font-weight: bold; }
 .sp_buy__bill li{ padding-right: 0px; }
 .sp_buy__bill li:after{ display: none; }
@@ -440,10 +440,6 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 
 .uc_order__wrap .sp_buy__addr:after { display: none; }
 
-.ico_alipay:before,.ico_wxpay:before,.ico_cmbpay:before { @extend .icon; background-position: -270px 0px; display: inline-block; vertical-align: -10px; }
-.ico_alipay.checked:after,.ico_wxpay.checked:after,.ico_cmbpay.checked:after { @extend .icon; background-position: -210px -30px; float: right; margin-top: 7px; -webkit-transform: scale(.8); }
-.ico_wxpay:before { background-position: -240px 0px; }
-.ico_cmbpay:before { background-position: 0px -230px; }
 
 .sp_buy__inv_required .checkboxlist { display: -webkit-box; border-top: 1px solid #ddd; }
 .sp_buy__inv_required .checkboxlist li { -webkit-box-flex: 1; height: 46px; line-height: 46px; padding-left: 15px; }
@@ -796,7 +792,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_coupon__list .price { font-size: 38px; margin-top: 15px; }
 .uc_coupon__list .price:before { content: '¥'; vertical-align: 14px; font-size: 16px; font-weight: bold; }
 .uc_coupon__list .type { font-size: 20px; font-weight: bold; }
-.uc_coupon__list .name { font-size: 14px; }
+.uc_coupon__list .name { font-size: 14px; height: 20px; }
 .uc_coupon__list .prd { font-size: 14px; }
 .uc_coupon__list .prd span { color: $blue; }
 .uc_coupon__list .time { font-size: 12px; position: absolute !important; bottom: 25px; left: 0; }
@@ -815,7 +811,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_coupon .my_nodata .icon:before { background-position-x: -150px; }
 .uc_coupon .my_nodata { margin-top: 90px; }
 
-.uc_coupon__tab .cp_tab { top: 112px; background-color: #F4F4F4 }
+.uc_coupon__tab .cp_tab { top: 112rem; background-color: #F4F4F4 }
 .uc_coupon__tab .cp_tab__head { font-size: 14px; }
 
 .uc_couponitem { background-color: #fff; }

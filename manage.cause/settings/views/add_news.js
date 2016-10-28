@@ -47,7 +47,7 @@
                 model: this.model,
                 name: 'user',
                 title: 'test',
-                useIframe: true,
+                useIFrame: true,
                 url: API.url('/api/manage/add_news'),
                 validator: 'userValid',
                 enctype: '',

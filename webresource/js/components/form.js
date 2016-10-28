@@ -4,69 +4,78 @@ var util = require('util');
 var Validator = require('./validator');
 var vm = require('core/model2');
 var Async = require('core/async');
+var Http = require('core/http');
 var TimePicker = require('./timepicker');
 
 var valid_keys = ['emptyAble', 'emptyText', 'regex', 'regexText', 'compare', 'compareText', 'validate', 'validateText', 'success', 'msg'];
 var guid = 0;
+var FormComponentKeys = ["buttons", "useIFrame", "contentType", "xhrFields", "method", 'enctype'];
 
 
 var FormComponent = function (options) {
-    var self = this,
-        option,
-        fields;
 
+    var self = this;
+    var fields;
     var items = {};
     var data = {};
+
     this.hiddens = [];
     this.fields = [];
     this.plugins = [];
     this.compo = {};
 
     var validator = {};
-    for (var key in options) {
-        option = options[key];
+    var fieldsOption = options.fields;
 
-        if (key == 'fields') {
-            for (var i = 0, len = option.length; i < len; i++) {
-                fields = option[i];
-                if (fields.type === 'hidden') {
-                    items[fields.field] = fields;
-                    data[fields.field] = fields.value;
+    for (var i = 0, len = fieldsOption.length; i < len; i++) {
+        fields = fieldsOption[i];
+        if (fields.type === 'hidden') {
+            items[fields.field] = fields;
+            data[fields.field] = fields.value;
 
-                    this.hiddens.push(fields);
-                } else {
-                    if (!fields.length) fields = [fields];
-                    this.fields.push(fields);
+            this.hiddens.push(fields);
+        } else {
+            if (!fields.length) fields = [fields];
 
-                    for (var j = 0, length = fields.length; j < length; j++) {
-                        var field = fields[j];
-                        var valid = util.pick(field, valid_keys);
+            this.fields.push(fields);
 
-                        items[field.field] = field;
-                        data[field.field] = field.value;
+            for (var j = 0, length = fields.length; j < length; j++) {
+                var field = fields[j];
+                var valid = util.pick(field, valid_keys);
 
-                        if (!util.isEmptyObject(valid)) {
-                            validator[field.field] = valid;
-                        }
-                    }
+                items[field.field] = field;
+                data[field.field] = field.value;
+
+                if (!util.isEmptyObject(valid)) {
+                    validator[field.field] = valid;
                 }
-
             }
-
-        } else
-            this[key] = option;
+        }
     }
 
-    this.$el = $(this.template.html(this));
+    this.buttons = options.buttons || null;
+
+    Object.assign(this, util.pick(options, FormComponentKeys))
+
+    var template = this.template.html(this);
+
+    this.$el = $(template);
+
     this.el = this.$el[0];
 
-    console.log(this.el);
+    this.url = Http.url(options.url);
 
     this.model = new vm.Model(this.$el, {
         fields: items,
         data: data
     });
 
+    var buttons = this.buttons;
+    if (buttons) {
+        for (var i = 0; i < buttons.length; i++) {
+            this.model['button' + i + "Click"] = buttons[i].click.bind(this);
+        }
+    }
 
     this.valid = new Validator(validator, this.model.data.data);
 
@@ -104,12 +113,12 @@ var FormComponent = function (options) {
 
 FormComponent.prototype = {
     template: form,
-    useIframe: false,
-    url: '',
-    enctype: '',
-    contentType: '',
-    method: "post",
-    fields: [],
+    method: 'post',
+    url: null,
+    enctype: null,
+    buttons: null,
+
+    useIFrame: false,
 
     set: function (arg0, arg1, arg2) {
         this.model.getModel('data').set(arg0, arg1, arg2);
@@ -148,7 +157,7 @@ FormComponent.prototype = {
 
         if (res.success) {
 
-            if (this.useIframe || this.$el.has('[type="file"]').length) {
+            if (this.useIFrame || this.$el.has('[type="file"]').length) {
                 guid++;
                 var target = "_submit_iframe" + guid;
                 var resultText;
@@ -169,6 +178,8 @@ FormComponent.prototype = {
                 this.$el.attr("target", target).submit();
 
             } else {
+                console.log(this.$el.serialize());
+
                 $.ajax({
                     url: this.url,
                     type: 'POST',
@@ -198,8 +209,6 @@ FormComponent.prototype = {
         var res = this.valid.validate(name);
 
         if (!this.model.data.result) this.model.set({ result: {} });
-
-        console.log(name);
 
         this.model.set('result.' + name, res);
     },

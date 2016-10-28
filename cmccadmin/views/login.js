@@ -3,9 +3,13 @@
     var $ = require('$');
     var util = require('util'),
         Page = require('core/page'),
-        model = require('core/model'),
-        API = require('models/api').API,
+        model = require('core/model2'),
         Form = require('components/form');
+    var Http = require('core/http');
+
+    var Toast = require('widget/toast');
+    var popup = require('widget/popup');
+    var auth = require('logical/auth');
 
     return Page.extend({
         events: {},
@@ -13,36 +17,50 @@
         onCreate: function () {
             var self = this;
 
-            self.$el.siblings().hide();
+            this.model = new model.Model(this.$el, {
+                title: '登录'
+            });
 
-            this.model = new model.ViewModel(this.$el, {
-                title: '登录',
+            var form = new Form({
+                url: '/admin/login',
+                fields: [{
+                    label: '账号',
+                    field: 'admin_name',
+                    emptyAble: false,
+                    emptyText: '不可为空'
+                }, {
+                    label: '密码',
+                    field: 'tk',
+                    type: 'password',
+                    emptyAble: false,
+                    emptyText: '不可为空'
+
+                }],
                 buttons: [{
-                    value: '确认',
+                    value: '登录',
                     click: function () {
-                        form.submit(function (res) {
-                            if (res.success) {
-                                sl.tip('登录成功');
-                                self.back('/');
+                        new Http({
+                            url: '/admin/login',
+                            params: auth.encryptParams({
+                                admin_name: this.get('admin_name'),
+                                password: auth.md5(this.get('tk'))
+                            })
+                        }).request()
+                            .then(function (res) {
+                                auth.setAdmin({
+                                    adminId: res.data.adminId,
+                                    adminName: res.data.adminName
+                                });
 
-                            } else {
-                                sl.tip(res.msg);
-                            }
-                        });
+                                auth.setAuthToken(res.data.tk);
+
+                                self.forward("/");
+                            });
                     }
                 }]
             });
 
-            var form = new Form({
-                model: this.model,
-                title: 'test',
-                fields: [{
-                    label: '账号',
-                    field: 'username',
-                    emptyAble: false,
-                    emptyText: '不可为空'
-                }]
-            });
+            form.$el.appendTo(this.$el);
 
         },
 

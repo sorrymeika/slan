@@ -1,4 +1,4 @@
-﻿var matchPair = function (input, left, right, from) {
+var matchPair = function (input, left, right, from) {
     var i = from || 0,
         len = input.length,
         count = 0,

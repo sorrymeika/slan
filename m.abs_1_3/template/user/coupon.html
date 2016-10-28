@@ -20,7 +20,7 @@
                 <p class="type" sn-if="item.VCA_VCT_ID!=4">{item.VCA_VCT_ID==4?'免邮卡':item.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
             </div>
             <div class="bd l-abs_card">
-                <p class="name">{item.VCA_VCT_ID==4?'免邮卡':(item.VCA_NAME.split(/\,|，/)[0]+'，')}</p>
+                <p class="name to_e">{item.VCA_VCT_ID==4?'免邮卡':(item.VCA_NAME.split(/\,|，/)[0]+'，')}</p>
                 <p class="prd" sn-if="{item.PRD_NAME&&item.VCA_VCT_ID!=4}" sn-tap="this.goTo(item)">仅限“<span>{item.PRD_NAME}</span>”使用</p>
                 <p class="time">有效期:<br>{item.IsOverdue?'已过期':(util.formatDate(item.CSV_START_DT,'yyyy/MM/dd')+'-'+util.formatDate(item.CSV_END_DT,'yyyy/MM/dd'))}</p>
             </div>
@@ -32,5 +32,3 @@
         <div class="btn" data-forward="/all?from=/coupon">去逛逛吧</div>
     </div>
 </div>
-
-<div class="coupon_tip" sn-if="{showTipStep==2}"></div>

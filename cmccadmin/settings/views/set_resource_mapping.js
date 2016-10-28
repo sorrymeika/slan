@@ -35,7 +35,7 @@
             var form = new Form({
                 model: this.model,
                 name: 'mapping',
-                useIframe: true,
+                useIFrame: true,
                 url: API.url('/api/manage/set_resource_mapping'),
                 validator: 'updateValid',
                 enctype: '',
@@ -73,7 +73,7 @@
             var form2 = new Form({
                 model: this.model,
                 name: 'upload',
-                useIframe: true,
+                useIFrame: true,
                 url: API.url('/api/manage/upload_resource'),
                 validator: 'updateValid',
                 enctype: '',

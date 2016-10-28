@@ -23,6 +23,6 @@ module.exports = {
     },
 
     genKey: function () {
-        return util.randomString(32)
+        return util.randomString(16)
     }
 }

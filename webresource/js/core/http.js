@@ -2,7 +2,7 @@ var $ = require('$');
 var _ = require('util');
 var Promise = require('promise');
 
-var extend = ['url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete'];
+var extend = ['url', 'check', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete'];
 
 //@options={url:'', params: {}, method:"POST", dataType:"json", headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }, xhrFields: { withCredentials: true }}
 var Http = function (options) {

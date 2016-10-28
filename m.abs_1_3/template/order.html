@@ -38,10 +38,10 @@
         </ul>
         <div class="sp_buy__pay" sn-if="{data.PUS_DESC=='待付款'}">
             <ul class="sp_buy__info top_bottom_border">
-                <li class="hd bottom_border">支付方式</li>
-                <li class="ico_alipay{payType==1?' checked':''} bottom_border" sn-tap="payType=1"><span>支付宝支付</span></li>
-                <li class="ico_wxpay{payType==2?' checked':''} bottom_border" sn-tap="payType=2"><span>微信支付</span></li>
-                <li class="ico_cmbpay{payType==3?' checked':''}" sn-tap="payType=3"><span>一网通银行卡支付</span></li>
+                <li class="hd bottom_border check">支付方式</li>
+                <li class="check icon-alipay bottom_border" sn-tap="payType=1"><span class="pl_s">支付宝支付</span> <i class="icon-right3" sn-if="payType==1"></i></li>
+                <li class="check icon-weipay{payType==2?' checked':''} bottom_border" sn-tap="payType=2"><span class="pl_s">微信支付</span> <i class="icon-right3" sn-if="payType==2"></i></li>
+                <li class="check icon-cmcc{payType==3?' checked':''}" sn-tap="payType=3"><span class="pl_s">一网通银行卡支付</span> <i class="icon-right3" sn-if="payType==3"></i></li>
             </ul>
         </div>
     </div>

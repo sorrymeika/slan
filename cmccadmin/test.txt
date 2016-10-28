@@ -1,0 +1,13 @@
+
+        @for (var i=0,len=fields.length;i < len;i++) {
+            var items=fields[i],
+                field;
+                    <td colspan="@(field.colSpan||1)">
+
+                    @if (field.type=='text'||!field.type){
+                        $data.plugins.push(field);
+                        <input type="hidden"@(attr) />
+                        <text>@(field.html||'')</text>
+                    }
+                    </td>
+        }

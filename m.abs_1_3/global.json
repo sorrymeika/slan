@@ -106,6 +106,7 @@
         "widget/album": "../webresource/m/js/widget/album",
         "widget/photoViewer": "../webresource/m/js/widget/photoViewer",
         "widget/deletion": "../webresource/m/js/widget/deletion",
-        "anim/default": "../webresource/m/js/anim/default"
+        "anim/default": "../webresource/m/js/anim/default",
+        "entry": "./entry"
     }
 }

@@ -42,7 +42,7 @@ return Page.extend({
             model: this.model,
             name: 'data',
             title: 'test',
-            useIframe: true,
+            useIFrame: true,
             url: '/api/manage/modify_news',
             validator: 'userValid',
             enctype: '',

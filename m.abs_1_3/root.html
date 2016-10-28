@@ -63,12 +63,11 @@
             var combineMapping = @(JSON.stringify(resourceMapping));
 
             @if(!debug && !useLocal) {
-                entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, combineMapping);
+                <text>entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, combineMapping);</text>
 
             } else {
-                entry.startApp(routes, combineMapping);
+                <text>entry.startApp(routes, combineMapping);</text>
             }
-
         });
     </script>
 </body>

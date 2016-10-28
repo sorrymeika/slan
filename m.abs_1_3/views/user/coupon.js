@@ -17,14 +17,6 @@ var userModel = require('models/user');
 var user = require('logical/user');
 
 module.exports = Activity.extend({
-    events: {
-        'tap .coupon_tip': function () {
-            util.store('showTipStep', 3);
-            this.model.set({
-                showTipStep: 3
-            })
-        }
-    },
 
     receiveCoupon: function () {
         var self = this;
@@ -43,16 +35,14 @@ module.exports = Activity.extend({
             return false;
         }
 
-        user.recieveCoupon(code, function (err, res) {
+        user.recieveCoupon(code, this.$el).then(function (res) {
 
-            if (res.success) {
-                self.showToast('suc', '领取成功');
-                self.loadData();
+            self.showToast('suc', '领取成功');
+            self.loadData();
 
-            } else {
-                self.showToast('error', err.msg);
-            }
-        }, this.$el);
+        }).catch(function (e) {
+            self.showToast('error', e.message);
+        });
     },
 
     showToast: function (type, msg) {
@@ -97,8 +87,7 @@ module.exports = Activity.extend({
 
         var model = new Model(this.$el, {
             back: this.swipeRightBackAction,
-            title: '我的卡券',
-            showTipStep: util.store('showTipStep')
+            title: '我的卡券'
         });
 
         this.model = model;

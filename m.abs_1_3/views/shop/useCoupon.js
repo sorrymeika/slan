@@ -37,12 +37,19 @@ module.exports = Activity.extend({
             return false;
         }
 
-        user.recieveCoupon(code, function (res) {
+        user.recieveCoupon(code, this.$el).then(function (res) {
 
             self.showToast('suc', '领取成功');
-            self.loadData();
 
-        }, this.$el);
+            user.getCart().then(function (res) {
+
+                self.route.data.coupon = res.coupon;
+                self.loadData();
+            })
+
+        }).catch(function (e) {
+            self.showToast('error', e.message);
+        });
     },
 
     showToast: function (type, msg) {

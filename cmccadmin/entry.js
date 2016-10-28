@@ -1,6 +1,7 @@
 var $ = require('$')
 var Navigation = require('core/navigation')
 var Menu = require('common/menu');
+var auth = require('logical/auth');
 
 
 function startApp(routes) {
@@ -8,6 +9,9 @@ function startApp(routes) {
 
     var menu = new Menu({
         data: [{
+            title: '首页',
+            url: '/'
+        }, {
             title: '数据库管理',
             url: '/databases',
             children: [{
