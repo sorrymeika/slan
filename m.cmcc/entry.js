@@ -12,6 +12,9 @@ var Offline = require('widget/offline');
 var Scroll = require('widget/scroll');
 var Model = require('core/model2').Model;
 
+
+var auth = require('logical/auth');
+
 var ModelProto = Model.prototype;
 
 ModelProto.bindScrollTo = function (el, options) {
@@ -123,7 +126,7 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
         });
     });
 
-    new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
+    window.Application = new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
 }
 
 function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {

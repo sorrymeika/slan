@@ -4,7 +4,8 @@
     "route": {
         "/": "index",
         "/login": "login",
-        "/connect": "oracle/connect",
-        "/databases": "oracle/databases"
+        "/pub_quan/index": "pub_quan/index",
+        "/pub_quan/add": "pub_quan/add",
+        "/pub_quan/update/{id:\\d+}": "pub_quan/update"
     }
 }

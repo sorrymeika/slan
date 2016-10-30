@@ -55,6 +55,8 @@ var FormComponent = function (options) {
 
     this.buttons = options.buttons || null;
 
+    this.url = Http.url(options.url);
+
     Object.assign(this, util.pick(options, FormComponentKeys))
 
     var template = this.template.html(this);
@@ -63,7 +65,6 @@ var FormComponent = function (options) {
 
     this.el = this.$el[0];
 
-    this.url = Http.url(options.url);
 
     this.model = new vm.Model(this.$el, {
         fields: items,
@@ -103,9 +104,11 @@ var FormComponent = function (options) {
         if (value !== undefined && value !== null)
             compo.val(value);
 
-        this.model.on('change:data/' + plugin.field, (function (compo, plugin) {
+        this.model.on('change:data.' + plugin.field, (function (compo, plugin) {
+
             return function (e, value) {
-                compo.val(value.data[plugin.field]);
+
+                compo.val(value);
             }
         })(compo, plugin))
     }
@@ -121,6 +124,7 @@ FormComponent.prototype = {
     useIFrame: false,
 
     set: function (arg0, arg1, arg2) {
+
         this.model.getModel('data').set(arg0, arg1, arg2);
 
         return this;
@@ -178,8 +182,6 @@ FormComponent.prototype = {
                 this.$el.attr("target", target).submit();
 
             } else {
-                console.log(this.$el.serialize());
-
                 $.ajax({
                     url: this.url,
                     type: 'POST',
@@ -260,6 +262,7 @@ var RichTextBox = function ($input, options) {
                 done();
             });
         });
+        return this;
     });
 
 };
@@ -268,6 +271,7 @@ RichTextBox.prototype = {
     val: function (val) {
         var self = this;
         self.async.await(function () {
+
             self.editor.setContent(val, false);
         });
         self.$input.val(val).trigger('change');
@@ -304,8 +308,6 @@ var CheckBoxList = function ($input, options) {
         if (original !== content) $input.trigger('change');
         $input.trigger('blur');
     });
-
-    console.log(options)
 }
 CheckBoxList.prototype = {
     val: function (val) {

@@ -52,10 +52,22 @@ email varchar(100),
 constellation number(2)
 ) tablespace cmccuser;
 
+create sequence user_seq minvalue 1 maxvalue 99999999999 start with 1000 increment by 1 cache 100;
+
 create table login_history (
 login_id number(12) primary key,
 user_id  number(11),
 login_date DATE
-)
+) tablespace cmccuser;
+create sequence login_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
-create sequence user_seq minvalue 1 maxvalue 99999999999 start with 1000 increment by 1 cache 100;
+drop table pub_quan;
+create table pub_quan (--公众圈
+    quan_id number(10) primary key,--圈编号&delete=true
+    quan_name varchar(20),--圈名称&unique=true&updateable=false&search=true
+    quan_pic varchar(100),--圈图片&type=file&ext=png|jpeg|jpg|bmp
+    follow_num number(12),--关注人数
+    summary varchar(2000),--简介&type=clob&grid=false
+    create_date DATE--添加日期&updateable=false&search=true
+) tablespace cmccuser;
+create sequence pub_quan_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;

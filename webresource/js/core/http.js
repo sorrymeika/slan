@@ -125,16 +125,29 @@ Http.prototype = {
         if (that.isLoading) return;
         that.isLoading = true;
 
+        var postData = {};
+
+        Object.keys(that.params).forEach(function (key) {
+            that.params[key] && (postData[key] = that.params[key]);
+        });
+
         that._xhr = $.ajax({
             url: that.url,
             headers: that.headers,
             xhrFields: that.xhrFields,
-            data: that.params,
+            data: postData,
             type: that.method,
             dataType: that.dataType,
             cache: false,
             error: function (xhr) {
-                var err = that.createError(10001, '网络错误');
+                var err;
+                try {
+                    err = JSON.parse(xhr.responseText);
+                } catch (e) {
+                }
+
+                !err && (err = that.createError(10001, '网络错误'));
+
                 that.error(err, xhr);
 
                 reject && reject(err, xhr);

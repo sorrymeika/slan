@@ -7,6 +7,8 @@ var Validator = function(data, options) {
 Validator.prototype.validate = function(value, options) {
     if (!options) return value;
 
+    console.log(value);
+
     if ((value === '' || value === null || value === undefined) && (options.empty === false))
         this.error(options.emptyText);
 

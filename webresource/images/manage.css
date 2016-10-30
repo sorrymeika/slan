@@ -32,7 +32,7 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .form th { text-align: right; padding-top: 20px; }
 .form th.vtop { vertical-align: top; }
 .form td { position: relative; }
-.form input.text, .form input.text_normal, .form input.text_price, .form input.text_number, .form textarea { width: 300px; height: 30px; padding: 0 4px; line-height: 30px; border: 1px solid #ccc; border-radius: 4px; }
+.form input.text, .form input.text_normal, .form input.text_price, .form input.text_number, .form textarea { width: 300px; height: 30px; padding: 0 4px; border: 1px solid #ccc; border-radius: 4px; }
 .form input.text_price { width: 90px; }
 .form input.text_number { width: 90px; }
 .form input.text_normal { width: 150px; }
@@ -40,7 +40,7 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .form .captcha { border-radius: 4px; height: 30px; }
 .form select { height: 26px; }
 
-.form .right_tip, .form .error_tip { position: absolute; bottom: -3px; right: 0; margin: 0; }
+.form .right_tip, .form .error_tip { position: absolute; bottom: -3px; left: 6px; margin: 0; }
 .action { margin: 10px 0 10px 10px; }
 .action .button { padding: 0px 15px; font-size: 14px; height: 34px; line-height: 34px; margin-left: 4px; }
 .ke-container td { padding: 0; }
@@ -111,7 +111,7 @@ h1 { border-bottom: 1px solid #ddd; font-size: 18pt; margin-bottom: 20px; paddin
 .grid_row_cur { background-color: #f9f1f0; }
 .grid_cell_err { background-color: #ffcccc; }
 .grid_cell_vcenter { display: -webkit-box; -webkit-box-orient: horizontal; -webkit-box-pack: center; -webkit-box-align: center; display: box; box-orient: horizontal; box-pack: center; box-align: center; box-sizing: border-box; }
-.grid .page { border: 1px solid #cdcdcd; border-top: 0px; width: auto; overflow: hidden; _margin-top: -2px; }
+.grid_cont .page { border: 1px solid #cdcdcd; border-top: 0px; width: auto; overflow: hidden; _margin-top: -2px; }
 .grid_child_con { padding: 5px 10px; border-left: 1px solid #ddd; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; clear: both; overflow: auto; visibility: visible; height: auto; }
 .grid_child_con .grid { background: url(grid_child_header.gif) repeat-x; margin-bottom: 5px; }
 .grid_child_con .grid_header_cont { height: 23px; margin-bottom: -1px; }

@@ -3,12 +3,15 @@
     Event = require('./event'),
     slice = Array.prototype.slice;
 
-var componentExtends = ['el', 'initialize', 'className', 'events', 'render', 'template'];
+var componentExtends = ['el', 'initialize', 'className', 'render', 'template'];
 
 var Component = Event.mixin(function (options) {
     var self = this;
 
-    Object.assign(this, util.pick(options, componentExtends));
+    if (options) {
+        Object.assign(this, util.pick(options, componentExtends));
+        options.events && Object.assign(this.events, options.events);
+    }
 
     self.cid = util.guid();
 
@@ -19,7 +22,6 @@ var Component = Event.mixin(function (options) {
     self.initialize.apply(self, slice.call(arguments));
 
 }, {
-
         initialize: util.noop,
 
         setElement: function (element, delegate) {

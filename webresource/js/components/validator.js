@@ -34,6 +34,7 @@
     };
 
     exports.prototype.valid = function (single, value) {
+        
         if (!single) return { success: true };
         if ((value === '' || value == null) && (single.emptyAble === false || ($.isFunction(single.emptyAble) && !single.emptyAble())))
             return { success: false, msg: single.emptyText };

@@ -3,30 +3,30 @@ var aes = require('util/aes');
 var RSA = require('util/rsa');
 var md5 = require('util/md5');
 var vm = require('core/model2');
+var userModel = require('models/user');
 var Http = require('core/http');
-var Form = require('components/form');
+var Loader = require('widget/loader');
 
 var rsaPublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCczoLxjmckSX9oJBNSXY1rKWK5\
 urp3WzPiLhctBOahVSaSeWhVKif1Q1VSfDhnEw93pNRX6vxwsZ215x8iAFU/Xp8q\
 Pdj+S3mVjefkHZQRBohnJ1Bs7qGf+794yKOXyeUOUXqMbeIBuZu7MmZkNcnjLU8r\
 Y9SWbWtJmH6pjEYS5QIDAQAB";
 
-
-var _request = Http.prototype._request;
-
 var getSign = function () {
-    var admin = auth.getAdmin();
+    var user = auth.getUser();
     var _tk = auth.getAuthToken();
 
-    if (admin && _tk) {
+    if (user && _tk) {
         var key = aes.genKey();
 
         return {
-            _sign: rsa.encrypt(admin.adminId + '|' + key),
+            _sign: rsa.encrypt(user.user_id + '|' + key),
             _tk: aes.encrypt(key, _tk)
         }
     }
 }
+
+var _request = Http.prototype._request;
 
 Http.prototype._request = function (resolve, reject) {
     var sign = getSign();
@@ -43,57 +43,46 @@ Http.prototype.success = function (res) {
     console.log(res);
 }
 
-var _submit = Form.prototype.submit;
+var _load = Loader.prototype._request;
 
-Form.prototype.submit = function (success, error) {
-
+Loader.prototype._request = function (resolve, reject) {
     var sign = getSign();
-    if (sign && this.$el.find('[name="_tk"]').length == 0) {
 
-        this.el.appendChild($('<input type="hidden" name="_tk" />').val(sign._tk)[0]);
-        this.el.appendChild($('<input type="hidden" name="_sign" />').val(sign._sign)[0])
+    sign && this.setParam(sign);
 
-        this.set(sign);
-    }
-
-    _submit.call(this, success, error);
+    _load.call(this, resolve, reject);
 }
-
 
 
 var _atk;
 var rsa = new RSA();
 rsa.setPublicKey(rsaPublicKey);
 
-vm.Global.set(util.store('admin'));
+userModel.set(util.store('cmccuser'));
 
 var auth = {
 
     clearAuth: function () {
-
-        localStorage.removeItem('__tk');
-        localStorage.removeItem('admin');
+        localStorage.removeItem('__wtk');
+        localStorage.removeItem('cmccuser');
     },
 
     setAuthToken: function (tk) {
-        localStorage.setItem('__tk', aes.decrypt(this.getAESKey(), tk));
+        localStorage.setItem('__wtk', aes.decrypt(this.getAESKey(), tk));
     },
 
     getAuthToken: function () {
-        return localStorage.getItem('__tk');
+        return localStorage.getItem('__wtk');
     },
 
-    getAdmin: function () {
-        return util.store('admin');
+    getUser: function () {
+        return util.store('cmccuser');
     },
 
-    setAdmin: function (admin) {
+    setUser: function (user) {
+        userModel.set(user);
 
-        console.log(admin);
-
-        vm.Global.set(admin);
-
-        util.store('admin', admin);
+        util.store('cmccuser', user);
     },
 
     getAESKey: function () {

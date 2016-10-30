@@ -369,6 +369,8 @@ var Application = Component.extend(Object.assign(appProto, {
         $win.one('load', function () {
             if (!location.hash) location.hash = '/';
         });
+
+        return this;
     },
 
     _toggle: function (route, options, toggleFinish, queueDone) {

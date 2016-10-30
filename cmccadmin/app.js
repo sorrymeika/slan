@@ -3,6 +3,7 @@
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
 
+
 var fs = require('fs');
 var fsc = require('../core/fs');
 var path = require('path');
@@ -150,7 +151,11 @@ exports.createIndex = function (config, callback) {
 
 exports.startWebServer = function (config) {
     var express = require('express');
+    var bodyParser = require('body-parser');
+
     var app = express();
+
+    app.use(bodyParser.urlencoded({ extended: true }));
 
     config.resourceMapping = {};
 
@@ -159,6 +164,20 @@ exports.startWebServer = function (config) {
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
             res.send(html);
+        });
+    });
+
+    app.all('/create', function (req, res) {
+        var savePath = req.body.savePath;
+        var data = req.body.data;
+
+        console.log(savePath);
+        console.log(data);
+
+        Tools.save(savePath, data, function () {
+            res.send({
+                success: true
+            })
         });
     });
 

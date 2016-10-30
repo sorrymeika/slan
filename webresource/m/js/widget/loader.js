@@ -283,7 +283,14 @@ Loader.prototype = {
             error: function (xhr) {
                 that.isShowLoading && that.hideLoading();
 
-                var err = that.createError(10001, '网络错误');
+                var err;
+                try {
+                    err = JSON.parse(xhr.responseText);
+                } catch (e) {
+                }
+
+                !err && (err = that.createError(10001, '网络错误'));
+
                 that.error(err, xhr);
 
                 reject && reject.call(that, err, xhr);

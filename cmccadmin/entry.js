@@ -12,11 +12,11 @@ function startApp(routes) {
             title: '首页',
             url: '/'
         }, {
-            title: '数据库管理',
-            url: '/databases',
+            title: '公众圈管理',
+            url: '/pub_quan/index',
             children: [{
-                title: '连接',
-                url: '/connect'
+                title: '添加',
+                url: '/pub_quan/add'
             }]
         }]
     });
