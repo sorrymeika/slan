@@ -32,6 +32,9 @@
             "api": "http://127.0.0.1:6006"
         }
     },
+    "copy": {
+        "components/umeditor": "../webresource/js/components/umeditor"
+    },
     "js": {
         "logical": {
             "logical/auth": "./logical/auth"
@@ -44,6 +47,7 @@
             "cryptojs/cipher-core": "../webresource/js/cryptojs/cipher-core",
             "cryptojs/evpkdf": "../webresource/js/cryptojs/evpkdf",
             "cryptojs/aes": "../webresource/js/cryptojs/aes",
+            "util/md5": "../webresource/js/util/md5",
             "util/base64": "../webresource/js/util/base64",
             "util/aes": "../webresource/js/util/aes",
             "util/rsa": "../webresource/js/util/rsa"
@@ -72,6 +76,7 @@
         "core/animation": "../webresource/js/core/animation",
         "core/http": "../webresource/js/core/http",
         "common/menu": "./common/menu",
+        "components/datepicker": "../webresource/js/components/datepicker",
         "components/timepicker": "../webresource/js/components/timepicker",
         "components/validator": "../webresource/js/components/validator",
         "components/form.html": "../webresource/js/components/form.html",
@@ -80,6 +85,7 @@
         "components/page": "../webresource/js/components/page",
         "widget/toast": "../webresource/js/widget/toast",
         "widget/popup": "../webresource/js/widget/popup",
+        "widget/tip": "../webresource/js/widget/tip",
         "entry": "entry"
     }
 }

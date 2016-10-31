@@ -4,8 +4,14 @@
     "route": {
         "/": "index",
         "/login": "login",
+        "/userinfo/index": "userinfo/index",
         "/pub_quan/index": "pub_quan/index",
         "/pub_quan/add": "pub_quan/add",
-        "/pub_quan/update/{id:\\d+}": "pub_quan/update"
+        "/pub_quan/update/{id:\\d+}": "pub_quan/update",
+        "/pub_quan_msg/index/{quan_id:\\d+}": "/pub_quan_msg/index",
+        "/pub_quan_msg/add/{quan_id:\\d+}": "/pub_quan_msg/add",
+        "/pub_quan_msg/update/{id:\\d+}": "/pub_quan_msg/update",
+        "/userinfo/update/{id:\\d+}": "/userinfo/update",
+        "/login_history/index/{user_id:\\d+}": "/login_history/index"
     }
 }

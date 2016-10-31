@@ -3465,7 +3465,7 @@
                         options.minFrameHeight = options.initialFrameHeight
                     } else {
 
-                        options.initialFrameHeight = options.minFrameHeight = $(container).height() || UM.defaultHeight;
+                        options.initialFrameHeight = options.minFrameHeight = $(container).height() || UM.defaultHeight||300;
                     }
 
                     container.style.width = /%$/.test(options.initialFrameWidth) ? '100%' : options.initialFrameWidth -
@@ -9716,8 +9716,8 @@
                 editor.langIsReady ? $.proxy(renderUI, T)() : editor.addListener("langReady", $.proxy(renderUI, T));
                 function renderUI() {
 
-
-                    var $container = this.createUI('#' + id, editor);
+                    var $id = opt.$id || $('#' + id);
+                    var $container = this.createUI($id, editor);
                     editor.key = id;
                     editor.ready(function () {
                         $.each(_readyFn, function (index, fn) {
@@ -9739,8 +9739,7 @@
                     //ie6下缓存图片
                     UM.browser.ie && UM.browser.version === 6 && document.execCommand("BackgroundImageCache", false, true);
 
-                    editor.render(id);
-
+                    editor.render($id);
 
                     //添加tooltip;
                     $.eduitooltip && $.eduitooltip('attachTo', $("[data-original-title]", $container)).css('z-index', editor.getOpt('zIndex') + 1);
@@ -9756,8 +9755,9 @@
 
             },
             createUI: function (id, editor) {
+
                 var $editorCont = $(id),
-                    $container = $('<div class="edui-container"><div class="edui-editor-body"></div></div>').insertBefore($editorCont);
+                    $container = $('<div class="edui-container" style="min-height:300px"><div class="edui-editor-body"></div></div>').insertBefore($editorCont);
                 editor.$container = $container;
                 editor.container = $container[0];
 

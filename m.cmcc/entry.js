@@ -12,9 +12,6 @@ var Offline = require('widget/offline');
 var Scroll = require('widget/scroll');
 var Model = require('core/model2').Model;
 
-
-var auth = require('logical/auth');
-
 var ModelProto = Model.prototype;
 
 ModelProto.bindScrollTo = function (el, options) {

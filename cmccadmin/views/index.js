@@ -169,7 +169,7 @@ return Page.extend({
                         var columnsList = [];
 
 
-                        code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}([^\n\r]+)){0,1}/mgi, function (match, name, type, memo) {
+                        code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}([^\n\r]+)){0,1}/mgi, function (match, name, type, memo) {
                             //console.log(name, type, memo);
                             var ext;
                             var emptyAble = false;
@@ -221,7 +221,19 @@ return Page.extend({
                                     var d = 'import java.util.Date;';
                                     namespaceCode.indexOf(d) == -1 &&
                                         namespaceCode.push(d);
+
+
+
                                     privateCode += "private Date " + name + ";\n";
+
+                                    if (item.search) {
+                                        d = 'import org.springframework.format.annotation.DateTimeFormat;';
+                                        namespaceCode.indexOf(d) == -1 &&
+                                            namespaceCode.push(d);
+
+                                        privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date start_" + name + ";\n";
+                                        privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date end_" + name + ";\n";
+                                    }
                                     break;
                             }
                         });
@@ -250,6 +262,7 @@ return Page.extend({
                             public Integer exists("+ className + " data);\n\
                             public int add("+ className + " data);\n\
                             public int update("+ className + " data);\n\
+                            public int updateAllFields("+ className + " data);\n\
                             public "+ className + " getById(int " + primaryKey.name + ");\n\
                             public List<"+ className + "> getAll();\n\
                             public List<"+ className + "> filter(" + className + " data);\n\
@@ -274,10 +287,16 @@ return Page.extend({
                                 return;
                             }
                             switch (item.type) {
+                                case 'date':
+                                    if (item.search) {
+                                        var start = "start_" + item.name;
+                                        var end = "end_" + item.name;
+                                        ifCondition.push('<if test="' + start + '!=null and ' + start + '!=\'\'"> and ' + item.name + ' &gt;= #{' + start + '}</if>');
+                                        ifCondition.push('<if test="' + end + '!=null and ' + end + '!=\'\'"> and ' + item.name + ' &lt;= #{' + end + '}</if>');
+                                    }
                                 case 'file':
                                 case 'varchar':
                                 case 'clob':
-                                case 'date':
                                     ifCondition.push('<if test="' + item.name + '!=null and ' + item.name + '!=\'\'"> and ' + item.name + '=#{' + item.name + '}</if>');
                                     break;
                                 case 'number':
@@ -320,6 +339,14 @@ return Page.extend({
                             + "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
+                        var updateAllFields = "<update id=\"updateAllFields\" parameterType=\"" + className + "\">\n\
+                        update " + tableName + "\n<set>\n" + columns.map(function (field) {
+                                if (field == primaryKey.name) return '';
+                                return field + "=#{" + field + "}"
+                            }).join('\n')
+                            + "\n</set>\n\
+                             where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
+
                         var deleteXml = "<delete id=\"delete\" parameterType=\"" + className + "\">\n\
                         delete from " + tableName + where + "\n</delete>";
 
@@ -331,7 +358,7 @@ return Page.extend({
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">\n\
 <mapper namespace="com.cmcc.helife.mapper.'+ className + 'Mapper">\n';
 
-                        mapperXml += [existsMapper, filterXml, getById, getAll, insert, update, deleteById, deleteXml].join("\n\n")
+                        mapperXml += [existsMapper, filterXml, getById, getAll, insert, update, updateAllFields, deleteById, deleteXml].join("\n\n")
                         mapperXml += '\n</mapper>';
 
                         if (javaDir) {
@@ -369,6 +396,7 @@ return Page.extend({
                             public Integer exists("+ className + " data) { return mapper.exists(data); }\n\
                             public int add("+ className + " data) { data.set" + toUpper(primaryKey.name) + "(getNextId());\n return mapper.add(data); }\n\
                             public int update("+ className + " data) { return mapper.update(data); }\n\
+                            public int updateAllFields("+ className + " data) { return mapper.updateAllFields(data); }\n\
                             public int delete("+ className + " data) { return mapper.delete(data); }\n\
                             public int deleteById(int "+ primaryKey.name + ") { return mapper.deleteById(" + primaryKey.name + "); }\n\
                             public "+ className + " getById(int " + primaryKey.name + ") { return mapper.getById(" + primaryKey.name + "); }\n\
@@ -387,6 +415,19 @@ return Page.extend({
                                         res += "null != search.get" + toUpper(item.name) + "() && !\"\".equals(search.get" + toUpper(item.name) + "())";
                                         break;
                                     case "date":
+                                        if (item.search) {
+                                            var start = "getStart_" + item.name + "()";
+                                            var end = "getEnd_" + item.name + "()";
+
+                                            res += 'null != search.' + start + ') {\n'
+                                                + 'sql += " and ' + item.name + '>=?";\n'
+                                                + 'objs.add(search.' + start + ');\n'
+                                                + '}\n'
+                                                + 'if (null != search.' + end + ') {\n'
+                                                + 'sql += " and ' + item.name + '<=?";\n'
+                                                + 'objs.add(search.' + end + ');\n'
+                                                + '}\nif (';
+                                        }
                                         res += "null != search.get" + toUpper(item.name) + "()";
                                         break;
                                     case "number":
@@ -520,7 +561,7 @@ return Page.extend({
                         }\n\n\
                         @RequestMapping(value = \"/getAll\")\n\
                         public WebResult getAll() throws Exception {\n\
-                            return new WebDataResult<List<PubQuan>>(service.getAll());\n\
+                            return new WebDataResult<List<"+ className + ">>(service.getAll());\n\
                         }\n\n\
                         @RequestMapping(value = \"/getById\")\n\
                         public WebResult getById(int "+ primaryKey.name + ") throws Exception {\n\
@@ -535,6 +576,11 @@ return Page.extend({
                         public WebResult update(" + controllerFile() + className + " data) throws Exception {\n\
                             "+ validate('update') + "\
                             return new WebDataResult<Integer>(service.update(data));\n\
+                        }\n\
+                        @RequestMapping(value = \"/updateAllFields\")\n\
+                        public WebResult updateAllFields(" + controllerFile() + className + " data) throws Exception {\n\
+                            "+ validate('update') + "\
+                            return new WebDataResult<Integer>(service.updateAllFields(data));\n\
                         }\n\
                         @RequestMapping(value = \"/delete\")\n\
                         public WebResult delete("+ className + " data) throws Exception {\n\
@@ -764,26 +810,35 @@ return Page.extend({
                                 var searchType;
                                 var res;
 
-                                function getCode(name, memo, options) {
-                                    var code = name + ": {\n"
-                                        + "label: '" + memo + "'";
-
-                                    if (searchType) {
-                                        code += ',\ntype:"' + searchType + '"';
-                                    }
-                                    if (options) {
-                                        code += ',\noptions:' + options;
-                                    }
-                                    code += '\n}';
-
-                                    return code;
-                                }
-
                                 if (item.type == "date") {
                                     searchType = "calendar";
 
                                 } else if (item.searchType) {
                                     searchType = item.searchType;
+                                }
+
+                                function getCode(name, memo, options) {
+                                    var code = name + ": {\n";
+                                    if (options) {
+                                        code += 'options:' + options + ",\n";
+                                    }
+
+                                    if (item.route) {
+                                        code += 'value: this.route.params.' + item.route + ",\n";
+                                        code += 'type: "hidden",\n';
+                                        memo = '';
+                                    } else if (item.query) {
+                                        code += 'value: this.route.query.' + item.query + ",\n";
+                                        code += 'type: "hidden",\n';
+                                        memo = '';
+
+                                    } else if (searchType) {
+                                        code += 'type:"' + searchType + '",\n';
+                                    }
+                                    code += "label: '" + memo + "'";
+                                    code += '\n}';
+
+                                    return code;
                                 }
 
                                 if (searchType == "calendar") {

@@ -234,8 +234,6 @@ var RichTextBox = function ($input, options) {
     self.$input = $input;
     self.id = 'UMEditor' + (RichTextBox.guid++);
 
-    var $script = $('<script type="text/plain" id="' + self.id + '" style="width:' + (options.width || 640) + 'px;height:300px;"></script>').insertBefore($input);
-
     window.UMEDITOR_HOME_URL = seajs.resolve('components/umeditor/');
 
     self.async = new Async(function (done) {
@@ -247,7 +245,11 @@ var RichTextBox = function ($input, options) {
             if (options.toolbar) editorOptions.toolbar = options.toolbar;
             else if (options.simple) editorOptions.toolbar = ['source | undo redo | bold italic underline strikethrough | removeformat | justifyleft justifycenter justifyright justifyjustify | link unlink | image'];
 
+            editorOptions.$id = $('<script type="text/plain" id="' + self.id + '" style="width:' + (options.width || 640) + 'px;height:300px;"></script>').insertBefore($input)[0];
+            editorOptions.initialFrameHeight = 300;
+
             var editor = UM.getEditor(self.id, editorOptions);
+
             editor.addListener('blur', function () {
                 var content = editor.getContent();
                 var original = $input[0].value;

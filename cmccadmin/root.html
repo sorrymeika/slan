@@ -9,7 +9,7 @@
     <title></title>
     @(style)
     <!--[if lte IE 9]><script src="@(debug?'jquery-1.11.3.js':'jquery-1.11.3.min.js')"></script><![endif]-->
-    <script src="@(debug?'seajs/sea.js':'slan.js')?v@(Date.now())"></script>
+    <script src="@(debug?'seajs/sea.js':'slan.m.js')?v@(Date.now())"></script>
     @if(debug){
     <script src="zepto.js"></script>
     <script src="extend/fx.js"></script>
@@ -40,8 +40,9 @@
             sl.buildVersion=@(Date.now());
 
             var routes = @(JSON.stringify(routes));
+            var resourceMapping = @(JSON.stringify(resourceMapping));
 
-            entry.startApp(routes);
+            entry.startApp(routes, resourceMapping);
         });
     </script>
 </body>

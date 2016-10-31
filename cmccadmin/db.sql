@@ -28,36 +28,36 @@ comment on column cmcc_admin.role is '权限:{ 0: 废弃, 1: 普通管理员, 2:
 
 
 create table account (
-user_id number(11) primary key,
-account varchar(20) not null,
-password varchar(32) not null,
-register_date DATE
+user_id number(11) primary key,--用户ID
+account varchar(20) not null,--用户账号&search=true
+password varchar(32) not null,--用户密码
+register_date DATE,--注册时间&search=true
 
 ) tablespace cmccuser;
 
 
 drop table userinfo;
-create table userinfo (
-user_id  number(11) primary key,
-avatars varchar(20),
-user_name varchar(20),
-sign_text varchar(200),
-gender number(1),
-home_city_id number(5),
-home_region_id number(7),
-city_id number(5),
-region_id number(7),
-tag varchar(200),
-email varchar(100),
-constellation number(2)
+create table userinfo (--用户
+user_id  number(11) primary key,--用户ID
+avatars varchar(20),--用户头像&type=file
+user_name varchar(20),--用户昵称&unique=true&updateable=false&search=true
+sign_text varchar(200),--签名&emptyAble=true
+gender number(1),--性别&emptyAble=true
+home_city_id number(5),--家乡城市&emptyAble=true
+home_region_id number(7),--家乡区县&emptyAble=true
+city_id number(5),--所在城市&emptyAble=true
+region_id number(7),--所在区县&emptyAble=true
+tag varchar(200),--标签&emptyAble=true
+email varchar(100),--email&emptyAble=true
+constellation number(2)--星座&emptyAble=true
 ) tablespace cmccuser;
 
 create sequence user_seq minvalue 1 maxvalue 99999999999 start with 1000 increment by 1 cache 100;
 
 create table login_history (
 login_id number(12) primary key,
-user_id  number(11),
-login_date DATE
+user_id  number(11),--用户ID&search=true&route=user_id
+login_date DATE--登录时间&search=true
 ) tablespace cmccuser;
 create sequence login_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
@@ -71,3 +71,26 @@ create table pub_quan (--公众圈
     create_date DATE--添加日期&updateable=false&search=true
 ) tablespace cmccuser;
 create sequence pub_quan_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+--delete:删除时验证是否为空
+--route:表单值来自路由参数
+--search:是否可搜索
+
+drop table pub_quan_msg;
+create table pub_quan_msg (--公众圈文章
+    msg_id number(10) primary key,--文章编号&delete=true
+    title varchar(200),--标题&search=true
+    content clob,--文章内容
+    quan_id number(10),--圈编号&route=quan_id&search=true
+    user_id number(10),--用户编号
+    add_date date,--添加时间&search=true
+    see number(10),--浏览数
+    likes number(10),--喜欢数
+    comments number(10),--评论数
+    imgs varchar(1000)--图片
+) tablespace cmccuser;
+create sequence pub_quan_msg_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+

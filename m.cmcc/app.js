@@ -320,6 +320,14 @@ if (args.build) {
             "slan.m": config.framework
         });
 
+        if (config.copy) {
+            Object.keys(config.copy).forEach(function (key) {
+                fsc.copy(config.copy[key], path.join(config.dest, key), function () {
+
+                });
+            })
+        }
+
         //合并js、css
         config.resourceMapping = tools.combine(config.js);
 

@@ -58,13 +58,13 @@
             $(window).on('ortchange', adjustPx);
 
             var routes = @(JSON.stringify(routes));
-            var combineMapping = @(JSON.stringify(resourceMapping));
+            var resourceMapping = @(JSON.stringify(resourceMapping));
 
             @if(!debug && !useLocal) {
-                <text>entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, combineMapping);</text>
+                <text>entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, resourceMapping);</text>
 
             } else {
-                <text>entry.startApp(routes, combineMapping);</text>
+                <text>entry.startApp(routes, resourceMapping);</text>
             }
 
         });
