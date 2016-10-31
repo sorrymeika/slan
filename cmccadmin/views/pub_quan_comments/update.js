@@ -17,47 +17,54 @@ module.exports = Page.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '公众圈修改'
+            title: '公众圈文章评论修改'
         });
 
         var form = this.form = new Form({
-            url: '/pub_quan/update',
+            url: '/pub_quan_comments/update',
             fields: [{
-                label: "圈编号",
-                field: "quan_id",
+                label: "评论编号",
+                field: "comment_id",
                 type: "hidden",
-                value: this.route.params.id
-            }, {
-                label: "圈名称",
-                field: "quan_name",
-                type: "text",
+                value: this.route.params.id,
                 emptyAble: false,
-                emptyText: '不可为空'
+                emptyText: "评论编号不可为空"
             }, {
-                label: "圈图片",
-                field: "quan_pic_file",
-                type: "file"
-            }, {
-                label: "关注人数",
-                field: "follow_num",
+                label: "文章编号",
+                field: "msg_id",
                 type: "number",
                 regex: /^\d+$/,
                 regexText: "格式错误",
+                value: this.route.params.quan_id,
                 emptyAble: false,
-                emptyText: '不可为空'
+                emptyText: "文章编号不可为空"
             }, {
-                label: "简介",
-                field: "summary",
-                type: "richTextBox",
+                label: "评论时间",
+                field: "add_date",
+                type: "timePicker",
                 emptyAble: false,
-                emptyText: '不可为空'
+                emptyText: "评论时间不可为空"
+            }, {
+                label: "用户编号",
+                field: "user_id",
+                type: "hidden",
+                regex: /^\d+$/,
+                regexText: "格式错误",
+                emptyAble: false,
+                emptyText: "用户编号不可为空"
+            }, {
+                label: "评论内容",
+                field: "content",
+                type: "textarea",
+                emptyAble: false,
+                emptyText: "评论内容不可为空"
             }],
             buttons: [{
                 value: '修改',
                 click: function () {
                     this.submit(function () {
                         Toast.showToast('修改');
-                        self.setResult('pub_quanchange');
+                        self.setResult('pub_quan_commentschange');
                     }, function (e) { Toast.showToast(e.message); });
                 }
             }, {
@@ -67,8 +74,8 @@ module.exports = Page.extend({
                 }
             }]
         });
-        Http.post('/pub_quan/getById', {
-            quan_id: this.route.params.id
+        Http.post('/pub_quan_comments/getById', {
+            comment_id: this.route.params.id
         }).then(function (res) { form.set(res.data); });
         form.$el.appendTo(model.refs.main);
 

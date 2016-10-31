@@ -15,7 +15,7 @@ module.exports = Page.extend({
     events: {
         'click .js_grid_delete': function (e) {
             if (window.confirm('确认删除吗?')) {
-                Http.post('/pub_quan_msg/delete', { msg_id: $(e.currentTarget).data('id') })
+                Http.post('/pub_quan_comments/delete', { comment_id: $(e.currentTarget).data('id') })
             }
         }
     },
@@ -23,92 +23,68 @@ module.exports = Page.extend({
     onCreate: function () {
         var self = this;
 
-        var quan_id = self.route.params.quan_id;
-
         var model = this.model = new Model(this.$el, {
-            title: '公众圈文章管理'
+            title: '公众圈文章评论管理'
         });
-        model.add = function () {
-            if (quan_id == 0) {
-                Toast.showToast('请选择发布的圈');
-                self.forward('/pub_quan/index');
-                return;
-            }
-            self.forward('/pub_quan_msg/add/' + self.route.params.quan_id);
-        }
         var grid = this.grid = new Grid({
             pageEnabled: true,
             search: {
-                url: '/pub_quan_msg/getPage',
+                url: '/pub_quan_comments/getPage',
                 type: 'POST',
                 beforeSend: function () {
                 },
                 data: {
-                    title: {
-                        label: '标题'
-                    },
-                    quan_id: {
+                    msg_id: {
                         value: this.route.params.quan_id,
                         type: "hidden",
                         label: ''
                     },
                     start_add_date: {
                         type: "calendar",
-                        label: '添加时间 从'
+                        label: '评论时间 从'
                     }, end_add_date: {
                         type: "calendar",
                         label: '到'
+                    },
+                    user_id: {
+                        label: '用户编号'
                     }
                 }
             },
             onSelectRow: function () { },
             columns: [{
+                text: "评论编号",
+                bind: "comment_id",
+                width: 5
+            }, {
                 text: "文章编号",
                 bind: "msg_id",
                 width: 5
             }, {
-                text: "标题",
-                bind: "title",
+                text: "评论时间",
+                bind: "add_date",
+                format: util.formatDate,
                 width: 10
-            }, {
-                text: "圈编号",
-                bind: "quan_id",
-                width: 5
             }, {
                 text: "用户编号",
                 bind: "user_id",
                 width: 5
             }, {
-                text: "添加时间",
-                bind: "add_date",
-                format: util.formatDate,
+                text: "评论内容",
+                bind: "content",
                 width: 10
-            }, {
-                text: "浏览数",
-                bind: "see",
-                width: 5
-            }, {
-                text: "喜欢数",
-                bind: "likes",
-                width: 5
-            }, {
-                text: "评论数",
-                bind: "comments",
-                width: 5
             }, {
                 text: "操作",
                 width: 10,
                 align: 'center',
                 valign: 'center',
                 render: function (data) {
-                    this.append($('<a class="js_click" data-id="' + data.msg_id + '" href="/pub_quan_msg/update/' + data.msg_id + '">[修改]</a>'));
-                    this.append(' <a href="javascript:;" data-id="' + data.msg_id + '" class="js_grid_delete">[删除]</a>');
-                    this.append($('<a class="js_click" href="/pub_quan_comments/index/' + data.msg_id + '">[查看评论]</a>'));
-                    this.append($('<a class="js_click" href="/pub_quan_comments/add/' + data.msg_id + '">[评论]</a>'));
+                    this.append($('<a class="js_click" data-id="' + data.comment_id + '" href="/pub_quan_comments/update/' + data.comment_id + '">[修改]</a>'));
+                    this.append(' <a href="javascript:;" data-id="' + data.comment_id + '" class="js_grid_delete">[删除]</a>');
                 }
             }]
         });
-        this.onResult('pub_quan_msgchange', function () { grid.search(); });
+        this.onResult('pub_quan_commentschange', function () { grid.search(); });
         grid.$el.appendTo($(model.refs.main));
         grid.search();
 

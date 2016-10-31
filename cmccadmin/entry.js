@@ -34,6 +34,9 @@ function startApp(routes, resourceMapping) {
                 children: [{
                     title: '添加',
                     url: '/pub_quan/add'
+                }, {
+                    title: '文章管理',
+                    url: '/pub_quan_msg/index/0'
                 }]
             }]
         });

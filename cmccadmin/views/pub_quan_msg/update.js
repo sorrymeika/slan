@@ -30,9 +30,7 @@ module.exports = Page.extend({
             }, {
                 label: "标题",
                 field: "title",
-                type: "number",
-                regex: /^\d+$/,
-                regexText: "格式错误"
+                type: "text"
             }, {
                 label: "文章内容",
                 field: "content",
@@ -40,14 +38,14 @@ module.exports = Page.extend({
             }, {
                 label: "圈编号",
                 field: "quan_id",
-                type: "number",
+                type: "hidden",
                 regex: /^\d+$/,
                 regexText: "格式错误",
                 value: this.route.params.quan_id
             }, {
                 label: "用户编号",
                 field: "user_id",
-                type: "number",
+                type: "hidden",
                 regex: /^\d+$/,
                 regexText: "格式错误"
             }, {
@@ -72,10 +70,6 @@ module.exports = Page.extend({
                 type: "number",
                 regex: /^\d+$/,
                 regexText: "格式错误"
-            }, {
-                label: "图片",
-                field: "imgs",
-                type: "text"
             }],
             buttons: [{
                 value: '修改',

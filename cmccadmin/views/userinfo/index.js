@@ -68,10 +68,6 @@ module.exports = Page.extend({
                 format: util.formatDate,
                 width: 10
             }, {
-                text: "签名",
-                bind: "sign_text",
-                width: 10
-            }, {
                 text: "性别",
                 bind: "gender",
                 width: 5
@@ -80,17 +76,13 @@ module.exports = Page.extend({
                 bind: "email",
                 width: 10
             }, {
-                text: "星座",
-                bind: "constellation",
-                width: 5
-            }, {
                 text: "操作",
                 width: 10,
                 align: 'center',
                 valign: 'center',
                 render: function (data) {
-                    this.append($('<a class="js_click" data-id="' + data.user_id + '" href="/userinfo/update/' + data.user_id + '">[修改]</a>'));
-                    this.append($('<a class="js_click" data-id="' + data.user_id + '" href="/login_history/index/' + data.user_id + '">[登录历史]</a>'));
+                    this.append($('<a class="js_click" href="/userinfo/update/' + data.user_id + '">[修改]</a>'));
+                    this.append($('<a class="js_click" href="/login_history/index/' + data.user_id + '">[登录历史]</a>'));
                     //this.append(' <a href="javascript:;" data-id="' + data.user_id + '" class="js_grid_delete">[删除]</a>');
                 }
             }]

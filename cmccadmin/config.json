@@ -11,6 +11,9 @@
         "/pub_quan_msg/index/{quan_id:\\d+}": "/pub_quan_msg/index",
         "/pub_quan_msg/add/{quan_id:\\d+}": "/pub_quan_msg/add",
         "/pub_quan_msg/update/{id:\\d+}": "/pub_quan_msg/update",
+        "/pub_quan_comments/index/{msg_id:\\d+}": "/pub_quan_comments/index",
+        "/pub_quan_comments/add/{msg_id:\\d+}": "/pub_quan_comments/add",
+        "/pub_quan_comments/update/{id:\\d+}": "/pub_quan_comments/update",
         "/userinfo/update/{id:\\d+}": "/userinfo/update",
         "/login_history/index/{user_id:\\d+}": "/login_history/index"
     }

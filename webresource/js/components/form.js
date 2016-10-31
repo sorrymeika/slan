@@ -189,7 +189,13 @@ FormComponent.prototype = {
                     xhrFields: this.xhrFields,
                     contentType: this.contentType ? this.contentType : undefined,
                     data: this.contentType == "application/json" ? JSON.stringify(this.model.data.data) : this.$el.serialize(),
-                    success: $.proxy(success, this),
+                    success: function (res) {
+                        if (res.success) {
+                            success.call(self, res);
+                        } else {
+                            error && error.call(self, res);
+                        }
+                    },
                     error: error && $.proxy(error, this)
                 });
             }

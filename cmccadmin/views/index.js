@@ -67,6 +67,8 @@ return Page.extend({
             return result;
         }
 
+        console.log('/Users/sunlu/Desktop/workspace/java/cmcc/helife/src/main/java');
+        console.log('/Users/sunlu/Desktop/slan/cmccadmin');
 
         var form = new Form({
             url: '',
@@ -137,7 +139,7 @@ return Page.extend({
                     if (/^create\s+table/.test(code)) {
                         var arr = [];
                         var columns = [];
-                        var tableInfo = /^create\s+table\s+([a-z0-9A-Z_]+)(?:\s*\(\s*)(?:--([^\n\r]+)){0,1}/i.exec(code);
+                        var tableInfo = /^create\s+table\s+([a-z0-9A-Z_]+)(?:\s*\(\s*)(?:--((?:\s+--[^\n]+|[^\n])+)){0,1}/i.exec(code);
                         var tableName = tableInfo[1];
                         var primaryKey = {};
                         var className = tableName.replace(/^[a-z]|_[a-zA-Z]/g, function (match) {
@@ -152,8 +154,7 @@ return Page.extend({
                         };
 
                         if (tableDesc) {
-                            tableDesc = tableDesc.split('&')
-                            console.log(tableDesc);
+                            tableDesc = tableDesc.split(/\s+--/)
                             tableInfo.desc = tableDesc.shift();
                             tableDesc.forEach(function (item) {
                                 var _name = item.substr(0, item.indexOf('='));
@@ -161,22 +162,19 @@ return Page.extend({
                                 tableInfo[_name] = _val == 'true' ? true : _val == 'false' ? false : _val;
                             });
                         }
-
                         console.log(tableInfo);
 
                         var privateCode = "";
                         var namespaceCode = [];
                         var columnsList = [];
 
-
-                        code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}([^\n\r]+)){0,1}/mgi, function (match, name, type, memo) {
-                            //console.log(name, type, memo);
+                        code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, memo) {
                             var ext;
                             var emptyAble = false;
                             var params = {};
 
                             if (memo) {
-                                var filter = memo.split('&');
+                                var filter = memo.split(/\s+--/);
 
                                 if (filter.length > 1) {
                                     memo = filter.shift();
@@ -328,21 +326,37 @@ return Page.extend({
                         select " + selectListColumns + " from " + tableName + "\n</select>";
 
                         var insert = "<insert id=\"add\" parameterType=\"" + className + "\">\n\
-                        insert into " + tableName + " (" + columns.join(",") + ") values (#{" + columns.join("},#{") + "})"
+                        insert into " + tableName + " (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
+                                if (field.type != "number")
+                                    return '<if test="' + field.name + '!=null">' + field.name + ',</if>'
+                                else return field.name + ','
+
+                            }).join("\n") + "\n</trim>) values (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
+                                if (field.type != "number")
+                                    return '<if test="' + field.name + '!=null">#{' + field.name + '},</if>'
+                                else return '#{' + field.name + '},'
+
+                            }).join("\n") + "\n</trim>\n)"
                             + "\n</insert>";
 
                         var update = "<update id=\"update\" parameterType=\"" + className + "\">\n\
-                        update " + tableName + "\n<set>\n" + columns.map(function (field) {
-                                if (field == primaryKey.name) return '';
-                                return '<if test="' + field + '!=null and ' + field + '!=\'\'">' + field + "=#{" + field + "}</if>"
+                        update " + tableName + "\n<set>\n" + columnsList.map(function (field) {
+                                if (field.name == primaryKey.name) return '';
+                                if (field.type == "number")
+                                    return '<if test="' + field.name + '!=0">' + field.name + "=#{" + field.name + "}</if>"
+                                else
+                                    return '<if test="' + field.name + '!=null">' + field.name + "=#{" + field.name + "}</if>"
                             }).join('\n')
                             + "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
                         var updateAllFields = "<update id=\"updateAllFields\" parameterType=\"" + className + "\">\n\
-                        update " + tableName + "\n<set>\n" + columns.map(function (field) {
-                                if (field == primaryKey.name) return '';
-                                return field + "=#{" + field + "}"
+                        update " + tableName + "\n<set>\n" + columnsList.map(function (field) {
+                                if (field.name == primaryKey.name) return '';
+                                if (field.type == "number")
+                                    return field.name + "=#{" + field.name + "},";
+                                else
+                                    return '<if test="' + field.name + '!=null">' + field.name + "=#{" + field.name + "},</if>"
                             }).join('\n')
                             + "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
@@ -441,7 +455,7 @@ return Page.extend({
 
                                 return res;
 
-                            }).join('\n') + "\n\
+                            }).join('\n') + "\nsql += \" order by " + primaryKey.name + " desc\";\n\
                                 return oracle.queryPage("+ className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + "\", page, pageSize, objs.toArray());\n }\n\
                         }";
 
@@ -521,7 +535,7 @@ return Page.extend({
                                         break;
                                 }
                                 res += ') {\n\
-                                    '+ (item.emptyAble || (sqlType == "update" && item.type == "file") ? '' : 'return new WebErrorResult(WebErrorResult.PARAMS_ERROR, "' + (item.memo || item.name) + '不可为空");') + '\n\
+                                    '+ ((item.emptyAble || (sqlType == "update" && item.type == "file")) ? '' : 'return new WebErrorResult(WebErrorResult.PARAMS_ERROR, "' + (item.memo || item.name) + '不可为空");') + '\n\
                                     }'+ fileRes + "\n\n";
 
                                 //唯一
@@ -750,8 +764,8 @@ return Page.extend({
                                     }
                                 }
 
-                                if (!item.emptyAble && !item.type == 'file')
-                                    res += '\n,emptyAble:false,\n\
+                                if (item.emptyAble !== true && item.type != 'file')
+                                    res += ',\nemptyAble:false,\n\
                                         emptyText: "'+ (item.memo || item.name) + '不可为空"\n';
 
                                 res += '},';
@@ -881,7 +895,7 @@ return Page.extend({
                                 align: 'center',\n\
                                 valign: 'center',\n\
                                 render: function (data) {\n\
-                                    this.append($('<a class=\"js_click\" data-id=\"' + data."+ primaryKey.name + " + '\" href=\"/" + tableName + "/update/' + data." + primaryKey.name + " + '\">[修改]</a>'));\n\
+                                    this.append($('<a class=\"js_click\" href=\"/" + tableName + "/update/' + data." + primaryKey.name + " + '\">[修改]</a>'));\n\
                                     this.append(' <a href=\"javascript:;\" data-id=\"' + data." + primaryKey.name + " + '\" class=\"js_grid_delete\">[删除]</a>');\
                                 }\
                             }]\

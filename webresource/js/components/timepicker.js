@@ -31,13 +31,13 @@ var TimePicker = model.ViewModel.extend({
                 <div class="calendar-up" sn-click="yearIndex=(yearIndex>0?yearIndex-1:yearIndex)"><em class="calendar-icon"><em></em></em></div>
                 <div class="calendar-con"><div style="margin-top:-{parseInt(yearIndex*200)}px"><i sn-repeat="item in years" class="{yyyy==item?'curr':''}" sn-click="this.setYear(item)">{item}</i></div></div>
                 <div class="calendar-down" sn-click="yearIndex=years.length>(yearIndex+1)*10?yearIndex+1:yearIndex"><em class="calendar-icon"><em></em></em></div>
-                <i sn-click="this.today()">今天</i>
+                <i sn-click="this.today(),this.hide()">今天</i>
             </div>
             <div class="calendar-bd">
                 <div class="calendar-up" sn-click="monthIndex=(monthIndex>0?monthIndex-1:monthIndex)"><em class="calendar-icon"><em></em></em></div>
                 <div class="calendar-con"><div style="margin-top:-{parseInt(monthIndex*200)}px"><i sn-repeat="item in months" class="{MM==item?'curr':''}" sn-click="this.setMonth(item)">{util.pad(item)}</i></div></div>
                 <div class="calendar-down" sn-click="monthIndex=months.length>(monthIndex+1)*10?monthIndex+1:monthIndex"><em class="calendar-icon"><em></em></em></div>
-                <i sn-click="this.now()">现在</i>
+                <i sn-click="this.now(),this.hide()">现在</i>
             </div>
             <div class="calendar-bd">
                 <div class="calendar-up" sn-click="dayIndex=(dayIndex>0?dayIndex-1:dayIndex)"><em class="calendar-icon"><em></em></em></div>

@@ -73,6 +73,7 @@ module.exports = Page.extend({
                     this.append($('<a class="js_click" data-id="' + data.quan_id + '" href="/pub_quan/update/' + data.quan_id + '">[修改]</a>'));
                     this.append(' <a href="javascript:;" data-id="' + data.quan_id + '" class="js_grid_delete">[删除]</a>');
                     this.append($('<a class="js_click" data-id="' + data.quan_id + '" href="/pub_quan_msg/index/' + data.quan_id + '">[文章]</a>'));
+                    this.append($('<a class="js_click" data-id="' + data.quan_id + '" href="/pub_quan_msg/add/' + data.quan_id + '">[发布]</a>'));
                 }
             }]
         });
