@@ -1,8 +1,13 @@
 {
+    "UMEditorImagePath": "http://127.0.0.1:6006/manage/upload/",
+    "UMEditorImageUrl": "http://127.0.0.1:6006/proxy/admin/uploadfile",
+    "upload": "/Users/sunlu/Desktop/workspace/java/upload/",
     "debug": true,
     "dest": "./dest",
-    "api": "http://127.0.0.1:10010",
-    "proxy": {},
+    "api": "http://127.0.0.1:6006/proxy",
+    "proxy": {
+        "/proxy/*": "127.0.0.1:10010"
+    },
     "css": [
         "../webresource/images/reset.css",
         "../webresource/images/manage.css",
@@ -23,7 +28,9 @@
     ],
     "env": {
         "production": {
-            "api": "http://appuser.abs.cn"
+            "api": "http://wxcs.ie1e.com/manage",
+            "UMEditorImagePath": "http://wxcs.ie1e.com/upload/",
+            "UMEditorImageUrl": "http://wxcs.ie1e.com/manage/admin/uploadfile"
         },
         "test": {
             "api": "http://localhost:6006"

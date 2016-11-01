@@ -2,9 +2,9 @@
     "debug": true,
     "useLocal": true,
     "dest": "./dest",
-    "api": "http://${ip}:10009",
+    "api": "http://${ip}:5560/proxy",
     "proxy": {
-        "/proxy/*": "testappapi-1-2-0.abs.cn"
+        "/proxy/*": "${ip}:10009"
     },
     "css": [
         "../webresource/m/images/style.css",

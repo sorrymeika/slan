@@ -160,7 +160,8 @@ Http.prototype = {
                     resolve && resolve(res, status, xhr);
 
                 } else {
-                    if (!res.message && res.msg) res.message = res.msg;
+                    if (!res) res = that.createError(10001, '网络错误');
+                    else if (!res.message && res.msg) res.message = res.msg;
                     that.error(res, xhr);
                     reject && reject(res, xhr);
                 }

@@ -27,7 +27,7 @@
 
                         } else if (field.type=='select') {
                             <select class="@(field.className||'text')"@(attr)>
-                                <option sn-repeat="item in fields.@(field.field).options" value="{item.value}">{item.text}</option>
+                                <option selected="{item.value==data.@(field.field)}" sn-repeat="item in fields.@(field.field).options" value="{item.value}">{item.text}</option>
                             </select>
 
                         } else if (field.type=='number'){
@@ -60,7 +60,7 @@
                 <td colspan="2" class="ta_r action"> 
                     @if (buttons) {
                         for (var i=0,len=buttons.length;i < len;i++) {
-                            <b class="button" sn-click="this.button@(i)Click()">@(buttons[i].value)</b>
+                            <b style="@(buttons[i].style)" class="button" sn-click="this.button@(i)Click()">@(buttons[i].value)</b>
                         }
                     }
                 </td>

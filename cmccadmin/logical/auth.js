@@ -28,6 +28,40 @@ var getSign = function () {
     }
 }
 
+if (typeof FormData != "undefined") {
+    var _formDataAppend = FormData.prototype.append;
+
+    FormData.prototype.append = function (k, v) {
+
+        var sign = getSign();
+
+        if (sign && (!this.has('_tk') || !this.has('_sign'))) {
+            var self = this;
+
+            Object.keys(sign).forEach(function (key) {
+                _formDataAppend.call(self, key, sign[key]);
+            });
+        }
+        _formDataAppend.call(this, k, v);
+    }
+}
+
+if (typeof HTMLFormElement != "undefined") {
+    var _formElementSubmit = HTMLFormElement.prototype.submit;
+
+    HTMLFormElement.prototype.submit = function (e) {
+        var sign = getSign();
+        if (sign) {
+            var $el = $(this);
+            if ($el.find('[name="_tk"]').length == 0) {
+                $el.prepend($('<input type="hidden" name="_tk" />').val(sign._tk));
+                $el.prepend($('<input type="hidden" name="_sign" />').val(sign._sign));
+            }
+        }
+        _formElementSubmit.call(this, e);
+    }
+}
+
 Http.prototype._request = function (resolve, reject) {
     var sign = getSign();
 

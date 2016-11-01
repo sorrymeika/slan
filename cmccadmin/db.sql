@@ -63,7 +63,7 @@ create sequence login_seq minvalue 1 maxvalue 99999999999 start with 1 increment
 
 drop table pub_quan;
 create table pub_quan (--公众圈
-    quan_id number(10) primary key,--圈编号 --delete=true
+    quan_id number(10) primary key,--圈编号 --deletion_key=true
     quan_name varchar(20),--圈名称 --unique=true --updateable=false --search=true
     quan_pic varchar(100),--圈图片 --type=file --ext=png|jpeg|jpg|bmp
     follow_num number(12),--关注人数
@@ -73,13 +73,20 @@ create table pub_quan (--公众圈
 create sequence pub_quan_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
 
---delete:删除时验证是否为空
---route:表单值来自路由参数
---search:是否可搜索
+--#tableInfo#
+--props:扩展Model.class私有变量(String name,String id)
+--children:扩展Model.class私有变量(quan_likes,quan_comments)
+--listChildren:扩展Model.class List<?>私有变量(quan_likes,quan_comments)
+--order_by: getPage,getAll,filter排序(id desc,date asc)
+
+--#columnInfo#
+--deletion_key:删除时验证是否为空(true|false)
+--route:生成后台表单的值是否来自路由参数(true|false)
+--search:是否可搜索(true|false)
 
 drop table pub_quan_msg;
 create table pub_quan_msg (--公众圈文章
-    msg_id number(10) primary key,--文章编号 --delete=true
+    msg_id number(10) primary key,--文章编号 --deletion_key=true
     title varchar(200),--标题 --search=true
     content clob,--文章内容
     quan_id number(10),--圈编号 --route=quan_id --search=true
@@ -94,11 +101,42 @@ create sequence pub_quan_msg_seq minvalue 1 maxvalue 99999999999 start with 1 in
 
 
 create table pub_quan_comments (--公众圈文章评论
-    comment_id number(10) primary key,--评论编号 --delete=true
+    comment_id number(10) primary key,--评论编号 --deletion_key=true
     msg_id number(10),--文章编号 --route=msg_id --search=true
     add_date date,--评论时间 --search=true,
     user_id number(10),--用户编号 --search=true
-    content varchar(300)--评论内容
+    content varchar(200)--评论内容
+) tablespace cmccuser;
+create sequence pub_quan_comments_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+create table quan_msgs (--朋友圈 --listChildren=quan_comments,quan_likes --props=String user_name,String avatars
+    msg_id number(10) primary key,--圈消息编号 --deletion_key=true
+    user_id number(10),--用户编号 --search=true
+    add_date date,--发布时间 --search=true
+    content varchar(300),--发布内容
+    imgs varchar(2000)--图片
 ) tablespace cmccuser;
 
+create sequence quan_msgs_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
+
+create table quan_comments (--朋友圈评论 --props=String user_name,String at_user_name
+    comment_id number(10) primary key,--评论编号 --deletion_key=true
+    msg_id number(10),--圈消息编号 --route=msg_id --search=true
+    add_date date,--评论时间 --search=true,
+    user_id number(10),--用户编号 --search=true
+    at_user_id number(10),--用户编号 --search=true
+    content varchar(200)--评论内容
+) tablespace cmccuser;
+
+create sequence quan_comments_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+create table quan_likes (--朋友圈赞 --props=String user_name
+    like_id number(10) primary key,--评论编号 --deletion_key=true
+    msg_id number(10),--圈消息编号 --route=msg_id --search=true
+    add_date date,--评论时间 --search=true,
+    user_id number(10)--用户编号 --search=true
+) tablespace cmccuser;
+
+create sequence quan_likes_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;

@@ -38,6 +38,8 @@
         seajs.use(['entry'], function(entry) {
             sl.isDebug=@debug;
             sl.buildVersion=@(Date.now());
+            sl.UMEditorImagePath="@(UMEditorImagePath)";
+            sl.UMEditorImageUrl="@(UMEditorImageUrl)";
 
             var routes = @(JSON.stringify(routes));
             var resourceMapping = @(JSON.stringify(resourceMapping));

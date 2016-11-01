@@ -6,6 +6,7 @@ var vm = require('core/model2');
 var Async = require('core/async');
 var Http = require('core/http');
 var TimePicker = require('./timepicker');
+var Base = require('core/base');
 
 var valid_keys = ['emptyAble', 'emptyText', 'regex', 'regexText', 'compare', 'compareText', 'validate', 'validateText', 'success', 'msg'];
 var guid = 0;
@@ -64,7 +65,6 @@ var FormComponent = function (options) {
     this.$el = $(template);
 
     this.el = this.$el[0];
-
 
     this.model = new vm.Model(this.$el, {
         fields: items,
@@ -168,7 +168,16 @@ FormComponent.prototype = {
                 var $iframe = $('<iframe style="top:-999px;left:-999px;position:absolute;display:none;" frameborder="0" width="0" height="0" name="' + target + '"></iframe>')
                     .appendTo(document.body)
                     .on('load', function () {
-                        var result = $.trim((this.contentWindow.document.body.innerHTML));
+                        var result = this.contentWindow.document.body.innerHTML;
+                        var match = /\<[^\>]+\>\s*\{/m.exec(result);
+                        if (match && match[0].length) {
+                            result = result.substr(match[0].length - 1);
+                        }
+                        match = /\}\s*\<[^\>]+\>/m.exec(result);
+                        if (match && match[0].length) {
+                            result = result.substr(0, match.index + 1);
+                        }
+                        result = $.trim(result);
                         if (!resultText || result != resultText) {
                             resultText = result;
                             try {
@@ -253,6 +262,9 @@ var RichTextBox = function ($input, options) {
 
             editorOptions.$id = $('<script type="text/plain" id="' + self.id + '" style="width:' + (options.width || 640) + 'px;height:300px;"></script>').insertBefore($input)[0];
             editorOptions.initialFrameHeight = 300;
+
+            editorOptions.imagePath = options.imagePath || Base.UMEditorImagePath;
+            editorOptions.imageUrl = options.imageUrl || Base.UMEditorImageUrl;
 
             var editor = UM.getEditor(self.id, editorOptions);
 

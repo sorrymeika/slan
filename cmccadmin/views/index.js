@@ -54,12 +54,12 @@ return Page.extend({
         }
 
         function getSetterAndGetter(code) {
-            var result = code.replace(/(?:\s*)private\s+([a-zA-Z]+)\s+([^\;]+);(?:\s*)/g, function (match, type, v) {
+            var result = code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+);(?:\s*)/g, function (match, type, v) {
 
                 return 'public ' + type + " get" + toUpper(v) + "(){ return " + v + "; }\n";
             });
 
-            result += code.replace(/(?:\s*)private\s+([a-zA-Z]+)\s+([^\;]+)\;(\s*)/mg, function (match, type, v) {
+            result += code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+)\;(\s*)/mg, function (match, type, v) {
 
                 return 'public void set' + toUpper(v) + "(" + type + " " + v + "){ this." + v + " = " + v + "; }\n";
             });
@@ -73,6 +73,18 @@ return Page.extend({
         var form = new Form({
             url: '',
             fields: [{
+                label: '写文件',
+                field: 'write',
+                value: localStorage.getItem('write'),
+                type: 'select',
+                options: [{
+                    text: '是',
+                    value: 1
+                }, {
+                    text: '否',
+                    value: 0
+                }]
+            }, {
                 label: 'javaDir',
                 field: 'javaDir',
                 value: localStorage.getItem('javaDir')
@@ -124,17 +136,32 @@ return Page.extend({
             }],
             buttons: [{
                 value: 'asdf',
+                style: 'position: fixed; top: 200px; left: 700px;',
                 click: function () {
                     var feDir = this.data().feDir;
                     var javaDir = this.data().javaDir;
                     var pack = this.data().pack;
+                    var write = this.data().write;
+
                     var code = this.data().code.replace(/\/\/.*?\n/g, '');
                     var result;
 
+                    localStorage.setItem('write', write);
                     localStorage.setItem('code', code);
                     localStorage.setItem('pack', pack);
                     localStorage.setItem('feDir', feDir);
                     localStorage.setItem('javaDir', javaDir);
+
+                    if (write == 0) {
+                        feDir = null;
+                        javaDir = null;
+                    }
+
+                    function getClassName(name) {
+                        return name.replace(/^[a-z]|_[a-zA-Z]/g, function (match) {
+                            return match.replace('_', '').toUpperCase();
+                        });
+                    }
 
                     if (/^create\s+table/.test(code)) {
                         var arr = [];
@@ -142,9 +169,7 @@ return Page.extend({
                         var tableInfo = /^create\s+table\s+([a-z0-9A-Z_]+)(?:\s*\(\s*)(?:--((?:\s+--[^\n]+|[^\n])+)){0,1}/i.exec(code);
                         var tableName = tableInfo[1];
                         var primaryKey = {};
-                        var className = tableName.replace(/^[a-z]|_[a-zA-Z]/g, function (match) {
-                            return match.replace('_', '').toUpperCase();
-                        });
+                        var className = getClassName(tableName);
                         var tableDesc = tableInfo[2];
 
                         tableInfo = {
@@ -167,6 +192,28 @@ return Page.extend({
                         var privateCode = "";
                         var namespaceCode = [];
                         var columnsList = [];
+
+                        if (tableInfo.children) {
+                            tableInfo.children.split(',').forEach(function (name) {
+                                privateCode += 'private ' + getClassName(name) + ' ' + name + ";\n";
+                            });
+                        }
+
+                        if (tableInfo.listChildren) {
+                            namespaceCode.push("import java.util.List;");
+
+                            tableInfo.listChildren.split(',').forEach(function (name) {
+                                privateCode += 'private List<' + getClassName(name) + '> ' + name + ";\n";
+                            });
+                        }
+
+                        if (tableInfo.props) {
+                            tableInfo.props.split(',').forEach(function (prop) {
+                                privateCode += 'private ' + prop + ";\n";
+                            })
+                        }
+
+                        console.log(privateCode);
 
                         code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, memo) {
                             var ext;
@@ -219,8 +266,6 @@ return Page.extend({
                                     var d = 'import java.util.Date;';
                                     namespaceCode.indexOf(d) == -1 &&
                                         namespaceCode.push(d);
-
-
 
                                     privateCode += "private Date " + name + ";\n";
 
@@ -320,10 +365,12 @@ return Page.extend({
                         select " + columns.join(",") + " from " + tableName + " where " + primaryKey.name + "=#{" + primaryKey.name + "}" + "\n</select>";
 
                         var filterXml = "<select id=\"filter\" resultType=\"" + className + "\" parameterType=\"" + className + "\">\n\
-                        select " + selectListColumns + " from " + tableName + where + "\n</select>";
+                        select " + selectListColumns + " from " + tableName + where + " order by " +
+                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey + " desc")) + "\n</select>";
 
                         var getAll = "<select id=\"getAll\" resultType=\"" + className + "\">\n\
-                        select " + selectListColumns + " from " + tableName + "\n</select>";
+                        select " + selectListColumns + " from " + tableName + " order by " +
+                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey + " desc")) + "\n</select>";
 
                         var insert = "<insert id=\"add\" parameterType=\"" + className + "\">\n\
                         insert into " + tableName + " (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
@@ -455,7 +502,7 @@ return Page.extend({
 
                                 return res;
 
-                            }).join('\n') + "\nsql += \" order by " + primaryKey.name + " desc\";\n\
+                            }).join('\n') + "\nsql += \" order by " + (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\";\n\
                                 return oracle.queryPage("+ className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + "\", page, pageSize, objs.toArray());\n }\n\
                         }";
 
@@ -500,7 +547,7 @@ return Page.extend({
                             return columnsList.map(function (item) {
 
                                 if (sqlType == 'delete') {
-                                    if (item['delete'] !== true) {
+                                    if (item.deletion_key !== true) {
                                         return;
                                     }
 
@@ -971,7 +1018,6 @@ return Page.extend({
                 label: '下拉框',
                 field: 'categoryId',
                 type: 'select',
-                value: 1,
                 options: [{
                     text: '选项1',
                     value: 1

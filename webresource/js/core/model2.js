@@ -1163,8 +1163,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 case 'sn-visible':
                     el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                     break;
-                case 'sn-display':
                 case 'display':
+                    el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                    break;
+                case 'sn-display':
                     var display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                     if (display == 'none') {
                         $(el).animate({

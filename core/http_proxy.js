@@ -14,33 +14,44 @@ module.exports = function (host, port, replace) {
             headers: _.extend({}, request.headers, { host: host + ":" + port })
         };
 
-        console.log(url);
+        var isDebug = false;
+
+        var log = isDebug ? console.log : function () { }
+
+        log(url, options);
 
         var req = http.request(options, function (res) {
+            log(1);
+
             response.set(res.headers);
             response.set('Access-Control-Allow-Credentials', true);
             response.set('Access-Control-Allow-Origin', request.headers.origin);
 
             res.on('data', function (chunk) {
+                log(2);
                 response.write(chunk);
             });
 
             res.on('end', function () {
+                log(3);
                 response.end();
             });
         });
 
         req.on('error', function (e) {
-            console.log(e);
+            log(e);
             response.end();
         });
 
         request.on('data', function (postData) {
+            log(4);
             req.write(postData);
         });
 
         request.on('end', function () {
+            log(5);
             req.end();
         });
+
     };
 }

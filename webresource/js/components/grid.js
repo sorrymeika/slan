@@ -687,7 +687,6 @@ var Grid = Component.extend({
             params: param,
 
             success: function (res) {
-
                 if (res.success) {
                     self.data(res.data);
 
@@ -700,14 +699,14 @@ var Grid = Component.extend({
 
                         self.trigger('PageChange', param.page);
                     }
-
                     if (ajaxSettings.success) ajaxSettings.success.call(self, res.data);
+
                 } else
-                    self.msg(typeof res.msg === 'string' ? res.msg : JSON.stringify(res.msg));
+                    self.msg(typeof res.message === 'string' ? res.message : JSON.stringify(res.message));
             },
-            error: function (xhr) {
-                if (ajaxSettings.error) ajaxSettings.error.call(self, xhr);
-                else self.msg(xhr.responseText)
+            error: function (e) {
+                if (ajaxSettings.error) ajaxSettings.error.call(self, e);
+                else self.msg(e.message)
             }
         }).request();
 

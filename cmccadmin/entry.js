@@ -38,6 +38,9 @@ function startApp(routes, resourceMapping) {
                     title: '文章管理',
                     url: '/pub_quan_msg/index/0'
                 }]
+            }, {
+                title: '圈管理',
+                url: '/quan_msgs/index'
             }]
         });
 

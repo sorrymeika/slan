@@ -155,11 +155,17 @@ exports.startWebServer = function (config) {
 
     var app = express();
 
-    app.use(bodyParser.urlencoded({ extended: true }));
-
     config.resourceMapping = {};
 
+    for (var key in config.proxy) {
+        var proxy = config.proxy[key].split(':');
+        app.all(key, http_proxy(proxy[0], proxy[1] ? parseInt(proxy[1]) : 80));
+    }
+
+    app.use(bodyParser.urlencoded({ extended: true }));
+
     app.use('/dest', express.static(config.dest));
+    app.use('/manage/upload', express.static(config.upload));
 
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
@@ -296,12 +302,6 @@ exports.startWebServer = function (config) {
             });
         });
     });
-
-
-    for (var key in config.proxy) {
-        var proxy = config.proxy[key].split(':');
-        app.all(key, http_proxy(proxy[0], proxy[1] ? parseInt(proxy[1]) : 80));
-    }
 
     console.log("start with", config.port, process.argv);
 
