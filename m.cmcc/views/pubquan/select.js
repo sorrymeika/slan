@@ -27,7 +27,7 @@ module.exports = Activity.extend({
 
             self.back(self.swipeRightBackAction, {
                 list: util.filter(list, 'isSelected', true).map(function (item) {
-                    return item.quan;
+                    return item;
                 })
             })
         }

@@ -196,7 +196,7 @@ Loader.prototype = {
         if (!val)
             attrs = key
         else
-                (attrs = {})[key] = val;
+            (attrs = {})[key] = val;
 
         if (this.headers === undefined) this.headers = {};
 
@@ -206,12 +206,17 @@ Loader.prototype = {
         return this;
     },
 
+    clearParams: function () {
+        this.params = {};
+        return this;
+    },
+
     setParam: function (key, val) {
         var attrs;
         if (!val)
             attrs = key
         else
-                (attrs = {})[key] = val;
+            (attrs = {})[key] = val;
 
         for (var attr in attrs) {
             val = attrs[attr];
@@ -236,11 +241,10 @@ Loader.prototype = {
         return this;
     },
 
-    reload: function (resolve, reject) {
+    reload: function () {
         if (!this.isLoading) {
             this.pageIndex = 1;
-
-            this.request(resolve, reject);
+            return this.request();
         }
     },
 

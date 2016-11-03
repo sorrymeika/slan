@@ -23,6 +23,10 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction);
         }
 
+        model.del = function (id) {
+            userLogical.delFav(id);
+        }
+
         Loader.showLoading();
 
         Promise.all([userLogical.getFav(), this.waitLoad()]).then(function (results) {

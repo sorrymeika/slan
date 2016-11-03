@@ -8,6 +8,7 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var contact = require('logical/contact');
+var user = require('models/user');
 
 
 module.exports = Activity.extend({
@@ -18,11 +19,22 @@ module.exports = Activity.extend({
         var personId = this.route.params.id;
 
         var model = this.model = new Model(this.$el, {
-            title: '详细资料'
+            title: '详细资料',
+            user: user
         });
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
+        }
+
+        model.addFriend = function () {
+
+            contact.addFriend(personId).then(function () {
+                Toast.showToast('发送成功');
+
+            }).catch(function (e) {
+                Toast.showToast(e.message);
+            });
         }
 
         model.acceptFriend = function () {

@@ -62,6 +62,8 @@ userModel.set(util.store('cmccuser'));
 
 var auth = {
 
+    getSign: getSign,
+
     clearAuth: function () {
         localStorage.removeItem('__wtk');
         localStorage.removeItem('cmccuser');

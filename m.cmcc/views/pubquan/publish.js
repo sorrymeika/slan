@@ -73,9 +73,12 @@ module.exports = Activity.extend({
             var saveImages = [];
 
             if (images) {
-                postImages = {};
+                postImages = [];
                 images.forEach(function (img, i) {
-                    postImages["img" + i] = img.id;
+                    postImages.push({
+                        name: 'images',
+                        value: img.id
+                    });
 
                     saveImages.push(img.thumbnail);
                 })

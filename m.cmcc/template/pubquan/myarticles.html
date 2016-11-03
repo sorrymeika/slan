@@ -10,17 +10,17 @@
                 <p class="name to_e">{item.title}</p>
                 <p class="con to_e3 pt_s pb_s fs_m">{item.content}</p>
                 <ul class="imgs clearfix pb_s">
-                    <li class="img fl_l pr_m" sn-repeat="img in item.imgs"><img sn-src="{img}" /></li>
+                    <li class="img fl_l pr_m" sn-repeat="img in item.imgs"><img sn-src="{sl.resource(img)}" /></li>
                 </ul>
                 <div class="flex pb_s fs_s">
-                    <img sn-src="{item.quan.quan_pic}" class="dp_b mr_m cir_xs" data-forward="/pubquan/{item.quan.quan_id}">
-                    <p class="mr_m" data-forward="/pubquan/{item.quan.quan_id}">{item.quan.quan_name}</p>
+                    <img sn-src="{sl.resource(item.quan_pic)}" class="dp_b mr_m cir_xs" data-forward="/pubquan/{item.quan_id}">
+                    <p class="mr_m" data-forward="/pubquan/{item.quan_id}">{item.quan_name}</p>
                     <p class="flexitem">{util.cnNum(item.see)}看过</p>
                     <a class="icon-good mr_m" href="javascript:;">
-                        <span class="va_m">{util.cnNum(item.like)}</span>
+                        <span class="va_m">{util.cnNum(item.likes)}</span>
                     </a>
                     <a class="icon-comment mr_m" href="javascript:;">
-                        <span class="va_m">{util.cnNum(item.comment)}</span>
+                        <span class="va_m">{util.cnNum(item.comments)}</span>
                     </a>
                     <a class="icon-del2 mr_m" href="javascript:;">
                     </a>

@@ -171,6 +171,7 @@ return Page.extend({
                         var primaryKey = {};
                         var className = getClassName(tableName);
                         var tableDesc = tableInfo[2];
+                        var typeAlias = pack + ".model." + className;
 
                         tableInfo = {
                             name: tableName,
@@ -299,7 +300,7 @@ return Page.extend({
 
                         //Mapper.java
                         var mapper = "package " + pack + ".mapper;\n\n\
-                        import com.cmcc.helife.model."+ className + ";\n\
+                        import "+ pack + ".model." + className + ";\n\
                         import java.util.List;\n\
                         public interface " + className + "Mapper {\n\
                             public Integer exists("+ className + " data);\n\
@@ -348,9 +349,9 @@ return Page.extend({
                             }
                         });
                         ifCondition = ifCondition.join('\n');
-                        var existsMapper = "<select id=\"exists\" resultType=\"Integer\" parameterType=\"" + className + "\">\n\
+                        var existsMapper = "<select id=\"exists\" resultType=\"Integer\" parameterType=\"" + typeAlias + "\">\n\
                             select "+ primaryKey.name + " from " + tableName;
-                        existsMapper += '\n<where>\n<choose>\n' + primaryKeyCondition + '<otherwise>\nROWNUM=1\n' + ifCondition + '\n</otherwise>\n</choose>\n</where></select>';
+                        existsMapper += '\n<where>\nROWNUM=1\n<if test="' + primaryKey.name + '!=0"> and ' + primaryKey.name + '=#{' + primaryKey.name + '}</if>\n' + ifCondition + '\n</where></select>';
 
                         var where = '\n<where>\n<choose>\n' + primaryKeyCondition + '<otherwise>' + ifCondition + '\n</otherwise>\n</choose>\n</where>';
 
@@ -361,18 +362,25 @@ return Page.extend({
                             return item.name;
                         }).join(",");
 
-                        var getById = "<select id=\"getById\" resultType=\"" + className + "\">\n\
+
+                        console.log(typeAlias);
+
+                        var getById = "<select id=\"getById\" resultType=\"" + typeAlias + "\">\n\
                         select " + columns.join(",") + " from " + tableName + " where " + primaryKey.name + "=#{" + primaryKey.name + "}" + "\n</select>";
 
-                        var filterXml = "<select id=\"filter\" resultType=\"" + className + "\" parameterType=\"" + className + "\">\n\
+                        var filterXml = "<select id=\"filter\" resultType=\"" + typeAlias + "\" parameterType=\"" + typeAlias + "\">\n\
                         select " + selectListColumns + " from " + tableName + where + " order by " +
-                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey + " desc")) + "\n</select>";
+                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\n</select>";
 
-                        var getAll = "<select id=\"getAll\" resultType=\"" + className + "\">\n\
+                        var firstXml = "<select id=\"first\" resultType=\"" + typeAlias + "\" parameterType=\"" + typeAlias + "\">\n\
+                            select "+ selectListColumns + " from " + tableName;
+                        firstXml += '\n<where>\n<choose>\n' + primaryKeyCondition + '<otherwise>\nROWNUM=1\n' + ifCondition + '\n</otherwise>\n</choose>\n</where></select>';
+
+                        var getAll = "<select id=\"getAll\" resultType=\"" + typeAlias + "\">\n\
                         select " + selectListColumns + " from " + tableName + " order by " +
-                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey + " desc")) + "\n</select>";
+                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\n</select>";
 
-                        var insert = "<insert id=\"add\" parameterType=\"" + className + "\">\n\
+                        var insert = "<insert id=\"add\" parameterType=\"" + typeAlias + "\">\n\
                         insert into " + tableName + " (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
                                 if (field.type != "number")
                                     return '<if test="' + field.name + '!=null">' + field.name + ',</if>'
@@ -386,18 +394,18 @@ return Page.extend({
                             }).join("\n") + "\n</trim>\n)"
                             + "\n</insert>";
 
-                        var update = "<update id=\"update\" parameterType=\"" + className + "\">\n\
+                        var update = "<update id=\"update\" parameterType=\"" + typeAlias + "\">\n\
                         update " + tableName + "\n<set>\n" + columnsList.map(function (field) {
                                 if (field.name == primaryKey.name) return '';
                                 if (field.type == "number")
-                                    return '<if test="' + field.name + '!=0">' + field.name + "=#{" + field.name + "}</if>"
+                                    return '<if test="' + field.name + '!=0">' + field.name + "=#{" + field.name + "},</if>"
                                 else
-                                    return '<if test="' + field.name + '!=null">' + field.name + "=#{" + field.name + "}</if>"
+                                    return '<if test="' + field.name + '!=null">' + field.name + "=#{" + field.name + "},</if>"
                             }).join('\n')
                             + "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
-                        var updateAllFields = "<update id=\"updateAllFields\" parameterType=\"" + className + "\">\n\
+                        var updateAllFields = "<update id=\"updateAllFields\" parameterType=\"" + typeAlias + "\">\n\
                         update " + tableName + "\n<set>\n" + columnsList.map(function (field) {
                                 if (field.name == primaryKey.name) return '';
                                 if (field.type == "number")
@@ -408,7 +416,7 @@ return Page.extend({
                             + "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
-                        var deleteXml = "<delete id=\"delete\" parameterType=\"" + className + "\">\n\
+                        var deleteXml = "<delete id=\"delete\" parameterType=\"" + typeAlias + "\">\n\
                         delete from " + tableName + where + "\n</delete>";
 
                         var deleteById = "<delete id=\"deleteById\">\n\
@@ -417,9 +425,9 @@ return Page.extend({
 
                         var mapperXml = '<?xml version="1.0" encoding="UTF-8" ?>\n\
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">\n\
-<mapper namespace="com.cmcc.helife.mapper.'+ className + 'Mapper">\n';
+<mapper namespace="'+ pack + '.mapper.' + className + 'Mapper">\n';
 
-                        mapperXml += [existsMapper, filterXml, getById, getAll, insert, update, updateAllFields, deleteById, deleteXml].join("\n\n")
+                        mapperXml += [existsMapper, filterXml, firstXml, getById, getAll, insert, update, updateAllFields, deleteById, deleteXml].join("\n\n")
                         mapperXml += '\n</mapper>';
 
                         if (javaDir) {
@@ -455,13 +463,14 @@ return Page.extend({
                                 return oracle.getNextId(\""+ tableName + "_seq\");\n\
                             }\n\
                             public Integer exists("+ className + " data) { return mapper.exists(data); }\n\
-                            public int add("+ className + " data) { data.set" + toUpper(primaryKey.name) + "(getNextId());\n return mapper.add(data); }\n\
+                            public int add("+ className + " data) { int id = getNextId();\ndata.set" + toUpper(primaryKey.name) + "(id);\n return mapper.add(data) > 0 ? id : 0; }\n\
                             public int update("+ className + " data) { return mapper.update(data); }\n\
                             public int updateAllFields("+ className + " data) { return mapper.updateAllFields(data); }\n\
                             public int delete("+ className + " data) { return mapper.delete(data); }\n\
                             public int deleteById(int "+ primaryKey.name + ") { return mapper.deleteById(" + primaryKey.name + "); }\n\
                             public "+ className + " getById(int " + primaryKey.name + ") { return mapper.getById(" + primaryKey.name + "); }\n\
                             public List<"+ className + "> filter(" + className + " data) { return mapper.filter(data); }\n\
+                            public "+ className + " first(" + className + " data) { return mapper.first(data); }\n\
                             public List<"+ className + "> getAll() { return mapper.getAll(); }\n\
                             public PageResult<List<"+ className + ">> getPage(int page, int pageSize, " + className + " search) {\n\n\
                                 List<Object> objs = new ArrayList<Object>();\n\n\
@@ -523,12 +532,12 @@ return Page.extend({
                             import "+ pack + ".data.RedisDB;\n\
                             import "+ pack + ".service." + className + "Service;\n\
                             import "+ pack + ".model.PageResult;\n\
-                            import com.cmcc.helife.model.WebDataResult;\n\
-                            import com.cmcc.helife.model.WebErrorResult;\n\
-                            import com.cmcc.helife.model.WebResult;\n\
+                            import "+ pack + ".model.WebDataResult;\n\
+                            import "+ pack + ".model.WebErrorResult;\n\
+                            import "+ pack + ".model.WebResult;\n\
                             import "+ pack + ".model." + className + ";\n\n\
                             import org.springframework.web.multipart.MultipartFile;\n\
-                            import com.cmcc.helife.service.MultipartFileService;\n\n";
+                            import "+ pack + ".service.MultipartFileService;\n\n";
 
                         var controllerFile = function () {
                             var fl = "";
@@ -627,6 +636,14 @@ return Page.extend({
                         @RequestMapping(value = \"/getById\")\n\
                         public WebResult getById(int "+ primaryKey.name + ") throws Exception {\n\
                             return new WebDataResult<"+ className + ">(service.getById(" + primaryKey.name + "));\n\
+                        }\n\n\
+                        @RequestMapping(value = \"/filter\")\n\
+                        public WebResult filter("+ className + " data) throws Exception {\n\
+                            return new WebDataResult<List<"+ className + ">>(service.filter(data));\n\
+                        }\n\n\
+                        @RequestMapping(value = \"/first\")\n\
+                        public WebResult first("+ className + " data) throws Exception {\n\
+                            return new WebDataResult<"+ className + ">(service.first(data));\n\
                         }\n\n\
                         @RequestMapping(value = \"/add\")\n\
                         public WebResult add(" + controllerFile() + className + " data) throws Exception {\n\

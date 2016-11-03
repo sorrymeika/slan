@@ -17,6 +17,8 @@ var publicquan = require('../logical/publicquan');
 var quan = require('../logical/quan');
 var messagesList = require('../models/messagesList');
 var user = require('../models/user');
+var userLogical = require('../logical/user');
+var auth = require('../logical/auth');
 
 
 module.exports = Activity.extend({
@@ -29,30 +31,41 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([publicquan.recommend(), publicquan.myrecommend(), publicquan.myfollow()])
+        //publicquan.recommend(),
+        //publicquan.myrecommend(),
+        Promise.all([publicquan.myfollow(), userLogical.getMe()])
             .then(function (results) {
                 var res = results[0];
 
                 model.set({
-                    recommendPublicQuan: res.data
+                    //recommendPublicQuan: res.data
 
                 }).next(function () {
-
                     /*
-                                        self.bindScrollTo(model.refs.recommend, {
-                                            vScroll: false,
-                                            hScroll: true
-                                        });
-                                        */
+                    self.bindScrollTo(model.refs.recommend, {
+                        vScroll: false,
+                        hScroll: true
+                    });
+                    */
+                });
+
+                res.data.forEach(function (item) {
+                    if (item.imgs) {
+                        item.imgs = item.imgs.split(',')
+                    }
                 });
 
                 model.set({
-                    myrecommendPublicQuan: results[1].data,
-                    myfollowPublicQuan: results[2].data
+                    // myrecommendPublicQuan: results[0].data,
+                    myfollowPublicQuan: res.data
                 });
             })
             .catch(function (e) {
-                Toast.showToast(e.message);
+
+                if (e.message == '无权限') {
+                    self.forward('/login');
+                } else
+                    Toast.showToast(e.message);
             })
             .then(function () {
                 loader.hideLoading();
@@ -75,6 +88,11 @@ module.exports = Activity.extend({
                     self.quanLoader = results[0];
 
                     self.quanLoader.autoLoadMore(function (res) {
+                        res.data.forEach(function (item) {
+                            if (item.imgs) {
+                                item.imgs = item.imgs.split(',')
+                            }
+                        });
                         model.get("quanData").add(res.data);
                     });
 
@@ -86,6 +104,11 @@ module.exports = Activity.extend({
 
             default:
                 quanLoader.reload().then(function (res) {
+                    res.data.forEach(function (item) {
+                        if (item.imgs) {
+                            item.imgs = item.imgs.split(',')
+                        }
+                    });
                     model.set({
                         quanData: res.data
                     })
@@ -277,7 +300,12 @@ module.exports = Activity.extend({
     onShow: function () {
         var self = this;
 
-        this.loadPublicQuan();
+        if (!auth.getAuthToken()) {
+            self.forward('/login');
+        } else {
+            this.loadPublicQuan();
+            this.loadQuan();
+        }
     },
 
     onHide: function () {

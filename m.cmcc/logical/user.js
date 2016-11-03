@@ -1,43 +1,49 @@
+var util = require('util');
 var Promise = require('promise');
 var Http = require('core/http');
+var userModel = require('models/user');
 
 var FAVORITE_TYPE = {
-    QUAN: 0,
+    QUAN: 2,
     PUBLIC_QUAN: 1
 }
 
 var User = {
     FAVORITE_TYPE: FAVORITE_TYPE,
 
+    set: function (type, value) {
+        var params = {};
+        params[type] = value;
+
+        return Http.post('/userinfo/update', params).then(function (res) {
+            userModel.set(type, value);
+            util.store('user', userModel.data);
+            return res;
+        });
+    },
+
+    getMe: function () {
+        return Http.post('/userinfo/getMe').then(function (res) {
+            if (res.data) {
+                userModel.set(res.data);
+
+                util.store('user', res.data);
+            }
+            return res;
+        });
+    },
+
     getFav: function () {
-        if (sl.isDev)
-            return Promise.resolve({
-                success: true,
-                data: [{
-                    fav_id: 1,
-                    msg_id: 111,
-                    user_name: '',
-                    avatars: 'images/logo.png',
-                    type: FAVORITE_TYPE.QUAN,
-                    content: '阿斯顿叔叔说发发',
-                    date: 1476101924277,
-                    imgs: ['images/logo.png', 'images/logo.png']
-                }, {
-                    fav_id: 2,
-                    msg_id: 10,
-                    quan_name: '福建移动',
-                    quan_pic: 'images/logo.png',
-                    quan_id: 1,
-                    type: FAVORITE_TYPE.PUBLIC_QUAN,
-                    date: 1476101924277,
-                    title: '最新消息',
-                    summary: '最最最最最新消息',
-                    imgs: ['images/logo.png', 'images/logo.png']
-                }]
+        return Http.post('/user_fav/getPage', {
+            page: 1,
+            pageSize: 20
+        });
+    },
 
-            })
-
-        return Http.post('/user/getFav');
+    delFav: function (fav_id) {
+        return Http.post('/user_fav/delete', {
+            fav_id: fav_id
+        });
     },
 
     getMessages: function (type) {

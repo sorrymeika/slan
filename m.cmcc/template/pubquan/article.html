@@ -5,20 +5,20 @@
 <div class="main pq_article" ref="main">
     <div class="pd_m bg_fff bd_b">
         <p class="fs_l">{data.title}</p>
-        <div class="flex mt_m"><img sn-src="{data.quan.quan_pic}" alt="" class="cir_m sp_b">
+        <div class="flex mt_m"><img sn-src="{sl.resource(quan.quan_pic)}" alt="" class="cir_m sp_b">
             <div class="flexitem ml_m">
-                <p class="fs_m">{data.quan.quan_name}</p>
+                <p class="fs_m">{quan.quan_name}</p>
                 <p class="fs_s cl_999">{util.formatDate(data.date)}</p>
             </div>
-            <button class="btn_bd_s dp_b" sn-tap="this.follow()"><i class="va_m">{data.quan.is_follow?' ':'＋'}</i><span class="va_m">{data.quan.is_follow?'取消关注':'关注'}</span></button>
+            <button class="btn_bd_s dp_b" sn-tap="this.follow()"><i class="va_m">{follow.is_follow?' ':'＋'}</i><span class="va_m">{follow.is_follow?'取消关注':'关注'}</span></button>
         </div>
         <div class="mt_l mb_l fs_m lh_xs" sn-html="{data.content}"></div>
         <div class="mt_xxl mb_l ta_c pq_article__action">
             <div class="icon-newslike dp_ib cir_xl" sn-tap="this.likePubQuanMsg()">
-                <p class="fs_s">{util.cnNum(data.like)}</p>
+                <p class="fs_s">{util.cnNum(data.likes)||0}</p>
             </div>
             <div class="icon-newssee dp_ib cir_xl">
-                <p class="fs_s">{util.cnNum(data.see)}</p>
+                <p class="fs_s">{util.cnNum(data.see)||0}</p>
             </div>
         </div>
     </div>
@@ -30,12 +30,12 @@
             <p class="sort"><span>倒序</span>
                 <i class="icon-sort"></i></p>
         </div>
-        <div class="pq_article__comments_item bd_b ml_m" sn-repeat="item in comments|orderByDesc:date">
+        <div class="pq_article__comments_item bd_b ml_m" sn-repeat="item in comments|orderByDesc:add_date">
             <div class="flex pt_m">
-                <img sn-src="{item.avatars}" class="cir_s" />
+                <img sn-src="{sl.resource(item.avatars)}" class="cir_s" />
                 <div class="flexitem ml_m">
                     <p class="fs_m">{item.user_name}</p>
-                    <p class="fs_s cl_999">{util.formatDate(item.date)}</p>
+                    <p class="fs_s cl_999">{util.formatDate(item.add_date)}</p>
                 </div>
                 <a class="icon-comment dp_b" href="javascript:;" sn-tap="this.comment(item.user_id,item.user_name)"></a>
                 <a sn-if="item.user_id==user.user_id" sn-tap="this.delComment(item.comment_id)" class="icon-del2 dp_b" href="javascript:;"></a>

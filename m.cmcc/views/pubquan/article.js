@@ -22,16 +22,21 @@ module.exports = Activity.extend({
         });
 
         model.fav = function () {
-            Toast.showToast('收藏成功！')
+            publicquan.fav(articleId).then(function () {
+                Toast.showToast('收藏成功！')
+
+            }).catch(function (e) {
+                Toast.showToast(e.message);
+            })
         }
 
         model.follow = function () {
             var follow = function () {
-                publicquan.follow(model.get('data.quan.quan_id')).then(function (res) {
+                publicquan.follow(model.get('quan.quan_id')).then(function (res) {
 
-                    model.getModel('data.quan').set({
-                        is_follow: res.is_follow
-                    })
+                    var is_follow = model.data.follow ? model.data.follow.is_follow : false;
+
+                    model.set('follow.is_follow', !is_follow);
 
                 }).catch(function (e) {
                     Toast.showToast(e.message);
@@ -80,10 +85,10 @@ module.exports = Activity.extend({
 
         model.likePubQuanMsg = function () {
             publicquan.likePubQuanMsg(articleId).then(function (res) {
-                Toast.showToast(res.message);
+                Toast.showToast('点赞成功');
 
                 model.getModel('data').set({
-                    like: res.like
+                    likes: res.data
                 })
 
             }).catch(function (e) {
@@ -122,9 +127,13 @@ module.exports = Activity.extend({
         });
 
         Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function () { }), this.waitLoad()]).then(function (results) {
+            var res = results[0];
+
             model.set({
-                data: results[0].data
-            })
+                data: res.data,
+                quan: res.quan,
+                follow: res.follow
+            });
 
             self.bindScrollTo(model.refs.main);
 

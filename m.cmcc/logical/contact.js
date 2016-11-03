@@ -1,8 +1,10 @@
 var util = require('util');
 var vm = require('core/model2');
+var Http = require('core/http');
 var bridge = require('bridge');
 var Promise = require('promise');
 var Event = require('core/event');
+var Loader = require('widget/loader');
 
 if (!util.store('friends_list')) {
 
@@ -74,47 +76,39 @@ if (!util.store('new_friends')) {
         msg: '你好！可以认识一下吗？',
         sign_text: '独特的人',
         address: '福建福州',
-        //-2非好友,-1未处理,0拒绝,1接受,2删除
+        //-2非好友,-1未处理,0拒绝,1接受,2删除,3黑名单
         status: 0
     }])
 }
 
 var contact = Event.mixin({
     newFriends: function () {
+        return Http.post('/friends/getNewFriends');
+    },
 
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
+    addFriend: function (user_id) {
 
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: util.store('new_friends')
-                    });
-                }, 100)
-            });
+        return Http.post('/friends/sendRequest', {
+            friend_id: user_id
+        });
+    },
 
-        return Http.post('/contact/newFriends');
+    createSearchLoader: function ($scroll, success, append) {
+
+        var loader = new Loader({
+            $scroll: $scroll,
+            url: '/userinfo/search',
+            success: success,
+            append: append
+        });
+
+        return loader;
     },
 
     person: function (user_id) {
-
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                var new_friends = util.store('new_friends')
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: util.first(new_friends, 'user_id', user_id)
-                    });
-                }, 100)
-            });
-
-        return Http.post('/contact/person', {
+        return Http.post('/userinfo/getById', {
             user_id: user_id
         });
-
     },
 
     contactList: function () {
@@ -167,26 +161,8 @@ var contact = Event.mixin({
     },
 
     acceptFriend: function (user_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
 
-                setTimeout(function () {
-                    var new_friends = util.store('new_friends');
-                    var friend = util.first(new_friends, 'user_id', user_id);
-
-                    friend.status = 1;
-
-                    friendsList.add(friend);
-
-                    util.store('friends_list', friendsList.data);
-
-                    resolve({
-                        success: true
-                    });
-                }, 100)
-            });
-
-        return Http.post('/contact/acceptFriend', {
+        return Http.post('/friends/accept', {
             friend_id: user_id
         });
     },

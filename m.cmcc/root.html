@@ -54,6 +54,14 @@
             sl.buildVersion = @(Date.now());
             sl.isInApp = util.isInApp = !!matchUA;
             sl.appVersion = matchUA ? matchUA[1] : '1.0.0';
+            sl.resources="@(resources)";
+            sl.resource = function(src) {
+                if (src.indexOf('http://') == 0 || src.indexOf('https://') == 0 || src.indexOf("data:image") == 0) {
+                    return src;
+                } else {
+                    return sl.resources + src;
+                }
+            };
 
             $(window).on('ortchange', adjustPx);
 

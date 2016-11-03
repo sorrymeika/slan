@@ -6,6 +6,7 @@ var util = require('util');
 var Event = require('core/event');
 
 var user = require('models/user');
+var auth = require('logical/auth');
 
 if (!util.store('publicquan')) {
 
@@ -89,7 +90,7 @@ if (!util.store('publicquan_comments')) {
     util.store('publicquan_comments', [{
         comment_id: 1,
         msg_id: 10,
-        date: 1476101924277,
+        add_date: 1476101924277,
         avatars: 'images/logo.png',
         user_id: 10,
         user_name: '小黑',
@@ -98,7 +99,7 @@ if (!util.store('publicquan_comments')) {
     }, {
         comment_id: 2,
         msg_id: 11,
-        date: 1476101924277,
+        add_date: 1476101924277,
         avatars: 'images/logo.png',
         user_id: 10,
         user_name: '小白',
@@ -108,43 +109,15 @@ if (!util.store('publicquan_comments')) {
 
 var publicquan = Event.mixin({
     recommend: function () {
-        if (sl.isDev) {
-            return Promise.resolve({
-                success: true,
-                data: [{
-                    quan_id: 1,
-                    quan_name: '福建移动',
-                    quan_pic: 'images/logo.png'
-                }, {
-                    quan_id: 2,
-                    quan_name: '和生活',
-                    quan_pic: 'images/logo.png'
-                }, {
-                    quan_id: 3,
-                    quan_name: '和生活',
-                    quan_pic: 'images/logo.png'
-                }, {
-                    quan_id: 4,
-                    quan_name: '和生活',
-                    quan_pic: 'images/logo.png'
-                }]
-            });
-        }
-
-        return Http.post('/publicquan/recommend');
+        return Http.post('/pub_quan_recommend/getAll');
     },
 
-    search: function (keywords) {
-        if (sl.isDev) {
-            return Promise.resolve({
-                success: true,
-                data: util.filter(util.store('publicquan'), function (item) {
-                    return item.quan_name.indexOf(keywords) != -1;
-                })
-            });
-        }
-
-        return Http.post('/publicquan/search');
+    search: function (keywords, page, pageSize) {
+        return Http.post('/pub_quan/getPage', {
+            quan_name: keywords,
+            page: page || 1,
+            pageSize: pageSize || 20
+        });
     },
 
     myrecommend: function () {
@@ -168,239 +141,78 @@ var publicquan = Event.mixin({
     },
 
     myfollow: function () {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    var quans = util.filter(util.store('publicquan'), 'is_follow', true).map(function (item) {
-
-                        return {
-                            quan: item,
-                            lastMsg: util.first(util.store('publicquan_messages'), 'quan_id', item.quan_id)
-                        }
-
-                    });
-
-                    resolve({
-                        success: true,
-                        data: quans
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/myfollow');
+        return Http.post('/pub_quan_follow/getPage', {
+            page: 1,
+            pageSize: 20
+        });
     },
 
     follow: function (quan_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    var myfollow = util.store('publicquan');
-                    var quan = util.first(myfollow, 'quan_id', quan_id);
-
-                    quan.is_follow = !quan.is_follow;
-
-                    util.store('publicquan', myfollow);
-
-                    resolve({
-                        success: true,
-                        is_follow: quan.is_follow
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/follow');
+        return Http.post('/pub_quan_follow/update', {
+            quan_id: quan_id
+        });
     },
 
     //公众圈详情
     item: function (quan_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: util.first(util.store('publicquan'), 'quan_id', quan_id)
-                    });
-
-                }, 100)
-            });
-
-        return Http.post('/publicquan/item', {
+        return Http.post('/pub_quan/getById', {
             quan_id: quan_id
+        });
+    },
+
+    fav: function (quan_id) {
+        return Http.post('/user_fav/add', {
+            rev_id: quan_id,
+            fav_type: 1
         });
     },
 
     newArticles: function (quan_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: util.filter(util.store('publicquan_messages'), 'quan_id', quan_id)
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/newArticles', {
-            quan_id: quan_id
+        return Http.post('/pub_quan_msg/getPage', {
+            quan_id: quan_id,
+            page: 1,
+            pageSize: 20
         });
-
     },
 
     seeArticle: function (msg_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-                var list = util.store('publicquan_messages');
-
-                var msg = util.first(list, 'msg_id', msg_id);
-
-                msg.see += 1;
-
-                util.store('publicquan_messages', list);
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        see: msg.see
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/seeArticle', {
+        return Http.post('/pub_quan_msg/see', {
             msg_id: msg_id
         });
     },
 
     likePubQuanMsg: function (msg_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                var list = util.store('publicquan_messages');
-
-                var msg = util.first(list, 'msg_id', msg_id);
-
-                if (msg.is_like) {
-                    reject({
-                        message: '请勿重复点赞'
-                    })
-                    return;
-                }
-
-                msg.like += 1;
-                msg.is_like = true;
-
-                util.store('publicquan_messages', list);
-
-                setTimeout(function () {
-
-                    resolve({
-                        success: true,
-                        like: msg.like,
-                        message: '点赞成功'
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/likePubQuanMsg', {
+        return Http.post('/pub_quan_likes/add', {
             msg_id: msg_id
         });
     },
 
     article: function (msg_id) {
 
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                var msg = util.first(util.store('publicquan_messages'), 'msg_id', msg_id);
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: $.extend({
-                            quan: util.first(util.store('publicquan'), 'quan_id', msg.quan_id)
-
-                        }, msg)
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/article', {
+        return Http.post('/pub_quan_msg/getById', {
             msg_id: msg_id
         });
     },
 
     myArticles: function () {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: util.filter(util.store("publicquan_messages"), 'user_id', user.data.user_id).map(function (msg) {
-
-                            return Object.assign({
-                                quan: util.first(util.store('publicquan'), 'quan_id', msg.quan_id)
-                            }, msg)
-                        })
-                    });
-                }, 100)
-            });
-
-        return Http.post('/publicquan/myArticles');
+        return Http.post('/pub_quan_msg/getMine', {
+            page: 1,
+            pageSize: 20
+        });
     },
 
     //@params = {quan_ids:[], title:'', content:'', images:{}}
     publish: function (params) {
 
-        if (sl.isDev) {
-            return new Promise(function (resolve, reject) {
-
-                var messages = util.store("publicquan_messages");
-
-                console.log(params.images);
-                var imgs = params.saveImages;
-
-                var id = 0;
-
-                messages.forEach(function (cmt) {
-                    if (cmt.msg_id > id) {
-                        id = cmt.msg_id + 1
-                    }
-                });
-
-                params.quan_ids.forEach(function (quan_id) {
-
-                    messages.push({
-                        msg_id: id,
-                        see: 0,
-                        like: 0,
-                        comment: 0,
-                        date: Date.now(),
-                        title: params.title,
-                        content: params.content,
-                        quan_id: quan_id,
-                        imgs: imgs
-                    });
-                })
-
-                util.store("publicquan_messages", messages);
-
-                resolve({
-                    success: true
-                })
-            });
-        }
-
         return new Promise(function (resolve, reject) {
-            bridge.image.upload(Loader.url('/publicquan/publish'), {
+            var sign = auth.getSign();
+
+            bridge.image.upload(Loader.url('/pub_quan_msg/add'), Object.assign({
                 title: params.title,
                 content: params.content,
                 quan_ids: params.quan_ids.join(',')
 
-            }, params.images, function (res) {
+            }, sign), params.images, function (res) {
                 if (res.success) {
                     resolve(res);
 
@@ -409,7 +221,6 @@ var publicquan = Event.mixin({
                 }
             });
         })
-
     },
 
 
@@ -417,7 +228,7 @@ var publicquan = Event.mixin({
     createCommentsLoader: function (params, success, append) {
 
         var loader = new Loader({
-            url: '/publicquan/getcomments',
+            url: '/pub_quan_comments/getPage',
 
             $scroll: params.$scroll,
 
@@ -425,85 +236,37 @@ var publicquan = Event.mixin({
                 msg_id: params.msg_id
             },
 
-            pageEnabled: false,
-
             success: success,
 
             append: append,
 
-            complete: sl.isDev ? function () {
-
-                success({
-                    success: true,
-                    data: util.filter(util.store('publicquan_comments'), 'msg_id', params.msg_id)
-                });
-
-            } : function () { }
+            complete: function () { }
         });
 
         return loader;
     },
 
     sendComment: function (msg_id, content) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    resolve({
-                        success: true
-                    });
-
-                    var comments = util.store('publicquan_comments');
-                    var id = 0;
-
-                    comments.forEach(function (cmt) {
-                        if (cmt.comment_id > id) {
-                            id = cmt.comment_id + 1
-                        }
-                    })
-
-                    var data = {
-                        comment_id: id,
-                        msg_id: msg_id,
-                        content: content,
-                        date: Date.now()
-                    }
-                    data = Object.assign(data, user.data);
-
-                    comments.push(data)
-
-                    util.store('publicquan_comments', comments);
-
-                    publicquan.trigger('sendComment:' + msg_id, data)
-
-                }, 100)
-            });
-
-        return Http.post('/publicquan/sendComment', {
+        return Http.post('/pub_quan_comments/add', {
             msg_id: msg_id,
             content: content
+        }).then(function (res) {
+
+            var data = {
+                comment_id: res.data,
+                msg_id: msg_id,
+                content: content,
+                date: Date.now()
+            }
+            data = Object.assign(data, user.data);
+
+            publicquan.trigger('sendComment:' + msg_id, data)
+            return res;
         });
     },
 
     delComment: function (comment_id) {
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                var comments = util.store('publicquan_comments');
-
-                comments.splice(util.indexOf(comments, 'comment_id', comment_id), 1);
-
-                util.store('publicquan_comments', comments);
-
-                setTimeout(function () {
-                    resolve({
-                        success: true
-                    });
-
-                }, 100)
-            });
-
-        return Http.post('/publicquan/delComment', {
+        return Http.post('/pub_quan_comments/delete', {
             comment_id: comment_id
         });
     }

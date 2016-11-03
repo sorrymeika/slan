@@ -43,7 +43,7 @@ module.exports = Activity.extend({
                 Toast.showToast('发送成功');
                 model.back();
 
-            }).catch(function () {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             });
         }

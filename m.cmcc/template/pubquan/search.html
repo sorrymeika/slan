@@ -7,7 +7,7 @@
 </header>
 <div class="main pq_search" ref="main">
     <div sn-repeat="item in searchResult" class="h_l flex pl_s bg_fff bd_b" data-forward="/pubquan/{item.quan_id}">
-        <img sn-src="{item.quan_pic}" class="sqr_m mr_m">
+        <img sn-src="{sl.resource(item.quan_pic)}" class="sqr_m mr_m">
         <p class="fs_m">{item.quan_name}</p>
     </div>
     <div class="fs_m cl_999 ta_c lh_l" sn-if="isSearch&&!searchResult.length">未搜到结果</div>

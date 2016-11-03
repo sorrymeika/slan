@@ -9,14 +9,14 @@
         <div class="icon-x dock_r pd_m" sn-if="user_name" sn-tap="user_name=''"></div>
     </div>
     <div class="mt_l flex uc_set__sign" sn-if="type=='sign_text'">
-        <textarea class="bg_fff flexitem" rows="7"></textarea>
+        <textarea class="bg_fff flexitem" rows="7" value="{sign_text}" sn-model="sign_text"></textarea>
     </div>
     <ul class="mt_l bd_tb bg_fff uc_set__gender" sn-if="type=='gender'">
         <li class="h_bar lh_bar pl_m bd_b" sn-tap="gender=1">
             <i class="icon-right fl_r mr_m" sn-if="gender==1"></i> 男
         </li>
-        <li class="h_bar lh_bar pl_m" sn-tap="gender=0">
-            <i class="icon-right fl_r mr_m" sn-if="gender==0"></i> 女
+        <li class="h_bar lh_bar pl_m" sn-tap="gender=2">
+            <i class="icon-right fl_r mr_m" sn-if="gender==2"></i> 女
         </li>
     </ul>
     <ul class="mt_l bd_tb bg_fff uc_set__gender" sn-if="type=='hometown'">

@@ -7,6 +7,7 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 var user = require('models/user');
+var userLogical = require('logical/user');
 
 var Selector = require('widget/selector');
 
@@ -189,7 +190,29 @@ module.exports = Activity.extend({
         }
 
         model.save = function () {
-            this.back();
+            var result;
+            switch (type) {
+                case 'user_name':
+                    result = userLogical.set("user_name", this.get('user_name'));
+                    break;
+                case 'sign_text':
+                    result = userLogical.set("sign_text", this.get('user_name'));
+                    break;
+                case 'gender':
+                    result = userLogical.set("gender", this.get('gender'));
+                    break;
+                case 'hometown':
+                    result = userLogical.set("home_city_id", this.get('city_id'));
+                    break;
+                case 'address':
+                    result = userLogical.set("city_id", this.get('city_id'));
+                    break;
+            }
+
+            result.then(function () {
+                model.back();
+            })
+
         }
 
         Promise.all([this.waitLoad()]).then(function (results) {

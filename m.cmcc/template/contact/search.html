@@ -1,0 +1,14 @@
+<header class="flex">
+    <form ref="searchform" class="ml_m flexitem flex hm_quan__search">
+        <div class="icon-search sqr_s"></div>
+        <input type="search" sn-model="search" ref="search" class="flexitem fs_m" placeholder="手机号/昵称/我信ID" />
+    </form>
+    <button class="h_bar pl_m pr_m bg_fff fs_m" sn-tap="this.back()">取消</button>
+</header>
+<div class="main pq_search" ref="main">
+    <div sn-repeat="item in searchResult" class="h_l flex pl_s bg_fff bd_b" data-forward="/contact/person/{item.user_id}">
+        <img sn-src="{sl.resource(item.avatars)}" class="sqr_m mr_m">
+        <p class="fs_m">{item.user_name}</p>
+    </div>
+    <div class="fs_m cl_999 ta_c lh_l" sn-if="isSearch&&!searchResult.length">未搜到结果</div>
+</div>

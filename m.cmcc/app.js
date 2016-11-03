@@ -156,6 +156,9 @@ exports.startWebServer = function (config) {
 
     app.use('/dest', express.static(config.dest));
 
+
+    app.use('/upload', express.static("/Users/sunlu/Desktop/workspace/java/upload"));
+
     app.get('/', function (req, res) {
         exports.createIndex(config, function (err, html) {
             res.send(html);

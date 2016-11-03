@@ -29,7 +29,8 @@ module.exports = Activity.extend({
             imagePicker.show('更换头像', function (res) {
                 user.set({
                     avatars: res.thumbnail
-                })
+                });
+
             });
         }
 

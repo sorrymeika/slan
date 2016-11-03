@@ -32,7 +32,7 @@ module.exports = Activity.extend({
                     console.log(res);
 
                     model.getModel('quanInfo').set({
-                        is_follow: res.is_follow
+                        is_follow: !model.get('quanInfo.is_follow')
                     })
 
                 }).catch(function (e) {
@@ -43,7 +43,7 @@ module.exports = Activity.extend({
             if (model.get('quanInfo').is_follow)
                 popup.confirm({
                     content: '确定不关注该圈了吗？',
-                    confirmAction: function(){
+                    confirmAction: function () {
                         follow()
                         this.hide();
                     }
@@ -52,10 +52,15 @@ module.exports = Activity.extend({
         }
 
         Promise.all([publicquan.item(quanId), publicquan.newArticles(quanId), this.waitLoad()]).then(function (results) {
-
+            var quanInfo = results[0].data;
+            if (quanInfo.summary) {
+                quanInfo.summary = quanInfo.summary.replace(/<(\/{0,1}[a-zA-Z]+)(?:\s+[a-zA-Z1-9_-]+="[^"]*"|\s+[^\s]+)*?\s*(\/){0,1}\s*>/mg, '');
+            }
+            quanInfo.is_follow = quanInfo.pub_quan_follow ? quanInfo.pub_quan_follow.is_follow : false;
             model.set({
-                quanInfo: results[0].data,
-                newArticles: results[1].data
+                quanInfo: quanInfo,
+                newArticles: results[1].data,
+                newLength: Math.min(20, results[1].total)
             })
 
             self.mainScroll = self.bindScrollTo(model.refs.main);

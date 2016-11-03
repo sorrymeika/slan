@@ -68,8 +68,17 @@
                     }, callback);
                 },
 
-                //@images={'avatars':0,'file2':1}
+                //@images=[{name:"file",value:0},{name:'file2',value:1}]
                 upload: function (url, data, images, callback) {
+
+                    if (typeof images == 'object' && !Array.isArray(images)) {
+                        images = Object.keys(images).map(function (key) {
+                            return {
+                                name: key,
+                                value: images[key]
+                            }
+                        });
+                    }
 
                     hybrid('image', {
                         type: 'upload',

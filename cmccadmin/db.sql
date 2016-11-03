@@ -37,7 +37,7 @@ register_date DATE,--注册时间 --search=true
 
 
 drop table userinfo;
-create table userinfo (--用户
+create table userinfo (--用户 --props=String account,int status
 user_id  number(11) primary key,--用户ID
 avatars varchar(20),--用户头像 --type=file
 user_name varchar(20),--用户昵称 --unique=true --updateable=false --search=true
@@ -62,7 +62,7 @@ login_date DATE--登录时间 --search=true
 create sequence login_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
 drop table pub_quan;
-create table pub_quan (--公众圈
+create table pub_quan (--公众圈 --children=pub_quan_follow,pub_quan_msg --props=int user_id
     quan_id number(10) primary key,--圈编号 --deletion_key=true
     quan_name varchar(20),--圈名称 --unique=true --updateable=false --search=true
     quan_pic varchar(100),--圈图片 --type=file --ext=png|jpeg|jpg|bmp
@@ -85,12 +85,12 @@ create sequence pub_quan_seq minvalue 1 maxvalue 99999999999 start with 1 increm
 --search:是否可搜索(true|false)
 
 drop table pub_quan_msg;
-create table pub_quan_msg (--公众圈文章
+create table pub_quan_msg (--公众圈文章 --listChildren=pub_quan_comments
     msg_id number(10) primary key,--文章编号 --deletion_key=true
     title varchar(200),--标题 --search=true
     content clob,--文章内容
     quan_id number(10),--圈编号 --route=quan_id --search=true
-    user_id number(10),--用户编号
+    user_id number(11),--用户编号
     add_date date,--添加时间 --search=true
     see number(10),--浏览数
     likes number(10),--喜欢数
@@ -100,11 +100,11 @@ create table pub_quan_msg (--公众圈文章
 create sequence pub_quan_msg_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
 
-create table pub_quan_comments (--公众圈文章评论
+create table pub_quan_comments (--公众圈文章评论 --props=String user_name,String avatars
     comment_id number(10) primary key,--评论编号 --deletion_key=true
     msg_id number(10),--文章编号 --route=msg_id --search=true
     add_date date,--评论时间 --search=true,
-    user_id number(10),--用户编号 --search=true
+    user_id number(11),--用户编号 --search=true
     content varchar(200)--评论内容
 ) tablespace cmccuser;
 create sequence pub_quan_comments_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
@@ -112,7 +112,7 @@ create sequence pub_quan_comments_seq minvalue 1 maxvalue 99999999999 start with
 
 create table quan_msgs (--朋友圈 --listChildren=quan_comments,quan_likes --props=String user_name,String avatars
     msg_id number(10) primary key,--圈消息编号 --deletion_key=true
-    user_id number(10),--用户编号 --search=true
+    user_id number(11),--用户编号 --search=true
     add_date date,--发布时间 --search=true
     content varchar(300),--发布内容
     imgs varchar(2000)--图片
@@ -120,13 +120,12 @@ create table quan_msgs (--朋友圈 --listChildren=quan_comments,quan_likes --pr
 
 create sequence quan_msgs_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
-
 create table quan_comments (--朋友圈评论 --props=String user_name,String at_user_name
     comment_id number(10) primary key,--评论编号 --deletion_key=true
     msg_id number(10),--圈消息编号 --route=msg_id --search=true
     add_date date,--评论时间 --search=true,
-    user_id number(10),--用户编号 --search=true
-    at_user_id number(10),--用户编号 --search=true
+    user_id number(11),--用户编号 --search=true
+    at_user_id number(11),--用户编号 --search=true
     content varchar(200)--评论内容
 ) tablespace cmccuser;
 
@@ -136,7 +135,76 @@ create table quan_likes (--朋友圈赞 --props=String user_name
     like_id number(10) primary key,--评论编号 --deletion_key=true
     msg_id number(10),--圈消息编号 --route=msg_id --search=true
     add_date date,--评论时间 --search=true,
-    user_id number(10)--用户编号 --search=true
+    user_id number(11)--用户编号 --search=true
 ) tablespace cmccuser;
 
 create sequence quan_likes_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+create table pub_quan_likes (--喜欢文章
+    like_id number(10) primary key,--编号 --deletion_key=true
+    msg_id number(10),--文章编号 --route=msg_id --search=true
+    add_date date,--添加时间
+    user_id number(11)--用户编号 --search=true
+) tablespace cmccuser;
+create sequence pub_quan_likes_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+create table pub_quan_follow (
+    follow_id number(11) primary key,--关注编号
+    quan_id number(10),--公众圈ID
+    user_id number(11),--用户ID
+    follow_date date,--关注时间
+    is_follow number(1)--是否关注
+) tablespace cmccuser;
+
+create sequence pub_quan_follow_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+create table pub_quan_recommend (
+    recommend_id number(11) primary key,--编号
+    quan_id number(10),--公众圈ID
+    recommend_date date,--推荐时间
+    sort number(10)--排序
+) tablespace cmccuser;
+
+create sequence pub_quan_recommend_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+create table user_fav (--用户收藏 --children=pub_quan_msg,quan_msgs
+    fav_id number(11) primary key,--收藏编号
+    rev_id number(10),--相关ID
+    user_id number(11),--用户ID
+    add_date date,--收藏时间
+    fav_type number--类型 --options={1:'公众圈文章',2:'朋友圈'}
+) tablespace cmccuser;
+
+create sequence user_fav_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+create table quan_msg_black (--朋友圈信息屏蔽
+    black_id number(10) primary key,--屏蔽编号 --deletion_key=true
+    msg_id number(10),--圈消息编号 --route=msg_id --search=true
+    add_date date,--添加时间 --search=true,
+    user_id number(11)--用户编号 --search=true
+) tablespace cmccuser;
+
+create sequence quan_msg_black_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+create table friends (--好友 --props=String user_name,String avatars
+    fid  number(15) primary key,--自增id
+    friend_id number(10),--好友id
+    user_id number(10),--发起请求方
+    status number(2),--状态 --options=-2非好友,-1未处理,0拒绝,1接受,2删除,
+    add_date date,--添加时间 --search=true
+    msg varchar(40),--验证消息
+    show number(1)--显示在新好友中
+) tablespace cmccuser;
+create sequence friends_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+
+
+-----------------------------
+--<<2016-11-3 up to date here
+-----------------------------
+
+alter table friends add msg varchar(40);

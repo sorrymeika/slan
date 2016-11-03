@@ -3,6 +3,7 @@
     "useLocal": true,
     "dest": "./dest",
     "api": "http://${ip}:5560/proxy",
+    "resources": "http://${ip}:5560/upload/",
     "proxy": {
         "/proxy/*": "${ip}:10009"
     },
@@ -26,7 +27,8 @@
     ],
     "env": {
         "production": {
-            "api": "http://appuser.abs.cn"
+            "api": "http://wxcs.ie1e.com/api",
+            "resources": "http://wxcs.ie1e.com/upload/"
         },
         "test": {
             "api": "http://appuser2.abs.cn"
@@ -51,6 +53,7 @@
             "cryptojs/cipher-core": "../webresource/js/cryptojs/cipher-core",
             "cryptojs/evpkdf": "../webresource/js/cryptojs/evpkdf",
             "cryptojs/aes": "../webresource/js/cryptojs/aes",
+            "util/base64": "../webresource/js/util/base64",
             "util/aes": "../webresource/js/util/aes",
             "util/rsa": "../webresource/js/util/rsa"
         },
@@ -59,7 +62,8 @@
             "logical/chat": "./logical/chat",
             "logical/publicquan": "./logical/publicquan",
             "logical/quan": "./logical/quan",
-            "logical/contact": "./logical/contact"
+            "logical/contact": "./logical/contact",
+            "logical/auth": "./logical/auth"
         },
         "models": {
             "models/user": "./models/user",
@@ -100,6 +104,7 @@
         "widget/scroll": "../webresource/m/js/widget/scroll",
         "widget/tip": "../webresource/js/widget/tip",
         "widget/loader": "../webresource/m/js/widget/loader",
+        "widget/selector": "../webresource/m/js/widget/selector",
         "widget/offline": "../webresource/m/js/widget/offline",
         "widget/tab": "../webresource/m/js/widget/tab",
         "widget/toast": "../webresource/js/widget/toast",

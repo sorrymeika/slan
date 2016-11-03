@@ -21,7 +21,7 @@ var ModelEvents = {
     focus: 'focus',
     blur: 'blur'
 };
-var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURIComponent', 'window', 'document'];
+var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURIComponent', "sl", 'window', 'document'];
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
