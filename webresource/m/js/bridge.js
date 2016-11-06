@@ -69,7 +69,9 @@
                 },
 
                 //@images=[{name:"file",value:0},{name:'file2',value:1}]
-                upload: function (url, data, images, callback) {
+                upload: function (url, data, images, crop, callback) {
+
+                    if (typeof crop === 'function') callback = crop, crop = false;
 
                     if (typeof images == 'object' && !Array.isArray(images)) {
                         images = Object.keys(images).map(function (key) {

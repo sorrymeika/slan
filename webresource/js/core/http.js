@@ -79,7 +79,7 @@ Http.prototype = {
         if (!val)
             attrs = key
         else
-                (attrs = {})[key] = val;
+            (attrs = {})[key] = val;
 
         for (var attr in attrs) {
             val = attrs[attr];

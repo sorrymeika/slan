@@ -66,6 +66,13 @@
         "/user/remind/{type:\\w+}": "user/remind_one",
         "/user/privacy": "user/privacy",
         "/user/qa": "user/qa",
-        "/user/about": "user/about"
+        "/user/about": "user/about",
+        "/life/notice": "life/notice",
+        "/life/search_notice": "life/search_notice",
+        "/yunmi": "yunmi/yunmi",
+        "/yunmi/detail": "yunmi/yunmi_detail",
+        "/yunmi/exchange": "yunmi/yunmi_exchange",
+        "/yunmi/invite": "yunmi/invite",
+        "/yunmi/task": "yunmi/yunmi_task"
     }
 }

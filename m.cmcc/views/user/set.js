@@ -22,6 +22,36 @@ module.exports = Activity.extend({
             type: type
         });
 
+        var provinceList = [{
+            province_id: 1,
+            province_name: '福建'
+        }, {
+            province_id: 10,
+            province_name: '上海'
+        }];
+
+        var cityList = [{
+            province_id: 1,
+            city_id: 1,
+            city_name: '福州'
+        }, {
+            province_id: 1,
+            city_id: 2,
+            city_name: '厦门'
+        }, {
+            province_id: 1,
+            city_id: 1,
+            city_name: '三江'
+        }, {
+            province_id: 10,
+            city_id: 4,
+            city_name: '黄埔'
+        }, {
+            province_id: 10,
+            city_id: 3,
+            city_name: '徐汇'
+        }];
+
         switch (type) {
             case 'user_name':
                 model.set('user_name', user.get('user_name'));
@@ -45,36 +75,6 @@ module.exports = Activity.extend({
                     province_name: '福建',
                     city_name: '福州'
                 });
-
-                var provinceList = [{
-                    province_id: 1,
-                    province_name: '福建'
-                }, {
-                    province_id: 10,
-                    province_name: '上海'
-                }];
-
-                var cityList = [{
-                    province_id: 1,
-                    city_id: 1,
-                    city_name: '福州'
-                }, {
-                    province_id: 1,
-                    city_id: 2,
-                    city_name: '厦门'
-                }, {
-                    province_id: 1,
-                    city_id: 1,
-                    city_name: '三江'
-                }, {
-                    province_id: 10,
-                    city_id: 4,
-                    city_name: '黄埔'
-                }, {
-                    province_id: 10,
-                    city_id: 3,
-                    city_name: '徐汇'
-                }];
 
                 var selector = self.selector = new Selector({
                     options: [{
@@ -118,35 +118,6 @@ module.exports = Activity.extend({
                     city_name: '福州'
                 });
 
-                var provinceList = [{
-                    province_id: 1,
-                    province_name: '福建'
-                }, {
-                    province_id: 10,
-                    province_name: '上海'
-                }];
-
-                var cityList = [{
-                    province_id: 1,
-                    city_id: 1,
-                    city_name: '福州'
-                }, {
-                    province_id: 1,
-                    city_id: 2,
-                    city_name: '厦门'
-                }, {
-                    province_id: 1,
-                    city_id: 1,
-                    city_name: '三江'
-                }, {
-                    province_id: 10,
-                    city_id: 4,
-                    city_name: '黄埔'
-                }, {
-                    province_id: 10,
-                    city_id: 3,
-                    city_name: '徐汇'
-                }];
 
                 var selector = self.selector = new Selector({
                     options: [{
@@ -196,7 +167,7 @@ module.exports = Activity.extend({
                     result = userLogical.set("user_name", this.get('user_name'));
                     break;
                 case 'sign_text':
-                    result = userLogical.set("sign_text", this.get('user_name'));
+                    result = userLogical.set("sign_text", this.get('sign_text'));
                     break;
                 case 'gender':
                     result = userLogical.set("gender", this.get('gender'));
@@ -211,6 +182,8 @@ module.exports = Activity.extend({
 
             result.then(function () {
                 model.back();
+            }).catch(function (e) {
+                Toast.showToast(e.message);
             })
 
         }

@@ -99,6 +99,30 @@ var event = {
         return this;
     },
 
+    onceTrue: function (name, callback, context) {
+        var me = this;
+
+        if (!callback) {
+            return this;
+        }
+
+        eachEvent(name, callback, function (name, callback) {
+            var once = function () {
+                var res = callback.apply(context || me, arguments);
+
+                if (res === true)
+                    me.off(name, once);
+
+                return res;
+            };
+
+            once._cb = callback;
+            me.on(name, once, context);
+        });
+
+        return this;
+    },
+
     one: function (name, callback, context) {
         var me = this;
 

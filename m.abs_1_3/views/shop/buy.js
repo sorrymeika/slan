@@ -159,6 +159,11 @@ define(function (require, exports, module) {
                     var requireInv = self.model.get('requireInv') ? true : false;
                     var isCompany = self.model.get('isCompany');
 
+                    if (requireInv && isCompany && !self.model.get('company')) {
+                        Toast.showToast('请填写公司抬头');
+                        return false;
+                    }
+
                     this.setParam({
                         mba_id: address.AddressID,
                         pay_type: self.model.get('payType'),

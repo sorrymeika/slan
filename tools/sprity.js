@@ -30,7 +30,7 @@ function combineImages(out, srcs, callback) {
 
                 var maxWidth = 0;
                 var height = 0;
-                var margin = 1;
+                var margin = 2;
 
                 for (var i = 0, j = images.length; i < j; i++) {
                     img = images[i];

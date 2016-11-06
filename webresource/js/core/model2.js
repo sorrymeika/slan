@@ -169,6 +169,7 @@ function updateRequireView(viewModel, el) {
 
         instance.$el.appendTo(el);
     }
+    setRefs(viewModel, el);
 }
 
 function updateNode(viewModel, el) {
@@ -183,16 +184,14 @@ function updateNode(viewModel, el) {
 
         if (el.nodeType == 1) {
 
-            if (el.snRequire) {
-                updateRequireView(viewModel, el);
-            }
-            setRefs(viewModel, el);
-
             if (el.snIf) {
                 if (!el.parentNode) {
                     return { isSkipChildNodes: true, nextSibling: el.snIf.nextSibling };
 
                 } else {
+                    if (el.snRequire) updateRequireView(viewModel, el);
+                    else setRefs(viewModel, el);
+
                     var nextElement = el.nextSibling;
                     var currentElement = el;
 
@@ -224,6 +223,10 @@ function updateNode(viewModel, el) {
 
                     return currentElement.nextSibling;
                 }
+            } else if (el.snRequire) {
+                updateRequireView(viewModel, el);
+            } else {
+                setRefs(viewModel, el);
             }
         }
 
@@ -443,12 +446,36 @@ var ModelProto = {
         return key == 'this' ? this : key == '' ? this.data : this.data[key];
     },
 
+    _setByKeys: function (cover, keys, val) {
+        var lastKey = keys.pop();
+        var model = this;
+        var tmp;
+
+        for (var i = 0, len = keys.length; i < len; i++) {
+            key = keys[i];
+
+            console.log(key, model.model[key])
+
+            if (!(model.model[key] instanceof Model)) {
+                tmp = model.model[key] = new Model(model, key, {});
+                model.data[key] = tmp.data;
+
+                model = tmp;
+
+            } else {
+                model = model.model[key];
+            }
+        }
+        model.set(cover, lastKey, val);
+    },
+
+    //[cover,object]|[cover,key,val]|[key,va]|[object]
+    //@cover=true|false 是否覆盖数据，[cover,key,val]时覆盖子model数据,[cover,object]时覆盖当前model数据
     set: function (cover, key, val) {
         var self = this,
             origin,
             changed,
             attrs,
-            model = self.model,
             parent,
             keys,
             coverChild = false,
@@ -479,20 +506,7 @@ var ModelProto = {
             keys = isArrayKey ? key : key.split('.');
 
             if (keys.length > 1) {
-                var lastKey = keys.pop();
-                for (var i = 0, len = keys.length; i < len; i++) {
-                    key = keys[i];
-
-                    if (!(model[key] instanceof Model)) {
-                        model = model[key] = new Model(this, key, {});
-                        this.data[key] = model.data;
-
-                    } else {
-                        model = model[key];
-                    }
-                }
-                model.set(cover, lastKey, val);
-                return;
+                return this._setByKeys(cover, keys, val);
 
             } else {
                 coverChild = cover;
@@ -503,6 +517,7 @@ var ModelProto = {
         if (!$.isPlainObject(this.data)) this.data = {}, syncParentData(this);
 
         var data = this.data;
+        var model = this.model;
 
         if (cover) {
             for (var attr in data) {
@@ -526,7 +541,6 @@ var ModelProto = {
                     (value.root.parents || (value.root.parents = [])).push(this.root);
 
                 } else if (origin instanceof Model) {
-
                     value === null || value === undefined ? origin.reset() : origin.set(coverChild, value);
                     data[attr] = origin.data;
 
@@ -538,6 +552,7 @@ var ModelProto = {
                             throw new Error('[Array to ' + (typeof value) + ' error]不可改变' + attr + '的数据类型');
                         }
                     }
+
                     origin.set(value);
                     data[attr] = origin.data;
 
@@ -550,6 +565,7 @@ var ModelProto = {
                             break;
 
                         case '[object Array]':
+
                             value = new Collection(this, attr, value);
                             data[attr] = value.data;
                             break;
@@ -577,6 +593,7 @@ var ModelProto = {
         this.set(data);
     }
 }
+ModelProto._ = ModelProto.getModel;
 
 Model.prototype = ModelProto;
 
@@ -723,16 +740,21 @@ Collection.prototype = {
             this.root.updateViewNextTick();
     },
 
+    //@[key,val]|function(){return true|false;}|Model
     remove: function (key, val) {
         var fn;
 
         if (typeof key === 'string' && val !== undefined) {
             fn = function (item) {
-
                 return item[key] == val;
             }
-        }
-        else fn = key;
+
+        } else if (key instanceof Model) {
+            fn = function (item, i) {
+                return this.models[i] == key;
+            }
+
+        } else fn = key;
 
         var models = [];
 
@@ -861,9 +883,6 @@ function ViewModel(el, data, children) {
     this.set(this.data);
 
     this.initialize.call(this, data);
-
-    if (this.viewWillUpdate) this.on('viewWillUpdate', this.viewWillUpdate);
-    if (this.viewDidUpdate) this.on('viewDidUpdate', this.viewDidUpdate);
 }
 
 ViewModel.prototype = Object.assign(Object.create(ModelProto), {
@@ -1394,7 +1413,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
     updateView: function () {
         this._nextTick = null;
-        this.trigger('viewWillUpdate');
+        this.trigger('datachanged');
+        this.viewWillUpdate && this.viewWillUpdate();
 
         if (this._nextTick) return;
 
@@ -1419,6 +1439,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         console.timeEnd('updateView');
 
         this.trigger('viewDidUpdate');
+        this.viewDidUpdate && this.viewDidUpdate();
     },
 
     bind: function (el) {

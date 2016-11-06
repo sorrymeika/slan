@@ -45,7 +45,7 @@ var User = {
 
     getCart: function () {
         var user = userModel.get();
-        
+
         return new api.CartAPI({
             $el: self.$el,
             checkData: false,
@@ -150,6 +150,8 @@ var User = {
 
     recieveCoupon: function (csvcode, $el) {
 
+        alert(1);
+
         var user = userModel.get();
 
         return new api.CouponAPI({
@@ -157,10 +159,9 @@ var User = {
             params: {
                 csvcode: csvcode,
                 pspcode: user.PSP_CODE
-            },
-            error: function () { }
+            }
 
-        }).load();
+        }).request();
     },
 
     getCouponStatus: function (csvId, callback, $el) {

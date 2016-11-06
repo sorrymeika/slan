@@ -9,7 +9,7 @@ var popup = require('widget/popup');
 var user = require('models/user');
 
 var imagePicker = require('components/imagePicker');
-
+var userLogical = require('logical/user');
 
 module.exports = Activity.extend({
 
@@ -21,16 +21,20 @@ module.exports = Activity.extend({
             user: user
         });
 
+        console.log(model.data.user)
+        console.log(user);
         model.back = function () {
             self.back(self.swipeRightBackAction);
         }
 
         model.changeAvatars = function () {
             imagePicker.show('更换头像', function (res) {
+
+                userLogical.setAvatars(res.id);
+
                 user.set({
                     avatars: res.thumbnail
                 });
-
             });
         }
 

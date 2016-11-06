@@ -1,7 +1,9 @@
 var util = require('util');
 var Promise = require('promise');
+var bridge = require('bridge');
 var Http = require('core/http');
 var userModel = require('models/user');
+var auth = require('logical/auth');
 
 var FAVORITE_TYPE = {
     QUAN: 2,
@@ -17,8 +19,25 @@ var User = {
 
         return Http.post('/userinfo/update', params).then(function (res) {
             userModel.set(type, value);
-            util.store('user', userModel.data);
             return res;
+        });
+    },
+
+    setAvatars: function (imageId) {
+        var sign = auth.getSign();
+
+        return new Promise(function (resolve, reject) {
+            bridge.image.upload(Loader.url('/userinfo/setAvatars'), Object.assign({}, sign), {
+                image: imageId
+
+            }, true, function (res) {
+                if (res.success) {
+                    resolve(res);
+
+                } else {
+                    reject(res)
+                }
+            });
         });
     },
 
@@ -26,8 +45,6 @@ var User = {
         return Http.post('/userinfo/getMe').then(function (res) {
             if (res.data) {
                 userModel.set(res.data);
-
-                util.store('user', res.data);
             }
             return res;
         });

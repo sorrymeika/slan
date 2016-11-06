@@ -24,7 +24,11 @@ module.exports = Activity.extend({
         }
 
         model.del = function (id) {
-            userLogical.delFav(id);
+            userLogical.delFav(id).then(function () {
+                model._("data").remove("fav_id", id);
+            }).catch(function (e) {
+                Toast.showToast(e.message);
+            });
         }
 
         Loader.showLoading();

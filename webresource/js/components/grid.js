@@ -28,6 +28,9 @@ var Page = require('./page'),
     ajaxOptions = ['url', 'beforeSend', 'success', 'error', 'type'];
 
 
+
+
+
 var Cell = Event.extend(function (row, options) {
     var self = this,
         settings = row.grid.options;
@@ -738,6 +741,22 @@ var Grid = Component.extend({
         return self.load();
     },
 
+    setParam: function (key, val) {
+
+        var attrs;
+        if (!val)
+            attrs = key
+        else
+            (attrs = {})[key] = val;
+
+        for (var attr in attrs) {
+            val = attrs[attr];
+
+            self.controls[attr].$el.val(val);
+        }
+        return this;
+    },
+
     createSearch: function () {
         var self = this,
             options = this.options.search;
@@ -765,6 +784,7 @@ var Grid = Component.extend({
         if (!controls || $.isEmptyObject(controls)) return;
 
         self.controls = controls;
+        self.selectsOptions = [];
 
         var $search = $('<div class="search"></div>'),
             visible = false;
@@ -816,13 +836,39 @@ var Grid = Component.extend({
 
                 } else if (option.type == "select") {
                     input = $('<select name="' + name + '"></select>');
-                    if ($.isArray(option.options)) {
+                    if (option.options && !$.isArray(option.options)) {
+
+                        var selectOptions = option.options;
+
+                        if (selectOptions.url) {
+                            selectOptions.field = name;
+                            self.selectsOptions.push(selectOptions);
+                        }
+
+                        if (!selectOptions.text) selectOptions.text = 'text';
+                        if (!selectOptions.value) selectOptions.text = 'value';
+                        if (!selectOptions.data) {
+                            var sd = {};
+                            sd[selectOptions.text] = '请选择';
+                            sd[selectOptions.value] = '';
+                            selectOptions.data = [sd];
+                        }
+
+                        option.options = selectOptions.data.map(function (item) {
+                            return {
+                                text: item[selectOptions.text],
+                                value: item[selectOptions.value]
+                            }
+                        });
+                    }
+
+                    if (option.options)
                         $.each(option.options, function (j, item) {
                             input.each(function () {
                                 this.options.add(new Option(item.text, item.value));
                             });
                         });
-                    }
+
                     if (option.change) input.on('change', option.change);
 
                 } else {
@@ -840,6 +886,14 @@ var Grid = Component.extend({
             controls[key] = control;
         });
 
+        if (this.selectsOptions.length) {
+            self.updateSelects();
+
+            this.$el.on('change', 'input,select', function () {
+                self.updateSelects();
+            });
+        }
+
         if (visible) {
             self.$searchBtn = $('<button class="grid_search button">搜索</button>')
                 .appendTo($search);
@@ -849,6 +903,51 @@ var Grid = Component.extend({
         self.$search = $search;
 
         self.$el.prepend($search);
+    },
+
+    updateSelects: function () {
+        var self = this;
+
+        this.selectsOptions.forEach(function (selectOptions) {
+            var params = {};
+            var willReturn = false;
+
+            selectOptions.params && Object.keys(selectOptions.params).forEach(function (key) {
+                var field = selectOptions.params[key];
+                var value = self.controls[field].$el.val();
+                params[key] = value;
+
+                if (value === '') {
+                    willReturn = true;
+                }
+            });
+
+            if (willReturn) return;
+            var paramsId = JSON.stringify(params);
+
+            if (selectOptions.paramsId == paramsId) return;
+            selectOptions.paramsId = paramsId;
+
+
+            Http.post(selectOptions.url, params).then(function (res) {
+                var options = selectOptions.data.concat(res.data).map(function (item) {
+                    return {
+                        text: item[selectOptions.text],
+                        value: item[selectOptions.value]
+                    }
+                });
+
+                var select = self.controls[selectOptions.field].$el[0];
+                select.options.length = 0;
+
+                console.log(options);
+
+                $.each(options, function (j, item) {
+                    select.options.add(new Option(item.text, item.value));
+                });
+
+            });
+        });
     }
 });
 

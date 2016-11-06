@@ -50,6 +50,11 @@ var quan = Event.mixin({
 
     //@params = { content:'', images:{}}
     publish: function (params) {
+        if (!sl.isInApp) {
+            return Http.post('/quan_msgs/add', {
+                content: params.content
+            });
+        }
 
         return new Promise(function (resolve, reject) {
 
@@ -86,7 +91,7 @@ var quan = Event.mixin({
 
     getHistory: function () {
 
-        return Http.post('/quan_msgs/getMine',{
+        return Http.post('/quan_msgs/getMine', {
             page: 1,
             pageSize: 20
         });

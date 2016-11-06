@@ -1,0 +1,83 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+    <div class="head_right icon-share pr_m pl_m"></div>
+</header>
+<div class="main ym_idx" ref="main">
+    <div class="ym_idx__bg cl_fff ta_c">
+        <div class="flex">
+            <dl class="flex_0 ml_l">
+                <dt class="pt_m_rem">累计获得</dt>
+                <dd class="pt_l_rem fs_xxl fw_b">8000</dd>
+            </dl>
+            <dl class="flex_0">
+                <dt class="pt_m_rem">当日获得</dt>
+                <dd class="pt_l_rem fs_xxl fw_b">15.5</dd>
+            </dl>
+            <div class="ym-arrow-rem pr_m" data-forward="/yunmi/detail"></div>
+        </div>
+        <div class="ta_c fs_s pt_l_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
+    </div>
+    <ul class="ym_idx__tab flex ta_c fs_m bd_b bg_fff">
+        <li class="flex_0 br_a curr">摇云米</li>
+        <li class="flex_0 br_a">赚云米</li>
+        <li class="flex_0 br_a" data-forward="/yunmi/exchange">用云米</li>
+        <li class="flex_0" data-forward="/yunmi/task">做任务</li>
+    </ul>
+    <div sn-if="!shakeResult" class="ym-shake ta_c pt_xxl pb_xxl bd_b">
+
+    </div>
+    <ul class="ym_idx_bags of_h pb_xl bd_b" sn-if="shakeResult">
+        <li class="fl_l">
+            <p class="name">aasdf</p>
+            <div class="ym-moneys-rem">
+                <div class="ym-bag-rem">
+                    <p class="ym_index__num">123</p>
+                    <p class="ym-stars-rem">
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li class="fl_l">
+            <p class="name">aasdf</p>
+            <div class="ym-moneys-rem">
+                <div class="ym-bag-rem">
+                    <p class="ym-stars-rem">
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li class="fl_l">
+            <p class="name">aasdf</p>
+            <div class="ym-moneys-rem">
+                <div class="ym-bag-rem">
+                    <p class="ym-stars-rem">
+                    </p>
+                </div>
+            </div>
+        </li>
+        <li class="fl_l">
+            <p class="name">aasdf</p>
+            <div class="ym-moneys-rem no">
+                <div class="ym-bag-rem">
+                    <p class="ym-stars-rem">
+                    </p>
+                </div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="pt_xxl pb_xxl">
+        <div class="ta_c cl_app pb_m" sn-tap="this.seeRules()">查看规则</div>
+        <div class="flex jc_c"><button class="ym_idx__btn fs_l btn_l ml_l br_6">查看好友云米</button>
+            <button class="ym_idx__btn btn_l fs_l ml_l mr_l br_6">好友排行榜</button></div>
+    </div>
+</div>
+<footer class="h_l bg_fff bd_t pt_1 flex ta_c ym_idx__foot">
+    <div class="flex_0 br_aaa">
+        <i class="icon-money mr_m"></i> <span class="va_m">找土豪</span>
+    </div>
+    <div class="flex_0">
+        <i class="icon-refresh2 mr_m"></i> <span class="va_m">换一批</span>
+    </div>
+</footer>

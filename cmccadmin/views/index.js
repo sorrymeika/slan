@@ -53,6 +53,100 @@ return Page.extend({
             })
         }
 
+
+        function getColumnsInfo(code) {
+            var columns = [];
+            var columnsList = [];
+            var primaryKey;
+            var privateCode = '';
+            var namespaceCode = [];
+
+            code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, memo) {
+                var ext;
+                var emptyAble = false;
+                var params = {};
+
+                if (memo) {
+                    var filter = memo.split(/\s+--/);
+
+                    if (filter.length > 1) {
+                        memo = filter.shift();
+
+                        filter.forEach(function (item) {
+                            var _name = item.substr(0, item.indexOf('='));
+                            var _val = item.substr(item.indexOf('=') + 1);
+
+                            params[_name] = _val == 'true' ? true : _val == 'false' ? false
+                                : _val.indexOf('{') == 0 ? new Function('return ' + _val + ';')() : _val;
+                        });
+                    }
+                }
+                type = (params.type || type).toLowerCase();
+
+                if (params.options && typeof params.options === 'string') {
+                    var po = params.options;
+                    params.options = {};
+                    po.split(',').forEach(function (item) {
+                        item = item.split(':');
+                        params.options[item.shift()] = item.join(":");
+                    });
+                }
+
+                var item = Object.assign({
+                    memo: memo,
+                    name: name,
+                    field: type == 'file' ? name + "_file" : name,
+                    ext: ext,
+                    type: type,
+                    emptyAble: emptyAble
+                }, params);
+
+                columns.push(name);
+                columnsList.push(item);
+
+                if (/\s+primary\s+key/.test(match)) {
+                    primaryKey = item;
+                }
+
+                switch (type) {
+                    case "number":
+                        privateCode += "private int " + name + ";\n";
+                        break;
+
+                    case "varchar":
+                    case "clob":
+                    case "file":
+                        privateCode += "private String " + name + ";\n";
+                        break;
+
+                    case "date":
+                        var d = 'import java.util.Date;';
+                        namespaceCode.indexOf(d) == -1 &&
+                            namespaceCode.push(d);
+
+                        privateCode += "private Date " + name + ";\n";
+
+                        if (item.search) {
+                            d = 'import org.springframework.format.annotation.DateTimeFormat;';
+                            namespaceCode.indexOf(d) == -1 &&
+                                namespaceCode.push(d);
+
+                            privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date start_" + name + ";\n";
+                            privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date end_" + name + ";\n";
+                        }
+                        break;
+                }
+            });
+
+            return {
+                privateCode: privateCode,
+                primaryKey: primaryKey,
+                columns: columns,
+                columnsList: columnsList,
+                namespaceCode: namespaceCode
+            }
+        }
+
         function getSetterAndGetter(code) {
             var result = code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+);(?:\s*)/g, function (match, type, v) {
 
@@ -67,15 +161,17 @@ return Page.extend({
             return result;
         }
 
-        console.log('/Users/sunlu/Desktop/workspace/java/cmcc/helife/src/main/java');
+        console.log('/Users/sunlu/Desktop/workspace/java/helife/src/main/java');
         console.log('/Users/sunlu/Desktop/slan/cmccadmin');
+        console.log('com.cmcc.helife');
+        console.log('com.app.sexy');
 
         var form = new Form({
             url: '',
-            fields: [{
-                label: '写文件',
-                field: 'write',
-                value: localStorage.getItem('write'),
+            fields: [[{
+                label: '写前端',
+                field: 'writeFe',
+                value: localStorage.getItem('writeFe'),
                 type: 'select',
                 options: [{
                     text: '是',
@@ -85,77 +181,131 @@ return Page.extend({
                     value: 0
                 }]
             }, {
+                label: 'model',
+                field: 'writeModel',
+                value: localStorage.getItem('writeModel'),
+                type: 'select',
+                options: [{
+                    text: '是',
+                    value: 1
+                }, {
+                    text: '否',
+                    value: 0
+                }]
+            }, {
+                label: 'mapper',
+                field: 'writeMapper',
+                value: localStorage.getItem('writeMapper'),
+                type: 'select',
+                options: [{
+                    text: '是',
+                    value: 1
+                }, {
+                    text: '否',
+                    value: 0
+                }]
+            }, {
+                label: 'service',
+                field: 'writeService',
+                value: localStorage.getItem('writeService'),
+                type: 'select',
+                options: [{
+                    text: '是',
+                    value: 1
+                }, {
+                    text: '否',
+                    value: 0
+                }]
+            }, {
+                label: 'controller',
+                field: 'writeController',
+                value: localStorage.getItem('writeController'),
+                type: 'select',
+                options: [{
+                    text: '是',
+                    value: 1
+                }, {
+                    text: '否',
+                    value: 0
+                }]
+            }], {
                 label: 'javaDir',
                 field: 'javaDir',
-                value: localStorage.getItem('javaDir')
+                value: localStorage.getItem('javaDir'),
+                colSpan: 9
             }, {
                 label: '前端文件夹',
                 field: 'feDir',
-                value: localStorage.getItem('feDir')
+                value: localStorage.getItem('feDir'),
+                colSpan: 9
             }, {
                 label: 'package',
                 field: 'pack',
-                value: localStorage.getItem('pack')
+                value: localStorage.getItem('pack'),
+                colSpan: 9
             }, {
                 label: '文本框',
                 field: 'code',
                 type: "textarea",
-                value: localStorage.getItem('code')
+                value: localStorage.getItem('code'),
+                colSpan: 9
             }, {
                 label: 'model',
                 field: 'model',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'mapperXml',
                 field: 'mapperXml',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'mapper',
                 field: 'mapper',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'service',
                 field: 'service',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'controller',
                 field: 'controller',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'insertForm',
                 field: 'insertForm',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'updateForm',
                 field: 'updateForm',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }, {
                 label: 'grid',
                 field: 'grid',
-                type: "textarea"
+                type: "textarea",
+                colSpan: 9
             }],
             buttons: [{
                 value: 'asdf',
                 style: 'position: fixed; top: 200px; left: 700px;',
                 click: function () {
-                    var feDir = this.data().feDir;
-                    var javaDir = this.data().javaDir;
-                    var pack = this.data().pack;
-                    var write = this.data().write;
+                    var formData = this.data();
+
+                    var feDir = formData.feDir;
+                    var javaDir = formData.javaDir;
+                    var pack = formData.pack;
+
+                    ['writeFe', "writeModel", 'writeMapper', "writeService", "writeController", 'code', 'pack', 'feDir', 'javaDir'].forEach(function (name) {
+                        localStorage.setItem(name, formData[name]);
+                    })
 
                     var code = this.data().code.replace(/\/\/.*?\n/g, '');
                     var result;
-
-                    localStorage.setItem('write', write);
-                    localStorage.setItem('code', code);
-                    localStorage.setItem('pack', pack);
-                    localStorage.setItem('feDir', feDir);
-                    localStorage.setItem('javaDir', javaDir);
-
-                    if (write == 0) {
-                        feDir = null;
-                        javaDir = null;
-                    }
 
                     function getClassName(name) {
                         return name.replace(/^[a-z]|_[a-zA-Z]/g, function (match) {
@@ -163,127 +313,92 @@ return Page.extend({
                         });
                     }
 
-                    if (/^create\s+table/.test(code)) {
-                        var arr = [];
-                        var columns = [];
-                        var tableInfo = /^create\s+table\s+([a-z0-9A-Z_]+)(?:\s*\(\s*)(?:--((?:\s+--[^\n]+|[^\n])+)){0,1}/i.exec(code);
-                        var tableName = tableInfo[1];
-                        var primaryKey = {};
-                        var className = getClassName(tableName);
-                        var tableDesc = tableInfo[2];
-                        var typeAlias = pack + ".model." + className;
+                    var arr = [];
+                    var tableInfo = /^create\s+table\s+([a-z0-9A-Z_]+)(?:\s*\(\s*)(?:--((?:\s+--[^\n]+|[^\n])+)){0,1}/i.exec(code);
 
-                        tableInfo = {
-                            name: tableName,
-                            desc: tableName,
-                            className: className
-                        };
+                    if (!tableInfo) return;
 
-                        if (tableDesc) {
-                            tableDesc = tableDesc.split(/\s+--/)
-                            tableInfo.desc = tableDesc.shift();
-                            tableDesc.forEach(function (item) {
-                                var _name = item.substr(0, item.indexOf('='));
-                                var _val = item.substr(item.indexOf('=') + 1);
-                                tableInfo[_name] = _val == 'true' ? true : _val == 'false' ? false : _val;
-                            });
-                        }
-                        console.log(tableInfo);
 
-                        var privateCode = "";
-                        var namespaceCode = [];
-                        var columnsList = [];
+                    var tableName = tableInfo[1];
+                    var className = getClassName(tableName);
+                    var tableDesc = tableInfo[2];
+                    var typeAlias = pack + ".model." + className;
 
-                        if (tableInfo.children) {
-                            tableInfo.children.split(',').forEach(function (name) {
-                                privateCode += 'private ' + getClassName(name) + ' ' + name + ";\n";
-                            });
-                        }
+                    tableInfo = {
+                        name: tableName,
+                        desc: tableName,
+                        className: className
+                    };
 
-                        if (tableInfo.listChildren) {
-                            namespaceCode.push("import java.util.List;");
-
-                            tableInfo.listChildren.split(',').forEach(function (name) {
-                                privateCode += 'private List<' + getClassName(name) + '> ' + name + ";\n";
-                            });
-                        }
-
-                        if (tableInfo.props) {
-                            tableInfo.props.split(',').forEach(function (prop) {
-                                privateCode += 'private ' + prop + ";\n";
-                            })
-                        }
-
-                        console.log(privateCode);
-
-                        code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, memo) {
-                            var ext;
-                            var emptyAble = false;
-                            var params = {};
-
-                            if (memo) {
-                                var filter = memo.split(/\s+--/);
-
-                                if (filter.length > 1) {
-                                    memo = filter.shift();
-
-                                    filter.forEach(function (item) {
-                                        var _name = item.substr(0, item.indexOf('='));
-                                        var _val = item.substr(item.indexOf('=') + 1);
-                                        params[_name] = _val == 'true' ? true : _val == 'false' ? false : _val;
-                                    });
-                                }
-                            }
-                            type = (params.type || type).toLowerCase();
-
-                            var item = Object.assign({
-                                memo: memo,
-                                name: name,
-                                field: type == 'file' ? name + "_file" : name,
-                                ext: ext,
-                                type: type,
-                                emptyAble: emptyAble
-                            }, params);
-
-                            columns.push(name);
-                            columnsList.push(item);
-
-                            if (/\s+primary\s+key/.test(match)) {
-                                primaryKey = item;
-                            }
-
-                            switch (type) {
-                                case "number":
-                                    privateCode += "private int " + name + ";\n";
-                                    break;
-
-                                case "varchar":
-                                case "clob":
-                                case "file":
-                                    privateCode += "private String " + name + ";\n";
-                                    break;
-
-                                case "date":
-                                    var d = 'import java.util.Date;';
-                                    namespaceCode.indexOf(d) == -1 &&
-                                        namespaceCode.push(d);
-
-                                    privateCode += "private Date " + name + ";\n";
-
-                                    if (item.search) {
-                                        d = 'import org.springframework.format.annotation.DateTimeFormat;';
-                                        namespaceCode.indexOf(d) == -1 &&
-                                            namespaceCode.push(d);
-
-                                        privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date start_" + name + ";\n";
-                                        privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date end_" + name + ";\n";
-                                    }
-                                    break;
-                            }
+                    if (tableDesc) {
+                        tableDesc = tableDesc.split(/\s+--/)
+                        tableInfo.desc = tableDesc.shift();
+                        tableDesc.forEach(function (item) {
+                            var _name = item.substr(0, item.indexOf('='));
+                            var _val = item.substr(item.indexOf('=') + 1);
+                            tableInfo[_name] = _val == 'true' ? true : _val == 'false' ? false : _val;
                         });
+                    }
+                    if (!tableInfo.seq_name) tableInfo.seq_name = tableName + "_seq";
+                    console.log(tableInfo);
+
+                    var commentCode;
+                    code = code.replace(/\/\*([\s\S]+?)\*\//img, function (match, ext) {
+                        commentCode = ext;
+                        return '';
+                    });
+
+                    var expand;
+
+                    if (commentCode) {
+                        expand = getColumnsInfo(commentCode);
+                    }
+
+                    var columnsInfo = getColumnsInfo(code);
+
+                    var primaryKey = columnsInfo.primaryKey;
+                    var privateCode = columnsInfo.privateCode;
+                    var namespaceCode = columnsInfo.namespaceCode;
+                    var columnsList = columnsInfo.columnsList;
+                    var columns = columnsInfo.columns;
+
+                    if (tableInfo.children) {
+                        tableInfo.children.split(',').forEach(function (name) {
+                            privateCode += 'private ' + getClassName(name) + ' ' + name + ";\n";
+                        });
+                    }
+
+                    if (tableInfo.listChildren) {
+                        namespaceCode.push("import java.util.List;");
+
+                        tableInfo.listChildren.split(',').forEach(function (name) {
+                            privateCode += 'private List<' + getClassName(name) + '> ' + name + ";\n";
+                        });
+                    }
+
+                    if (tableInfo.props) {
+                        tableInfo.props.split(',').forEach(function (prop) {
+                            privateCode += 'private ' + prop + ";\n";
+                        })
+                    }
 
 
+                    var scope = this;
+
+                    function sql(tableInfo) {
+                        var tableName = tableInfo.name;
+                    }
+
+
+                    (function (callback) {
+                        callback.call(scope);
+
+                    })(function () {
                         //Model.java
+                        if (expand) {
+                            privateCode += expand.privateCode;
+                        }
+
                         var classCode = "package " + pack + ".model;\n\n"
                             + namespaceCode.join('\n')
                             + "\npublic class " + className + " {\n";
@@ -291,7 +406,7 @@ return Page.extend({
                         classCode += getSetterAndGetter(privateCode);
                         classCode += "}";
 
-                        if (javaDir) {
+                        if (formData.writeModel != 0 && javaDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: javaDir + "/" + pack.replace(/\./g, '/') + "/model/" + className + ".java",
                                 data: classCode
@@ -315,7 +430,7 @@ return Page.extend({
                             public int deleteById(int " + primaryKey.name + ");\n\
                         }";
 
-                        if (javaDir) {
+                        if (formData.writeMapper != 0 && javaDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: javaDir + "/" + pack.replace(/\./g, '/') + "/mapper/" + className + "Mapper.java",
                                 data: mapper
@@ -351,7 +466,10 @@ return Page.extend({
                         ifCondition = ifCondition.join('\n');
                         var existsMapper = "<select id=\"exists\" resultType=\"Integer\" parameterType=\"" + typeAlias + "\">\n\
                             select "+ primaryKey.name + " from " + tableName;
-                        existsMapper += '\n<where>\nROWNUM=1\n<if test="' + primaryKey.name + '!=0"> and ' + primaryKey.name + '=#{' + primaryKey.name + '}</if>\n' + ifCondition + '\n</where></select>';
+
+                        var ifAnd = '<if test="' + primaryKey.name + '!=0"> and ' + primaryKey.name + '=#{' + primaryKey.name + '}</if>\n' + ifCondition + '\n'
+
+                        existsMapper += '\n<where>\nROWNUM=1\n' + ifAnd + '</where></select>';
 
                         var where = '\n<where>\n<choose>\n' + primaryKeyCondition + '<otherwise>' + ifCondition + '\n</otherwise>\n</choose>\n</where>';
 
@@ -362,8 +480,6 @@ return Page.extend({
                             return item.name;
                         }).join(",");
 
-
-                        console.log(typeAlias);
 
                         var getById = "<select id=\"getById\" resultType=\"" + typeAlias + "\">\n\
                         select " + columns.join(",") + " from " + tableName + " where " + primaryKey.name + "=#{" + primaryKey.name + "}" + "\n</select>";
@@ -417,7 +533,7 @@ return Page.extend({
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
                         var deleteXml = "<delete id=\"delete\" parameterType=\"" + typeAlias + "\">\n\
-                        delete from " + tableName + where + "\n</delete>";
+                        delete from " + tableName + "<where>" + ifAnd + "</where>\n</delete>";
 
                         var deleteById = "<delete id=\"deleteById\">\n\
                         delete from " + tableName + " where " + primaryKey.name + "=#{" + primaryKey.name + "}\n\
@@ -430,7 +546,7 @@ return Page.extend({
                         mapperXml += [existsMapper, filterXml, firstXml, getById, getAll, insert, update, updateAllFields, deleteById, deleteXml].join("\n\n")
                         mapperXml += '\n</mapper>';
 
-                        if (javaDir) {
+                        if (formData.writeMapper != 0 && javaDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: javaDir + "/../resources/mybatis/sqlmap/" + className + "Mapper.xml",
                                 data: mapperXml
@@ -460,7 +576,7 @@ return Page.extend({
                             @Resource\n\
                             private "+ className + "Mapper mapper;\n\n\
                             public int getNextId() {\n\
-                                return oracle.getNextId(\""+ tableName + "_seq\");\n\
+                                return oracle.getNextId(\""+ tableInfo.seq_name + "\");\n\
                             }\n\
                             public Integer exists("+ className + " data) { return mapper.exists(data); }\n\
                             public int add("+ className + " data) { int id = getNextId();\ndata.set" + toUpper(primaryKey.name) + "(id);\n return mapper.add(data) > 0 ? id : 0; }\n\
@@ -515,7 +631,7 @@ return Page.extend({
                                 return oracle.queryPage("+ className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + "\", page, pageSize, objs.toArray());\n }\n\
                         }";
 
-                        if (javaDir) {
+                        if (formData.writeService != 0 && javaDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: javaDir + "/" + pack.replace(/\./g, '/') + "/service/" + className + "Service.java",
                                 data: service
@@ -673,7 +789,7 @@ return Page.extend({
                             return new WebDataResult<Integer>(service.deleteById("+ primaryKey.name + ")); }\n\
                         }";
 
-                        if (javaDir) {
+                        if (formData.writeController != 0 && javaDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: javaDir + "/" + pack.replace(/\./g, '/') + "/web/" + className + "Controller.java",
                                 data: controller
@@ -705,9 +821,19 @@ return Page.extend({
                         };
 
                         //后台添加数据
+                        var formList = columnsList.concat(expand ? expand.columnsList : []);
+
+                        console.log(formList);
+
+                        formList.sort(function (a, b) {
+                            if (!a.formSort || !b.formSort) return 0;
+
+                            return a.formSort > b.formSort ? 1 : a.formSort < b.formSort ? -1 : 0;
+                        })
+
                         var insertForm = "\nvar form = this.form = new Form({\n\
                             url: '/"+ tableName + "/add',\n\
-                            fields: ["+ columnsList.map(function (item) {
+                            fields: ["+ formList.map(function (item) {
 
                                 if (item.name == primaryKey.name) return '';
 
@@ -715,90 +841,9 @@ return Page.extend({
                                     label: "'+ (item.memo || item.name) + '",\n\
                                     field: "'+ item.field + '",\n\
                                     type:';
-                                switch (item.type) {
-                                    case "varchar":
-                                        res += '"text"';
-                                        break;
-                                    case "file":
-                                        res += '"file"';
-                                        break;
-                                    case "clob":
-                                        res += '"richTextBox"';
-                                        break;
-                                    case "date":
-                                        res += '"timePicker"';
-                                        break;
-                                    case "number":
-                                        res += '"number",\n\
-                                        regex: /^\\d+$/,\n\
-                                        regexText: "格式错误"';
-                                        break;
-                                }
 
-                                if (item.route) {
-                                    res += ',\nvalue: this.route.params.' + item.route;
-                                } else if (item.query) {
-                                    res += ',\nvalue: this.route.query.' + item.query;
-                                } else if (item.value) {
-                                    res += ',\nvalue: "' + item.value + '"';
-                                }
-
-                                if (!item.emptyAble)
-                                    res += ',\nemptyAble:false,\n\
-                                        emptyText: "'+ (item.memo || item.name) + '不可为空"\n';
-
-                                res += '},';
-
-                                return res;
-
-                            }).join(' ').replace(/\,$/, '') + "],\n\
-                        buttons: [{\n\
-                            value:'添加',\n\
-                            click: function(){\n\
-                                this.submit(function(){\n\
-                                    Toast.showToast('添加成功');\n\
-                                    form.reset();\n\
-                                    self.setResult('"+ tableName + "change');\n\
-                                },function(e){ Toast.showToast(e.message); });\n\
-                                }\n\
-                        },{\n\
-                            value:'取消',\n\
-                            click: function(){\n\
-                                history.back();\n\
-                            }\n\
-                        }]";
-
-                        insertForm += "});\nform.$el.appendTo(model.refs.main);\n"
-
-                        insertForm = pageCode(insertForm, "添加");
-
-                        var template = '<div class="main" ref="main"><h1>{title}</h1></div>';
-
-                        if (feDir) {
-                            Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/views/" + tableName + "/add.js",
-                                data: insertForm
-                            });
-                            Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/template/" + tableName + "/add.html",
-                                data: template
-                            });
-                        }
-
-
-                        //后台修改数据
-                        var updateForm = "\nvar form = this.form = new Form({\n\
-                            url: '/"+ tableName + "/update',\n\
-                            fields: ["+ columnsList.map(function (item) {
-
-                                var res = '{\n\
-                                    label: "'+ (item.memo || item.name) + '",\n\
-                                    field: "'+ item.field + '",\n\
-                                    type:';
-
-                                if (item.name == primaryKey.name) {
-                                    res += '"hidden",\n\
-                                    value: this.route.params.'+ (item.route || "id");
+                                if (item.formType) {
+                                    res += '"' + item.formType + '"';
 
                                 } else {
                                     switch (item.type) {
@@ -820,12 +865,114 @@ return Page.extend({
                                         regexText: "格式错误"';
                                             break;
                                     }
+                                }
+
+                                if (item.route) {
+                                    res += ',\nvalue: this.route.params.' + item.route;
+                                } else if (item.query) {
+                                    res += ',\nvalue: this.route.query.' + item.query;
+                                } else if (item.value) {
+                                    res += ',\nvalue: "' + item.value + '"';
+                                }
+
+                                if (!item.emptyAble)
+                                    res += ',\nemptyAble:false,\n\
+                                        emptyText: "'+ (item.memo || item.name) + '不可为空"\n';
+
+                                if (item.options) {
+                                    res += ',\noptions: ' + JSON.stringify(item.options);
+                                }
+
+                                res += '},';
+
+                                return res;
+
+                            }).join(' ').replace(/\,$/, '') + "],\n\
+                        buttons: [{\n\
+                            value:'添加',\n\
+                            click: function(){\n\
+                                this.submit(function(){\n\
+                                    Toast.showToast('添加成功');\n\
+                                    form.reset();\n\
+                                    history.back();\n\
+                                    self.setResult('"+ tableName + "change');\n\
+                                },function(e){ Toast.showToast(e.message); });\n\
+                                }\n\
+                        },{\n\
+                            value:'取消',\n\
+                            click: function(){\n\
+                                history.back();\n\
+                            }\n\
+                        }]";
+
+                        insertForm += "});\nform.$el.appendTo(model.refs.main);\n"
+
+                        insertForm = pageCode(insertForm, "添加");
+
+                        var template = '<div class="main" ref="main"><h1>{title}</h1></div>';
+
+                        if (formData.writeFe != 0 && feDir) {
+                            Http.post("http://" + location.host + "/create", {
+                                savePath: feDir + "/views/" + tableName + "/add.js",
+                                data: insertForm
+                            });
+                            Http.post("http://" + location.host + "/create", {
+                                savePath: feDir + "/template/" + tableName + "/add.html",
+                                data: template
+                            });
+                        }
+
+
+                        //后台修改数据
+                        var updateForm = "\nvar form = this.form = new Form({\n\
+                            url: '/"+ tableName + "/update',\n\
+                            fields: ["+ formList.map(function (item) {
+
+                                var res = '{\n\
+                                    label: "'+ (item.memo || item.name) + '",\n\
+                                    field: "'+ item.field + '",\n\
+                                    type:';
+
+                                if (item.name == primaryKey.name) {
+                                    res += '"hidden",\n\
+                                    value: this.route.params.'+ (item.route || "id");
+
+                                } else {
+                                    if (item.formType) {
+                                        res += '"' + item.formType + '"';
+
+                                    } else {
+                                        switch (item.type) {
+                                            case "varchar":
+                                                res += '"text"';
+                                                break;
+                                            case "file":
+                                                res += '"file"';
+                                                break;
+                                            case "clob":
+                                                res += '"richTextBox"';
+                                                break;
+                                            case "date":
+                                                res += '"timePicker"';
+                                                break;
+                                            case "number":
+                                                res += '"number",\n\
+                                        regex: /^\\d+$/,\n\
+                                        regexText: "格式错误"';
+                                                break;
+                                        }
+                                    }
+
 
                                     if (item.route) {
                                         res += ',\nvalue: this.route.params.' + item.route;
                                     } else if (item.query) {
                                         res += ',\nvalue: this.route.query.' + item.query;
                                     }
+                                }
+
+                                if (item.options) {
+                                    res += ',\noptions: ' + JSON.stringify(item.options);
                                 }
 
                                 if (item.emptyAble !== true && item.type != 'file')
@@ -841,7 +988,8 @@ return Page.extend({
                             value:'修改',\n\
                             click: function(){\n\
                                 this.submit(function(){\n\
-                                    Toast.showToast('修改');\n\
+                                    Toast.showToast('修改成功');\n\
+                                    history.back();\n\
                                     self.setResult('"+ tableName + "change');\n\
                                 },function(e){ Toast.showToast(e.message); });\n\
                             }\n\
@@ -860,7 +1008,7 @@ return Page.extend({
 
                         updateForm = pageCode(updateForm, '修改');
 
-                        if (feDir) {
+                        if (formData.writeFe != 0 && feDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: feDir + "/views/" + tableName + "/update.js",
                                 data: updateForm
@@ -880,7 +1028,7 @@ return Page.extend({
                                 beforeSend: function () {\n\
                                 },\n\
                                 data: {\n\
-                                    "+ columnsList.map(function (item) {
+                                    "+ formList.map(function (item) {
                                 if (!item.search) {
                                     return null;
                                 }
@@ -891,14 +1039,14 @@ return Page.extend({
                                 if (item.type == "date") {
                                     searchType = "calendar";
 
-                                } else if (item.searchType) {
-                                    searchType = item.searchType;
+                                } else if (item.formType) {
+                                    searchType = item.formType;
                                 }
 
                                 function getCode(name, memo, options) {
                                     var code = name + ": {\n";
                                     if (options) {
-                                        code += 'options:' + options + ",\n";
+                                        code += 'options:' + JSON.stringify(options) + ",\n";
                                     }
 
                                     if (item.route) {
@@ -969,20 +1117,24 @@ return Page.extend({
 
                         gridCode = pageCode(gridCode, '管理', "events: {\
         'click .js_grid_delete': function(e) {\n\
-            if(window.confirm('确认删除吗?')) {\n\
-                Http.post('/"+ tableName + "/delete',{ " + primaryKey.name + ": $(e.currentTarget).data('id') })\
+            if(window.confirm('确认删除吗?')) {\nvar self = this;\n\
+                Http.post('/"+ tableName + "/delete',{ " + primaryKey.name + ": $(e.currentTarget).data('id') }).then(function(){\n\
+                    self.setResult('"+ tableName + "change');\n\
+                });\
             }\n\
         }\n\
     },\n");
 
-                        if (feDir) {
+                        if (formData.writeFe != 0 && feDir) {
                             Http.post("http://" + location.host + "/create", {
                                 savePath: feDir + "/views/" + tableName + "/index.js",
                                 data: gridCode
                             });
                             Http.post("http://" + location.host + "/create", {
                                 savePath: feDir + "/template/" + tableName + "/index.html",
-                                data: template
+                                data: '<div class="main" ref="main">\n\
+    <h1>{title}</h1>\n<div class="toobar pb_m"><a class="button" href="/'+ tableName + '/add"><i class="ico-add"></i>添加</a></div>\n\
+    </div>'
                             });
                         }
 
@@ -1000,13 +1152,7 @@ return Page.extend({
                             grid: gridCode
                         });
 
-                    } else {
-                        result = getSetterAndGetter(code);
-
-                        this.set({
-                            code: result
-                        })
-                    }
+                    });
                 }
             }]
         });
@@ -1035,6 +1181,7 @@ return Page.extend({
                 label: '下拉框',
                 field: 'categoryId',
                 type: 'select',
+                //{ url: 'xxx', data:{}, text: 'key of data'||'text', value: 'key of data'||'value' }
                 options: [{
                     text: '选项1',
                     value: 1

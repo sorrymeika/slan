@@ -10,7 +10,35 @@
 .uc_licence { bottom: 55px; }
 .uc_licence__ft { bottom: 5px; }
 
+
 //首页
+.ym_rules { max-height: 300px; overflow: scroll; -webkit-overflow-scrolling: touch; }
+.ym_rules__popup { width: 256px; }
+
+
+.hm_idx.main { bottom: 50px; }
+.hm_idx__cir { position: relative; width: 38px; height: 38px; border: 2px solid #7fd38a; border-radius: 50%; background-color: #a8e1b0; margin: 0 auto; text-align: center; font-size: 8px; line-height: 1.2; padding-top: 11px; color: #585858; }
+.hm-icons-more ~ .icon-more { height: 13px; padding-top: 4px; overflow: hidden; line-height: 0; }
+
+.hm_idx__head { position: relative; width: 100%; height: 1.38rem; overflow: hidden; background: url(../images/hm_idx__head.png) no-repeat; background-size: 100%; }
+
+.hm_ym__present { background: url(../images/present.png) no-repeat; background-size: 100%; width: 3.20rem; height: 2.95rem; }
+.hm_ym__present .fs_s { padding: 1.9rem 0 0 1.2rem; color: #fff; line-height: .25rem; font-size: .12rem; }
+
+.hm-yunmi-rem { padding-top: .38rem; color: #fff; }
+.hm-yunmi-rem:before { position: absolute; top: 0; left: 50%; margin-left: -0.51rem; }
+.hm-yunmi-rem i { font-size: 28px; }
+.hm-yunmi-rem i,.hm-yunmi-rem em { position: relative; z-index: 1; line-height: 1; }
+.hm-yunmi-rem em { font-size: 10px; }
+.hm-timeout-rem { padding-top: 3px; position: absolute; right: .21rem; bottom: .26rem; width: 0.47rem; height: 0.47rem; text-align: center; }
+.hm-timeout-rem:before { position: absolute; top: 0; left: 0; }
+.hm-timeout-rem em { font-size: 8px; margin-left: -1px; }
+.hm-totip-rem { width: .81rem; height: 0.21rem; position: absolute; right: .04rem; bottom: 0; line-height: .14rem; text-align: center; color: #3f3f3f; }
+.hm-totip-rem:before { position: absolute; left: 0; top: 0; }
+.hm-totip-rem em { position: relative; font-size: 10px; }
+.hm_idx__more { height: 30px; line-height: 30px; text-align: center; font-size: 12px; background-color: #f3f3f3; color: #999; margin-left: 30px; margin-right: 30px; border-radius: 10px; }
+.hm_idx__more .icon-drop_arrow { position: relative; top: -1px; margin-left: 10px; }
+
 .hm_home { -webkit-transition: all 300ms ease-out 0ms; }
 .menu_aexit { -webkit-transform: translate3d(80%,0%,0); }
 .menu_aexit:before { position: absolute; z-index: 2000; content: ""; top: 0; left: 0; right: 0; bottom: 0; }
@@ -214,3 +242,63 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .ct_chat__footer { background-color: #f7f7f7; padding-left: 10px; }
 .ct_chat__footer .icon-face { background-color: #f7f7f7; }
 .ct_chat__textbox { @include textbox(#aaa,4px); height: 30px; }
+
+
+//和生活 - 提醒
+.lf_notice__search { background-color: $bgcolor; height: 33px; margin: 0 0 0 5px; position: relative; border-radius: 33px; padding-right: 15px; }
+.lf_notice__search:before { @include border(#bdbdbd,33px); }
+.lf_notice__search .icon-search:before { vertical-align: 3px; }
+.lf_notice__search p{ height: 33px; line-height: 33px; }
+
+.lf_notice__tab { margin: 0 30px; border-bottom: 2px solid $color; margin-bottom: 10px; }
+.lf_notice__tab_title { height: 36px; line-height: 36px; color: $color; }
+.lf_notice__tab_title.curr { background-color: $color; color: #fff; border-top-right-radius: 6px; border-top-left-radius: 6px; }
+
+//云米 - 首页
+.ym_idx__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: 1.14rem; }
+.ym-arrow-rem { padding-top: .45rem; }
+.ym_idx__tab { padding: 8px 0; }
+.ym_idx__tab > li { height: 28px; line-height: 28px; }
+.ym_idx__tab > li.curr { color: $color; }
+
+.ym_idx_bags > li { margin: .2rem 0px 0 .13rem; }
+.ym_idx_bags > li .name { color: #ffc017; text-align: center; padding-bottom: 4px; }
+.ym-moneys-rem { position: relative; width: 0.9rem; }
+.ym-moneys-rem.no:before { display: none; }
+.ym-moneys-rem:before { position: absolute; left: .16rem; }
+.ym-bag-rem{ padding-top: .24rem; }
+.ym-bag-rem:before { position: relative; }
+.ym-stars-rem:before { position: absolute; top: 0px; left: 0; }
+
+.ym_idx.main { bottom: 50px; }
+
+.ym_index__num { position: absolute; z-index: 100; top: .6rem; font-size: 14px; color: #fff; padding-left: .05rem; right: 0; text-align: center; left: 0; }
+
+//云米 - 交易明细
+.ym_detail__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: .66rem; }
+.ym_detail__overview { font-size: 14px; text-align: center; }
+.ym_detail__overview span { color: #666; padding-left: 5px; }
+.ym_detail__overview b { color: $color; font-weight: normal; }
+.ym_detail__overview em { color: #e04447; }
+.ym_detail__overview i { color: #ff7c08; }
+.ym_detail__list .hd { height: 30px; line-height: 30px; padding: 0 10px; color: #715a0b; background-color: #fdf7e2; }
+
+//云米 - 首页
+.ym_exchange__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: 1.14rem; background-size: 100%; }
+.ym_exchange__total { font-size: .3rem; padding-top: .24rem; }
+.ym_exchange__num { border: 1px solid #bbb; height: 25px; line-height: 25px; background: #fff; padding: 0 7px; margin: 0 2px; border-radius: 4px; color: #333; }
+.ym_exchange__list { padding-left: 2px; padding-right: 12px; }
+.ym_exchange__list > li { margin-left: 10px; font-size: 14px; height: 32px; }
+.ym_exchange__list > li.curr { background: $color; color: #fff; border-radius: 4px; }
+.ym_exchange__list > li:after { border-radius: 8px; }
+.ym_exchange__btn { padding-top: 40px; }
+
+//云米 - 任务
+.ym_task__btn { height: 26px; color: #fff; background: #f60; padding: 0 16px; border-radius: 13px; font-size: 12px; margin-right: 10px; }
+
+.ym_invite__prize { background: url(../images/prize.png) no-repeat; width: 2.14rem; height: 1.58rem; background-size: 100% auto; margin: 0 auto; padding-top: .33rem; color: #666; }
+.ym_invite__prize .hd { font-size: .12rem; margin-bottom: .06rem; }
+.ym_invite__prize .num { font-size: .22rem; color: #d5122e; }
+.ym_invite__code { color: #ff0101; font-size: .24rem; }
+.ym_invite__share { margin: 0 10px 0 10px; overflow: hidden; text-align: center; }
+.ym_invite__share > li {width: 70px; }

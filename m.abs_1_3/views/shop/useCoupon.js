@@ -74,9 +74,16 @@ module.exports = Activity.extend({
             var coupons = self.route.data.coupon || [];
             var isFree = self.route.data.isFree;
 
+            console.log(coupons, isFree);
+
             if (res.data)
                 res.data.forEach(function (item) {
                     if (!item.isOverdue && (isFree ? item.VCA_VCT_ID == 4 : (item.VCA_VCT_ID != 4))) {
+
+                        console.log(util.indexOf(coupons, function (a) {
+                            return a.CSV_ID == item.CSV_ID;
+                        }));
+
                         if (-1 == util.indexOf(coupons, function (a) {
                             return a.CSV_ID == item.CSV_ID;
                         })) {

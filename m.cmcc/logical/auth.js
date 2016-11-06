@@ -58,15 +58,13 @@ var _atk;
 var rsa = new RSA();
 rsa.setPublicKey(rsaPublicKey);
 
-userModel.set(util.store('cmccuser'));
-
 var auth = {
 
     getSign: getSign,
 
     clearAuth: function () {
         localStorage.removeItem('__wtk');
-        localStorage.removeItem('cmccuser');
+        localStorage.removeItem('user');
     },
 
     setAuthToken: function (tk) {
@@ -78,13 +76,11 @@ var auth = {
     },
 
     getUser: function () {
-        return util.store('cmccuser');
+        return util.store('user');
     },
 
     setUser: function (user) {
         userModel.set(user);
-
-        util.store('cmccuser', user);
     },
 
     getAESKey: function () {

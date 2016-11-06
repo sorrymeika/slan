@@ -1,5 +1,6 @@
 var $ = require('$');
 var util = require('util');
+var promise = require('promise');
 var Touch = require('core/touch');
 var Model = require('core/model2').Model;
 var Scroll = require('../widget/scroll');
@@ -95,6 +96,14 @@ var Tab = Model.extend({
 
             self.tab(index < 0 ? 0 : index >= self.data.items.length ? self.data.items.length - 1 : index, e.type == 'bounceBack' ? 0 : 250);
         });
+
+        this.promise = new Promise(function (resove) {
+            self.next(resove);
+        });
+
+        this.on('change:index', function (e, value) {
+            this.tab(value);
+        });
     },
 
     fix: function (index) {
@@ -105,15 +114,21 @@ var Tab = Model.extend({
         var self = this;
         var index = page >= this.data.items.length ? 0 : page < 0 ? this.data.items.length - 1 : page;
 
-        self.touch.scrollTo(self.refs.body.offsetWidth * index, 0, duration, function () {
-            if (index !== self.data.index) {
-                self.trigger('tabChange', index, self.data.index);
+        this.promise.then(function () {
+            var scrollLeft = self.refs.body.offsetWidth * index;
+
+            if (scrollLeft != self.touch.x) {
+                self.touch.scrollTo(scrollLeft, 0, duration, function () {
+                    if (index !== self.data.index) {
+                        self.trigger('tabChange', index, self.data.index);
+                    }
+                    self.set({
+                        index: index,
+                        cursorX: self.refs.heads[index].offsetLeft,
+                        cursorWidth: self.refs.heads[index].offsetWidth
+                    });
+                });
             }
-            self.set({
-                index: index,
-                cursorX: self.refs.heads[index].offsetLeft,
-                cursorWidth: self.refs.heads[index].offsetWidth
-            });
         });
     }
 

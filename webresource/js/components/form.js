@@ -12,6 +12,46 @@ var valid_keys = ['emptyAble', 'emptyText', 'regex', 'regexText', 'compare', 'co
 var guid = 0;
 var FormComponentKeys = ["buttons", "useIFrame", "contentType", "xhrFields", "method", 'enctype'];
 
+/*
+
+var form = new FormComponent({
+    url: '',
+    fields: [{
+        label: '时间选择',
+        field: 'time',
+        type: "TimePicker"
+    }, {
+        label: '文本框',
+        field: 'name',
+        type: "text",
+        value: "aaa",
+        emptyAble: false
+    }, {
+        label: '文本框',
+        field: 'xxx',
+        type: "textarea",
+        value: "aaa"
+    }, {
+        label: '下拉框',
+        field: 'categoryId',
+        type: 'select',
+
+        //@options = array || { url: 'xxx', params: { parentId: 'parentId'=>this.model.get('parentId') }, data:{}, text: 'key of data'||'text', value: 'key of data'||'value' }
+        options: [{
+            text: '选项1',
+            value: 1
+        }]
+    }],
+    buttons: [{
+        value: '确认',
+        click: function(){
+            this.submit();
+        }
+    }]
+});
+
+form.$el.appendTo(this.$el);
+*/
 
 var FormComponent = function (options) {
 
@@ -27,6 +67,7 @@ var FormComponent = function (options) {
 
     var validator = {};
     var fieldsOption = options.fields;
+    var selectsOptions = [];
 
     for (var i = 0, len = fieldsOption.length; i < len; i++) {
         fields = fieldsOption[i];
@@ -50,6 +91,33 @@ var FormComponent = function (options) {
                 if (!util.isEmptyObject(valid)) {
                     validator[field.field] = valid;
                 }
+
+                if (field.type == 'select' && field.options && !Array.isArray(field.options)) {
+
+                    //@options = { url: 'xxx', params: { parentId: 'parentId'=>this.model.get('parentId') }, data:[{}], text: 'key of data'||'text', value: 'key of data'||'value' }
+                    var fieldOptions = field.options;
+
+                    if (fieldOptions.url) {
+                        fieldOptions.field = field.field;
+                        selectsOptions.push(fieldOptions);
+                    }
+
+                    if (!fieldOptions.text) fieldOptions.text = 'text';
+                    if (!fieldOptions.value) fieldOptions.value = 'value';
+                    if (!fieldOptions.data) {
+                        var sd = {};
+                        sd[fieldOptions.text] = '请选择';
+                        sd[fieldOptions.value] = '';
+                        fieldOptions.data = [sd];
+                    }
+
+                    field.options = fieldOptions.data.map(function (item) {
+                        return {
+                            text: item[fieldOptions.text],
+                            value: item[fieldOptions.value]
+                        }
+                    });
+                }
             }
         }
     }
@@ -66,19 +134,58 @@ var FormComponent = function (options) {
 
     this.el = this.$el[0];
 
-    this.model = new vm.Model(this.$el, {
+    var model = this.model = new vm.Model(this.$el, {
         fields: items,
         data: data
     });
 
+    if (selectsOptions.length)
+        model.on('datachanged', function (e) {
+            selectsOptions.forEach(function (selectOptions) {
+                var params = {};
+                var willReturn = false;
+
+                selectOptions.params && Object.keys(selectOptions.params).forEach(function (key) {
+                    var field = selectOptions.params[key];
+                    var value = model.get("data." + field);
+                    params[key] = value;
+
+                    if (value === '') {
+                        willReturn = true;
+                    }
+                });
+
+                if (willReturn) return;
+                var paramsId = JSON.stringify(params);
+
+                if (selectOptions.paramsId == paramsId) return;
+                selectOptions.paramsId = paramsId;
+
+                Http.post(selectOptions.url, params).then(function (res) {
+                    console.log(model.getModel('fields.' + selectOptions.field + ".options"))
+
+                    model.set('fields.' + selectOptions.field + ".options", selectOptions.data.concat(res.data).map(function (item) {
+                        return {
+                            text: item[selectOptions.text],
+                            value: item[selectOptions.value]
+                        }
+                    }));
+
+                    console.log(selectOptions.field);
+
+
+                });
+            });
+        });
+
     var buttons = this.buttons;
     if (buttons) {
         for (var i = 0; i < buttons.length; i++) {
-            this.model['button' + i + "Click"] = buttons[i].click.bind(this);
+            model['button' + i + "Click"] = buttons[i].click.bind(this);
         }
     }
 
-    this.valid = new Validator(validator, this.model.data.data);
+    this.valid = new Validator(validator, model.data.data);
 
     this.$el.on('blur', '[name]', $.proxy(this._validInput, this))
         .on('focus', '[name]', function (e) {
@@ -86,7 +193,7 @@ var FormComponent = function (options) {
             var name = $target.attr('name');
             var valid = validator[name];
 
-            valid && valid.msg && self.model.set('result.' + name, {
+            valid && valid.msg && model.set('result.' + name, {
                 success: -1,
                 msg: valid.msg
             });
@@ -99,12 +206,12 @@ var FormComponent = function (options) {
 
         var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $hidden, plugin) : new (FormComponent.require(plugin.type))($hidden, plugin);
 
-        var value = this.model.data.data[plugin.field];
+        var value = model.data.data[plugin.field];
 
         if (value !== undefined && value !== null)
             compo.val(value);
 
-        this.model.on('change:data.' + plugin.field, (function (compo, plugin) {
+        model.on('change:data.' + plugin.field, (function (compo, plugin) {
 
             return function (e, value) {
 

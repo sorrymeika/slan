@@ -26,6 +26,19 @@ function startApp(routes, resourceMapping) {
                 title: '首页',
                 url: '/'
             }, {
+                title: '国家/省/市管理',
+                url: '/country/index',
+                children: [{
+                    title: '添加国家',
+                    url: '/country/add'
+                }, {
+                    title: '省管理',
+                    url: '/province/index'
+                }, {
+                    title: '市管理',
+                    url: '/city/index'
+                }]
+            }, {
                 title: '用户管理',
                 url: '/userinfo/index'
             }, {

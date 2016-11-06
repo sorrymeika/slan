@@ -1,4 +1,20 @@
 
+--#tableInfo#
+--props:扩展Model.class私有变量(String name,String id)
+--children:扩展Model.class私有变量(quan_likes,quan_comments)
+--listChildren:扩展Model.class List<?>私有变量(quan_likes,quan_comments)
+--order_by: getPage,getAll,filter排序(id desc,date asc)
+--seq_name: 主键sequence
+
+--#columnInfo#
+--deletion_key:删除时验证是否为空(true|false)
+--route:生成后台表单的值是否来自路由参数(true|false)
+--search:是否可搜索(true|false)
+--formType: 表单类型(select|datePicker|timePicker)
+--options: 选项(value:text,0:'请选择'|{ url: 'xxx', data:{}, text: 'key of data'||'text', value: 'key of data'||'value' })
+--formSort: 表单项排序(从小到大)
+
+
 connect sys/12345Qwert as sysdba
 
 connect cmccuser/12345
@@ -73,16 +89,6 @@ create table pub_quan (--公众圈 --children=pub_quan_follow,pub_quan_msg --pro
 create sequence pub_quan_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
 
---#tableInfo#
---props:扩展Model.class私有变量(String name,String id)
---children:扩展Model.class私有变量(quan_likes,quan_comments)
---listChildren:扩展Model.class List<?>私有变量(quan_likes,quan_comments)
---order_by: getPage,getAll,filter排序(id desc,date asc)
-
---#columnInfo#
---deletion_key:删除时验证是否为空(true|false)
---route:生成后台表单的值是否来自路由参数(true|false)
---search:是否可搜索(true|false)
 
 drop table pub_quan_msg;
 create table pub_quan_msg (--公众圈文章 --listChildren=pub_quan_comments
@@ -208,3 +214,31 @@ create sequence friends_seq minvalue 1 maxvalue 99999999999 start with 1 increme
 -----------------------------
 
 alter table friends add msg varchar(40);
+
+create table country (--国家 --seq_name=district_seq
+    country_id number(6) primary key,--国家id
+    country_name varchar(20)--国家名称 --search=true
+) tablespace cmccuser;
+
+create table province (--省 --seq_name=district_seq
+    province_id number(6) primary key,--省id
+    province_name varchar(20),--省名称 --search=true
+    country_id number(6)--国家id --search=true 
+    --formType=select --options={ url: '/country/getAll', text: 'country_name', value: 'country_id' }
+) tablespace cmccuser;
+
+create table city (--市 --seq_name=district_seq
+    city_id number(10) primary key,--市id
+    city_name varchar(20),--市名称 --search=true
+    province_id number(6)--省id --search=true --formSort=1
+    --formType=select --options={ url: '/province/filter', params:{ country_id: 'country_id' }, text: 'province_name', value: 'province_id' }
+    /*
+    country_id number(6)--国家id --search=true --formSort=2
+    --formType=select --options={ url: '/country/getAll', text: 'country_name', value: 'country_id' }
+    */
+) tablespace cmccuser;
+create sequence district_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1;
+
+select city_id from city where 
+
+

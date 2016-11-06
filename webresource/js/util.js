@@ -313,9 +313,10 @@ var util = {
             f = d, d = new Date;
         } else if (typeof d === 'number') {
             d = new Date(d);
-        } else {
+        } else if (!(d instanceof Date)) {
             return '';
         }
+
 
         if (f === 'minutes') {
             var now = new Date();
@@ -364,6 +365,8 @@ var util = {
             }
         }
 
+        var week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+
         var y = d.getFullYear() + "",
             M = d.getMonth() + 1,
             D = d.getDate(),
@@ -375,8 +378,9 @@ var util = {
             .replace(/y{2}/, y.substr(2, 2))
             .replace(/M{2}/, pad(M))
             .replace(/M/, M)
+            .replace(/W/, week[d.getDay()])
             .replace(/d{2,}/, pad(D))
-            .replace(/d/, d)
+            .replace(/d/, D)
             .replace(/H{2,}/i, pad(H))
             .replace(/H/i, H)
             .replace(/m{2,}/, pad(m))

@@ -204,6 +204,14 @@ var publicquan = Event.mixin({
     //@params = {quan_ids:[], title:'', content:'', images:{}}
     publish: function (params) {
 
+        if (!sl.isInApp) {
+            return Http.post('/pub_quan_msg/add', {
+                title: params.title,
+                content: params.content,
+                quan_ids: params.quan_ids.join(',')
+            });
+        }
+
         return new Promise(function (resolve, reject) {
             var sign = auth.getSign();
 

@@ -34,6 +34,7 @@ module.exports = {
         <div class="cp_popup__action"><button class="btn" click="action">'+ params.btn + '</button></div>';
 
         return this.popup({
+            className: params.className,
             content: content,
             action: function () {
                 this.hide();
@@ -171,7 +172,7 @@ module.exports = {
                             this.parentNode && this.parentNode.removeChild(this);
                         }
                     })
-                    .on('click', '[click]', function (e) {
+                    .on('tap', '[click]', function (e) {
 
                         var actionName = $(e.currentTarget).attr('click');
 
@@ -181,6 +182,12 @@ module.exports = {
                             ret.hide();
                         }
                     });
+
+                if (params.tapToHide === true) {
+                    $container.on('tap', function () {
+                        ret.hide();
+                    })
+                }
 
                 ret.$container = $container;
 
