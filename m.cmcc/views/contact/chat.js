@@ -142,6 +142,10 @@ module.exports = Activity.extend({
     },
 
     newMessage: function (e, msg) {
+        var self = this;
         this.model._('messages').add(msg);
+        this.model.next(function () {
+            self.scroll.scrollToEnd();
+        });
     }
 });

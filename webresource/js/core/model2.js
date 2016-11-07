@@ -1344,7 +1344,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         collection.each(function (model) {
 
-            var hasElem = false;
             var elem;
             var elemIndex = -1;
             var snData;
@@ -1352,17 +1351,16 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             var ifElement;
 
             for (var j = 0; j < elementsLength; j++) {
-                elem = elements[j];
 
-                if (elem.snModel == model) {
+                if (elements[j].snModel == model) {
                     elemContain[j] = true;
-                    hasElem = true;
+                    elem = elements[j];
                     elemIndex = j;
                     break;
                 }
             }
 
-            if (!hasElem) {
+            if (!elem) {
                 snData = Object.assign({}, parentSnData);
                 snData[repeatSource.alias] = model;
 
@@ -1376,7 +1374,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             if (isInData) {
 
-                if (!hasElem) {
+                if (!elem) {
                     elem = cloneRepeatElement(repeatSource.source, snData);
 
                     elem.snRepeatSource = repeatSource;
@@ -1396,16 +1394,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         });
 
-        console.log(list.length)
-
         if (orderBy)
             list.sort(function (a, b) {
                 a = a.model.data[orderBy];
                 b = b.model.data[orderBy];
                 return isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
             });
-
-        console.log(collection.models.length)
 
         list.forEach(function (item, index) {
             var elem = item.el;
