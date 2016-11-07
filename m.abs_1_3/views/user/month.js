@@ -136,12 +136,16 @@ module.exports = Activity.extend({
 
             if (!res.data) return null;
 
-            return Promise.all(res.data.map(function (freId) {
+            return Promise.all(res.data.map(function (item) {
 
                 return new Promise(function (resolve) {
 
-                    user.getMonthGifts(freId, function (res) {
+                    user.getMonthGifts(item.freId, function (res) {
 
+                        res.data.forEach(function (prd) {
+                            prd.Year = item.Year;
+                            prd.Month = item.Month;
+                        });
                         resolve(res.data);
                     })
                 })
@@ -155,6 +159,7 @@ module.exports = Activity.extend({
             });
 
             results = self.filterGifts(arr);
+            console.log(results);
 
             model.set({
                 overdue: results
@@ -165,12 +170,15 @@ module.exports = Activity.extend({
 
             if (!res.data) return null;
 
-            return Promise.all(res.data.map(function (freId) {
+            return Promise.all(res.data.map(function (item) {
 
                 return new Promise(function (resolve) {
 
-                    user.getMonthGifts(freId, function (res) {
-
+                    user.getMonthGifts(item.freId, function (res) {
+                        res.data.forEach(function (prd) {
+                            prd.Year = item.Year;
+                            prd.Month = item.Month;
+                        });
                         resolve(res.data);
                     })
                 })

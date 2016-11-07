@@ -20,7 +20,7 @@
             <button sn-if="item.status==-1" class="btn_xs" sn-tap="this.acceptFriend(item.user_id)">接受</button>
             <span sn-if="item.status==1" class="cl_ccc fs_s">已接受</span>
             <span sn-if="item.status==0" class="cl_ccc fs_s">已拒绝</span>
-            <button class="icon-xx" sn-tap="this.del(item.user_id)"></button>
+            <button class="icon-xx" sn-tap="this.del(item.fid)"></button>
         </div>
     </div>
 </div>

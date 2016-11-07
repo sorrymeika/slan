@@ -1,5 +1,5 @@
 var $ = require('$');
-var model = require('core/model');
+var model = require('core/model2');
 var api = require('models/api');
 var Size = require('components/size');
 var util = require('util');
@@ -8,50 +8,50 @@ var Month = model.ViewModel.extend({
 	el: <div class="main sp_package">
 		<div class="sp_package_hd" style="display:none">
 			<div class="con">
-				<h1>{{PPG_NAME}}</h1>
-				<div class="text">{{PPG_MEMO}}</div>
+				<h1>{PPG_NAME}</h1>
+				<div class="text">{PPG_MEMO}</div>
 			</div>
 		</div>
 		<div class="sp_package_bd" sn-repeat="item in data">
-			<div class="hd">{{item.PPS_Model.PST_NAME}} <em>下方商品任选{{item.PPS_Model.PST_OPTIONAL_QTY}}件</em></div>
+			<div class="hd">{item.PPS_Model.PST_NAME} <em>下方商品任选{item.PPS_Model.PST_OPTIONAL_QTY}件</em></div>
 			<ul>
 				<li sn-repeat="prod in item.PRD_List">
-					<img sn-src="{{prod.WPP_LIST_PIC}}" data-forward="/item/{{prod.PRD_ID}}?from={{url}}" />
+					<img sn-src="{prod.WPP_LIST_PIC}" data-forward="/item/{prod.PRD_ID}?from={url}" />
 					<div class="name" sn-tap="this.selectSize(item,prod)">
-						<span>{{prod.PRD_NAME}}</span>
+						<span>{prod.PRD_NAME}</span>
 						<b>选择 尺寸 颜色 ></b>
-						<p class="qty"> <span class="minus">-</span> <input type="text" value="{{prod.qty||1}}" sn-model="changedQty"> <span class="plus">+</span> </p>
+						<p class="qty"> <span class="minus">-</span> <input type="text" value="{prod.qty||1}" sn-model="changedQty"> <span class="plus">+</span> </p>
 					</div>
 					<p class="price">
-						<em>￥{{prod.PRD_PRICE}}</em>
-						<del sn-display="{{prod.PRD_PRICE!=0&&prod.PRD_PRICE<prod.PRD_MEMBER_PRICE}}" style="display: none;">￥{{prod.PRD_MEMBER_PRICE}}&nbsp;</del>
+						<em>￥{prod.PRD_PRICE}</em>
+						<del sn-display="{prod.PRD_PRICE!=0&&prod.PRD_PRICE<prod.PRD_MEMBER_PRICE}" style="display: none;">￥{prod.PRD_MEMBER_PRICE}&nbsp;</del>
 					</p>
 				</li>
 			</ul>
 		</div>
 	</div><div class="sp_package_ft">
 		<div class="price">
-			<em>总计：</em><b>¥{{PPG_PRICE}}</b>
+			<em>总计：</em><b>¥{PPG_PRICE}</b>
 		</div>
-		<div class="buy" sn-tap="this.showList()">查看套餐商品（{{qty||0}}）</div>
-	</div><div class="sp_package_list" sn-tap="this.hideList()" style="display:none">
+		<div class="buy" sn-tap="this.showList()">查看套餐商品（{qty||0}）</div>
+	</div><div class="sp_package_list" ref="sp_package_list" sn-tap="this.hideList()" style="display:none">
 		<div class="sp_package_hd">
 			确认套餐清单
 		</div>
 		<div class="main">
 			<div class="sp_package_bd" sn-repeat="item in data">
-				<div class="hd">{{item.PPS_Model.PST_NAME}} <em>任选{{item.PPS_Model.PST_OPTIONAL_QTY}}件</em></div>
+				<div class="hd">{item.PPS_Model.PST_NAME}<em>任选{item.PPS_Model.PST_OPTIONAL_QTY}件</em></div>
 				<ul>
 					<li sn-repeat="prod in item.list">
-						<img sn-src="{{prod.WPP_LIST_PIC}}" />
+						<img sn-src="{prod.WPP_LIST_PIC}" />
 						<div class="name">
-							<span>{{prod.PRD_NAME}}</span>
+							<span>{prod.PRD_NAME}</span>
 						</div>
 						<p class="price">
-							<em>￥{{prod.PRD_PRICE}}</em>
-							<del sn-display="{{prod.PRD_PRICE!=0&&prod.PRD_PRICE<prod.PRD_MEMBER_PRICE}}" style="display: none;">￥{{prod.PRD_MEMBER_PRICE}}&nbsp;</del>
+							<em>￥{prod.PRD_PRICE}</em>
+							<del sn-display="{prod.PRD_PRICE!=0&&prod.PRD_PRICE<prod.PRD_MEMBER_PRICE}" style="display: none;">￥{prod.PRD_MEMBER_PRICE}&nbsp;</del>
 						</p>
-						<b>尺寸:{{prod.PRD_DISPLAY_SPEC}} 颜色:{{prod.PRD_COLOR}}  x{{prod.qty}}</b>
+						<b>尺寸:{prod.PRD_DISPLAY_SPEC} 颜色:{prod.PRD_COLOR}  x{prod.qty}</b>
 						<div class="btn" sn-tap="this.deleteItem(prod,item.PPS_Model.PST_ID)">删除</div>
 					</li>
 				</ul>
@@ -62,18 +62,20 @@ var Month = model.ViewModel.extend({
 		</div>
 	</div>,
 	
-	deleteItem: function(e,prod,PST_ID){
+	deleteItem: function(prod,PST_ID,e){
 		this.getModel('data').each(function(model,i){
 			var ppsModel=model.get('PPS_Model');
 			
 			if (ppsModel.PST_ID==PST_ID){
-				
-				model.getModel('list').remove(util.indexOf(model.data.list,function(item) {
+				model.getModel('list').remove(function(item) {
 					return item.PRD_ID==prod.PRD_ID;
-				}));
+				});
 				return false;
 			}
 		});
+
+		console.log(this);
+		console.log(this.data);
 				
 		this.refreshQty();
 	},
@@ -83,6 +85,7 @@ var Month = model.ViewModel.extend({
 		var qty=0;
 		for (var i=0;i<self.data.data.length;i++) {
 			var data=self.data.data[i];
+
 			for (var j=0;data.list&&j<data.list.length;j++) {
 				qty+=data.list[j].qty;
 			}
@@ -94,11 +97,11 @@ var Month = model.ViewModel.extend({
 	},
 	
 	_hideList: function(){
-		this.$('.sp_package_list').hide();
+		$(this.refs.sp_package_list).hide();
 	},
 	
 	showList: function(){
-		this.$('.sp_package_list').show();
+		$(this.refs.sp_package_list).show();
 	},
 	
 	hideList: function(e){
@@ -107,7 +110,7 @@ var Month = model.ViewModel.extend({
 		}
 	},
 	
-	selectSize: function(e,item,product){
+	selectSize: function(item,product,e){
 		var self=this;
 		
 		var color = [];
@@ -179,7 +182,7 @@ var Month = model.ViewModel.extend({
 		}).show();
 	},
 	
-	buy: function(e, item) {
+	buy: function(item,e) {
 		var self=this;
 		
 		if (!this.data.qty){
@@ -225,7 +228,7 @@ var Month = model.ViewModel.extend({
 		});
 		
 		var dataAPI=new api.PackageAPI({
-			$el: self.$('.sp_package'),
+			$el: self.$el.find('.sp_package'),
 			params: {
 				id: this.data.id
 			},

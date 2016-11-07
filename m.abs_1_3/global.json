@@ -52,11 +52,13 @@
         "dev": {
             "api": "http://${ip}:5559/proxy3",
             "shopApi": "http://${ip}:5559/proxy",
-            "updateApi": "http://${ip}:5559/proxy2"
+            "updateApi": "http://${ip}:5559/proxy2",
+            "useLocal": true
         }
     },
     "js": {
         "common": {
+            "core/http": "../webresource/js/core/http",
             "components/confirm": "./components/confirm",
             "components/cart": "./components/cart",
             "components/imagePicker": "./components/imagePicker"

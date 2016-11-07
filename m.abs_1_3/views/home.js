@@ -512,13 +512,13 @@ module.exports = Activity.extend({
         this.listenTo($(this.model.refs.searchText), 'keydown', function (e) {
             if (e.keyCode == 13) {
 
-                model.search(e, e.target.value);
+                model.search(e.target.value);
                 e.preventDefault();
                 return false;
             }
         });
 
-        model.search = function (e, item) {
+        model.search = function (item) {
             var searchHistory = util.store('searchHistory') || [];
             var index = searchHistory.indexOf(item);
 

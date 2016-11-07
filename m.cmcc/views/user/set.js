@@ -8,6 +8,7 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 var user = require('models/user');
 var userLogical = require('logical/user');
+var district = require('logical/district');
 
 var Selector = require('widget/selector');
 
@@ -21,36 +22,6 @@ module.exports = Activity.extend({
             user: user,
             type: type
         });
-
-        var provinceList = [{
-            province_id: 1,
-            province_name: '福建'
-        }, {
-            province_id: 10,
-            province_name: '上海'
-        }];
-
-        var cityList = [{
-            province_id: 1,
-            city_id: 1,
-            city_name: '福州'
-        }, {
-            province_id: 1,
-            city_id: 2,
-            city_name: '厦门'
-        }, {
-            province_id: 1,
-            city_id: 1,
-            city_name: '三江'
-        }, {
-            province_id: 10,
-            city_id: 4,
-            city_name: '黄埔'
-        }, {
-            province_id: 10,
-            city_id: 3,
-            city_name: '徐汇'
-        }];
 
         switch (type) {
             case 'user_name':
@@ -71,19 +42,31 @@ module.exports = Activity.extend({
             case 'hometown':
                 model.set({
                     title: '故乡',
-                    country_name: '中国',
-                    province_name: '福建',
-                    city_name: '福州'
+                    country_name: user.get('home_country_name'),
+                    province_name: user.get('home_province_name'),
+                    city_name: user.get('home_city_name')
                 });
 
                 var selector = self.selector = new Selector({
                     options: [{
+                        template: '<li><%=country_name%></li>',
+                        onChange: function (i, data) {
+                            district.getProvinces(data.country_id).then(function (res) {
+                                selector.eq(1).set(res.data);
+                                if (user.get('province_id')) {
+                                    sel.val('province_id', user.get('province_id'));
+                                }
+                            });
+                        }
+                    }, {
                         template: '<li><%=province_name%></li>',
                         onChange: function (i, data) {
-
-                            selector.eq(1).set(util.find(cityList, function (city) {
-                                return city.province_id == data.province_id;
-                            }))
+                            district.getCities(data.province_id).then(function (res) {
+                                var sel = selector.eq(2).set(res.data);
+                                if (user.get('city_id')) {
+                                    sel.val('city_id', user.get('city_id'));
+                                }
+                            });
                         }
                     }, {
                         template: '<li><%=city_name%></li>',
@@ -93,17 +76,23 @@ module.exports = Activity.extend({
                     complete: function (res) {
 
                         model.set({
-                            province_id: res[0].province_id,
-                            province_name: res[0].province_name,
-                            city_id: res[1].city_id,
-                            city_name: res[1].city_name
+                            country_id: res[0].country_id,
+                            country_name: res[0].country_name,
+                            province_id: res[1].province_id,
+                            province_name: res[1].province_name,
+                            city_id: res[2].city_id,
+                            city_name: res[2].city_name
                         })
                     }
                 });
-                selector.eq(0).set(provinceList);
-                selector.eq(1).set(util.find(cityList, function (city) {
-                    return city.province_id == provinceList[0].province_id;
-                }));
+
+                district.getCountries().then(function (res) {
+                    var countrySel = selector.eq(0).set(res.data);
+
+                    if (user.get('country_id')) {
+                        countrySel.val('country_id', user.get('country_id'));
+                    }
+                });
 
                 model.selectCity = function () {
                     selector.show();
@@ -113,20 +102,31 @@ module.exports = Activity.extend({
             case 'address':
                 model.set({
                     title: '所在地',
-                    country_name: '中国',
-                    province_name: '福建',
-                    city_name: '福州'
+                    country_name: user.get('country_name'),
+                    province_name: user.get('province_name'),
+                    city_name: user.get('city_name')
                 });
-
 
                 var selector = self.selector = new Selector({
                     options: [{
+                        template: '<li><%=country_name%></li>',
+                        onChange: function (i, data) {
+                            district.getProvinces(data.country_id).then(function (res) {
+                                selector.eq(1).set(res.data);
+                                if (user.get('province_id')) {
+                                    sel.val('province_id', user.get('province_id'));
+                                }
+                            });
+                        }
+                    }, {
                         template: '<li><%=province_name%></li>',
                         onChange: function (i, data) {
-
-                            selector.eq(1).set(util.find(cityList, function (city) {
-                                return city.province_id == data.province_id;
-                            }))
+                            district.getCities(data.province_id).then(function (res) {
+                                var sel = selector.eq(2).set(res.data);
+                                if (user.get('city_id')) {
+                                    sel.val('city_id', user.get('city_id'));
+                                }
+                            });
                         }
                     }, {
                         template: '<li><%=city_name%></li>',
@@ -136,17 +136,23 @@ module.exports = Activity.extend({
                     complete: function (res) {
 
                         model.set({
-                            province_id: res[0].province_id,
-                            province_name: res[0].province_name,
-                            city_id: res[1].city_id,
-                            city_name: res[1].city_name
+                            country_id: res[0].country_id,
+                            country_name: res[0].country_name,
+                            province_id: res[1].province_id,
+                            province_name: res[1].province_name,
+                            city_id: res[2].city_id,
+                            city_name: res[2].city_name
                         })
                     }
                 });
-                selector.eq(0).set(provinceList);
-                selector.eq(1).set(util.find(cityList, function (city) {
-                    return city.province_id == provinceList[0].province_id;
-                }));
+
+                district.getCountries().then(function (res) {
+                    var countrySel = selector.eq(0).set(res.data);
+
+                    if (user.get('country_id')) {
+                        countrySel.val('country_id', user.get('country_id'));
+                    }
+                });
 
                 model.selectCity = function () {
                     selector.show();
@@ -173,10 +179,27 @@ module.exports = Activity.extend({
                     result = userLogical.set("gender", this.get('gender'));
                     break;
                 case 'hometown':
-                    result = userLogical.set("home_city_id", this.get('city_id'));
+                    result = userLogical.set("home_city_id", this.get('city_id')).then(function () {
+                        user.set({
+                            home_city_name: model.get('city_name'),
+                            home_province_id: model.get('province_id'),
+                            home_province_name: model.get('province_name'),
+                            home_country_id: model.get('country_id'),
+                            home_country_name: model.get('country_name')
+                        });
+
+                    });
                     break;
                 case 'address':
-                    result = userLogical.set("city_id", this.get('city_id'));
+                    result = userLogical.set("city_id", this.get('city_id')).then(function () {
+                        user.set({
+                            city_name: model.get('city_name'),
+                            province_id: model.get('province_id'),
+                            province_name: model.get('province_name'),
+                            country_id: model.get('country_id'),
+                            country_name: model.get('country_name')
+                        });
+                    });
                     break;
             }
 

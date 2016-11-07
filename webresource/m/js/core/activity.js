@@ -195,6 +195,7 @@ var Activity = Component.extend({
 
     _onDestroy: function () {
         if (this._scrolls) this._scrolls.destory();
+        this.onDestroy && this.onDestroy();
         this.application.remove(this.url);
     },
 

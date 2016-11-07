@@ -3,6 +3,8 @@ var util = require('util');
 var Activity = require('activity');
 var Loader = require('widget/loader');
 var popup = require('widget/popup');
+var Toast = require('widget/toast');
+
 var Model = require('core/model2').Model;
 
 var api = require('models/api');

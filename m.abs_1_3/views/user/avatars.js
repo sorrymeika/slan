@@ -30,7 +30,7 @@ module.exports = Activity.extend({
         model.camera = function () {
             bridge.image.camera(function (res) {
                 model.set({
-                    src: res.src
+                    src: res.src || res.thumbnail
                 });
                 self.uploadAvatars(res.id);
             });
@@ -39,7 +39,7 @@ module.exports = Activity.extend({
         model.photo = function () {
             bridge.image.photo(function (res) {
                 model.set({
-                    src: res.src
+                    src: res.src || res.thumbnail
                 });
 
                 self.uploadAvatars(res.id);

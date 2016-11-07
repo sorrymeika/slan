@@ -758,10 +758,10 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 .uc_month__list .item .img{ width: 1.2rem; height: 1.2rem; position: relative; margin-left: 10px; }
 .uc_month__list .item .img img { width: 100%; height: 100%; }
 .uc_month__list .item .date{ position: absolute; top: 0; left: 0; font-size: 12px; text-align: center; width: .8rem; background-color: rgba(0,0,0,.6); color: #fff; z-index: 2; }
-.uc_month__list .item .con { -webkit-box-flex: 1; padding: 5px 10px; height: 100%; position: relative; }
+.uc_month__list .item .con { -webkit-box-flex: 1; padding: 5px 10px; height: 120; position: relative; }
 .uc_month__list .item .name { display: block; font-size: 16px; }
 .uc_month__list .item .price { display: block; font-size: 14px; color: $color; }
-.uc_month__list .item .btn_m { display: block; position: absolute; bottom: -5px; left: 0; right: 0; }
+.uc_month__list .item .btn_m { display: block; position: absolute; bottom: 0px; right: 10px; }
 
 .uc_month__list .next_month { background: #E6E6E6; text-align: center; padding: 25px 0 15px 0; margin: 10px; }
 .uc_month__list .next_month .note { padding: 10px; color: #fff; }
@@ -799,7 +799,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 
 .uc_coupon__list .free { border-left: 3px solid $blue; }
 .uc_coupon__list .l-free { margin-top: 32px; }
-.uc_coupon__list .free .name { font-size: 24px; margin-top: 15px; }
+.uc_coupon__list .free .name { font-size: 24px; margin-top: 15px; height: 30px; }
 
 .uc_coupon__list .radio { position: absolute; right: 0px; top: 50%; margin-top: -20px; z-index: 10; }
 .uc_coupon__list .radio~.bd { padding-right: 30px; }
@@ -810,7 +810,7 @@ canvas.home_points_bg { width: 190px; position: absolute; left: 50%; top: 44px; 
 
 .uc_coupon .my_nodata .icon:before { background-position-x: -150px; }
 .uc_coupon .my_nodata { margin-top: 90px; }
-    
+
 .uc_coupon__tab .cp_tab { top: 1.12rem; background-color: #F4F4F4 }
 .uc_coupon__tab .cp_tab__head { font-size: 14px; }
 

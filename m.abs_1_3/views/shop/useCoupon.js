@@ -20,6 +20,44 @@ var user = require('logical/user');
 
 module.exports = Activity.extend({
 
+    onCreate: function () {
+        var self = this;
+
+        this.loadData();
+
+        var $main = this.$('.main');
+
+        this.bindScrollTo($main);
+
+        self.user = userModel.get();
+
+        var props = this.route.data || {};
+
+        var model = new Model(this.$el, {
+            back: this.swipeRightBackAction,
+            title: '使用优惠券',
+            isFree: props.isFree,
+            bag_amount: props.bag_amount,
+            coupon: props.selected
+        });
+
+        this.model = model;
+        model.receiveCoupon = this.receiveCoupon.bind(this);
+        model.useCoupon = this.useCoupon.bind(this);
+        model.selectCoupon = this.selectCoupon;
+    },
+
+    onShow: function () {
+        bridge.statusBar('dark');
+    },
+
+    onPause: function () {
+        bridge.statusBar("light");
+    },
+
+    onDestory: function () {
+    },
+
     receiveCoupon: function () {
         var self = this;
         if (!self.model.data.puttingCoupon) {
@@ -74,32 +112,47 @@ module.exports = Activity.extend({
             var coupons = self.route.data.coupon || [];
             var isFree = self.route.data.isFree;
 
-            console.log(coupons, isFree);
 
-            if (res.data)
+            if (res.data) {
                 res.data.forEach(function (item) {
-                    if (!item.isOverdue && (isFree ? item.VCA_VCT_ID == 4 : (item.VCA_VCT_ID != 4))) {
+                    if (!item.isOverdue) {
+                        if (isFree) {
+                            if (item.VCA_VCT_ID == 4)
+                                data.push(item);
 
-                        console.log(util.indexOf(coupons, function (a) {
-                            return a.CSV_ID == item.CSV_ID;
-                        }));
+                        } else if (item.VCA_VCT_ID != 4) {
 
-                        if (-1 == util.indexOf(coupons, function (a) {
-                            return a.CSV_ID == item.CSV_ID;
-                        })) {
-                            cannotuse.push(item);
-                        } else {
-                            data.push(item);
+                            if (-1 == util.indexOf(coupons, function (a) {
+                                return a.CSV_ID == item.CSV_ID;
+                            })) {
+                                cannotuse.push(item);
+                            } else {
+                                data.push(item);
+                            }
                         }
                     }
                 });
+            }
 
             data.sort(function (a, b) {
                 return a.CSV_END_DT > b.CSV_END_DT ? 1 : a.CSV_END_DT == b.CSV_END_DT ? 0 : -1;
             });
 
+            var usedCoupons = [];
+            var selected = self.model.get('coupon');
+
+            if (selected && selected.CSV_CODE) {
+                var codes = selected.CSV_CODE.split(',');
+                data.forEach(function (item) {
+                    if (codes.indexOf(item.CSV_CODE) != -1) {
+                        usedCoupons.push(item);
+                    }
+                });
+            }
+
             self.model.set({
                 data: data,
+                usedCoupons: usedCoupons,
                 cannotuse: cannotuse
             });
 
@@ -108,13 +161,13 @@ module.exports = Activity.extend({
         });
     },
     useCoupon: function () {
+        var model = this.model;
 
-        console.log(this.model.data.coupon);
-
-        this.back('/buy', {
-            coupon: this.model.data.coupon,
-            freeCoupon: this.model.data.freeCoupon
-        });
+        this.back('/buy', model.get('isFree') ? {
+            freeCoupon: this.model.data.coupon
+        } : {
+                coupon: this.model.data.coupon
+            });
     },
 
     selectCoupon: function (coupon) {
@@ -128,13 +181,11 @@ module.exports = Activity.extend({
 
         if (coupon.VCA_VCT_ID == 4) {
             this.set({
-                freeCoupon: data.freeCoupon && data.freeCoupon.CSV_CODE == coupon.CSV_CODE
-                    ? null
-                    : coupon
+                coupon: coupon
             });
 
         } else if (coupon.VCA_VCT_ID == 5) {
-            var usedCoupons = this.data.usedCoupons || [];
+            var usedCoupons = [].concat(this.data.usedCoupons);
             var index = util.indexOf(usedCoupons, function (item) {
                 return item.CSV_CODE == coupon.CSV_CODE;
             });
@@ -170,40 +221,5 @@ module.exports = Activity.extend({
             })
         }
 
-    },
-
-    onCreate: function () {
-        var self = this;
-
-        this.loadData();
-
-        var $main = this.$('.main');
-
-        this.bindScrollTo($main);
-
-        self.user = userModel.get();
-
-        var props = this.route.data || {};
-        var model = new Model(this.$el, {
-            back: this.swipeRightBackAction,
-            title: '使用优惠券',
-            bag_amount: props.bag_amount
-        });
-
-        this.model = model;
-        model.receiveCoupon = this.receiveCoupon.bind(this);
-        model.useCoupon = this.useCoupon.bind(this);
-        model.selectCoupon = this.selectCoupon;
-    },
-
-    onShow: function () {
-        bridge.statusBar('dark');
-    },
-
-    onPause: function () {
-        bridge.statusBar("light");
-    },
-
-    onDestory: function () {
     }
 });

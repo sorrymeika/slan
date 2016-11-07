@@ -150,8 +150,6 @@ var User = {
 
     recieveCoupon: function (csvcode, $el) {
 
-        alert(1);
-
         var user = userModel.get();
 
         return new api.CouponAPI({

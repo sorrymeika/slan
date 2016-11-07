@@ -1409,7 +1409,7 @@
                     options.url = appendQuery(options.url, options.data), options.data = undefined
             }
 
-            $.ajax = function (options) {
+            $.ajax = function (options) {                
                 var settings = $.extend({}, options || {}),
                     deferred = $.Deferred && $.Deferred(),
                     urlAnchor, hashIndex
@@ -1589,7 +1589,7 @@
                 var params = []
                 params.add = function (key, value) {
                     if ($.isFunction(value)) value = value()
-                    if (value == null) value = ""
+                    if (value === null || value === undefined) value = ""
                     this.push(escape(key) + '=' + escape(value))
                 }
                 serialize(params, obj, traditional)

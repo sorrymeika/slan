@@ -93,16 +93,14 @@ var contact = Event.mixin({
         });
     },
 
-    createSearchLoader: function ($scroll, success, append) {
-
-        var loader = new Loader({
-            $scroll: $scroll,
-            url: '/userinfo/search',
-            success: success,
-            append: append
+    hideItem: function (fid) {
+        return Http.post('/friends/hideItem', {
+            fid: fid
         });
+    },
 
-        return loader;
+    pageLoaderForSearch: function (model) {
+        return Loader.pageLoader('/userinfo/search', 'searchResult', model);
     },
 
     person: function (user_id) {

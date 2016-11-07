@@ -88,16 +88,23 @@ module.exports = Activity.extend({
             });
         }
 
-        popup.popup({
-            tapMaskToHide: true,
-            tapToHide: true,
-            className: 'bg_0000 hm_ym__present',
-            content: '<div class="fs_s">恭喜您获得新人首<br>\
+        setTimeout(function () {
+            popup.popup({
+                tapMaskToHide: true,
+                tapToHide: true,
+                className: 'bg_0000 hm_ym__present',
+                content: '<div class="fs_s">恭喜您获得新人首<br>\
 登福利100云米\
 </div>'
-        })
+            })
+        }, 1000)
 
-        this.bindScrollTo(model.refs.life)
+
+        this.bindScrollTo(model.refs.life);
+
+        this.onceTrue('Show', function () {
+            return auth.getAuthToken() && userLogical.getMe() ? true : false;
+        });
     },
 
     menu: function () {
@@ -140,7 +147,7 @@ module.exports = Activity.extend({
 
         //publicquan.recommend(),
         //publicquan.myrecommend(),
-        Promise.all([publicquan.myfollow(), userLogical.getMe()])
+        Promise.all([publicquan.myfollow()])
             .then(function (results) {
                 var res = results[0];
 

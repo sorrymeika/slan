@@ -108,7 +108,7 @@ Http.prototype = {
         var self = this;
 
         if (typeof resolve === 'function') {
-            self._request(resolve, reject);
+            return self.request().then(resolve, reject);
 
         } else
             return new Promise(function (resolve, reject) {
@@ -128,7 +128,7 @@ Http.prototype = {
         var postData = {};
 
         Object.keys(that.params).forEach(function (key) {
-            that.params[key] && (postData[key] = that.params[key]);
+            (that.params[key] !== undefined) && (postData[key] = that.params[key]);
         });
 
         that._xhr = $.ajax({

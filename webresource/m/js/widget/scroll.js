@@ -258,6 +258,7 @@ var touchEnd = function (e) {
 function Scroll(el, options) {
 
     var $el = $(el);
+    var self = this;
 
     el.__timestamp = 0;
 
@@ -274,10 +275,11 @@ function Scroll(el, options) {
             overflowX: options.hScroll ? 'auto' : ''
         });
     }
-    $el.on('scroll', scroll)
-        .on('touchstart', touchStart)
+
+    $el.on('touchstart', touchStart)
         .on('touchmove', touchMove)
-        .on('touchend', touchEnd);
+        .on('touchend', touchEnd)
+        .on('scroll', scroll);
 
     el._scrollTop = 0;
     el.options = options;
@@ -298,7 +300,11 @@ Scroll.prototype = {
         return this.el.scrollHeight;
     },
 
-    scrollTop: function () {
+    scrollTop: function (y) {
+
+        if (y !== undefined) {
+            this.scrollTo(this.el.scrollLeft, y);
+        }
         return this.el.scrollTop;
     },
 

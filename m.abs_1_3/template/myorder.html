@@ -5,45 +5,41 @@
 
 @helper orderList(index) {
 <ul class="uc_orderlist__item">
-        <li class="bd_t mb_m bg_fff" sn-repeat="item in data@(index==0?'':index)">
-            <div class="lh_m flex fs_m ml_m bd_b" sn-tap="this.openOrder(item)">
-                <p class="icon-list"></p>
-                <p class="ml_m flexitem">{item.CNL_DESC}</p>
-                <p class="ta_r mr_m" sn-html="item.PUS_DESC"></p>
+    <li class="bd_t mb_m bg_fff" sn-repeat="item in data@(index==0?'':index)">
+        <div class="lh_m flex fs_m ml_m bd_b" sn-tap="this.openOrder(item)">
+            <p class="icon-list"></p>
+            <p class="ml_m flexitem">{item.CNL_DESC}</p>
+            <p class="ta_r mr_m" sn-html="item.PUS_DESC"></p>
+        </div>
+        <div class="sp_cart__listitem_con bd_b" sn-repeat="prd in item.Children">
+            <img sn-tap="this.openPrd(prd,item)" sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
+            <div class="con" sn-tap="this.openOrder(item)">
+                <b class="name">{ prd.PRD_NAME }</b>
+                <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
+                <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</p>
             </div>
-            <div class="sp_cart__listitem_con bd_b" sn-repeat="prd in item.Children">
-                <img sn-tap="this.openPrd(prd,item)" sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
-                <div class="con" sn-tap="this.openOrder(item)">
-                    <b class="name">{ prd.PRD_NAME }</b>
-                    <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
-                    <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</p>
-                </div>
-                <p class="ft">
-                    <span class="qty">x{prd.LPK_QTY}</span>
-                </p>
-            </div>
-            <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span></div>
-            <div class="flex pb_m">
-                <p class="flexitem"></p>
-                <button class="btn_s mr_s cl_000 bg_ddd" sn-if="item.PUR_PUS_ID==7" sn-tap="this.openOrder(item)">查看详情</button>
-                <button class="btn_s mr_s" sn-if="{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}" data-forward="/news/order{item.PUR_ID}?from={url}">分享有惊喜</button>
-                <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'}" sn-tap="this.openOrder(item)">立即付款</button>
-                <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</button>
-            </div>
-        </li>
-        <li ref="refreshing" class="refreshing">
-            <p class="loading js_loading"></p>
-            <p class="msg js_msg"></p>
-        </li>
-    </ul>
- }
+            <p class="ft">
+                <span class="qty">x{prd.LPK_QTY}</span>
+            </p>
+        </div>
+        <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span></div>
+        <div class="flex pb_m">
+            <p class="flexitem"></p>
+            <button class="btn_s mr_s cl_000 bg_ddd" sn-if="item.PUR_PUS_ID==7" sn-tap="this.openOrder(item)">查看详情</button>
+            <button class="btn_s mr_s" sn-if="{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}" data-forward="/news/order{item.PUR_ID}?from={url}">分享有惊喜</button>
+            <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'}" sn-tap="this.openOrder(item)">立即付款</button>
+            <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</button>
+        </div>
+    </li>
+    <li ref="refreshing" class="refreshing">
+        <p class="loading js_loading"></p>
+        <p class="msg js_msg"></p>
+    </li>
+</ul>
+}
 
 <div class="uc_orderlist fs_m" sn-require="widget/tab" ref="tab" sn-data="{{items:['全部','待付款','待发货','配送中','已完成']}}">
-    @this.helpers.orderList(0)
-    @this.helpers.orderList(1)
-    @this.helpers.orderList(2)
-    @this.helpers.orderList(3)
-    @this.helpers.orderList(4)
+    @this.helpers.orderList(0) @this.helpers.orderList(1) @this.helpers.orderList(2) @this.helpers.orderList(3) @this.helpers.orderList(4)
 </div>
 
 <div class="main myorder" style="display:none">

@@ -31,6 +31,8 @@ define(function (require, exports, module) {
 
             self.user = util.store('user');
 
+            var state = self.route.query.state || 0;
+
             this.model = new model.ViewModel(this.$el, {
                 back: '/',
                 url: encodeURIComponent(this.route.url),
@@ -53,7 +55,7 @@ define(function (require, exports, module) {
                     var loader = new Loader({
                         url: "/api/order/getListByType",
                         $el: self.$el,
-                        $refreshing: $(self.model.refs.refreshing),
+                        $refreshing: $(tab.refs.items[index]).find('.refreshing'),
                         $scroll: $(tab.refs.items[index]),
                         checkData: false,
                         success: function (res) {
@@ -80,8 +82,10 @@ define(function (require, exports, module) {
                     createLoader(index)
 
                 }).next(function () {
-                    createLoader(0)
+                    createLoader(0);
+                    tab.tab(state);
                 });
+
             });
 
             this.wxPayApi = new api.WxPayAPI({
@@ -155,6 +159,8 @@ define(function (require, exports, module) {
                         cancelAction: function () { },
                         confirmText: '确定取消',
                         confirmAction: function () {
+                            this.hide();
+                            
                             self.cancelOrderApi.setParam({
                                 purcode: order.PUR_CODE
 

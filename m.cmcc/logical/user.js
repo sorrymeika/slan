@@ -4,6 +4,7 @@ var bridge = require('bridge');
 var Http = require('core/http');
 var userModel = require('models/user');
 var auth = require('logical/auth');
+var Loader = require('widget/loader');
 
 var FAVORITE_TYPE = {
     QUAN: 2,
@@ -27,8 +28,8 @@ var User = {
         var sign = auth.getSign();
 
         return new Promise(function (resolve, reject) {
-            bridge.image.upload(Loader.url('/userinfo/setAvatars'), Object.assign({}, sign), {
-                image: imageId
+            bridge.image.upload(Loader.url('/userinfo/update'), Object.assign({}, sign), {
+                avatars_file: imageId
 
             }, true, function (res) {
                 if (res.success) {

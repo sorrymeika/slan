@@ -45,6 +45,8 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
+        console.log(id);
+
         if (remoteMapping && remoteMapping[id]) {
             emitData.requestUri = remoteMapping[id];
 

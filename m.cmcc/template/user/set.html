@@ -19,19 +19,19 @@
             <i class="icon-right fl_r mr_m" sn-if="gender==2"></i> 女
         </li>
     </ul>
-    <ul class="mt_l bd_tb bg_fff uc_set__gender" sn-if="type=='hometown'">
+    <ul class="mt_l bd_tb bg_fff uc_set__gender" sn-if="type=='hometown'" sn-tap="this.selectCity()">
         <li class="h_bar lh_bar pl_m bd_b">
             <i class="fl_r mr_m">{country_name}</i> 国家
         </li>
-        <li class="h_bar lh_bar pl_m" sn-tap="this.selectCity()">
+        <li class="h_bar lh_bar pl_m">
             <i class="fl_r mr_m">{province_name}—{city_name}</i> 省市
         </li>
     </ul>
-    <ul class="mt_l bd_tb bg_fff uc_set__gender" sn-if="type=='address'">
+    <ul class="mt_l bd_tb bg_fff uc_set__gender" sn-if="type=='address'" sn-tap="this.selectCity()">
         <li class="h_bar lh_bar pl_m bd_b">
             <i class="fl_r mr_m">{country_name}</i> 国家
         </li>
-        <li class="h_bar lh_bar pl_m" sn-tap="this.selectCity()">
+        <li class="h_bar lh_bar pl_m">
             <i class="fl_r mr_m">{province_name}—{city_name}</i> 省市
         </li>
     </ul>

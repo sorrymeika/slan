@@ -31,6 +31,8 @@ return Activity.extend({
                 cancelAction: function () { },
                 confirmText: '确定退出',
                 confirmAction: function () {
+                    this.hide();
+                    
                     if (userModel.get()) {
                         userModel.set(null);
                         self.setResult("Logout");

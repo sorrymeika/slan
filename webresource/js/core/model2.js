@@ -454,8 +454,6 @@ var ModelProto = {
         for (var i = 0, len = keys.length; i < len; i++) {
             key = keys[i];
 
-            console.log(key, model.model[key])
-
             if (!(model.model[key] instanceof Model)) {
                 tmp = model.model[key] = new Model(model, key, {});
                 model.data[key] = tmp.data;
@@ -538,7 +536,8 @@ var ModelProto = {
 
                     (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
 
-                    (value.root.parents || (value.root.parents = [])).push(this.root);
+                    (value.root.parents || (value.root.parents = [])).push(root);
+                    (root._children || (root._children = [])).push(value.root);
 
                 } else if (origin instanceof Model) {
                     value === null || value === undefined ? origin.reset() : origin.set(coverChild, value);
@@ -681,6 +680,26 @@ Collection.prototype = {
         return null;
     },
 
+    filter: function (key, val) {
+        var fn;
+
+        if (typeof key === 'string' && val !== undefined) {
+            fn = function (item) {
+                return item[key] == val;
+            }
+        }
+        else fn = key;
+
+        var result = [];
+
+        for (var i = 0; i < this.models.length; i++) {
+            if (fn.call(this, this.data[i], i)) {
+                result.push(this.models[i]);
+            }
+        }
+        return result;
+    },
+
 
     add: function (data) {
         var model;
@@ -698,6 +717,7 @@ Collection.prototype = {
             this.models.push(model);
             this.data.push(model.data);
         }
+
         this.root.updateViewNextTick();
     },
 
@@ -756,11 +776,9 @@ Collection.prototype = {
 
         } else fn = key;
 
-        var models = [];
-
         for (var i = this.models.length - 1; i >= 0; i--) {
             if (fn.call(this, this.data[i], i)) {
-                models.push(this.models.splice(i, 1)[0]);
+                this.models.splice(i, 1);
                 this.data.splice(i, 1);
             }
         }
@@ -774,7 +792,6 @@ Collection.prototype = {
         this.root.updateViewNextTick();
     }
 }
-
 
 function RepeatSource(viewModel, el, parent) {
     var self = this;
@@ -1320,8 +1337,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var elements = el.snElements || (el.snElements = []);
         var list = [];
         var cursorElem = el;
-        var elemContain = {};
         var elementsLength = elements.length;
+        var elemContain = {};
+
+        console.log(collection.models.length)
 
         collection.each(function (model) {
 
@@ -1377,6 +1396,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         });
 
+        console.log(list.length)
+
         if (orderBy)
             list.sort(function (a, b) {
                 a = a.model.data[orderBy];
@@ -1384,6 +1405,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 return isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
             });
 
+        console.log(collection.models.length)
 
         list.forEach(function (item, index) {
             var elem = item.el;
@@ -1607,6 +1629,15 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             if (viewModelList[i] == this) {
                 viewModelList.splice(i, 1);
                 break;
+            }
+        }
+
+        var children = this._children;
+        if (children) {
+            for (var i = 0, len = children.length; i < len; i++) {
+                var parents = children[i].parents;
+
+                parents.splice(parents.indexOf(this), 1);
             }
         }
 

@@ -1,5 +1,6 @@
 var $ = require('$');
 var util = require('util');
+var bridge = require('bridge');
 var Activity = require('activity');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
@@ -49,6 +50,11 @@ module.exports = Activity.extend({
         }).then(function () {
             loader.hideLoading();
         });
+
+        bridge.motion.start();
+
+        this.motion = this.motion.bind(this);
+        $(window).on('motion', this.motion);
     },
 
     onShow: function () {
@@ -57,5 +63,14 @@ module.exports = Activity.extend({
 
     onDestory: function () {
         this.model.destroy();
+        $(window).off('motion', this.motion);
+        bridge.motion.stop();
+    },
+
+    motion: function () {
+
+        this.model.set({
+            shakeResult: true
+        })
     }
 });

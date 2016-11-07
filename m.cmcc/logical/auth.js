@@ -40,7 +40,6 @@ Http.prototype.error = function (err) {
 }
 
 Http.prototype.success = function (res) {
-    console.log(res);
 }
 
 var _load = Loader.prototype._request;

@@ -53,7 +53,7 @@ register_date DATE,--注册时间 --search=true
 
 
 drop table userinfo;
-create table userinfo (--用户 --props=String account,int status
+create table userinfo (--用户 --props=String account,int status,int country_id,String country_name,String province_name,int province_id,String city_name,int home_country_id,String home_country_name,String home_province_name,int home_province_id,String home_city_name
 user_id  number(11) primary key,--用户ID
 avatars varchar(20),--用户头像 --type=file
 user_name varchar(20),--用户昵称 --unique=true --updateable=false --search=true
@@ -239,6 +239,16 @@ create table city (--市 --seq_name=district_seq
 ) tablespace cmccuser;
 create sequence district_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1;
 
-select city_id from city where 
 
+create table messages (
+    msg_id number(12) primary key,--消息id
+    type number(5),--消息类型
+    from_id number(11),--发消息人
+    to_id number(12),--收消息人
+    is_show_time number(1),--是否显示时间小标记
+    add_date date,--发送时间 --search=true
+    content varchar(4000),--正文
+    feature varchar(2000)--扩展
+) tablespace cmccuser;
+create sequence messages_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 

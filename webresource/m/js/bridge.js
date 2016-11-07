@@ -86,10 +86,25 @@
                         type: 'upload',
                         url: url,
                         data: data,
-                        images: images
+                        images: images,
+                        crop: crop
 
                     }, callback);
 
+                }
+            },
+
+            motion: {
+                start: function () {
+                    hybrid('motion', {
+                        type: 'start'
+                    });
+                },
+
+                stop: function () {
+                    hybrid('motion', {
+                        type: 'stop'
+                    });
                 }
             },
 

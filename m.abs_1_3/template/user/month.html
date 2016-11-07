@@ -36,11 +36,10 @@
                 <div class="ta_c mt_l cl_999">您还没有相关月礼哦</div>
                 <button class="btn_xl" data-back="/?tab=0">去逛逛吧</button>
             </div>
-            <div class="left">您可领取的礼品 <span>您还可领取<em>{user.FreeMonths}</em>/{user.TotalMonths}</span></div>
             <div class="uc_month__list">
                 <div class="item" sn-repeat="item in got">
                     <p class="img">
-                        <span class="date">{data.Year}年{data.Month}月</span>
+                        <span class="date">{item.Year}年{item.Month}月</span>
                         <img sn-src="{item.WPP_LIST_PIC}">
                     </p>
                     <p class="con">
@@ -58,17 +57,16 @@
                 <div class="ta_c mt_l cl_999">您还没有相关月礼哦</div>
                 <button class="btn_xl" data-back="/?tab=0">去逛逛吧</button>
             </div>
-            <div class="left">您可领取的礼品 <span>您还可领取<em>{user.FreeMonths}</em>/{user.TotalMonths}</span></div>
             <div class="uc_month__list">
                 <div class="item" sn-repeat="item in overdue">
                     <p class="img">
-                        <span class="date">{data.Year}年{data.Month}月</span>
+                        <span class="date">{item.Year}年{item.Month}月</span>
                         <img sn-src="{item.WPP_LIST_PIC}">
                     </p>
                     <p class="con">
                         <span class="name">{item.PRD_NAME}</span>
                         <em class="price">￥{item.PRD_PRICE}</em>
-                        <button class="btn_m" sn-tap="this.getGift(item)">立即领取</button>
+                        <button class="btn_m bg_ddd" sn-tap="this.getGift(item)">已过期</button>
                     </p>
                 </div>
             </div>

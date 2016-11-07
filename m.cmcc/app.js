@@ -346,43 +346,48 @@ if (args.build) {
             var excludes = [];
 
             for (var key in project.js) {
+                var combinedJs = combinePath(project.root, key);
+                var resourceMapping = config.resourceMapping[combinedJs] = [];
 
-                requires.push(combinePath(project.root, key));
+                requires.push(combinedJs);
 
-                if (project.js[key]) {
-                    //打包项目引用js                
-                    (function (key, fileList) {
-                        var ids;
-                        if (!_.isArray(fileList)) {
-                            ids = _.keys(fileList);
-                            fileList = _.map(fileList, function (value, id) {
-                                return value || id;
-                            });
-                        }
-
-                        Promise.all(fileList.map(function (file, i) {
-                            var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
-
-                            excludes.push(path.relative(baseDir, combinePath(project.root, "./" + file)));
-
-                            return new Promise(function (resolve) {
-                                fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
-
-                                    if (isRazorTpl) text = razor.web(text);
-                                    text = formatJs(text);
-                                    text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
-
-                                    resolve(text);
-                                });
-                            })
-
-                        })).then(function (results) {
-
-                            Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
+                //打包项目引用js
+                (function (key, fileList, resourceMapping) {
+                    var ids;
+                    if (!_.isArray(fileList)) {
+                        ids = _.keys(fileList);
+                        fileList = _.map(fileList, function (value, id) {
+                            return value || id;
                         });
+                    }
 
-                    })(key, project.js[key]);
-                }
+                    Promise.all(fileList.map(function (file, i) {
+                        var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
+
+                        excludes.push(path.relative(baseDir, combinePath(project.root, "./" + file)));
+
+                        return new Promise(function (resolve) {
+                            fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
+                                var jsId = ids ? ids[i] : combinePath(project.root, file);
+
+                                resourceMapping.push(jsId);
+
+                                if (isRazorTpl) text = razor.web(text);
+
+                                text = formatJs(text);
+                                text = Tools.compressJs(Tools.replaceDefine(jsId, text));
+
+                                resolve(text);
+                            });
+                        })
+
+                    })).then(function (results) {
+
+
+                        Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
+                    });
+
+                })(key, project.js[key], resourceMapping);
             }
 
             for (var key in project.css) {

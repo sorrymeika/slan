@@ -33,10 +33,12 @@ define(function (require, exports, module) {
                     self.forward('/address?buy=1&from=' + encodeURIComponent(self.route.url));
                 },
 
-                useCoupon: function () {
+                useCoupon: function (isFree) {
+                    if (isFree && this.refs.freight.innerHTML == '免邮费') return;
                     self.forward('/shop/useCoupon?from=' + encodeURIComponent(self.route.url), {
                         coupon: this.data.coupon,
-                        isFree: false,
+                        isFree: isFree,
+                        selected: isFree ? this.data.selectedFreeCoupon : this.data.selectedCoupon,
                         bag_amount: this.data.bag_amount
                     });
                 },
@@ -126,7 +128,9 @@ define(function (require, exports, module) {
                     self.model.set({
                         bag_amount: res.bag_amount,
                         full_amount_free: parseInt(res.full_amount_free),
-                        coupon: res.coupon,
+                        coupon: util.find(res.coupon, function (item) {
+                            return item.VCT_ID != 4;
+                        }),
                         freight: res.freight
                     });
                 }
@@ -209,9 +213,12 @@ define(function (require, exports, module) {
                                     bridge.cmbpay(api.API.prototype.baseUri + "/api/cmbpay/pay?orderCode=" + res.code);
                                     break;
                             }
+                            self.forward('/order/' + res.pur_id + "?from=/myorder&refresh=1");
+
+                        } else {
+                            self.forward("/news/order" + res.pur_id);
                         }
 
-                        self.forward('/order/' + res.pur_id + "?from=/myorder&refresh=1");
                     }
                 },
                 error: function (res) {
@@ -234,14 +241,6 @@ define(function (require, exports, module) {
 
             self.user = userModel.get();
 
-            self.orderCreateApi.setParam({
-                pspcode: self.user.PSP_CODE,
-                pay_type: 1,
-                coupon: routeData.coupon ? routeData.coupon.CSV_CODE : '',
-                points: routeData.points,
-                freecoupon: routeData.freeCoupon ? routeData.freeCoupon.CSV_CODE : ''
-            });
-
             self.model.set({
                 selectedCoupon: routeData.coupon,
                 selectedFreeCoupon: routeData.freeCoupon,
@@ -249,6 +248,14 @@ define(function (require, exports, module) {
                 requireInv: routeData.requireInv,
                 company: routeData.company,
                 isCompany: routeData.isCompany
+            });
+
+            self.orderCreateApi.setParam({
+                pspcode: self.user.PSP_CODE,
+                pay_type: 1,
+                coupon: self.model.get('selectedCoupon.CSV_CODE') || '',
+                points: routeData.points,
+                freecoupon: self.model.get('selectedFreeCoupon.CSV_CODE') || ''
             });
 
             self.cart.load();

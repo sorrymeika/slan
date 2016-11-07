@@ -18,7 +18,15 @@ module.exports = Activity.extend({
 
         var personId = this.route.params.id;
 
-        var model = this.model = new Model(this.$el, {});
+        var model = this.model = new Model(this.$el, {
+            messages: []
+        });
+
+        this.sendResult = this.sendResult.bind(this);
+        this.newMessage = this.newMessage.bind(this);
+
+        chat.on('sendresult' + personId, this.sendResult)
+            .on('message:' + personId, this.newMessage);
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
@@ -27,32 +35,81 @@ module.exports = Activity.extend({
         model.send = function () {
             if (!this.data.content) return;
 
-            chat.send({
+            var messages = model._('messages');
+            var data = {
+                gid: chat.getGid(),
                 type: chat.MESSAGETYPE.TEXT,
                 content: this.data.content,
-                user_id: personId
+                to_id: personId,
+                from_id: user.get('user_id'),
+                is_show_time: false
+            };
+
+            messages.add(data);
+
+            model.set({
+                content: ''
+
+            }).next(function () {
+                self.scroll && self.scroll.scrollToEnd();
             });
+
+            chat.send(data);
         }
 
         var loader = this.loader = new Loader(this.$el);
 
         loader.showLoading();
 
+        model.refs.send.onsubmit = function () {
+            model.send();
+        }
+
         Promise.all([chat.getMessages(personId), this.waitLoad()]).then(function (results) {
 
-            var data = results[0];
+            var res = results[0];
+            var messages = res.data;
+
+            var scroll = self.scroll = self.bindScrollTo(model.refs.main).eq(0);
+
+            var loadMore = function (e, options) {
+                if (scroll.scrollTop() == 0) {
+
+                    var scrollBottom = options.scrollHeight - options.y;
+
+                    model.set({
+                        showMore: true,
+                        showMoreLoading: true,
+                        moreMsg: '正在加载...'
+                    });
+                    chat.getMessages(personId, model.get('messages')[0].msg_id).then(function (res) {
+                        if (!res.data || !res.data.length) {
+                            scroll.$el.off('scrollStop', loadMore);
+                            model.set({
+                                showMoreLoading: false,
+                                moreMsg: '没有更多消息了'
+                            });
+
+                        } else {
+                            model._('messages').insert(0, res.data)
+                            model.next(function () {
+                                scroll.scrollTop(scroll.scrollHeight() - scrollBottom);
+                            });
+                        }
+                    });
+                }
+            }
+
+            scroll.$el.on('scrollStop', loadMore);
 
             model.set({
                 user: user,
-                friend: data.user,
-                messages: data.data
+                friend: res.user,
+                messages: messages
+
+            }).next(function () {
+                scroll.scrollToEnd();
             });
-
-            self.scroll = self.bindScrollTo(model.refs.main).eq(0);
-
-            console.log(self.scroll);
-
-            self.scroll.scrollToEnd();
 
             model.scrollToEnd = function () {
                 self.scroll.scrollToEnd();
@@ -71,6 +128,20 @@ module.exports = Activity.extend({
     },
 
     onDestory: function () {
+        var personId = this.route.params.id;
+        chat.off('sendresult:' + personId, this.sendResult)
+            .off('message:' + personId, this.newMessage);
+
         this.model.destroy();
+    },
+
+    sendResult: function (e, msg) {
+        this.model._('messages').find('gid', msg.gid).set({
+            msg_id: msg_id
+        });
+    },
+
+    newMessage: function (e, msg) {
+        this.model._('messages').add(msg);
     }
 });

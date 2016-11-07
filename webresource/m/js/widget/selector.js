@@ -60,12 +60,21 @@
             });
 
             this.data = data;
-            this.selectedData = data && data.length ? data[0] : {};
             this.$content.html(html);
             return this.index(0);
         },
 
         itemHeight: 30,
+
+        _changeNextTick: function () {
+            var self = this;
+            if (!self._nextTick) {
+                self._nextTick = setTimeout(function () {
+                    self._nextTick = null;
+                    self.options.onChange.call(self, self._index, self.selectedData)
+                }, 0);
+            }
+        },
 
         _index: 0,
         index: function (index) {
@@ -75,14 +84,17 @@
                 index = this.data.length - 1;
             }
 
-            if (index != -1 && this._index != index) {
-                this.selectedData = this.data[index];
+            if (index != -1) {
+                if (this._index != index) {
+                    this._index = index;
+                    var y = index * this.itemHeight;
+                    y != this.y && this.touch.scrollTo(0, y, 200);
+                }
 
-                this.options.onChange && this.options.onChange.call(this, index, this.selectedData);
-                this._index = index;
-
-                var y = index * this.itemHeight;
-                y != this.y && this.touch.scrollTo(0, y, 200);
+                if (this.selectedData != this.data[index]) {
+                    this.selectedData = this.data[index];
+                    this.options.onChange && this._changeNextTick();
+                }
             }
             return this;
         },
@@ -96,7 +108,7 @@
 
             var index = util.indexOf(this.data, key, val);
 
-            this.index(index);
+            index != -1 && this.index(index);
         }
     };
 
@@ -161,7 +173,6 @@
                     });
                 }
             }
-
         });
 
         this.$click = this.$el.find('.js_click').on('tap', function () {

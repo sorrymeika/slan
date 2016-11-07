@@ -35,10 +35,11 @@ module.exports = Activity.extend({
             return false;
         }
 
-        model.del = function (personId, e) {
+        model.del = function (fid, e) {
 
-            var person = model.getModel('newFriends').remove("user_id", personId);
+            model.getModel('newFriends').remove("fid", fid);
 
+            contact.hideItem(fid);
 
             return false;
         }
@@ -46,6 +47,14 @@ module.exports = Activity.extend({
         model.back = function () {
             self.back(self.swipeRightBackAction)
         }
+
+        contact.on('addFriend', function () {
+            contact.newFriends().then(function (res) {
+                model.set({
+                    newFriends: res.data
+                });
+            });
+        });
 
         var loader = this.loader = new Loader(this.$el);
 

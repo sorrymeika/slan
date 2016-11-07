@@ -22,15 +22,7 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
-        var search = contact.createSearchLoader(model.refs.main, function (res) {
-            model.set({
-                isSearch: true,
-                searchResult: res.data
-            })
-
-        }, function (res) {
-            model.getModel('searchResult').append(res.data)
-        });
+        var searcher = contact.pageLoaderForSearch(model);
 
         model.refs.searchform.onsubmit = function () {
             if (model.data.search) {
@@ -45,7 +37,7 @@ module.exports = Activity.extend({
                     params.user_name = keywords;
                 }
 
-                search.clearParams()
+                searcher.clearParams()
                     .setParam(params).reload().catch(function (e) {
                         Toast.showToast(e.message);
                     });

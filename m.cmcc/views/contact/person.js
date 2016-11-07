@@ -32,6 +32,10 @@ module.exports = Activity.extend({
             contact.addFriend(personId).then(function () {
                 Toast.showToast('发送成功');
 
+                contact.trigger('addFriend');
+
+                model.back();
+
             }).catch(function (e) {
                 Toast.showToast(e.message);
             });

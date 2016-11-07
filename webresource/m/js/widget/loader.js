@@ -3,7 +3,6 @@ var _ = require('util');
 var $empty = $();
 
 var Promise = require("promise");
-
 var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete', 'pageIndex', 'pageSize', 'append', 'checkEmptyData', 'check', 'hasData', 'KEY_PAGE', 'KEY_PAGESIZE', 'DATAKEY_TOTAL', 'MSG_NO_MORE'];
 
 /*
@@ -252,12 +251,12 @@ Loader.prototype = {
         var self = this;
 
         if (typeof resolve === 'function') {
-            self._request(resolve, reject);
+            return this.request().then(resolve, reject)
 
         } else
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (_resolve, _reject) {
 
-                self._request(resolve, reject);
+                self._request(_resolve, _reject);
             });
     },
 
@@ -431,5 +430,25 @@ Loader.prototype = {
 Loader.prototype.load = Loader.prototype.request;
 
 Loader.extend = _.extend;
+
+Loader.pageLoader = function (url, key, model) {
+
+    if (!model) model = key, key == 'data';
+
+    return new Loader({
+        url: url,
+        $el: model.$el,
+
+        $scroll: $(model.refs.main),
+
+        success: function (res) {
+            model.set(key, res.data);
+        },
+
+        append: function (res) {
+            model._(key).append(res.data);
+        }
+    });
+}
 
 module.exports = Loader;

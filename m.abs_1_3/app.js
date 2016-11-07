@@ -349,7 +349,7 @@ if (args.build) {
                 requires.push(combinedJs);
 
                 //打包项目引用js
-                (function (fileList, resourceMapping) {
+                (function (key, fileList, resourceMapping) {
                     var ids;
                     if (!_.isArray(fileList)) {
                         ids = _.keys(fileList);
@@ -380,10 +380,11 @@ if (args.build) {
 
                     })).then(function (results) {
 
+
                         Tools.save(path.join(destDir, project.root, key + '.js'), results.join(''));
                     });
 
-                })(project.js[key], resourceMapping);
+                })(key, project.js[key], resourceMapping);
             }
 
             for (var key in project.css) {
