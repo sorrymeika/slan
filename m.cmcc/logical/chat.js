@@ -1,5 +1,5 @@
 var util = require('util');
-var model2 = require('core/model2');
+var vm = require('core/model2');
 var Http = require('core/http');
 var Event = require('core/event');
 var Promise = require('promise');
@@ -20,7 +20,7 @@ function keep() {
             messages.forEach(function (msg) {
 
                 console.log(msg);
-                
+
                 switch (msg.type) {
                     case MESSAGETYPE.TEXT:
                     case MESSAGETYPE.IMAGE:
@@ -35,10 +35,13 @@ function keep() {
 }
 keep();
 
-
+var records = vm.createCollection();
 
 var chat = Event.mixin({
     MESSAGETYPE: MESSAGETYPE,
+
+    getRecords: function () {
+    },
 
     getUnreadMessages: function () {
     },
@@ -49,6 +52,7 @@ var chat = Event.mixin({
             friend_id: friend_id,
             last_msg_id: last_msg_id || 0,
             type: 0
+
         }).then(function (res) {
 
             res.data.sort(function (a, b) {

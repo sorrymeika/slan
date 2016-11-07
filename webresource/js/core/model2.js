@@ -1285,6 +1285,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         var parentSnData = {};
 
+        console.log(el);
+
         if (repeatSource.parent) {
             closestElement(el, function (parentNode) {
                 if (parentNode.snRepeatSource == repeatSource.parent && parentNode.snData) {
@@ -1325,6 +1327,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 collection = model && model.findByKey(repeatSource.collectionKey);
             }
 
+            console.log(collection, model, repeatSource.collectionKey);
+
             if (!collection) return;
 
             el.snCollection = collection;
@@ -1339,8 +1343,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var cursorElem = el;
         var elementsLength = elements.length;
         var elemContain = {};
-
-        console.log(collection.models.length)
 
         collection.each(function (model) {
 

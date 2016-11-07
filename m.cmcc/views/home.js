@@ -87,8 +87,7 @@ module.exports = Activity.extend({
                 model._('quanTab').tab(2);
             });
         }
-
-        setTimeout(function () {
+        if (0)
             popup.popup({
                 tapMaskToHide: true,
                 tapToHide: true,
@@ -96,8 +95,7 @@ module.exports = Activity.extend({
                 content: '<div class="fs_s">恭喜您获得新人首<br>\
 登福利100云米\
 </div>'
-            })
-        }, 1000)
+            });
 
 
         this.bindScrollTo(model.refs.life);

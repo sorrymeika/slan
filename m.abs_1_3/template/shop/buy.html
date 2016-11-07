@@ -40,7 +40,7 @@
             <div sn-repeat="ppg in store.packagelist" class="sp_cart__pkgitem">
                 <dl>
                     <dt class="sp_cart__pkgitem_hd bottom_border">
-						{ ppg.PPG_NAME }
+                        { ppg.PPG_NAME }
 						<b class="price">￥{ Math.round(ppg.PPG_PRICE * 100) / 100 }</b>
 					</dt>
                     <dd sn-repeat="item in ppg.PackageList" class="sp_cart__listitem bottom_border">

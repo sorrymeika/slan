@@ -17,7 +17,7 @@ var Menu = Model.extend({
             <p class="user-qrcode mr_m" data-forward="/user/qrcode"></p>
         </div>
         <div class="menu_sign h_s ml_l mt_m fw_xs" data-forward="/user/set/sign_text">
-            {user.sign_text}
+            {user.sign_text || '编辑个性签名'}
         </div>
         <ul class="menu_list" ref="list">
             <li class="user-fav" data-forward="/user/fav">
@@ -68,10 +68,10 @@ var Menu = Model.extend({
         })
     },
 
-    logout: function(){
-         popup.confirm({
+    logout: function () {
+        popup.confirm({
             content: '<p class="ta_c">确定退出当前帐号吗</p>',
-            confirmAction: function(){
+            confirmAction: function () {
                 this.hide();
             }
         })

@@ -138,6 +138,7 @@
 
             <div class="bd_t mb_l bg_fff">
                 <div class="bd_b lh_s ml_l">我推荐的</div>
+                <div class="ta_c bd_b lh_m fs_s cl_ccc" sn-if="!myrecommendPublicQuan.length">暂未推荐公众圈</div>
                 <div class="hm_pubquan__myrecommend bd_b" sn-repeat="item in myrecommendPublicQuan">
                     <div class="hd clearfix" data-forward="/pubquan/{item.quan_id}">
                         <p class="img">
@@ -162,6 +163,7 @@
 
             <div class="bd_t mb_l bg_fff">
                 <div class="bd_b lh_s ml_l">我关注的</div>
+                <div class="ta_c bd_b lh_m fs_s cl_ccc" sn-if="!myfollowPublicQuan.length">暂未关注公众圈</div>
                 <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in myfollowPublicQuan">
                     <div class="hd clearfix" data-forward="/pubquan/{item.quan_id}">
                         <p class="img">
@@ -224,7 +226,7 @@
                     <p class="ml_l flexitem">手机联系人</p>
                     <p class="hm_contacts__backup">备份</p>
                 </li>
-                <li class="flex pl_m h_bar bg_fff" data-forward="/contact/friends">
+                <li class="flex pl_m h_bar bg_fff bd_b" data-forward="/contact/friends">
                     <p class="icon-person3"></p>
                     <p class="ml_l">我的好友</p>
                 </li>

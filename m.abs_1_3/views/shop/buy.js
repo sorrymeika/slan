@@ -117,25 +117,24 @@ define(function (require, exports, module) {
             });
             address.load();
 
-            new api.CartAPI({
+            var cartPromise = new api.CartAPI({
                 $el: self.$el,
                 checkData: false,
                 params: {
                     pspcode: self.user.PSP_CODE
-                },
-                success: function (res) {
-                    console.log(res);
-                    self.model.set({
-                        bag_amount: res.bag_amount,
-                        full_amount_free: parseInt(res.full_amount_free),
-                        coupon: util.find(res.coupon, function (item) {
-                            return item.VCT_ID != 4;
-                        }),
-                        freight: res.freight
-                    });
                 }
+            }).request().then(function (res) {
+                self.model.set({
+                    bag_amount: res.bag_amount,
+                    full_amount_free: parseInt(res.full_amount_free),
+                    coupon: util.find(res.coupon, function (item) {
+                        return item.VCT_ID != 4;
+                    }),
+                    freight: res.freight
+                });
 
-            }).load();
+                return res;
+            });
 
             self.cart = new api.PreOrderAPI({
                 $el: self.$el,
@@ -144,10 +143,50 @@ define(function (require, exports, module) {
                     pspcode: self.user.PSP_CODE
                 },
                 success: function (res) {
-                    self.model.set({
-                        data: res.data,
-                        loading: false
+                    var data = res.data;
+
+                    cartPromise.then(function (cartInfo) {
+                        var packageList = cartInfo.data_package;
+
+                        data.forEach(function (item) {
+                            var resultPackageList = [];
+                            var tagPackageList = item.packagelist;
+                            if (tagPackageList) {
+
+                                console.log(packageList)
+
+                                packageList.forEach(function (ppg) {
+                                    var flag = false;
+
+                                    //判断套餐是否属于该仓库
+                                    ppg.PackageList.forEach(function (prd) {
+
+                                        var index = util.indexOf(tagPackageList, function (tagPrd) {
+                                            return tagPrd.SPB_ID == prd.SPB_ID;
+                                        });
+
+                                        if (index != -1) {
+                                            flag = true;
+                                        }
+                                    });
+
+                                    if (flag)
+                                        resultPackageList.push(ppg);
+                                });
+
+                                console.log(resultPackageList);
+
+                                item.packagelist = resultPackageList;
+                            }
+                        });
+
+                        self.model.set({
+                            data: data,
+                            loading: false
+                        });
                     });
+
+
                 }
             });
 

@@ -128,9 +128,12 @@ module.exports = Activity.extend({
 
         Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function () { }), this.waitLoad()]).then(function (results) {
             var res = results[0];
+            var data = res.data;
+
+            data.see = (data.see || 0) + 1;
 
             model.set({
-                data: res.data,
+                data: data,
                 quan: res.quan,
                 follow: res.follow
             });

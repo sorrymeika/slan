@@ -108,6 +108,12 @@
                 }
             },
 
+            contact: {
+                getAll: function () {
+
+                }
+            },
+
             pickColor: function (f) {
                 hybrid('pickColor', f);
             },

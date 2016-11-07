@@ -11,6 +11,7 @@
     </div>
     <div class="ml_m mt_m fs_m">新的朋友</div>
     <div class="mt_m bd_t bg_fff">
+        <div class="ta_c bd_b lh_m fs_s cl_ccc" sn-if="!newFriends.length">暂无新朋友</div>
         <div class="ct_new__item flex bd_b" sn-repeat="item in newFriends" data-forward="/contact/{item.status==1?'friend':'person'}/{item.user_id}?type=new">
             <img src="{item.avatars}" alt="" class="sqr_s dp_b ml_m">
             <div class="flexitem ml_m">
