@@ -293,6 +293,8 @@ module.exports = Activity.extend({
                 });
                 self.share.$el.appendTo(self.$el);
 
+                console.log(self.share);
+
                 colorAndSpec.setParam({
                     id: res.data.PRD_PRH_ID
                 }).load();

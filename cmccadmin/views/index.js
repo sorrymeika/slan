@@ -628,7 +628,7 @@ return Page.extend({
                                 return res;
 
                             }).join('\n') + "\nsql += \" order by " + (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\";\n\
-                                return oracle.queryPage("+ className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + "\", page, pageSize, objs.toArray());\n }\n\
+                                return oracle.queryPage("+ className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + " order by a." + (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\", page, pageSize, objs.toArray());\n }\n\
                         }";
 
                         if (formData.writeService != 0 && javaDir) {

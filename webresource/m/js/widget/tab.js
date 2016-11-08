@@ -1,6 +1,6 @@
 var $ = require('$');
 var util = require('util');
-var promise = require('promise');
+var Promise = require('promise');
 var Touch = require('core/touch');
 var Model = require('core/model2').Model;
 var Scroll = require('../widget/scroll');

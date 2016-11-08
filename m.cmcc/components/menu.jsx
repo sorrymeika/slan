@@ -9,7 +9,7 @@ var userModel = require('models/user');
 var Menu = Model.extend({
     el: <div class="menu_exit menu">
         <div class="menu_user h_l flex">
-            <img sn-src="{sl.resource(user.avatars)}" class="gl_avatars dp_b" data-forward="/user/person" />
+            <img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="gl_avatars dp_b" data-forward="/user/person" />
             <p class="fs_m ml_m flexitem" data-forward="/user/person">
                 <span class="name dp_b">{user.user_name}</span>
                 <span class="msg dp_b">ID：{user.user_id}</span>
@@ -73,6 +73,9 @@ var Menu = Model.extend({
             content: '<p class="ta_c">确定退出当前帐号吗</p>',
             confirmAction: function () {
                 this.hide();
+
+                userModel.set(null);
+                Application.forward('/login')
             }
         })
 

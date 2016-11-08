@@ -7,7 +7,7 @@
 </header>
 <div class="main pq_search" ref="main">
     <div sn-repeat="item in searchResult" class="h_l flex pl_s bg_fff bd_b" data-forward="/contact/person/{item.user_id}">
-        <img sn-src="{sl.resource(item.avatars)}" class="sqr_m mr_m">
+        <img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" class="sqr_m mr_m">
         <p class="fs_m">{item.user_name}</p>
     </div>
     <div class="fs_m cl_999 ta_c lh_l" sn-if="isSearch&&!searchResult.length">未搜到结果</div>

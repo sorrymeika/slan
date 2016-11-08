@@ -4,7 +4,7 @@
 </header>
 <div class="main" ref="main">
     <div class="bd_tb mt_m pd_m flex_t bg_fff">
-        <img class="sqr_xl dp_b" sn-src="{sl.resource(person.avatars)}" />
+        <img onerror="this.src='images/default.jpg'" class="sqr_xl dp_b" sn-src="{sl.resource(person.avatars)}" />
         <div class="ml_l flexitem">
             <p class="name fs_l">{person.user_name}</p>
             <p class="fs_s mt_m">我信ID:{person.user_id}</p>
@@ -12,7 +12,7 @@
     </div>
     <ul class="mt_l bd_t fs_m bg_fff">
         <li class="bd_b lh_l pl_m">
-            地区：{person.address}
+            地区：{person.country_name}-{person.province_name}-{person.city_name}
         </li>
         <li class="bd_b lh_l pl_m">
             个性签名：{person.sign_text}

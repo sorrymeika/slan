@@ -34,6 +34,12 @@ var contact = Event.mixin({
         });
     },
 
+    personStatus: function (user_id) {
+        return Http.post('/userinfo/getStatus', {
+            user_id: user_id
+        });
+    },
+
     contactList: function () {
 
         if (sl.isDev)
@@ -108,39 +114,14 @@ var contact = Event.mixin({
     },
 
     friends: function () {
-        return Http.post('/contact/friends');
+        return Http.post('/friends/getFriends');
     },
 
     friend: function (user_id) {
 
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
-
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: {
-                            user_id: 1,
-                            user_name: '福建移动',
-                            avatars: 'images/logo.png',
-                            msg: '你好！可以认识一下吗？',
-                            sign_text: '独特的人',
-                            address: '福建福州',
-                            memo: '小猪',
-                            enable_leave_msg: true,
-                            //允许推送到首页
-                            enable_push: true,
-                            //-2非好友,-1未处理,0拒绝,1接受,2删除
-                            status: 1
-                        }
-                    });
-                }, 100)
-            });
-
-        return Http.post('/contact/person', {
-            user_id: user_id
+        return Http.post('/friends/getById', {
+            friend_id: user_id
         });
-
     },
 
     deleteFriend: function (user_id) {

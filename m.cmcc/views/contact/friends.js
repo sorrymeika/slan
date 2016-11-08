@@ -13,34 +13,6 @@ var contact = require('logical/contact');
 
 module.exports = Activity.extend({
 
-    groups: function () {
-        var model = this.model;
-        var groups = {};
-        var data = model.data.friendList;
-
-        if (!data) return;
-
-        data.forEach(function (item) {
-            var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
-
-            if (!groups[letter]) {
-                groups[letter] = [];
-            }
-
-            groups[letter].push(item);
-        });
-
-        groups = Object.keys(groups).map(function (key) {
-
-            return {
-                letter: key,
-                list: groups[key]
-            };
-        });
-
-        return groups;
-    },
-
     onCreate: function () {
         var self = this;
 
@@ -83,5 +55,33 @@ module.exports = Activity.extend({
 
     onDestory: function () {
         this.model.destroy();
+    },
+
+    groups: function () {
+        var model = this.model;
+        var groups = {};
+        var data = model.data.friendList;
+
+        if (!data) return;
+
+        data.forEach(function (item) {
+            var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
+
+            if (!groups[letter]) {
+                groups[letter] = [];
+            }
+
+            groups[letter].push(item);
+        });
+
+        groups = Object.keys(groups).map(function (key) {
+
+            return {
+                letter: key,
+                list: groups[key]
+            };
+        });
+
+        return groups;
     }
 });

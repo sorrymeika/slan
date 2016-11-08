@@ -343,8 +343,6 @@ var util = {
             } else if (today - date == 0) {
                 var minutes = Math.round((now - d) / 60000);
 
-                console.log(minutes, d);
-
                 if (minutes <= 2) {
                     return '刚刚';
 

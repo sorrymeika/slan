@@ -160,8 +160,6 @@ module.exports = Activity.extend({
                 break;
         }
 
-        console.log(user.data);
-
         model.back = function () {
             self.back(self.swipeRightBackAction);
         }
@@ -179,6 +177,11 @@ module.exports = Activity.extend({
                     result = userLogical.set("gender", this.get('gender'));
                     break;
                 case 'hometown':
+                    if (!this.get('home_city_id')) {
+                        Toast.showToast('未做修改');
+                        return;
+                    }
+
                     result = userLogical.set("home_city_id", this.get('city_id')).then(function () {
                         user.set({
                             home_city_name: model.get('city_name'),
@@ -187,10 +190,13 @@ module.exports = Activity.extend({
                             home_country_id: model.get('country_id'),
                             home_country_name: model.get('country_name')
                         });
-
                     });
                     break;
                 case 'address':
+                    if (!this.get('city_id')) {
+                        Toast.showToast('未做修改');
+                        return;
+                    }
                     result = userLogical.set("city_id", this.get('city_id')).then(function () {
                         user.set({
                             city_name: model.get('city_name'),

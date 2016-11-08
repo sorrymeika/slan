@@ -18,7 +18,8 @@ module.exports = Activity.extend({
         var personId = this.route.params.id;
 
         var model = this.model = new Model(this.$el, {
-            title: '详细资料'
+            title: '详细资料',
+            personId: personId
         });
 
         model.back = function () {

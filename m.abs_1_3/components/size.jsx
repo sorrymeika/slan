@@ -12,8 +12,8 @@ var Month = Model.extend({
 			<div class="base_info">
 				<div class="img"><img sn-src="{data.WPP_LIST_PIC||data.WPP_M_PIC}" /></div>
 				<div class="info">
-					<h2 class="price">¥{ specialPrice || data.PRD_PRICE }</h2>
-					<div class="qty">库存{ data.PRD_NUM }件</div>
+					<h2 class="price">¥{specialPrice || data.PRD_PRICE}</h2>
+					<div class="qty">库存{data.PRD_NUM}件</div>
 					<p class="other">
 						<em>选择</em>
 						<em>尺码</em>
@@ -25,13 +25,13 @@ var Month = Model.extend({
 				<div class="pd_size_select">
 					<div class="hd">尺码</div>
 					<ul>
-						<li sn-repeat="item in spec" class="{this.equal(data.PRD_SPEC,item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}" sn-tap="this.setSpec(item)">{ item.split('|')[0]}</li>
+						<li sn-repeat="item in spec" class="{this.equal(data.PRD_SPEC,item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}" sn-tap="this.setSpec(item)">{item.split('|')[0]}</li>
 					</ul>
 				</div>
 				<div class="pd_size_select">
 					<div class="hd">颜色分类</div>
 					<ul>
-						<li sn-repeat="item in color" class="{data.PRD_COLOR==item?'curr':this.isInList(data.PRD_SPEC,item,colorSpec)?'':'disabled'}" sn-tap="this.setColor(item)">{ item }</li>
+						<li sn-repeat="item in color" class="{data.PRD_COLOR==item?'curr':this.isInList(data.PRD_SPEC,item,colorSpec)?'':'disabled'}" sn-tap="this.setColor(item)">{item}</li>
 					</ul>
 				</div>
 			</div>
@@ -42,7 +42,7 @@ var Month = Model.extend({
 					<em sn-tap="qty=parseInt(qty)+1">+</em>
 				</p>
 			</div>
-			<b class="btn_large btn_confirm{data.PRD_NUM===0?' disabled':''}" ref="buy" sn-tap="this.confirm()">{ data.PRD_NUM === 0 ? '商品已售罄' : (btn || '确认') }</b>
+			<b class="btn_large btn_confirm{data.PRD_NUM===0?' disabled':''}" ref="buy" sn-tap="this.confirm()">{data.PRD_NUM === 0 ? '商品已售罄' : (btn || '确认')}</b>
 		</div>
 	</div>,
 
@@ -51,34 +51,34 @@ var Month = Model.extend({
 		return a == b;
 	},
 
-    isInList: function (spec, color, colorSpec) {
+	isInList: function (spec, color, colorSpec) {
 
-        return !!util.first(colorSpec, function (item) {
+		return !!util.first(colorSpec, function (item) {
 			return item.PRD_SPEC == spec && item.PRD_COLOR == color;
 		});
-    },
+	},
 
 	setSpec: function (item, e) {
 
-        if ($(e.currentTarget).hasClass('disabled')) {
-            return;
-        }
+		if ($(e.currentTarget).hasClass('disabled')) {
+			return;
+		}
 
-        this.getModel("data").set("PRD_SPEC", item);
+		this.getModel("data").set("PRD_SPEC", item);
 
-        this.onChange();
-    },
+		this.onChange();
+	},
 
-    setColor: function (item, e) {
-        if ($(e.currentTarget).hasClass('disabled')) {
-            return;
-        }
-        this.set("data.PRD_COLOR", item);
-        this.onChange();
-    },
+	setColor: function (item, e) {
+		if ($(e.currentTarget).hasClass('disabled')) {
+			return;
+		}
+		this.set("data.PRD_COLOR", item);
+		this.onChange();
+	},
 
-    onChange: function () {
-        var self = this;
+	onChange: function () {
+		var self = this;
 		var colorSpec = self.get('colorSpec');
 		var data = self.get('data');
 
@@ -86,19 +86,19 @@ var Month = Model.extend({
 			return item.PRD_SPEC == data.PRD_SPEC && item.PRD_COLOR == data.PRD_COLOR;
 		});
 
-        if (item) {
-            if (item.PRD_PRICE !== undefined) {
-                this.set("data.PRD_PRICE", item.PRD_PRICE);
-            }
-            if (item.PRD_NUM !== undefined) {
-                this.set("data.PRD_NUM", item.PRD_NUM);
-            }
-            if (item.WPP_LIST_PIC !== undefined) {
-                this.set("data.WPP_LIST_PIC", item.WPP_LIST_PIC);
-            }
-        }
-        this.trigger("SizeChange", item);
-    },
+		if (item) {
+			if (item.PRD_PRICE !== undefined) {
+				this.set("data.PRD_PRICE", item.PRD_PRICE);
+			}
+			if (item.PRD_NUM !== undefined) {
+				this.set("data.PRD_NUM", item.PRD_NUM);
+			}
+			if (item.WPP_LIST_PIC !== undefined) {
+				this.set("data.WPP_LIST_PIC", item.WPP_LIST_PIC);
+			}
+		}
+		this.trigger("SizeChange", item);
+	},
 
 	show: function () {
 		this.$el.show();
@@ -130,12 +130,12 @@ var Month = Model.extend({
 
 		} else {
 
-            self.set({ data: item });
+			self.set({ data: item });
 
-            if (item.PRD_NUM === 0) {
-                sl.tip('该商品已售罄');
-                return;
-            }
+			if (item.PRD_NUM === 0) {
+				sl.tip('该商品已售罄');
+				return;
+			}
 
 			self.cartAddAPI.setParam({
 				pspcode: self.user.PSP_CODE,
@@ -195,11 +195,11 @@ var Month = Model.extend({
 					self.hide();
 					//self.forward('/cart?from=' + self.route.url);
 
-                    Application.getCurrentActivity().setResult('CartChange');
-					
+					Application.getCurrentActivity().setResult('CartChange');
+
 				} else {
-                    sl.tip(res.msg);
-                }
+					sl.tip(res.msg);
+				}
 			},
 			complete: function () {
 				$(self.refs.buy).removeClass('disabled');

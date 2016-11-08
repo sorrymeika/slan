@@ -53,16 +53,20 @@ var filterCode = (function () {
         res += 'var ' + key + '=$data.' + key + ';';
     }
     return res;
-})()
+})();
 
-var valueCode = function (str, variables) {
+function testRegExp(regExp, val) {
+    return (regExp.lastIndex = 0) || regExp.test(val);
+}
+
+function valueCode(str, variables) {
     var arr = str.split('.');
     var alias = arr[0];
     var result = [];
     var code = '';
     var gb = '$data';
 
-    if (!alias || alias in Filters || GlobalVariables.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(str)) {
+    if (!alias || alias in Filters || GlobalVariables.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || testRegExp(rvalue, str)) {
         return str;
     }
 
@@ -289,7 +293,7 @@ function closestElement(el, fn) {
 
 
 function genFunction(expression) {
-    if (!rmatch.test(expression)) return;
+    if (!testRegExp(rmatch, expression)) return;
 
     var variables;
     var isGlobal = false;
@@ -368,40 +372,51 @@ var Model = function (parent, key, data) {
 var ModelProto = {
 
     findByKey: function (key) {
-        var model = this;
-        var keys = key.split('.');
-        var result;
+        if (this.key == key) return this;
 
-        // var isLog = key === 'myrecommendPublicQuan^child.lastMsg.imgs';
+        var models = this.model;
+        var model;
 
-        key = keys.shift();
+        while (1) {
+            var flag = false;
 
-        var models = model.model;
+            for (var modelKey in models) {
+                model = models[modelKey];
 
-        if (model._key == key || model.keys && model.keys.indexOf(key) != -1) {
-            key = keys.shift();
-            result = model;
-            models = model.model;
-        }
+                if (model instanceof Model || model instanceof Collection) {
 
-        while (key) {
-            result = null;
+                    if (model.key == key) {
+                        return model;
 
-            for (var k in models) {
-                var mod = models[k];
+                    } else if (model.keys) {
+                        if (model.keys.indexOf(key) != -1) {
+                            return model;
 
-                if (mod instanceof Collection || mod instanceof Model) {
-                    if (mod._key == key || mod.keys && mod.keys.indexOf(key) != -1) {
-                        result = mod;
-                        models = mod.model;
-                        key = keys.shift();
+                        } else {
+                            for (var i = 0, len = model.keys.length; i < len; i++) {
+                                if (key.indexOf(model.keys[i] + '.') == 0) {
+                                    flag = true;
+                                    key = key.substr(model.keys[i].length + 1);
+                                    break;
+                                }
+                            }
+                        }
+
+                    } else if (key.indexOf(model.key + '.') == 0) {
+                        flag = true;
+                    }
+
+                    if (flag && model.model) {
+                        models = model.model;
                         break;
                     }
                 }
             }
-            if (result == null || models == null) break;
+
+            if (!flag) break;
         }
-        return result;
+
+        return null;
     },
 
     getModel: function (key) {
@@ -1068,7 +1083,10 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                             attr = "sn-" + self.cid + evt;
 
-                            if (rset.test(val) || rfunc.test(val)) {
+                            var a = /\d+$/g;
+
+                            if (testRegExp(rset, val) || testRegExp(rfunc, val)) {
+
                                 var content = val.replace(rfunc, function (match, $1, $2) {
 
                                     if (/^(Math\.|encodeURIComponent\(|parseInt\()/.test($1)) {
@@ -1081,7 +1099,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                     return match;
 
                                 })*/.replace(rset, 'this.setDataFromElement(e.currentTarget,"$1",$2)');
-
 
                                 var fid = self.getFunctionId('{' + content + '}');
                                 if (fid) {
@@ -1285,8 +1302,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         var parentSnData = {};
 
-        console.log(el);
-
         if (repeatSource.parent) {
             closestElement(el, function (parentNode) {
                 if (parentNode.snRepeatSource == repeatSource.parent && parentNode.snData) {
@@ -1326,8 +1341,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             } else {
                 collection = model && model.findByKey(repeatSource.collectionKey);
             }
-
-            console.log(collection, model, repeatSource.collectionKey);
 
             if (!collection) return;
 
@@ -1682,7 +1695,7 @@ exports.Collection = Collection;
 exports.createModel = function (props) {
     var model = Object.assign(new ViewModel, props);
 
-    if (props.defaultData) model.set(props.defaultData);
+    if (props && props.defaultData) model.set(props.defaultData);
 
     return model;
 }
@@ -1690,7 +1703,7 @@ exports.createModel = function (props) {
 exports.createCollection = function (props) {
     var model = Object.assign(new Collection, props);
 
-    if (props.defaultData) model.set(props.defaultData);
+    if (props && props.defaultData) model.set(props.defaultData);
 
     return model;
 }

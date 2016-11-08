@@ -57,9 +57,19 @@ module.exports = Activity.extend({
                 quanInfo.summary = quanInfo.summary.replace(/<(\/{0,1}[a-zA-Z]+)(?:\s+[a-zA-Z1-9_-]+="[^"]*"|\s+[^\s]+)*?\s*(\/){0,1}\s*>/mg, '');
             }
             quanInfo.is_follow = quanInfo.pub_quan_follow ? quanInfo.pub_quan_follow.is_follow : false;
+
+            var articles = results[1].data;
+
+            articles.forEach(function (item) {
+
+                if (item.imgs) {
+                    item.imgs = item.imgs.split(',')
+                }
+            });
+
             model.set({
                 quanInfo: quanInfo,
-                newArticles: results[1].data,
+                newArticles: articles,
                 newLength: Math.min(20, results[1].total)
             })
 

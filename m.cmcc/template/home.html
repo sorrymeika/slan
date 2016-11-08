@@ -1,6 +1,6 @@
 <div class="hm_home dock" ref="home" sn-tap="this.exitMenu()">
     <header class="flex header_app" sn-if="tab==1">
-        <a href="javascript:;" sn-tap="this.menu()" class="pr_m h_bar pt_s pt_6"><img sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
+        <a href="javascript:;" sn-tap="this.menu()" class="pr_m h_bar pt_s pt_6"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
         <div class="flexitem">
             <div class="hm_idx__cir">
                 剩余流量<br/> 1G
@@ -15,7 +15,7 @@
     </header>
 
     <header class="flex" sn-if="tab==3">
-        <a href="javascript:;" sn-tap="this.menu()"><img sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
+        <a href="javascript:;" sn-tap="this.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
         <div class="ml_m flexitem flex hm_quan__search" data-forward="{quanTab.index==0?'/pubquan/search':'/quan/search'}">
             <div class="icon-search sqr_s"></div>
             <p class="fs_m pt_1 dp_b cl_ccc">搜索{quanTab.index==0?'公众圈':quanTab.index==1?'朋友圈':'通讯录'}</p>
@@ -150,7 +150,7 @@
                     <div class="bd" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
                         <div class="pt_m pl_m fs_m" sn-html="{item.pub_quan_msg.title}"></div>
                         <ul class="imgs clearfix">
-                            <li class="img fl_l ml_m" sn-repeat="img in item.pub_quan_msg.imgs"><img sn-src="{sl.resource(img)}" /></li>
+                            <li class="img fl_l ml_m" sn-repeat="img in item.pub_quan_msg.imgs"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
                     </div>
                     <div class="ft flex lh_s" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
@@ -175,10 +175,10 @@
                     <div class="bd" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
                         <div class="pb_s pl_m pt_m fs_m to_e">{item.pub_quan_msg.title}</div>
                         <ul class="imgs clearfix">
-                            <li class="img fl_l pl_m" sn-repeat="img in item.pub_quan_msg.imgs"><img sn-src="{sl.resource(img)}" /></li>
+                            <li class="img fl_l pl_m" sn-repeat="img in item.pub_quan_msg.imgs"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
                     </div>
-                    <div class="ft flex lh_s" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
+                    <div sn-if="item.pub_quan_msg" class="ft flex lh_s" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
                         <p class="icon-see flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.see)}</span></p>
                         <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.likes)}</span></p>
                         <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.comments)}</span></p>
@@ -191,12 +191,12 @@
         <div class="hm_quan">
             <div class="hm_quan__item bd_b" sn-repeat="quan in quanData">
                 <div class="flex_t pt_m pb_m">
-                    <p class="avatars ml_m mr_m" data-forward="/contact/friend/{quan.user_id}"><img src="{quan.avatars}" /></p>
+                    <p class="avatars ml_m mr_m" data-forward="/contact/friend/{quan.user_id}"><img onerror="this.src='images/default.jpg'" src="{quan.avatars}" /></p>
                     <div class="bd flexitem lh_xxs">
                         <p class="name cl_dark fs_m" data-forward="/contact/friend/{quan.user_id}">{quan.user_name}</p>
                         <p class="con fs_m" sn-html="{quan.content}"></p>
                         <ul class="imgs clearfix mt_s">
-                            <li class="img fl_l mr_m" sn-repeat="img in quan.imgs"><img sn-src="{sl.resource(img)}" /></li>
+                            <li class="img fl_l mr_m" sn-repeat="img in quan.imgs" sn-tap="this.showImages(quan.imgs)"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
                         <div class="bar flex fs_s mt_s">
                             <p class="date flexitem">{util.formatDate(quan.add_date,"short")}</p>
@@ -231,9 +231,9 @@
                     <p class="ml_l">我的好友</p>
                 </li>
             </ul>
-            <ul class="bd_t mt_l pt_1 hm_contacts__messages">
-                <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list" data-forward="/contact/chat/{item.user_id}">
-                    <p class="img ml_m"><img sn-src="{sl.resource(item.avatars)}" /></p>
+            <ul class="bd_t mt_l pt_1 hm_contacts__messages" sn-if="messagesList.list.length">
+                <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list|orderByDesc:date" data-forward="/contact/chat/{item.user_id}">
+                    <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>
                     <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
                         <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
                     </p>

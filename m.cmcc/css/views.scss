@@ -96,7 +96,7 @@
 .hm_quan__item .avatars img { width: 100%; }
 .hm_quan__item .comment { padding: 5px; background-color: #eee; margin-right: 10px; border-radius: 5px; margin-top: 10px; position: relative; }
 .hm_quan__item .comment:before { width: 10px; height: 10px; background-color: #eee; position: absolute; top: -5px; -webkit-transform: rotate(45deg); content: ""; left: 20px; }
-.hm_quan__item .imgs img { max-width: 100px; }
+.hm_quan__item .imgs img { max-width: .72rem; }
 
 .hm_contacts .icon-newfriend,.hm_contacts .icon-person2 ,.hm_contacts .icon-person3 { width: 30px; height: 30px; text-align: center; border-radius: 4px; padding-top: 2px; }
 .hm_contacts .icon-newfriend { background-color: #fa9d3b; }

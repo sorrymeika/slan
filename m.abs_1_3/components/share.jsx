@@ -78,10 +78,8 @@ var Share = Component.extend({
     callback: function () {
 
     },
-    initialize: function () {
-
-        this.model = new model.ViewModel(this.$el, this.options);
-
+    initialize: function (options) {
+        this.model = new model.ViewModel(this.$el, options);
     },
 
     set: function (data) {

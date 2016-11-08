@@ -3,8 +3,6 @@ var $ = require('$');
 var Scroll = require('./scroll');
 var util = require('util');
 
-
-
 module.exports = Model.extend({
     el: (<div class="cp_photoviewer" sn-tap="this.resetSize()" sn-touchstart="this.touchStart()" sn-touchmove="this.touchMove()" sn-touchend="this.touchEnd()">
         <ul class="cp_photoviewer__con" ref="content" style="-webkit-transform:translate({x}px,0px);width:{images.length*100}%">
@@ -21,18 +19,27 @@ module.exports = Model.extend({
         images: [{
             src: "http://127.0.0.1:5559/images/launch0.jpg"
         }, {
-                src: "http://image.beekka.com/blog/201206/bg2012061901.jpg"
-            }]
+            src: "http://image.beekka.com/blog/201206/bg2012061901.jpg"
+        }]
     },
 
     resetSize: function () {
-
         this.currentItem.set({
             s: 1
         })
     },
 
-    setImage: function () {
+    setImages: function (images) {
+
+        images.forEach(function (img) {
+
+            img.r = 0;
+            img.s = 1;
+        });
+
+        this.set({
+            images: images
+        })
     },
 
     initialize: function () {

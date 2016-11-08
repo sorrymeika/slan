@@ -231,27 +231,10 @@ var publicquan = Event.mixin({
         })
     },
 
-
     //@params={msg_id: msg_id, $scroll: $scroll}
-    createCommentsLoader: function (params, success, append) {
-
-        var loader = new Loader({
-            url: '/pub_quan_comments/getPage',
-
-            $scroll: params.$scroll,
-
-            params: {
-                msg_id: params.msg_id
-            },
-
-            success: success,
-
-            append: append,
-
-            complete: function () { }
-        });
-
-        return loader;
+    commentsLoader: function (params, model) {
+        return Loader.pageLoader('/pub_quan_comments/getPage', 'comments', model)
+            .setParam(params);
     },
 
     sendComment: function (msg_id, content) {

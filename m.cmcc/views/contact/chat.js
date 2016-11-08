@@ -9,6 +9,7 @@ var popup = require('widget/popup');
 
 var chat = require('logical/chat');
 var user = require('models/user');
+var messagesList = require('models/messagesList');
 
 
 module.exports = Activity.extend({
@@ -26,20 +27,21 @@ module.exports = Activity.extend({
         this.newMessage = this.newMessage.bind(this);
 
         chat.on('sendresult' + personId, this.sendResult)
-            .on('message:' + personId, this.newMessage);
+            .on('message:' + user.get('user_id'), this.newMessage);
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
         model.send = function () {
-            if (!this.data.content) return;
+            var content = this.data.content;
+            if (!content) return;
 
             var messages = model._('messages');
             var data = {
                 gid: chat.getGid(),
                 type: chat.MESSAGETYPE.TEXT,
-                content: this.data.content,
+                content: content,
                 to_id: personId,
                 from_id: user.get('user_id'),
                 is_show_time: false
@@ -130,7 +132,7 @@ module.exports = Activity.extend({
     onDestory: function () {
         var personId = this.route.params.id;
         chat.off('sendresult:' + personId, this.sendResult)
-            .off('message:' + personId, this.newMessage);
+            .off('message:' + user.get('user_id'), this.newMessage);
 
         this.model.destroy();
     },
@@ -142,6 +144,8 @@ module.exports = Activity.extend({
     },
 
     newMessage: function (e, msg) {
+
+        console.log('recieve new message')
         var self = this;
         this.model._('messages').add(msg);
         this.model.next(function () {

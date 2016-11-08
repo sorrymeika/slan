@@ -22,6 +22,17 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
+        model.selectItem = function (item) {
+            this._('list').each(function (mod) {
+
+                if (mod.get('quan_id') != item.quan_id) {
+                    mod.set('isSelected', false)
+                } else {
+                    mod.set('isSelected', true)
+                }
+            });
+        }
+
         model.save = function () {
             var list = this.data.list;
 

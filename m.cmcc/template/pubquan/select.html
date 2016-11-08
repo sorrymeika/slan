@@ -5,7 +5,7 @@
 </header>
 <div class="main pt_m" ref="main">
     <ul class="bd_t bg_fff">
-        <li class="bd_b h_l flex " sn-repeat="item in list" sn-tap="item.isSelected=!item.isSelected">
+        <li class="bd_b h_l flex " sn-repeat="item in list" sn-tap="this.selectItem(item)">
             <p class="radio{item.isSelected?' checked':''}"></p>
             <img sn-src="{sl.resource(item.quan_pic)}" class="dp_b sqr_m">
             <p class="name ml_m">{item.quan_name}</p>

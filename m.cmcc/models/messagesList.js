@@ -3,27 +3,14 @@ var model2 = require('core/model2');
 
 
 var messagesList = model2.createModel({
-    defaultData: sl.isDev ? {
-        list: [{
-            user_id: 1,
-            user_name: '小黑',
-            avatars: "images/logo.png",
-            date: 1476211314511,
-            msg: '[图片]',
-            unread: 3,
-            last_msg_id: 0
-
-        }, {
-                user_id: 2,
-                user_name: '小白',
-                avatars: "images/logo.png",
-                date: 1476211314511,
-                msg: '[图片]',
-                unread: 0,
-                last_msg_id: 0
-            }]
-
-    } : util.store('messagesList')
+    defaultData: util.store('messagesList') || {
+        list: []
+    }
 });
+
+messagesList.on('datachanged', function () {
+    util.store('messagesList', this.data);
+});
+
 
 module.exports = messagesList;

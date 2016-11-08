@@ -55,7 +55,7 @@ register_date DATE,--注册时间 --search=true
 drop table userinfo;
 create table userinfo (--用户 --props=String account,int status,int country_id,String country_name,String province_name,int province_id,String city_name,int home_country_id,String home_country_name,String home_province_name,int home_province_id,String home_city_name
 user_id  number(11) primary key,--用户ID
-avatars varchar(20),--用户头像 --type=file
+avatars varchar(255),--用户头像 --type=file
 user_name varchar(20),--用户昵称 --unique=true --updateable=false --search=true
 sign_text varchar(200),--签名 --emptyAble=true
 gender number(1),--性别 --emptyAble=true
@@ -196,8 +196,8 @@ create table quan_msg_black (--朋友圈信息屏蔽
 
 create sequence quan_msg_black_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
-create table friends (--好友 --props=String user_name,String avatars
-    fid  number(15) primary key,--自增id
+create table friends (--好友 --props=String user_name,String avatars,int is_send
+    fid number(15) primary key,--自增id
     friend_id number(10),--好友id
     user_id number(10),--发起请求方
     status number(2),--状态 --options=-2非好友,-1未处理,0拒绝,1接受,2删除,
@@ -207,11 +207,6 @@ create table friends (--好友 --props=String user_name,String avatars
 ) tablespace cmccuser;
 create sequence friends_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
-
-
------------------------------
---<<2016-11-3 up to date here
------------------------------
 
 alter table friends add msg varchar(40);
 
@@ -252,3 +247,19 @@ create table messages (
 ) tablespace cmccuser;
 create sequence messages_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
+
+
+
+-----------------------------
+--<<2016-11-8 up to date here
+-----------------------------
+alter table userinfo modify avatars varchar(255);
+
+create table friends_ext (
+    ext_id number(15) primary key,--自增id
+    friend_id number(10),--好友id
+    user_id number(10),--用户ID
+    memo varchar(10),--备注
+    enable_leave_msg number(1),--允许留言
+    enable_push number(1)--允许推送到首页
+) tablespace cmccuser;

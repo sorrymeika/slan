@@ -6,7 +6,7 @@
 
     <div class="bd_tb flex mt_l bg_fff pt_m pb_m" sn-tap="this.changeAvatars()">
         <p class="flexitem ml_m">头像</p>
-        <img sn-src="{sl.resource(user.avatars)}" class="gl_avatars dp_b mr_m">
+        <img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="gl_avatars dp_b mr_m">
     </div>
 
     <ul class="mt_l bg_fff pt_1">
@@ -31,11 +31,11 @@
     <ul class="mt_l bg_fff pt_1">
         <li class="bd_b lh_bar h_bar pl_m pr_m flex" data-forward="/user/set/hometown">
             <p class="flexitem">家乡</p>
-            <p class="ta_r">{user.hometown}</p>
+            <p class="ta_r">{user.home_country_name}{user.home_province_name}{user.home_city_name}</p>
         </li>
         <li class="bd_b lh_bar h_bar pl_m pr_m flex" data-forward="/user/set/address">
             <p class="flexitem">地区</p>
-            <p class="ta_r">{user.address}</p>
+            <p class="ta_r">{user.country_name}{user.province_name}{user.city_name}</p>
         </li>
     </ul>
 </div>

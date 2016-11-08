@@ -61,7 +61,7 @@
             "core/http": "../webresource/js/core/http",
             "components/confirm": "./components/confirm",
             "components/cart": "./components/cart",
-            "components/imagePicker": "./components/imagePicker"
+            "components/imagePicker": "./components/imagePicker"            
         },
         "widget/calendar": {
             "widget/calendar": "../webresource/m/js/widget/calendar"

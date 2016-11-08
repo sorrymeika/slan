@@ -442,6 +442,7 @@ Loader.pageLoader = function (url, key, model) {
         $scroll: $(model.refs.main),
 
         success: function (res) {
+
             model.set(key, res.data);
         },
 

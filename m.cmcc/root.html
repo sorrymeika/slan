@@ -62,6 +62,14 @@
                     return sl.resources + src;
                 }
             };
+            sl.thumbnail = function(src) {
+                src = this.resource(src);
+                if (src.indexOf("data:image")==0) return src;
+                var i = src.lastIndexOf('.');
+                var ext = src.substr(i);
+
+                return src.substr(0, i) + "_180x180.jpg";
+            };
 
             $(window).on('ortchange', adjustPx);
 

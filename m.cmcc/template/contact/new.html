@@ -13,14 +13,15 @@
     <div class="mt_m bd_t bg_fff">
         <div class="ta_c bd_b lh_m fs_s cl_ccc" sn-if="!newFriends.length">暂无新朋友</div>
         <div class="ct_new__item flex bd_b" sn-repeat="item in newFriends" data-forward="/contact/{item.status==1?'friend':'person'}/{item.user_id}?type=new">
-            <img src="{item.avatars}" alt="" class="sqr_s dp_b ml_m">
+            <img onerror="this.src='images/default.jpg'" src="{sl.resource(item.avatars)}" alt="" class="sqr_s dp_b ml_m">
             <div class="flexitem ml_m">
                 <div class="fs_m">{item.user_name}</div>
                 <div class="fs_s">{item.msg}</div>
             </div>
-            <button sn-if="item.status==-1" class="btn_xs" sn-tap="this.acceptFriend(item.user_id)">接受</button>
-            <span sn-if="item.status==1" class="cl_ccc fs_s">已接受</span>
-            <span sn-if="item.status==0" class="cl_ccc fs_s">已拒绝</span>
+            <span sn-if="item.is_send==1&&item.status==-1" class="cl_ccc fs_s">等待接受</span>
+            <button sn-else-if="!item.is_send&&item.status==-1" class="btn_xs" sn-tap="this.acceptFriend(item.user_id)">接受</button>
+            <span sn-else-if="item.status==1" class="cl_ccc fs_s">已接受</span>
+            <span sn-else-if="item.status==0" class="cl_ccc fs_s">已拒绝</span>
             <button class="icon-xx" sn-tap="this.del(item.fid)"></button>
         </div>
     </div>

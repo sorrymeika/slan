@@ -4,7 +4,7 @@
 </header>
 <div class="main" ref="main">
     <div class="bd_tb mt_m pd_m flex_t bg_fff ps_r">
-        <img class="sqr_xl dp_b" sn-src="{sl.resource(person.avatars)}" />
+        <img onerror="this.src='images/default.jpg'" class="sqr_xl dp_b" sn-src="{sl.resource(person.avatars)}" />
         <div class="ml_l flexitem">
             <p class="name fs_l">{person.user_name}</p>
             <p class="fs_s mt_xs">我信ID:{person.user_id}</p>
@@ -39,6 +39,6 @@
 
     <div class="mg_m mb_l">
         <div class="btn_xl">拨号</div>
-        <div class="btn_xl mt_m">发消息</div>
+        <div class="btn_xl mt_m" data-forward="/contact/chat/{personId}">发消息</div>
     </div>
 </div>

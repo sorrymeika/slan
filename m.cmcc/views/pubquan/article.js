@@ -54,18 +54,8 @@ module.exports = Activity.extend({
             else follow();
         }
 
-        publicquan.on('sendComment:' + articleId, function (e, data) {
-            var comments = model.getModel('comments');
-            data = $.extend(data, user.data);
-
-            if (!comments) {
-                model.set({
-                    comments: [data]
-                })
-            } else {
-                comments.unshift(data);
-            }
-        })
+        this.onSendComment = this.onSendComment.bind(this);
+        publicquan.on('sendComment:' + articleId, this.onSendComment);
 
         model.delComment = function (comment_id) {
             publicquan.delComment(comment_id).then(function (res) {
@@ -112,25 +102,36 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        var commentsLoader = publicquan.createCommentsLoader({
+        var commentsLoader = publicquan.commentsLoader({
             msg_id: articleId,
-            $scroll: $(model.refs.main)
+            orderBy: 'desc'
 
-        }, function (res) {
-            model.set({
-                comments: res.data
-            })
+        }, model);
 
-        }, function (res) {
+        model.sortBy = function () {
+            var sort = commentsLoader.getParam('orderBy');
 
-            model.getModel('comments').add(res.data);
-        });
+            commentsLoader.setParam('orderBy', sort == 'asc' ? 'desc' : 'asc')
+                .reload();
+        }
 
         Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function () { }), this.waitLoad()]).then(function (results) {
             var res = results[0];
             var data = res.data;
 
             data.see = (data.see || 0) + 1;
+
+            console.log(data.imgs)
+
+            if (!/<img\s+/.test(data.content)) {
+                if (data.imgs) {
+                    data.imgs = data.imgs.split(',');
+                }
+            } else {
+                data.imgs = null;
+            }
+
+            console.log(data.imgs);
 
             model.set({
                 data: data,
@@ -159,5 +160,19 @@ module.exports = Activity.extend({
         publicquan.off('sendComment:' + this.route.params.id)
 
         this.model.destroy();
+    },
+
+    onSendComment: function (e, data) {
+        var model = this.model;
+        var comments = model._('comments');
+        data = $.extend(data, user.data);
+
+        if (!comments) {
+            model.set({
+                comments: [data]
+            })
+        } else {
+            comments.unshift(data);
+        }
     }
 });

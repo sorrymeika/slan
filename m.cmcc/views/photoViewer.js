@@ -6,10 +6,7 @@ var Model = require('core/model2').Model;
 var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
-var user = require('models/user');
 
-var imagePicker = require('components/imagePicker');
-var userLogical = require('logical/user');
 
 module.exports = Activity.extend({
 
@@ -17,24 +14,20 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '个人资料',
-            user: user
+            title: ''
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeRightBackAction)
         }
 
-        model.changeAvatars = function () {
-            imagePicker.show('更换头像', function (res) {
+        var photoViewer = this.photoViewer = new PhotoViewer();
 
-                userLogical.setAvatars(res.id);
+        photoViewer.$el.appendTo(model.$el);
 
-                user.set({
-                    avatars: res.thumbnail
-                });
-            });
-        }
+        var loader = this.loader = new Loader(this.$el);
+
+        loader.showLoading();
 
         Promise.all([this.waitLoad()]).then(function (results) {
 
@@ -42,11 +35,17 @@ module.exports = Activity.extend({
 
         }).catch(function (e) {
             Toast.showToast(e.message);
+
+        }).then(function () {
+            loader.hideLoading();
         });
     },
 
     onShow: function () {
         var self = this;
+        var routeData = this.route.data;
+
+        this.photoViewer.setImages(routeData.images);
     },
 
     onDestory: function () {

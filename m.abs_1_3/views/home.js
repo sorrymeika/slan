@@ -134,6 +134,8 @@ module.exports = Activity.extend({
                         cart: cart
                     });
                     cart.$el.appendTo(this.model.refs.cart);
+                } else {
+                    this.cart.cartApi.load();
                 }
 
                 this.model.set({
@@ -490,10 +492,7 @@ module.exports = Activity.extend({
             self.$('.footer li:nth-child(1)').trigger('tap');
 
         }).onResult('CartChange', function () {
-
-            self.getCartQty();
-
-            self.cart && self.cart.cartApi.load();
+            self.refreshCart();
         });
 
         setInterval(function () {
@@ -537,12 +536,15 @@ module.exports = Activity.extend({
 
     },
 
-    getCartQty: function () {
+    refreshCart: function () {
         if (this.user.PSP_CODE) {
-            cartQtyApi.setParam({
-                pspcode: this.user.PSP_CODE
+            if (this.cart)
+                this.cart.cartApi.load();
+            else
+                cartQtyApi.setParam({
+                    pspcode: this.user.PSP_CODE
 
-            }).load();
+                }).load();
         }
     },
 
@@ -563,7 +565,7 @@ module.exports = Activity.extend({
                 user: self.user
             });
 
-            self.getCartQty();
+            self.refreshCart();
 
             self.showEnergy();
             self.stewardQtyApi.setParam({

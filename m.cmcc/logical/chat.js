@@ -4,6 +4,9 @@ var Http = require('core/http');
 var Event = require('core/event');
 var Promise = require('promise');
 
+var messagesList = require('models/messagesList');
+var contact = require('logical/contact');
+
 var MESSAGETYPE = {
     TEXT: 1,
     IMAGE: 2
@@ -24,6 +27,7 @@ function keep() {
                 switch (msg.type) {
                     case MESSAGETYPE.TEXT:
                     case MESSAGETYPE.IMAGE:
+                        chat.record(msg.from_id, msg.content);
                         chat.trigger('message:' + msg.to_id, msg);
                         break;
                 }
@@ -35,12 +39,30 @@ function keep() {
 }
 keep();
 
-var records = vm.createCollection();
-
 var chat = Event.mixin({
     MESSAGETYPE: MESSAGETYPE,
 
-    getRecords: function () {
+    record: function (friend_id, content) {
+
+        var records = messagesList._('list');
+        var record = records.find('user_id', friend_id);
+
+        var recordData = {
+            user_id: friend_id,
+            date: Date.now(),
+            msg: content
+        };
+
+        if (!record) {
+            contact.person(friend_id).then(function (res) {
+                recordData.user_name = res.data.user_name;
+                recordData.avatars = res.data.avatars;
+                records.add(recordData);
+            });
+
+        } else {
+            record.set(recordData);
+        }
     },
 
     getUnreadMessages: function () {
@@ -74,6 +96,9 @@ var chat = Event.mixin({
             is_show_time: params.is_show_time || 0,
             isSending: true
         };
+
+        this.record(params.to_id, params.content);
+
 
         return Http.post("/messages/sendMessage", params).then(function (res) {
 
