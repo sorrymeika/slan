@@ -90,7 +90,7 @@ module.exports = Activity.extend({
             });
             return util.currency(amount, '￥');
         }
-        self.model.cancelOrder = function (e, order) {
+        self.model.cancelOrder = function (order, e) {
 
             popup.confirm({
                 title: '温馨提示',
@@ -99,6 +99,8 @@ module.exports = Activity.extend({
                 cancelAction: function () { },
                 confirmText: '确定取消',
                 confirmAction: function () {
+                    this.hide();
+                    
                     self.cancelOrderApi.setParam({
                         purcode: order.PUR_CODE
 
@@ -162,7 +164,8 @@ module.exports = Activity.extend({
                     self.orderApi.reload();
 
                     //通知更新优惠券数量
-                    self.setResult("UserChange");
+                    self.setResult("UserChange")
+                        .setResult("OrderChange");
                 }
             },
             error: function (res) {

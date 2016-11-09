@@ -28,6 +28,10 @@ define(function (require, exports, module) {
             });
 
             cart.$el.appendTo(this.model.refs.cart);
+
+            this.onResult('CartChange', function () {
+                cart.cartApi.load();
+            });
         },
 
         onShow: function () {

@@ -3,7 +3,7 @@ var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
 var Loading = require('widget/loader');
-var model = require('core/model');
+var model = require('core/model2');
 var Scroll = require('widget/scroll');
 var Share = require('components/share');
 var Size = require('components/size');
@@ -22,6 +22,8 @@ module.exports = Activity.extend({
 
         'tap .js_buy:not(.disabled)': function () {
             var self = this;
+
+            console.log(self.model.data);
 
             if (!self.model.data.canBuy) {
                 sl.tip(self.model.data.tip);
@@ -71,6 +73,9 @@ module.exports = Activity.extend({
             qty: 1,
             tip: '分享后才能购买哦'
         });
+
+        console.log(self.model.get('tip'));
+        console.log(self.model.data.tip);
 
         this.bindScrollTo(self.model.refs.main);
 
@@ -171,7 +176,7 @@ module.exports = Activity.extend({
                     self.model.set({
                         LPP_ID: res.data.LPP_ID,
                         canBuy: res.isbuy,
-                        tip: res.sharemsg
+                        tip: res.sharemsg || '分享后才能购买哦'
                     });
 
                     self.share = new Share({
@@ -282,17 +287,21 @@ module.exports = Activity.extend({
                     sl.tip('加入购物车成功！');
 
                 } else {
-                    sl.tip(res.msg);
+                    sl.tip(res.message);
                 }
             },
             error: function (res) {
-                sl.tip(res.msg);
+                sl.tip(res.message);
             }
         });
     },
 
     onShow: function () {
         var self = this;
+
+        this.model.set({
+            isLogin: !!userModel.get()
+        })
     },
 
     onDestory: function () {

@@ -33,6 +33,8 @@ define(function (require, exports, module) {
 
             var state = self.route.query.state || 0;
 
+            var loaders = {};
+
             this.model = new model.ViewModel(this.$el, {
                 back: '/',
                 url: encodeURIComponent(this.route.url),
@@ -44,15 +46,13 @@ define(function (require, exports, module) {
             }).next(function () {
                 var tab = self.tab = this.refs.tab;
 
-                var inits = {};
 
                 var createLoader = function (index) {
-                    if (inits[index]) return;
-                    inits[index] = true;
+                    if (loaders[index]) return;
 
                     var key = 'data' + (index || '');
 
-                    var loader = new Loader({
+                    var loader = loaders[index] = new Loader({
                         url: "/api/order/getListByType",
                         $el: self.$el,
                         $refreshing: $(tab.refs.items[index]).find('.refreshing'),
@@ -160,7 +160,7 @@ define(function (require, exports, module) {
                         confirmText: '确定取消',
                         confirmAction: function () {
                             this.hide();
-                            
+
                             self.cancelOrderApi.setParam({
                                 purcode: order.PUR_CODE
 
@@ -183,7 +183,7 @@ define(function (require, exports, module) {
                             self.forward('/item/' + prd.PRD_ID + "?from=" + encodeURIComponent(self.route.url));
                         }
                     } else {
-                        this.openOrder(e, order);
+                        this.openOrder(order);
                     }
                 }
             })
@@ -195,7 +195,10 @@ define(function (require, exports, module) {
             });
 
             self.onResult("OrderChange", function () {
-                self.loading.reload();
+                if (!self.tab) return;
+                var loader = loaders[self.tab.get('index')];
+
+                loader && loader.reload();
             });
 
             self.cancelOrderApi = new api.CancelOrderAPI({
@@ -207,7 +210,7 @@ define(function (require, exports, module) {
                 success: function (res) {
                     if (res.success) {
                         sl.tip('订单已成功取消');
-                        self.loading.reload();
+                        loaders[self.tab.get('index')].reload();
 
                         //通知更新优惠券数量
                         self.setResult("UserChange");

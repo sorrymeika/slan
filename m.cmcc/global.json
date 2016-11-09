@@ -27,6 +27,10 @@
     ],
     "env": {
         "production": {
+            "api": "http://10.46.110.85/api",
+            "resources": "http://10.46.110.85/upload/"
+        },
+        "uat": {
             "api": "http://wxcs.ie1e.com/api",
             "resources": "http://wxcs.ie1e.com/upload/"
         },

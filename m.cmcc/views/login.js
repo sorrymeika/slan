@@ -41,32 +41,32 @@ module.exports = Activity.extend({
             }
 
             Loader.showLoading();
-
-            new Http({
-                        url: '/user/login',
-                        params: auth.encryptParams({
-                            account: phoneNo,
-                            password: auth.md5(password),
-                            token: "xxx"
-                        })
-
-                    }).request()
-                        .then(function (res) {
-                            auth.setAuthToken(res.data.tk);
-
-                            delete res.data.tk;
-
-                            auth.setUser(res.data);
-
-                            model.back();
-
-                        }).catch(function (e) {
-                            Toast.showToast(res.message);
-
-                        }).then(function () {
-                            Loader.hideLoading();
-                        });
-
+            /*
+                        new Http({
+                                    url: '/user/login',
+                                    params: auth.encryptParams({
+                                        account: phoneNo,
+                                        password: auth.md5(password),
+                                        token: "xxx"
+                                    })
+            
+                                }).request()
+                                    .then(function (res) {
+                                        auth.setAuthToken(res.data.tk);
+            
+                                        delete res.data.tk;
+            
+                                        auth.setUser(res.data);
+            
+                                        model.back();
+            
+                                    }).catch(function (e) {
+                                        Toast.showToast(res.message);
+            
+                                    }).then(function () {
+                                        Loader.hideLoading();
+                                    });
+            */
             bridge.cmcc.login(phoneNo, password, "sms", function (res) {
                 if (res.success) {
 
@@ -89,7 +89,7 @@ module.exports = Activity.extend({
                             model.back();
 
                         }).catch(function (e) {
-                            Toast.showToast(res.message);
+                            Toast.showToast(e.message);
 
                         }).then(function () {
                             Loader.hideLoading();

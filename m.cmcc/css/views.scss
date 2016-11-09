@@ -131,7 +131,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .pq_item__info img { width: 60px; height: 60px; border-radius: 4px; overflow: hidden; }
 .pq_item__info .follow { color: #b2b2b2; }
 .pq_item__articles .hd { height: 44px; color: $color; line-height: 44px; font-size: 14px; padding-left: 10px; }
-.pq_item__articles_item { }
+.pq_item__articles_item img { max-width: 1.2rem; }
 
 .quan-publish { position: absolute; bottom: 60px; right: 10px; z-index: 100; background: rgba(0,0,0,0); }
 .quan-publish:active { opacity: .7; }
@@ -301,4 +301,4 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .ym_invite__prize .num { font-size: .22rem; color: #d5122e; }
 .ym_invite__code { color: #ff0101; font-size: .24rem; }
 .ym_invite__share { margin: 0 10px 0 10px; overflow: hidden; text-align: center; }
-.ym_invite__share > li {width: 70px; }
+.ym_invite__share > li { width: 70px; }

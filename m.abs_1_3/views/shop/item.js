@@ -300,7 +300,7 @@ module.exports = Activity.extend({
                 }).load();
             },
             error: function (res) {
-                sl.tip(res.msg || res.data);
+                sl.tip(res.msg || res.data || res.message);
 
                 self.back(self.query.from || self.referrer);
             }

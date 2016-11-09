@@ -51,6 +51,10 @@ module.exports = Activity.extend({
             tab: 1
         });
 
+         model.openEnt = function () {
+            bridge.openInApp('http://share.migu.cn/h5/api/h5/133/3223?channelCode=300000100002&cpsChannelId=300000100002&cpsPackageChannelId=300000100002');
+        };
+
         model.showQuanMenu = function () {
             $(this.refs.quanMenuMask).show();
             $(this.refs.quanMenu).show();
@@ -271,7 +275,7 @@ module.exports = Activity.extend({
             }).catch(function (e) {
                 Toast.showToast(e.message);
             });
-        }
+        };
 
         model.likeQuanMsg = function (msg_id) {
             var msg = model.getModel('quanData').find('msg_id', msg_id);

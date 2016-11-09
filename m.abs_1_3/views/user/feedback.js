@@ -67,7 +67,7 @@ module.exports = Activity.extend({
                 pspcode: user.PSP_CODE,
                 content: content
 
-            }, images, function (res) {
+            }, postImages, function (res) {
                 Toast.showToast(res.msg);
 
                 if (res.success) {

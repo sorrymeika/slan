@@ -78,7 +78,7 @@ module.exports = Activity.extend({
             resource: 'http://appuser.abs.cn'
         });
 
-        this.model.selectCate = function (e, item) {
+        this.model.selectCate = function (item, e) {
             if (typeof item == 'string' && !/^\d+$/.test(item)) {
                 self.forward(item);
                 return;
@@ -100,7 +100,7 @@ module.exports = Activity.extend({
                 current: item.PCG_ID
             });
 
-            this.requestProd(e, item.PCG_ID);
+            this.requestProd(item.PCG_ID);
         }
 
         this.model.showCategories = function () {
@@ -149,12 +149,12 @@ module.exports = Activity.extend({
             currentSub: currentSub
         });
 
-        self.model.selectCate(null, current);
+        self.model.selectCate(current);
     },
 
     onQueryChange: function (e) {
         if ('id' in e.data) {
-            this.model.selectCate(null, this.query.id);
+            this.model.selectCate(this.query.id);
         }
     },
 
@@ -167,7 +167,7 @@ module.exports = Activity.extend({
                 data: res,
                 goto: function (e, id) {
 
-                    self.model.selectCate(null, id);
+                    self.model.selectCate(id);
 
                     cpCategory.hide();
                 }
