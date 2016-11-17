@@ -7,6 +7,8 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var contact = require('logical/contact');
+
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -18,6 +20,15 @@ module.exports = Activity.extend({
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
+        }
+
+        model.backup = function () {
+            contact.backup().then(function () {
+                Toast.showToast("备份成功！");
+
+            }).catch(function (e) {
+                Toast.showToast(e.message);
+            });
         }
 
         var loader = this.loader = new Loader(this.$el);

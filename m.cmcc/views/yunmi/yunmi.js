@@ -10,7 +10,6 @@ var popup = require('widget/popup');
 
 var yunMiRules = require('components/yunMiRules');
 
-
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -40,7 +39,6 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         Promise.all([this.waitLoad()]).then(function (results) {
-
 
             self.bindScrollTo(model.refs.main);
 

@@ -13,7 +13,8 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '云米任务'
+            title: '云米红包',
+            type: 0
         });
 
         model.back = function () {

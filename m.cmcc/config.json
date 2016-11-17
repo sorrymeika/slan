@@ -71,8 +71,10 @@
         "/life/search_notice": "life/search_notice",
         "/yunmi": "yunmi/yunmi",
         "/yunmi/detail": "yunmi/yunmi_detail",
-        "/yunmi/exchange": "yunmi/yunmi_exchange",
+        "/yunmi/exchange": "yunmi/exchange_yunmi",
         "/yunmi/invite": "yunmi/invite",
-        "/yunmi/task": "yunmi/yunmi_task"
+        "/yunmi/send_yunmi": "yunmi/send_yunmi",
+        "/yunmi/redbag": "yunmi/redbag",
+        "/yunmi/select_user": "yunmi/select_user"
     }
 }

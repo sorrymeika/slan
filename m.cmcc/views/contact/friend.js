@@ -40,14 +40,27 @@ module.exports = Activity.extend({
 
         }
 
+        model.toMemo = function () {
+            self.forward('/contact/memo/' + personId, {
+                memo: this.get('ext.memo')
+            })
+        }
+
+        self.onResult("friendMemoChange:" + personId, function (e, memo) {
+            model.set('ext.memo', memo);
+        });
+
+
         var loader = this.loader = new Loader(this.$el);
 
         loader.showLoading();
 
         Promise.all([contact.friend(personId), this.waitLoad()]).then(function (results) {
-
+            var res = results[0];
             model.set({
-                person: results[0].data
+                person: res.data,
+                ext: res.ext,
+                friend: res.friend
             })
 
             self.bindScrollTo(model.refs.main);

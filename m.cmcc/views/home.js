@@ -34,9 +34,11 @@ module.exports = Activity.extend({
         photoViewer.$el.hide().appendTo('body')
             .addClass('gl_beforeshow')
             .on($.fx.transitionEnd, function () {
-                !photoViewer.$el.hasClass('gl_show') && photoViewer.$el.hide();
+                if (!photoViewer.$el.hasClass('gl_show')) {
+                    photoViewer.$el.hide();
+                }
             })
-            .on('click', function () {
+            .on('tap', function () {
                 photoViewer.$el.removeClass('gl_show');
             });
 
@@ -51,7 +53,7 @@ module.exports = Activity.extend({
             tab: 1
         });
 
-         model.openEnt = function () {
+        model.openEnt = function () {
             bridge.openInApp('http://share.migu.cn/h5/api/h5/133/3223?channelCode=300000100002&cpsChannelId=300000100002&cpsPackageChannelId=300000100002');
         };
 
@@ -104,13 +106,14 @@ module.exports = Activity.extend({
             });
         }
 
-        model.showImages = function (imgs) {
+        model.showImages = function (imgs, index) {
 
             photoViewer.setImages(imgs.map(function (src) {
                 return {
                     src: sl.resource(src)
                 }
             }));
+            photoViewer.index(index);
 
             photoViewer.$el.show()[0].clientHeight;
             photoViewer.$el.addClass('gl_show');
@@ -167,9 +170,9 @@ module.exports = Activity.extend({
                 var m = code.match(/cmccfj\:\/\/user\/(\d+)/);
                 if (m && m[1]) {
                     var user_id = parseInt(m[1]);
-                    var status = contact.personStatus(user_id);
+                    var isFriend = contact.isFriend(user_id);
 
-                    if (status == 1)
+                    if (isFriend)
                         self.forward('/contact/friend/' + user_id);
                     else
                         self.forward('/contact/person/' + user_id);
@@ -329,7 +332,8 @@ module.exports = Activity.extend({
                     self.quanLoader.autoLoadMore(function (res) {
                         res.data.forEach(function (item) {
                             if (item.imgs) {
-                                item.imgs = item.imgs.split(',')
+                                item.imgs = item.imgs.split(',');
+
                             }
                         });
                         model.get("quanData").add(res.data);
@@ -344,6 +348,8 @@ module.exports = Activity.extend({
                     model.set({
                         quanData: results[1].data
                     })
+
+                    console.log(model.data.quanData[0]);
                 });
                 break;
 
@@ -421,7 +427,7 @@ module.exports = Activity.extend({
         var self = this;
 
         if (!auth.getAuthToken()) {
-            //self.forward('/login');
+            self.forward('/login');
 
         } else {
             seajs.use(['logical/chat']);

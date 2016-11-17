@@ -118,6 +118,7 @@ var Tab = Model.extend({
             var scrollLeft = self.refs.body.offsetWidth * index;
 
             if (scrollLeft != self.touch.x) {
+
                 self.touch.scrollTo(scrollLeft, 0, duration, function () {
                     if (index !== self.data.index) {
                         self.trigger('tabChange', index, self.data.index);

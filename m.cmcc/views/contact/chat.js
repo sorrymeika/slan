@@ -49,12 +49,15 @@ module.exports = Activity.extend({
 
             messages.add(data);
 
+            console.log("send:", model.get('content'))
+
             model.set({
                 content: ''
 
             }).next(function () {
                 self.scroll && self.scroll.scrollToEnd();
             });
+            console.log("aftersend:", model.get('content'))
 
             chat.send(data);
         }

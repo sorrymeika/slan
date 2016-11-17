@@ -53,7 +53,7 @@ register_date DATE,--注册时间 --search=true
 
 
 drop table userinfo;
-create table userinfo (--用户 --props=String account,int status,int country_id,String country_name,String province_name,int province_id,String city_name,int home_country_id,String home_country_name,String home_province_name,int home_province_id,String home_city_name
+create table userinfo (--用户 --props=String account,int status,int country_id,String country_name,String province_name,int province_id,String city_name,int home_country_id,String home_country_name,String home_province_name,int home_province_id,String home_city_name --children=friends_ext
 user_id  number(11) primary key,--用户ID
 avatars varchar(255),--用户头像 --type=file
 user_name varchar(20),--用户昵称 --unique=true --updateable=false --search=true
@@ -248,11 +248,6 @@ create table messages (
 create sequence messages_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
-
-
------------------------------
---<<2016-11-8 up to date here
------------------------------
 alter table userinfo modify avatars varchar(255);
 
 create table friends_ext (
@@ -263,3 +258,16 @@ create table friends_ext (
     enable_leave_msg number(1),--允许留言
     enable_push number(1)--允许推送到首页
 ) tablespace cmccuser;
+
+
+create table contacts_backup (--通讯录备份
+    backup_id number(12) primary key,--自增id
+    user_id number(10),--用户ID
+    backup_date date,--备份时间 --search=true
+    backup_data clob
+) tablespace cmccuser;
+create sequence contacts_backup_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+-----------------------------
+--<<2016-11-16 up to date here
+-----------------------------

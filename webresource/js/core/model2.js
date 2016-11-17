@@ -131,7 +131,11 @@ function setRefs(viewModel, el) {
         var refs = viewModel.refs[refName];
 
         if (!refs) {
-            viewModel.refs[refName] = ref;
+
+            viewModel.refs[refName] = el.snRepeatSource || closestElement(el, function (parentNode) {
+                return parentNode.snRepeatSource ? true : parentNode.snViewModel ? false : null;
+
+            }) ? [ref] : ref;
 
         } else if (refs.nodeType) {
             viewModel.refs[refName] = [refs, ref];
@@ -284,8 +288,11 @@ function insertElementAfter(cursorElem, elem) {
 
 function closestElement(el, fn) {
     for (var parentNode = el.parentNode; parentNode; parentNode = parentNode.parentNode) {
-        if (fn(parentNode, el)) {
+        var res = fn(parentNode, el);
+        if (res === true) {
             return parentNode;
+        } else if (res === false) {
+            break;
         }
     }
     return null;
@@ -341,7 +348,17 @@ function genFunction(expression) {
 
 function syncParentData(model) {
     var parent = model.parent;
-    parent.data[(parent instanceof Collection) ? parent.models.indexOf(model) : model._key] = model.data;
+
+    if (parent instanceof Collection) {
+        var index = parent.models.indexOf(model);
+        if (index != -1) {
+            parent.data[index] = model.data;
+        }
+
+    } else {
+        parent.data[model._key] = model.data;
+    }
+
 }
 
 var Model = function (parent, key, data) {
@@ -364,6 +381,7 @@ var Model = function (parent, key, data) {
     this.model = {};
     this.parent = parent;
     this.root = parent.root;
+    this.changed = false;
 
     this.set(data);
 }
@@ -479,13 +497,28 @@ var ModelProto = {
                 model = model.model[key];
             }
         }
-        model.set(cover, lastKey, val);
+        return model.set(cover, lastKey, val);
+    },
+
+    _changedAndUpdateViewNextTick: function () {
+        if (this.changed) return;
+
+        var self = this;
+        this.changed = true;
+
+        this.root.one('datachanged', function () {
+            self.changed = false;
+
+            self.root.trigger("datachanged:" + self.key);
+
+        }).updateViewNextTick();
     },
 
     //[cover,object]|[cover,key,val]|[key,va]|[object]
     //@cover=true|false 是否覆盖数据，[cover,key,val]时覆盖子model数据,[cover,object]时覆盖当前model数据
     set: function (cover, key, val) {
         var self = this,
+            model,
             origin,
             changed,
             attrs,
@@ -507,19 +540,28 @@ var ModelProto = {
             attrs = {};
 
         } else if (typeof val == 'undefined') {
-            val = key, key = '', parent = this.parent;
+            val = key;
+            key = '';
 
-            this.data = val;
+            if (this.data != val) {
+                this.data = val;
 
-            syncParentData(this);
+                syncParentData(this);
 
+                this._changedAndUpdateViewNextTick();
+            }
             return this;
 
         } else {
             keys = isArrayKey ? key : key.split('.');
 
             if (keys.length > 1) {
-                return this._setByKeys(cover, keys, val);
+                model = this._setByKeys(cover, keys, val);
+
+                if (model.changed) {
+                    this._changedAndUpdateViewNextTick();
+                }
+                return this;
 
             } else {
                 coverChild = cover;
@@ -530,7 +572,7 @@ var ModelProto = {
         if (!$.isPlainObject(this.data)) this.data = {}, syncParentData(this);
 
         var data = this.data;
-        var model = this.model;
+        model = this.model;
 
         if (cover) {
             for (var attr in data) {
@@ -539,6 +581,8 @@ var ModelProto = {
                 }
             }
         }
+
+        var hasChange = false;
 
         for (var attr in attrs) {
             origin = model[attr];
@@ -553,10 +597,13 @@ var ModelProto = {
 
                     (value.root.parents || (value.root.parents = [])).push(root);
                     (root._children || (root._children = [])).push(value.root);
+                    hasChange = true;
 
                 } else if (origin instanceof Model) {
                     value === null || value === undefined ? origin.reset() : origin.set(coverChild, value);
                     data[attr] = origin.data;
+
+                    if (!hasChange && origin.changed) hasChange = true;
 
                 } else if (origin instanceof Collection) {
                     if (!$.isArray(value)) {
@@ -569,6 +616,8 @@ var ModelProto = {
 
                     origin.set(value);
                     data[attr] = origin.data;
+
+                    if (!hasChange && origin.changed) hasChange = true;
 
                 } else {
 
@@ -590,11 +639,13 @@ var ModelProto = {
                             break;
                     }
                     model[attr] = value;
+
+                    if (!hasChange) hasChange = true;
                 }
             }
         }
 
-        root.updateViewNextTick();
+        hasChange && this._changedAndUpdateViewNextTick();
 
         return self;
     },
@@ -630,6 +681,7 @@ var Collection = function (parent, attr, data) {
     this._key = attr;
 
     this.root = parent.root;
+    this.changed = false;
 
     this.data = [];
     parent.data[attr] = this.data;
@@ -638,6 +690,7 @@ var Collection = function (parent, attr, data) {
 }
 
 Collection.prototype = {
+    _changedAndUpdateViewNextTick: ModelProto._changedAndUpdateViewNextTick,
 
     get: function (i) {
         return this.models[i];
@@ -656,14 +709,122 @@ Collection.prototype = {
             }
 
             var i = 0;
+            var hasChange = this.changed;
+
             this.each(function (model) {
                 model.set(true, data[i]);
+
+                if (!hasChange && model.changed) {
+                    hasChange = true;
+                }
+
                 i++;
             });
 
             this.add(i == 0 ? data : data.slice(i, data.length));
+
+            if (!this.changed && hasChange) {
+                this._changedAndUpdateViewNextTick();
+            }
         }
         return this;
+    },
+
+
+    add: function (data) {
+        var model;
+        var length;
+
+        if (!$.isArray(data)) {
+            data = [data];
+        }
+
+        dataLen = data.length;
+
+        if (dataLen) {
+            for (var i = 0; i < dataLen; i++) {
+                var dataItem = data[i];
+                length = this.models.length;
+                model = new Model(this, length, dataItem);
+
+                this.models.push(model);
+                this.data.push(model.data);
+            }
+
+            this._changedAndUpdateViewNextTick();
+        }
+    },
+
+    unshift: function (data) {
+        this.insert(0, data);
+    },
+
+    insert: function (index, data) {
+
+        var model;
+        var count;
+
+        if (!$.isArray(data)) {
+            data = [data];
+        }
+
+        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
+            var dataItem = data[i];
+
+            count = index + i;
+            model = new Model(this, count, dataItem);
+
+            this.models.splice(count, 0, model);
+            this.data.splice(count, 0, model.data);
+        }
+
+        this._changedAndUpdateViewNextTick();
+    },
+
+
+    splice: function (start, count, data) {
+        if (!count) count = 1;
+
+        this.models.splice(start, count);
+        this.data.splice(start, count);
+
+        if (data)
+            this.insert(start, data);
+        else
+            this._changedAndUpdateViewNextTick();
+    },
+
+    //@[key,val]|function(){return true|false;}|Model
+    remove: function (key, val) {
+        var fn;
+
+        if (typeof key === 'string' && val !== undefined) {
+            fn = function (item) {
+                return item[key] == val;
+            }
+
+        } else if (key instanceof Model) {
+            fn = function (item, i) {
+                return this.models[i] == key;
+            }
+
+        } else fn = key;
+
+        for (var i = this.models.length - 1; i >= 0; i--) {
+            if (fn.call(this, this.data[i], i)) {
+                this.models.splice(i, 1);
+                this.data.splice(i, 1);
+            }
+        }
+
+        this._changedAndUpdateViewNextTick();
+    },
+
+    clear: function () {
+        if (this.models.length == 0 && this.data.length) return;
+        this.models.length = this.data.length = 0;
+
+        this._changedAndUpdateViewNextTick();
     },
 
     each: function (start, end, fn) {
@@ -713,98 +874,6 @@ Collection.prototype = {
             }
         }
         return result;
-    },
-
-
-    add: function (data) {
-        var model;
-        var length;
-
-        if (!$.isArray(data)) {
-            data = [data];
-        }
-
-        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
-            var dataItem = data[i];
-            length = this.models.length;
-            model = new Model(this, length, dataItem);
-
-            this.models.push(model);
-            this.data.push(model.data);
-        }
-
-        this.root.updateViewNextTick();
-    },
-
-    unshift: function (data) {
-        this.insert(0, data);
-    },
-
-    insert: function (index, data) {
-
-        var model;
-        var count;
-
-        if (!$.isArray(data)) {
-            data = [data];
-        }
-
-        for (var i = 0, dataLen = data.length; i < dataLen; i++) {
-            var dataItem = data[i];
-
-            count = index + i;
-            model = new Model(this, count, dataItem);
-
-            this.models.splice(count, 0, model);
-            this.data.splice(count, 0, model.data);
-        }
-
-        this.root.updateViewNextTick();
-    },
-
-
-    splice: function (start, count, data) {
-        if (!count) count = 1;
-
-        this.models.splice(start, count);
-        this.data.splice(start, count);
-
-        if (data)
-            this.insert(start, data);
-        else
-            this.root.updateViewNextTick();
-    },
-
-    //@[key,val]|function(){return true|false;}|Model
-    remove: function (key, val) {
-        var fn;
-
-        if (typeof key === 'string' && val !== undefined) {
-            fn = function (item) {
-                return item[key] == val;
-            }
-
-        } else if (key instanceof Model) {
-            fn = function (item, i) {
-                return this.models[i] == key;
-            }
-
-        } else fn = key;
-
-        for (var i = this.models.length - 1; i >= 0; i--) {
-            if (fn.call(this, this.data[i], i)) {
-                this.models.splice(i, 1);
-                this.data.splice(i, 1);
-            }
-        }
-
-        this.root.updateViewNextTick();
-    },
-
-    clear: function (data) {
-        this.models.length = this.data.length = 0;
-
-        this.root.updateViewNextTick();
     }
 }
 
@@ -855,7 +924,7 @@ function RepeatSource(viewModel, el, parent) {
         this.isFn = true;
         this.fid = viewModel.getFunctionId('{' + collectionKey + '}').id;
 
-        collectionKey = collectionKey.replace(/\./, '|');
+        collectionKey = collectionKey.replace(/\./g, '/');
 
     } else {
         this.isGlobal = false;
@@ -940,6 +1009,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         } else {
             model = this;
         }
+
         model.set(attrs, value);
         return this;
     },
@@ -1150,7 +1220,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         var attrs = el.snAttrs || (el.snAttrs = {});
 
-
         for (var attr in attrsBinding) {
 
             if (attr == 'sn-else') {
@@ -1292,6 +1361,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     },
 
     updateRepeatElement: function (el) {
+
         var self = this;
         var repeatSource = el.snRepeatSource;
         var collection = el.snCollection;
@@ -1336,7 +1406,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
 
             if (repeatSource.isFn) {
-                collection = new Collection(collectionData, repeatSource.collectionKey);
+                collection = new Collection(this, repeatSource.collectionKey, collectionData);
 
             } else {
                 collection = model && model.findByKey(repeatSource.collectionKey);
@@ -1347,8 +1417,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             el.snCollection = collection;
 
         } else if (repeatSource.isFn) {
-
-            collection.set(collectionData)
+            collection.set(collectionData);
         }
 
         var elements = el.snElements || (el.snElements = []);
@@ -1358,7 +1427,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var elemContain = {};
 
         collection.each(function (model) {
-
             var elem;
             var elemIndex = -1;
             var snData;
@@ -1456,7 +1524,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         this.refs = {};
 
         eachElement(this.$el, function (el) {
-            if (el.snViewModel && el.snViewModel != self) return false;
+            if (el.snViewModel && el.snViewModel != self || self._nextTick) return false;
 
             return updateNode(self, el);
         });
@@ -1469,16 +1537,20 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         console.timeEnd('updateView');
 
-        this.trigger('viewDidUpdate');
         this.viewDidUpdate && this.viewDidUpdate();
+        this.trigger('viewDidUpdate');
     },
 
     bind: function (el) {
+
         var self = this;
-        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
+        var $el = $(el).on('input change', '[' + this.snModelKey + ']', function (e) {
             var target = e.currentTarget;
 
-            self.setDataFromElement(target, target.getAttribute(self.snModelKey), target.value);
+            if ((target.tagName == 'INPUT' || target.tagName == "TEXTAREA") && (e.type == "input")
+                || target.tagName == 'SELECT' && e.type == "change") {
+                self.setDataFromElement(target, target.getAttribute(self.snModelKey), target.value);
+            }
         });
 
         this._bindElement($el);

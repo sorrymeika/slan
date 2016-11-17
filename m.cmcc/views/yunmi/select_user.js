@@ -7,42 +7,38 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var firstLetter = require('util/firstLetter');
+
 var contact = require('logical/contact');
 
 module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
-        var routeData = this.route.data;
-        var friend_id = this.route.params.id;
 
         var model = this.model = new Model(this.$el, {
-            title: '备注',
-            text: routeData.memo,
-            origin: routeData.memo
+            title: '我的好友'
         });
-
-        model.save = function () {
-            var memo = this.get('text');
-            contact.setFriendMemo(friend_id, memo).then(function () {
-                Toast.showToast("修改成功！");
-                self.setResult("friendMemoChange:" + friend_id, memo);
-                model.back();
-
-            }).catch(function (e) {
-                Toast.showToast(e.message);
-            });
-        }
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
+        }
+
+        model.save = function () {
+            this.back();
         }
 
         var loader = this.loader = new Loader(this.$el);
 
         loader.showLoading();
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Promise.all([contact.friends(), this.waitLoad()]).then(function (results) {
+
+            var friendList = results[0].data;
+            model.set({
+                friendList: friendList,
+                groups: self.groups(friendList)
+            });
 
             self.bindScrollTo(model.refs.main);
 
@@ -60,5 +56,32 @@ module.exports = Activity.extend({
 
     onDestory: function () {
         this.model.destroy();
+    },
+
+    groups: function (data) {
+        var groups = {};
+
+        if (!data) return;
+
+        data.forEach(function (item) {
+
+            var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
+
+            if (!groups[letter]) {
+                groups[letter] = [];
+            }
+
+            groups[letter].push(item);
+        });
+
+        groups = Object.keys(groups).map(function (key) {
+
+            return {
+                letter: key,
+                list: groups[key]
+            };
+        });
+
+        return groups;
     }
 });

@@ -1,0 +1,28 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main pt_m" ref="main">
+    <div class="ml_m mr_m mb_m h_l bg_fff flex">
+        <p class="pl_m">红包个数</p>
+        <input type="text" class="flexitem ta_r fs_m pr_s" placeholder="填写个数" />
+        <p class="pr_s">个</p>
+    </div>
+    <div class="ml_m mr_m mb_s h_l bg_fff flex">
+        <p class="pl_m"><span class="va_m">{type==0?'单个':'总'}金额</span> <i class="ym_redbag__pin_icon" sn-if="type==1">拼</i></p>
+        <input type="text" class="flexitem ta_r fs_m pr_s" placeholder="填写金额" />
+        <p class="pr_s">云米</p>
+    </div>
+    <div class="fs_m pl_l mb_l">当前为{type==0?'普通红包':'拼手气红包'}，<a href="javascript:;" class="cl_dark" sn-tap="type=type==1?0:1">改为{type==1?'普通红包':'拼手气红包'}</a></div>
+    <div class="ml_m mr_m mb_s bg_fff">
+        <textarea class="ym_redbag__msg">恭喜发财，大吉大利！</textarea>
+    </div>
+    <div class="fs_m pl_l"><a href="javascript:;" data-forward="/yunmi/select_user" class="cl_app td_u pb_l">添加好友</a></div>
+    <div class="ta_c pt_xxl flex jc_c">
+        <p class="ym-point2"></p>
+        <p class="ym_redbag__point">10000</p>
+    </div>
+    <div class="ml_m mr_m pt_xxl flex jc_c">
+        <button class="btn_xl">塞钱进红包</button>
+    </div>
+</div>

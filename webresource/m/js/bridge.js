@@ -1,4 +1,4 @@
-﻿define(function (require, exports, module) {
+define(function (require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
@@ -109,8 +109,18 @@
             },
 
             contact: {
-                getAll: function () {
+                getContacts: function (fn) {
+                    hybrid('contact', {
+                        type: 'getContacts'
+                    }, fn);
+                },
 
+                setContacts: function (data, fn) {
+                    hybrid('contact', {
+                        type: 'setContacts',
+                        data: data
+
+                    }, fn || util.noop);
                 }
             },
 

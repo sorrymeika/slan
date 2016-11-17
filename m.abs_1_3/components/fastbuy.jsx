@@ -85,8 +85,8 @@ var Month = model.ViewModel.extend({
 			$el: self.$el,
             checkData: false,
 			params: {
-				startdt: util.formatDate(startDt, 'yyyy-MM-dd 00:00:00'),
-				enddt: util.formatDate(endDt, 'yyyy-MM-dd 23:59:59')
+				startdt: util.formatDate(+startDt, 'yyyy-MM-dd 00:00:00'),
+				enddt: util.formatDate(+endDt, 'yyyy-MM-dd 23:59:59')
 			},
 			success: function (res) {
 				var result = [];

@@ -9,7 +9,7 @@
     </div>
     <div class="ct_chat__item flex_t {item.from_id==user.user_id?'curr flex_re':''}" sn-repeat="item in messages">
         <div class="date" sn-if="item.isShowTime">{util.formatDate(item.add_date,'minutes')}</div>
-        <img sn-src="{sl.resource(item.from_id==user.user_id?user.avatars:friend.avatars)}" class="sqr_d">
+        <img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.from_id==user.user_id?user.avatars:friend.avatars)}" class="sqr_d">
         <div class="con">
             <div sn-if="item.type==1" class="fs_m">{item.content}</div>
             <img sn-else-if="item.type==2" sn-src="{sl.resource(item.content)}" />

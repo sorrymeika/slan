@@ -34,59 +34,69 @@ var contact = Event.mixin({
         });
     },
 
-    personStatus: function (user_id) {
-        return Http.post('/userinfo/getStatus', {
+    isFriend: function (user_id) {
+        return Http.post('/userinfo/isFriend', {
             user_id: user_id
         });
     },
 
     contactList: function () {
+        return new Promise(function (resolve, reject) {
 
-        if (sl.isDev)
-            return new Promise(function (resolve, reject) {
+            bridge.contact.getContacts(function (result) {
 
-                setTimeout(function () {
-                    resolve({
-                        success: true,
-                        data: [{
-                            user_id: 1,
-                            user_name: '用户a',
-                            avatars: 'images/logo.png',
-                            phoneNumber: '18830493332',
-                            contactName: '小王',
-                            contactImage: 'images/logo.png',
-                            contactId: 1,
-                            //-2非好友,-1未处理,0拒绝,1接受,2删除
-                            status: -1
-                        }, {
-                            user_id: 1,
-                            user_name: '用户b',
-                            avatars: 'images/logo.png',
-                            phoneNumber: '18830493332',
-                            contactName: '有王',
-                            contactImage: 'images/logo.png',
-                            contactId: 1,
-                            //-2非好友,-1未处理,0拒绝,1接受,2删除
-                            status: 1
-                        }, {
-                            user_id: 0,
-                            user_name: null,
-                            contactName: '小张',
-                            contactImage: 'images/logo.png'
-                        }, {
-                            user_id: 0,
-                            user_name: null,
-                            contactName: '王队',
-                            contactImage: 'images/logo.png'
-                        }]
+                if (result.success) {
+                    var data = result.data;
+                    var ids = [];
+
+                    data.forEach(function (item) {
+                        if (/^1\d{10}$/.test(item.phoneNumber)) {
+                            ids.push(item.phoneNumber);
+                        }
                     });
-                }, 100)
+
+                    Http.post("/userinfo/contacts", {
+                        ids: ids.join(',')
+
+                    }).then(function (res) {
+                        data.forEach(function (item) {
+                            var userinfo = util.first(res.data, 'account', item.phoneNumber);
+                            userinfo && Object.assign(item, userinfo);
+                        });
+                        resolve({
+                            success: true,
+                            data: data
+                        });
+                    }, reject);
+
+                } else {
+                    reject(result);
+                }
+
             });
 
+        });
 
-        bridge.contact.getAll(function (contactList) {
+    },
+
+    backup: function () {
+
+        return new Promise(function (resolve, reject) {
+
+            bridge.contact.getContacts(function (result) {
+                if (result.success) {
+                    resolve(result);
+                } else {
+                    reject(result);
+                }
+                Http.post('/contact_backup/backup', {
+                    data: JSON.stringify(result.data)
+                });
+
+            });
 
         });
+
     },
 
     acceptFriend: function (user_id) {
@@ -115,6 +125,13 @@ var contact = Event.mixin({
 
     friends: function () {
         return Http.post('/friends/getFriends');
+    },
+
+    setFriendMemo: function (friend_id, memo) {
+        return Http.post('/friends/setFriendMemo', {
+            friend_id: friend_id,
+            memo: memo
+        });
     },
 
     friend: function (user_id) {

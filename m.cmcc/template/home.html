@@ -1,15 +1,13 @@
 <div class="hm_home dock" ref="home" sn-tap="this.exitMenu()">
     <header class="flex header_app" sn-if="tab==1">
         <a href="javascript:;" sn-tap="this.menu()" class="pr_m h_bar pt_s pt_6"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
-        <div class="flexitem">
-            <div class="hm_idx__cir">
-                剩余流量<br/> 1G
-            </div>
+        <div class="flexitem hm_idx__left">
+            <span>剩余流量</span>
+            <em>1G</em>
         </div>
-        <div class="flexitem">
-            <div class="hm_idx__cir">
-                剩余话费<br/> 3.14
-            </div>
+        <div class="flexitem hm_idx__left">
+            <span>剩余话费</span>
+            <em>3.14</em>
         </div>
         <div class="icon-notice h_bar pl_m pr_m"></div>
     </header>
@@ -26,21 +24,16 @@
     </header>
     <div sn-if="tab==1" class="hm_idx main" ref="life">
         <div class="hm_idx__head">
-            <div class="ta_c cl_app fs_s pt_s mb_s">流量使用越多返云米越多</div>
-            <div class="hm-yunmi-rem mg_a ta_c ps_r flex jc_c ai_b" data-forward="/yunmi">
-                <i class="hm_idx__ym">999</i>
-                <em class="fs_s">云米</em>
+            <div class="hm-yunmi-rem mg_a ta_c ps_r" data-forward="/yunmi">
+                <em class="fs_s dp_b">剩余时间</em>
+                <i class="hm_idx__ym dp_b">10:21:10</i>
             </div>
-            <div class="hm-timeout-rem">
-                <em class="fs_s ps_r zi_1">10:21:49</em>
-            </div>
-            <div class="hm-totip-rem"><em>云币数量倒计时</em></div>
+            <div class="hm-totip-rem"></div>
             <a href="javascript:;" sn-tap="this.showYunMi()" class="hm_idx__ym_rule dock_bl cl_fff fs_s pd_s pl_m">云米规则</a>
         </div>
-        <div class="flex h_bar pd_s bd_b" sn-tap="this.toContact()">
-            <img src="" class="sqr_s mr_s" />
-            <div class="msg fs_m flexitem">你们最近忙呢</div>
-            <div class="cl_999 fs_m pr_s">8个好友消息</div>
+        <div class="flex h_bar pd_s bd_b bg_fff" sn-tap="this.toContact()">
+            <i class="icon-msg2 hm_idx__msg"></i>
+            <div class="msg fs_m flexitem to_e">4个未查阅消息，李航、陈晨…</div>
             <div class="icon-arrow"></div>
         </div>
         <div class="flex h_bar bd_b" data-forward="/life/notice">
@@ -196,7 +189,7 @@
                         <p class="name cl_dark fs_m" data-forward="/contact/friend/{quan.user_id}">{quan.user_name}</p>
                         <p class="con fs_m" sn-html="{quan.content}"></p>
                         <ul class="imgs clearfix mt_s">
-                            <li class="img fl_l mr_m" sn-repeat="img in quan.imgs" sn-tap="this.showImages(quan.imgs)"><img sn-src="{sl.thumbnail(img)}" /></li>
+                            <li class="img fl_l mr_m" sn-repeat="img,i in quan.imgs" sn-tap="this.showImages(quan.imgs,i)"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
                         <div class="bar flex fs_s mt_s">
                             <p class="date flexitem">{util.formatDate(quan.add_date,"short")}</p>

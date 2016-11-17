@@ -13,6 +13,82 @@ var Scroll = require('widget/scroll');
 var vm = require('core/model2');
 var Model = vm.Model;
 
+var ModelProto = Model.prototype;
+
+ModelProto.bindScrollTo = function (el, options) {
+    var sbr = Scroll.bind(el, options);
+
+    if (!this._scrolls) {
+        this._scrolls = sbr;
+
+    } else {
+        this._scrolls.add(sbr);
+    }
+    return sbr;
+}
+
+ModelProto.getScrollView = function (el) {
+    return this._scrolls.get(el);
+}
+
+var oldModelDestroy = ModelProto.destory;
+ModelProto.destory = function () {
+    oldModelDestroy.call(this);
+
+    if (this._scrolls) this._scrolls.destory();
+}
+
+util.cnNum = function (num) {
+    if (num > 10000) {
+        num = (num + '');
+        return num.substr(0, num.length - 4) + "万";
+    } else if (num > 1000) {
+
+        num = (num + '');
+        return num.substr(0, num.length - 4) + 'k';
+    } else {
+        return num;
+    }
+}
+
+//cmccBridge
+bridge.cmcc = {
+
+    //@bizType="register"|"resetPwd"|"smsLogin"
+    sendSms: function (phoneNo, bizType) {
+        if (!bizType) throw new Error('require bizType!!');
+
+        bridge.exec('cmcc', {
+            type: 'sendSms',
+            phoneNo: phoneNo,
+            bizType: bizType
+        });
+    },
+
+    registerUser: function (phoneNo, password, validCode, callback) {
+
+        bridge.exec('cmcc', {
+            type: 'registerUser',
+            phoneNo: phoneNo,
+            password: password,
+            bizType: bizType
+
+        }, callback);
+
+    },
+
+    //@loginType="sms"|"password"
+    login: function (phoneNo, password, loginType, callback) {
+
+        bridge.exec('cmcc', {
+            type: 'login',
+            phoneNo: phoneNo,
+            password: password,
+            loginType: loginType
+
+        }, callback);
+    }
+};
 
 function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
@@ -47,84 +123,6 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
     });
 
     seajs.use(['logical/auth'], function (auth) {
-
-        var ModelProto = Model.prototype;
-
-        ModelProto.bindScrollTo = function (el, options) {
-            var sbr = Scroll.bind(el, options);
-
-            if (!this._scrolls) {
-                this._scrolls = sbr;
-
-            } else {
-                this._scrolls.add(sbr);
-            }
-            return sbr;
-        }
-
-        ModelProto.getScrollView = function (el) {
-            return this._scrolls.get(el);
-        }
-
-        var oldModelDestroy = ModelProto.destory;
-        ModelProto.destory = function () {
-            oldModelDestroy.call(this);
-
-            if (this._scrolls) this._scrolls.destory();
-        }
-
-
-        util.cnNum = function (num) {
-            if (num > 10000) {
-                num = (num + '');
-                return num.substr(0, num.length - 4) + "万";
-            } else if (num > 1000) {
-
-                num = (num + '');
-                return num.substr(0, num.length - 4) + 'k';
-            } else {
-                return num;
-            }
-        }
-
-        //cmccBridge
-        bridge.cmcc = {
-
-            //@bizType="register"|"resetPwd"|"smsLogin"
-            sendSms: function (phoneNo, bizType) {
-                if (!bizType) throw new Error('require bizType!!');
-
-                bridge.exec('cmcc', {
-                    type: 'sendSms',
-                    phoneNo: phoneNo,
-                    bizType: bizType
-                });
-            },
-
-            registerUser: function (phoneNo, password, validCode, callback) {
-
-                bridge.exec('cmcc', {
-                    type: 'registerUser',
-                    phoneNo: phoneNo,
-                    password: password,
-                    bizType: bizType
-
-                }, callback);
-
-            },
-
-            //@loginType="sms"|"password"
-            login: function (phoneNo, password, loginType, callback) {
-
-                bridge.exec('cmcc', {
-                    type: 'login',
-                    phoneNo: phoneNo,
-                    password: password,
-                    loginType: loginType
-
-                }, callback);
-            }
-        };
         window.Application = new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
     });
 }

@@ -41,18 +41,14 @@ module.exports = Activity.extend({
 
     getGift: function (item) {
         var self = this;
+        var freId = item.freId;
 
         this.size.set({
             data: item
 
         }).show();
 
-        product.getSizeByPrhId(item.PRH_ID, function (err, res) {
-
-            if (err) {
-                Toast.showToast(err.msg);
-                return;
-            }
+        product.getSizeByPrhId(item.PRH_ID, function (res) {
 
             var color = [];
             var spec = [];
@@ -78,7 +74,7 @@ module.exports = Activity.extend({
             });
 
             self.size.set({
-                freid: self.route.params.id,
+                freid: freId,
                 type: "month",
                 color: color,
                 spec: spec,
@@ -206,7 +202,14 @@ module.exports = Activity.extend({
             });
 
             if (res.data && res.data.FRE_ID) {
+                var freId = res.data.FRE_ID;
                 user.getMonthGifts(res.data.FRE_ID, function (res) {
+
+                    res.data.forEach(function (item) {
+                        item.freId = freId;
+                    });
+
+                    console.log(res.data);
 
                     model.set({
                         list: self.filterGifts(res.data),

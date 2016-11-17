@@ -16,11 +16,18 @@ module.exports = Model.extend({
         r: 0,
         s: 1,
         index: 0,
-        images: [{
-            src: "http://127.0.0.1:5559/images/launch0.jpg"
-        }, {
-            src: "http://image.beekka.com/blog/201206/bg2012061901.jpg"
-        }]
+        images: []
+    },
+
+    index: function (index) {
+        if (index === undefined) return this.data.index;
+
+        console.log(this.data.index * (this.$el.offsetWidth || window.innerWidth));
+
+        this.set({
+            x: -1 * index * (this.$el.offsetWidth || window.innerWidth),
+            index: index
+        })
     },
 
     resetSize: function () {
@@ -55,22 +62,22 @@ module.exports = Model.extend({
             })
         });
         this.set({
-            x: this.data.index * (this.$el.offsetWidth || window.innerWidth)
+            x: -1 * this.data.index * (this.$el.offsetWidth || window.innerWidth)
         })
 
-        this.next(function () {
-            if (!$.isArray(this.refs.items)) {
-                this.refs.items = [this.refs.items];
-            }
+    },
 
-            this.refs.items.forEach(function (item) {
+    viewDidUpdate: function () {
+        var self = this;
+
+        this.refs.items && this.refs.items.forEach(function (item) {
+            if (!item.scroll) {
                 self.bindScrollTo(item, {
                     hScroll: true,
                     vScroll: true
                 });
-
                 $(item).on('touchstart', self._start).on('touchmove', self._move).on('touchend', self._end);
-            });
+            }
         });
     },
 
@@ -144,7 +151,6 @@ module.exports = Model.extend({
         this.originY = this.data.y;
 
         this.originR = this.data.r;
-
 
         this.currentItem = this.getModel('images.' + this.data.index);
         this.originR = this.currentItem.get("r");

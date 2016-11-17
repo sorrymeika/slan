@@ -62,9 +62,7 @@ var User = {
         new api.MonthAPI({
             params: {
                 freid: freId,
-
-                UserID: user.ID,
-                Auth: user.Auth
+                pspcode: user.PSP_CODE
             }
 
         }).load(callback);

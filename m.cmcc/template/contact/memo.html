@@ -1,11 +1,11 @@
 <header>
     <div class="head_back" sn-tap="this.back()"></div>
     <div class="head_title">{title}</div>
-    <div class="head_right"><button class="btn_xs" disabled='{text==origin}'>保存</button></div>
+    <div class="head_right"><button class="btn_xs" disabled='{text==origin||!text}' sn-tap="this.save()">保存</button></div>
 </header>
 <div class="main" ref="main">
     <div class="ct_memo__input bd_tb">
         <input type="text" sn-model="text" value="{text}" ref="text" />
-        <div class="icon-reset"></div>
+        <div class="icon-reset" sn-tap="text=''"></div>
     </div>
 </div>
