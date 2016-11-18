@@ -27,8 +27,8 @@ function keep() {
                 switch (msg.type) {
                     case MESSAGETYPE.TEXT:
                     case MESSAGETYPE.IMAGE:
-                        chat.record(msg.from_id, msg.content);
-                        chat.trigger('message:' + msg.to_id, msg);
+                        chat.record(false, msg.from_id, msg.content);
+                        chat.trigger('message:' + msg.from_id, msg);
                         break;
                 }
             });
@@ -42,7 +42,14 @@ keep();
 var chat = Event.mixin({
     MESSAGETYPE: MESSAGETYPE,
 
-    record: function (friend_id, content) {
+    readMessage: function (friend_id) {
+        var record = messagesList.getFriendLastMessage(friend_id);
+        if (record) {
+            record.set('unread', 0);
+        }
+    },
+
+    record: function (is_send, friend_id, content) {
 
         var records = messagesList._('list');
         var record = records.find('user_id', friend_id);
@@ -57,10 +64,19 @@ var chat = Event.mixin({
             contact.person(friend_id).then(function (res) {
                 recordData.user_name = res.data.user_name;
                 recordData.avatars = res.data.avatars;
+                if (!is_send) {
+                    records.unread = 1;
+                }
                 records.add(recordData);
             });
 
         } else {
+
+            if (!is_send) {
+                records.unread = (records.unread || 0) + 1;
+            } else {
+                records.unread = 0;
+            }
             record.set(recordData);
         }
     },
@@ -97,8 +113,7 @@ var chat = Event.mixin({
             isSending: true
         };
 
-        this.record(params.to_id, params.content);
-
+        this.record(true, params.to_id, params.content);
 
         return Http.post("/messages/sendMessage", params).then(function (res) {
 

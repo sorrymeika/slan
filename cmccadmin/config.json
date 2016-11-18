@@ -25,6 +25,8 @@
         "/pub_quan_comments/update/{id:\\d+}": "/pub_quan_comments/update",
         "/userinfo/update/{id:\\d+}": "/userinfo/update",
         "/quan_msgs/index": "quan_msgs/index",
-        "/login_history/index/{user_id:\\d+}": "/login_history/index"
+        "/login_history/index/{user_id:\\d+}": "/login_history/index",
+        "/user_yunmi/index": "/user_yunmi/index",
+        "/user_yunmi/add": "/user_yunmi/add"
     }
 }

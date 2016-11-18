@@ -166,10 +166,10 @@ var Activity = Component.extend({
     onShow: null,
 
     _statusChange: function (e) {
-        if (this._status == 'Pause') {
+        if (this.status == 'Pause') {
             this.trigger('Resume');
         }
-        this._status = e.type;
+        this.status = e.type;
     },
 
     //离开动画开始时触发

@@ -329,8 +329,6 @@ var Grid = Component.extend({
         self.$el = $(self.el);
         self.el = self.$el[0];
 
-        console.log(this.$el)
-
         self.$header = self.$el.find('.grid_header');
         self.$body = self.$el.find('.grid_body');
 
@@ -939,8 +937,6 @@ var Grid = Component.extend({
 
                 var select = self.controls[selectOptions.field].$el[0];
                 select.options.length = 0;
-
-                console.log(options);
 
                 $.each(options, function (j, item) {
                     select.options.add(new Option(item.text, item.value));

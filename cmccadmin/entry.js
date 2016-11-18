@@ -39,9 +39,6 @@ function startApp(routes, resourceMapping) {
                     url: '/city/index'
                 }]
             }, {
-                title: '用户管理',
-                url: '/userinfo/index'
-            }, {
                 title: '公众圈管理',
                 url: '/pub_quan/index',
                 children: [{
@@ -53,7 +50,18 @@ function startApp(routes, resourceMapping) {
                 }]
             }, {
                 title: '圈管理',
-                url: '/quan_msgs/index'
+                url: '/quan_msgs/index',
+                children: []
+            }, {
+                title: '用户管理',
+                url: '/userinfo/index'
+            }, {
+                title: '云米管理',
+                url: '/user_yunmi/index',
+                children: [{
+                    title: '添加云米时段',
+                    url: '/user_yunmi/add'
+                }]
             }]
         });
 

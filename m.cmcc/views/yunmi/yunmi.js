@@ -9,6 +9,7 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var yunMiRules = require('components/yunMiRules');
+var ym = require('logical/yunmi');
 
 module.exports = Activity.extend({
 
@@ -38,7 +39,7 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Promise.all([ym.getYunmi(), this.waitLoad()]).then(function (results) {
 
             self.bindScrollTo(model.refs.main);
 

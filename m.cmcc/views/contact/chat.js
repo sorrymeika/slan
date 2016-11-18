@@ -9,8 +9,6 @@ var popup = require('widget/popup');
 
 var chat = require('logical/chat');
 var user = require('models/user');
-var messagesList = require('models/messagesList');
-
 
 module.exports = Activity.extend({
 
@@ -27,7 +25,7 @@ module.exports = Activity.extend({
         this.newMessage = this.newMessage.bind(this);
 
         chat.on('sendresult' + personId, this.sendResult)
-            .on('message:' + user.get('user_id'), this.newMessage);
+            .on('message:' + personId, this.newMessage);
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
@@ -130,12 +128,13 @@ module.exports = Activity.extend({
 
     onShow: function () {
         var self = this;
+        chat.readMessage(this.route.params.id);
     },
 
     onDestory: function () {
         var personId = this.route.params.id;
         chat.off('sendresult:' + personId, this.sendResult)
-            .off('message:' + user.get('user_id'), this.newMessage);
+            .off('message:' + personId, this.newMessage);
 
         this.model.destroy();
     },
@@ -154,5 +153,9 @@ module.exports = Activity.extend({
         this.model.next(function () {
             self.scroll.scrollToEnd();
         });
+
+        if (this.status != 'Pause') {
+            chat.readMessage(this.route.params.id);
+        }
     }
 });

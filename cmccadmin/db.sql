@@ -3,16 +3,16 @@
 --props:扩展Model.class私有变量(String name,String id)
 --children:扩展Model.class私有变量(quan_likes,quan_comments)
 --listChildren:扩展Model.class List<?>私有变量(quan_likes,quan_comments)
---order_by: getPage,getAll,filter排序(id desc,date asc)
 --seq_name: 主键sequence
 
 --#columnInfo#
 --deletion_key:删除时验证是否为空(true|false)
 --route:生成后台表单的值是否来自路由参数(true|false)
 --search:是否可搜索(true|false)
---formType: 表单类型(select|datePicker|timePicker)
---options: 选项(value:text,0:'请选择'|{ url: 'xxx', data:{}, text: 'key of data'||'text', value: 'key of data'||'value' })
+--sort:是否可排序(true|false)
 --formSort: 表单项排序(从小到大)
+--formType: 表单类型(select|datePicker|timePicker)
+--options: 选项(value:text,1:'类型1'|{ url: 'xxx', data:{}, text: 'key of data'||'text', value: 'key of data'||'value' })
 
 
 connect sys/12345Qwert as sysdba
@@ -200,7 +200,7 @@ create table friends (--好友 --props=String user_name,String avatars,int is_se
     fid number(15) primary key,--自增id
     friend_id number(10),--好友id
     user_id number(10),--发起请求方
-    status number(2),--状态 --options=-2非好友,-1未处理,0拒绝,1接受,2删除,
+    status number(2),--状态 --options=-2:非好友,-1:未处理,0:拒绝,1:接受,2:删除,
     add_date date,--添加时间 --search=true
     msg varchar(40),--验证消息
     show number(1)--显示在新好友中
@@ -237,7 +237,7 @@ create sequence district_seq minvalue 1 maxvalue 99999999999 start with 1 increm
 
 create table messages (
     msg_id number(12) primary key,--消息id
-    type number(5),--消息类型
+    type number(5),--消息类型 --options=1:文本,2:图片,3:红包,4:赠送云米
     from_id number(11),--发消息人
     to_id number(12),--收消息人
     is_show_time number(1),--是否显示时间小标记
@@ -246,7 +246,6 @@ create table messages (
     feature varchar(2000)--扩展
 ) tablespace cmccuser;
 create sequence messages_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
-
 
 alter table userinfo modify avatars varchar(255);
 
@@ -259,15 +258,181 @@ create table friends_ext (
     enable_push number(1)--允许推送到首页
 ) tablespace cmccuser;
 
-
 create table contacts_backup (--通讯录备份
     backup_id number(12) primary key,--自增id
     user_id number(10),--用户ID
     backup_date date,--备份时间 --search=true
-    backup_data clob
+    backup_data clob--备份数据
 ) tablespace cmccuser;
 create sequence contacts_backup_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+
+
+
+
 
 -----------------------------
 --<<2016-11-16 up to date here
 -----------------------------
+
+create table user_yunmi (--云米时段
+    yunmi_id number(12) primary key,--时段ID
+    user_id number(10),--用户ID
+    amount number(10),--云米数量
+    start_date date,--时段开始时间 --search=true
+    end_date date,--时段结束时间 --sort=true --search=true
+    create_date date,--云米生成时间
+    status number(3),--状态 --options=1:已领取,2:未领取,3:已过期 --formType=select
+    add_date date--云米导入时间
+) tablespace cmccuser;
+create sequence user_yunmi_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+
+create table user_open_history (--用户打开app历史记录
+    history_id number(12) primary key,--历史ID
+    user_id number(12),--用户ID
+    device_type number(2),--设备类型 --options=1:iOS,2:android --formType=select
+    os_version varchar(20),--操作系统版本
+    app_version varchar(20),--app版本
+    user_agent varchar(200),--userAgent
+    record_date date--打开app时间
+) tablespace cmccuser;
+create sequence user_open_history_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table user_ext (--用户扩展信息
+    user_id number(12) primary key,--用户ID
+    total_yunmi number(12),--云米总数
+    invited_code number(11),--邀请码
+    device_type number(2),--设备类型 --options=1:iOS,2:android --formType=select
+    device_token varchar(128),--消息推送token
+    valid_new_friend number(1),--加好友时需要验证
+    can_search_me number(1),--能否搜索到我
+    can_someone_call_me number(1),--是否允许call_black的人拨号给我
+    can_call_me number(1),--允许陌生人拨号给我
+    can_see_some number(1)--允许陌生人看十张照片
+) tablespace cmccuser;
+
+
+create table quan_black (--圈子黑名单
+    black_id number(12) primary key,--黑名单ID
+    user_id number(12),--用户ID
+    friend_id number(12),--黑名单用户ID
+    type number(2)--类型 --options=1:我不看他,2:不准他看我 --formType=select
+) tablespace cmccuser;
+create sequence quan_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table call_black (--拨号黑名单
+    black_id number(12) primary key,--黑名单ID
+    user_id number(12),--用户ID
+    friend_id number(12)--黑名单用户ID
+) tablespace cmccuser;
+create sequence call_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table yunmi_trade (--云米交易明细
+    trade_id number(12) primary key,--交易ID
+    trade_no varchar(32),--交易码
+    trade_type number(3),--交易类型 --options=1:自己领取,2:摇一摇,3:他人赠送,4:赠送他人,5:赠送退回,6:发红包,7:收红包,8:红包退回,9:任务,10:别人帮领,11:兑换流量 --formType=select
+    amount number(10),--交易云米数量
+    user_id number(10),--用户ID
+    friend_id number(10),--交易对象
+    task_id number(10),--任务id
+    status number(3),--交易状态 --options=1:交易结束,2:交易进行中 --formType=select
+    trade_date date--交易时间 --search=true
+) tablespace cmccuser;
+create sequence yunmi_trade_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table yunmi_redbag (--云米红包
+    redbag_id number(12) primary key,--红包ID
+    trade_id number(12),--交易ID
+    amount number(10),--红包云米数量
+    user_id number(10),--发红包的用户
+    type number(2),--红包类型 --options=1:普通红包,2:手气红包 --formType=select
+    status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
+    quantity number(3)--红包数量
+) tablespace cmccuser;
+create sequence yunmi_redbag_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table yunmi_redbag_detail (--手气红包领取记录
+    receive_id number(12) primary key,--自增ID
+    redbag_id number(12),--红包ID
+    trade_id number(12),--交易ID
+    status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
+    amount number(10),--红包云米数量
+    friend_id number(10)--领红包的好友ID
+) tablespace cmccuser;
+create sequence yunmi_redbag_detail_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table yunmi_redbag_friends (--手气红包可领取好友
+    receive_id number(12) primary key,--自增ID
+    redbag_id number(12),--红包ID
+    friend_id number(12)--好友ID
+) tablespace cmccuser;
+create sequence yunmi_redbag_friends_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table business (--业务
+    business_id number(10) primary key,--业务ID
+    business_name varchar(200),--业务名称
+    business_pic varchar(200),--业务图片 --type=file
+    type number(2),--业务类型 --options=1:移动业务,2:生活
+    linkurl varchar(200)--跳转链接
+) tablespace cmccuser;
+create sequence business_seq minvalue 1 maxvalue 9999999999 start with 1 increment by 1;
+
+
+create table notification (--消息提醒
+    notify_id number(12) primary key,--自增ID
+    summary varchar(200),--提醒摘要
+    linkurl varchar(200),--跳转链接
+    user_id number(12),--用户ID
+    image varchar(200),--图片
+    type number(2),--类型 --options=1:后台发送,2:系统自动发送 --formType=select
+    business_id number(10),--业务编号
+    feature varchar(2000),--扩展字段
+    send_date date--发送日期
+) tablespace cmccuser;
+create sequence notification_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table notification_status (--消息提醒状态
+    read_id number(12) primary key,--自增ID
+    notify_id number(12),--消息ID
+    user_id number(12),--用户ID
+    status number(1)--状态 --options=1:已读,2:未读,3:删除 --formType=select
+) tablespace cmccuser;
+create sequence notification_status_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table notification_tag (--消息提醒标签
+    tag_id number(12) primary key,--标签ID
+    tag_name number(12)--标签名
+) tablespace cmccuser;
+
+
+create table news (--新闻
+    news_id number(10) primary key,--自增ID
+    title varchar(200),--新闻标题
+    summary varchar(400),--新闻摘要
+    linkurl varchar(200),--跳转链接
+    image varchar(200),--图片
+    category_id number(5),--分类
+    content clob,--文章内容
+    add_date date--发布日期
+) tablespace cmccuser;
+create sequence news_seq minvalue 1 maxvalue 9999999999 start with 1 increment by 1;
+
+
+create table news_category (
+    category_id number(6) primary key,--分类ID
+    category_name number(10),--分类名称
+    type number(2)--类型 --options=1:新闻,2:关于我们,3:广告位 --formType=select
+) tablespace cmccuser;
+create sequence news_seq minvalue 1 maxvalue 999999 start with 10000 increment by 1;

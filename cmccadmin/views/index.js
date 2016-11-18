@@ -85,11 +85,26 @@ return Page.extend({
 
                 if (params.options && typeof params.options === 'string') {
                     var po = params.options;
-                    params.options = {};
-                    po.split(',').forEach(function (item) {
-                        item = item.split(':');
-                        params.options[item.shift()] = item.join(":");
-                    });
+
+                    if (params.formType === 'select') {
+                        params.options = [];
+
+                        po.split(',').forEach(function (item) {
+                            item = item.split(':');
+
+                            params.options.push({
+                                value: item.shift(),
+                                text: item.join(":")
+                            });
+                        });
+
+                    } else {
+                        params.options = {};
+                        po.split(',').forEach(function (item) {
+                            item = item.split(':');
+                            params.options[item.shift()] = item.join(":");
+                        });
+                    }
                 }
 
                 var item = Object.assign({
@@ -391,7 +406,7 @@ return Page.extend({
 
 
                     (function (callback) {
-                        
+
                         callback.call(scope);
 
                     })(function () {
@@ -399,6 +414,40 @@ return Page.extend({
                         if (expand) {
                             privateCode += expand.privateCode;
                         }
+
+
+                        var hasSort = false;
+                        var chooseOrderByXml = ['order by <trim suffixOverrides=\",\">\n<choose>\n<when test="', '">'
+                            , '</when>\n<otherwise>' + primaryKey.name + ' desc</otherwise>\n</choose>\n</trim>'];
+
+                        var orderByXml;
+                        var orderBy = [];
+
+                        columnsList.filter(function (column) {
+                            return column.sort === true;
+
+                        }).forEach(function (item, i) {
+
+                            hasSort = true;
+                            privateCode += 'private short order_by_' + item.name + ';\n';
+
+                            orderBy.push(item.name);
+
+                            chooseOrderByXml.splice(1, 0, (i == 0 ? '' : ' or ') + 'order_by_' + item.name + '!=0');
+
+                            var result = '<choose><when test="order_by_' + item.name + '==1">' + item.name + ' asc,</when>\n\
+                            <otherwise>' + item.name + ' desc,</otherwise>\n</choose>';
+
+                            chooseOrderByXml.splice(chooseOrderByXml.length - 1, 0, result);
+                        });
+
+                        if (hasSort) {
+                            orderByXml = chooseOrderByXml.join('');
+                        } else {
+                            orderByXml = "order by " + primaryKey.name + ' desc';
+                        }
+
+                        console.log(orderByXml);
 
                         var classCode = "package " + pack + ".model;\n\n"
                             + namespaceCode.join('\n')
@@ -472,7 +521,7 @@ return Page.extend({
 
                         existsMapper += '\n<where>\nROWNUM=1\n' + ifAnd + '</where></select>';
 
-                        var where = '\n<where>\n<choose>\n' + primaryKeyCondition + '<otherwise>' + ifCondition + '\n</otherwise>\n</choose>\n</where>';
+                        var where = '<where>\n' + ifAnd + '</where>\n';
 
                         var selectListColumns = columnsList.filter(function (column) {
                             return column.type != "clob" || column.grid === false;
@@ -482,21 +531,43 @@ return Page.extend({
                         }).join(",");
 
 
+                        //Mapper.xml id=getById
                         var getById = "<select id=\"getById\" resultType=\"" + typeAlias + "\">\n\
                         select " + columns.join(",") + " from " + tableName + " where " + primaryKey.name + "=#{" + primaryKey.name + "}" + "\n</select>";
 
+
+                        //Mapper.xml id=filter
                         var filterXml = "<select id=\"filter\" resultType=\"" + typeAlias + "\" parameterType=\"" + typeAlias + "\">\n\
-                        select " + selectListColumns + " from " + tableName + where + " order by " +
-                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\n</select>";
+                        select " + selectListColumns + " from " + tableName + where + orderByXml + "\n</select>";
 
-                        var firstXml = "<select id=\"first\" resultType=\"" + typeAlias + "\" parameterType=\"" + typeAlias + "\">\n\
-                            select "+ selectListColumns + " from " + tableName;
-                        firstXml += '\n<where>\n<choose>\n' + primaryKeyCondition + '<otherwise>\nROWNUM=1\n' + ifCondition + '\n</otherwise>\n</choose>\n</where></select>';
 
+                        //Mapper.xml id=first
+                        var firstXml = "<select id=\"first\" resultType=\"" + typeAlias + "\" parameterType=\""
+                            + typeAlias + "\">\n\
+                            select ";
+
+                        if (hasSort) {
+                            firstXml += columnsList.map(function (item) {
+                                return "b." + item.name;
+
+                            }).join(",") + " from (select " + primaryKey.name + " from " + tableName + where + orderByXml + ") a join "
+                                + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name
+                                + ' where ROWNUM=1</select>';
+
+                        } else {
+
+                            firstXml += columnsList.map(function (item) {
+                                return item.name;
+                            }).join(",") + " from " + tableName + where + '</select>';
+                        }
+
+
+                        //Mapper.xml id=getAll
                         var getAll = "<select id=\"getAll\" resultType=\"" + typeAlias + "\">\n\
-                        select " + selectListColumns + " from " + tableName + " order by " +
-                            (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\n</select>";
+                        select " + selectListColumns + " from " + tableName + orderByXml + "\n</select>";
 
+
+                        //Mapper.xml id=add
                         var insert = "<insert id=\"add\" parameterType=\"" + typeAlias + "\">\n\
                         insert into " + tableName + " (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
                                 if (field.type != "number")
@@ -560,6 +631,7 @@ return Page.extend({
                             import java.util.List;\n\
                             import javax.annotation.Resource;\n\
                             import org.springframework.stereotype.Service;\n\
+                            import "+ pack + ".util.StringUtils;\n\
                             import "+ pack + ".data.Oracle;\n\
                             import "+ pack + ".data.RedisDB;\n\
                             import "+ pack + ".mapper." + className + "Mapper;\n\
@@ -587,6 +659,12 @@ return Page.extend({
                             public int deleteById(int "+ primaryKey.name + ") { return mapper.deleteById(" + primaryKey.name + "); }\n\
                             public "+ className + " getById(int " + primaryKey.name + ") { return mapper.getById(" + primaryKey.name + "); }\n\
                             public List<"+ className + "> filter(" + className + " data) { return mapper.filter(data); }\n\
+                            public List<UserYunmi> filter(Integer[] ids) {\n\
+                                return oracle.query("+ className + ".class, \"select "
+                            + columnsList.map(function (item) { return item.name; }).join(",")
+                            + " from " + tableName
+                            + " where " + primaryKey.name + " in (\" + StringUtils.join(ids, \",\") + \")\");\n\
+                            }\n\
                             public "+ className + " first(" + className + " data) { return mapper.first(data); }\n\
                             public List<"+ className + "> getAll() { return mapper.getAll(); }\n\
                             public PageResult<List<"+ className + ">> getPage(int page, int pageSize, " + className + " search) {\n\n\
@@ -628,8 +706,36 @@ return Page.extend({
 
                                 return res;
 
-                            }).join('\n') + "\nsql += \" order by " + (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\";\n\
-                                return oracle.queryPage("+ className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + " order by a." + (tableInfo.order_by ? tableInfo.order_by : (primaryKey.name + " desc")) + "\", page, pageSize, objs.toArray());\n }\n\
+                            }).join('\n');
+
+                        service += "\nsql += \" order by \";";
+                        service += "\nString orderBySql = \"\";";
+
+                        var serviceOrderBy;
+
+                        if (orderBy.length) {
+                            orderBy.forEach(function (name) {
+                                service += '\n'
+                                    + 'if (-1 ==search.get' + toUpper("order_by_" + name) + '()) {'
+                                    + '\nif (!\"\".equals(orderBySql)) orderBySql+=",";'
+                                    + '\norderBySql+="' + name + ' desc";'
+                                    + '\n} else if (1 ==search.get' + toUpper("order_by_" + name) + '()) {'
+                                    + '\nif (!\"\".equals(orderBySql)) orderBySql+=",";'
+                                    + '\norderBySql+="' + name + ' asc";'
+                                    + '\n}';
+                            });
+                            "\nif (!\"\".equals(orderBySql)) orderBySql=\"" + primaryKey.name + " desc\";"
+
+                        } else {
+                            "\norderBySql=\"" + primaryKey.name + " desc\";"
+                        }
+
+                        service += "\nsql += orderBySql;\n\
+                                return oracle.queryPage("
+                            + className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \""
+                            + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + " order by b.\""
+                            + ' + orderBySql.replaceAll(",\\\\s*", ", b.")'
+                            + ", page, pageSize, objs.toArray());\n }\n\
                         }";
 
                         if (formData.writeService != 0 && javaDir) {

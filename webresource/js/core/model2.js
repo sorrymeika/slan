@@ -628,7 +628,6 @@ var ModelProto = {
                             break;
 
                         case '[object Array]':
-
                             value = new Collection(this, attr, value);
                             data[attr] = value.data;
                             break;
@@ -738,8 +737,7 @@ Collection.prototype = {
         if (!$.isArray(data)) {
             data = [data];
         }
-
-        dataLen = data.length;
+        var dataLen = data.length;
 
         if (dataLen) {
             for (var i = 0; i < dataLen; i++) {
@@ -970,6 +968,8 @@ function ViewModel(el, data, children) {
     this.snModelKey = 'sn-' + this.cid + 'model';
 
     this.data = $.extend({}, this.defaultData, data);
+
+
     this.model = {};
     this.repeats = {};
     this._expressions = {
@@ -1128,6 +1128,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                         } else if (fid) {
                             (el.snBinding || (el.snBinding = {}))[attr] = fid.id;
                             el.snIsGlobal = fid.isGlobal;
+                            el.removeAttribute(attr);
 
                         } else if (attr == "ref") {
                             self.refs[val] = el;
@@ -1547,10 +1548,26 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var $el = $(el).on('input change', '[' + this.snModelKey + ']', function (e) {
             var target = e.currentTarget;
 
-            if ((target.tagName == 'INPUT' || target.tagName == "TEXTAREA") && (e.type == "input")
-                || target.tagName == 'SELECT' && e.type == "change") {
-                self.setDataFromElement(target, target.getAttribute(self.snModelKey), target.value);
+            switch (e.type) {
+                case 'change':
+                    switch (target.tagName) {
+                        case 'TEXTAREA':
+                            return;
+                        case 'INPUT':
+                            switch (target.type) {
+                                case 'hidden':
+                                case 'radio':
+                                case 'checkbox':
+                                    break;
+                                default:
+                                    return;
+                            }
+                            break;
+                    }
+                    break;
             }
+
+            self.setDataFromElement(target, target.getAttribute(self.snModelKey), target.value);
         });
 
         this._bindElement($el);
