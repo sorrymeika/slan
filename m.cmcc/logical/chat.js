@@ -9,7 +9,11 @@ var contact = require('logical/contact');
 
 var MESSAGETYPE = {
     TEXT: 1,
-    IMAGE: 2
+    IMAGE: 2,
+    SEND_YUNMI: 3,
+    GET_SEND_YUNMI: 4,
+    YUNMI_REDBAG: 5,
+    GET_YUNMI_REDBAG: 6
 };
 
 var _gid = 1;
@@ -27,7 +31,7 @@ function keep() {
                 switch (msg.type) {
                     case MESSAGETYPE.TEXT:
                     case MESSAGETYPE.IMAGE:
-                        chat.record(false, msg.from_id, msg.content);
+                        chat.record(false, msg.from_id, msg);
                         chat.trigger('message:' + msg.from_id, msg);
                         break;
                 }
@@ -49,7 +53,23 @@ var chat = Event.mixin({
         }
     },
 
-    record: function (is_send, friend_id, content) {
+    formatMessages: function (messages) {
+
+        messages.forEach(function (msg) {
+            switch (msg.type) {
+                case MESSAGETYPE.SEND_YUNMI:
+                case MESSAGETYPE.GET_SEND_YUNMI:
+                case MESSAGETYPE.YUNMI_REDBAG:
+                case MESSAGETYPE.GET_YUNMI_REDBAG:
+                    msg.content = JSON.parse(msg.content);
+                    break;
+            }
+        });
+
+        return messages;
+    },
+
+    record: function (is_send, friend_id, msg) {
 
         var records = messagesList._('list');
         var record = records.find('user_id', friend_id);
@@ -57,8 +77,15 @@ var chat = Event.mixin({
         var recordData = {
             user_id: friend_id,
             date: Date.now(),
-            msg: content
+            msg: msg.type == MESSAGETYPE.IMAGE ? '[图片]' :
+                msg.type == MESSAGETYPE.SEND_YUNMI ? '[转账]' :
+                    msg.type == MESSAGETYPE.GET_SEND_YUNMI ? '[收钱]' :
+                        msg.type == MESSAGETYPE.YUNMI_REDBAG ? '[云米红包]' :
+                            msg.type == MESSAGETYPE.GET_YUNMI_REDBAG ? '[收红包]' :
+                                msg.content
         };
+
+        console.log(recordData);
 
         if (!record) {
             contact.person(friend_id).then(function (res) {

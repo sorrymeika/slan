@@ -100,7 +100,7 @@ module.exports = Activity.extend({
                 confirmText: '确定取消',
                 confirmAction: function () {
                     this.hide();
-                    
+
                     self.cancelOrderApi.setParam({
                         purcode: order.PUR_CODE
 
@@ -125,9 +125,9 @@ module.exports = Activity.extend({
                 self.model.set({
                     data: res.data,
                     list: res.list
-                })
+                });
 
-                if (self.referrer != '/myorder' && res.data.PUR_PAS_ID == 2) {
+                if (self.referrer && self.referrer.indexOf('/myorder') != 0 && res.data.PUR_PAS_ID == 2) {
                     self.forward("/news/order" + self.route.params.id);
                 }
             }
@@ -173,7 +173,7 @@ module.exports = Activity.extend({
             }
         });
 
-        if (self.route.query.refresh) {
+        if (self.route.query.refresh == 1) {
             self.checkStatus();
         }
     },

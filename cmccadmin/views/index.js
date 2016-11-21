@@ -61,7 +61,7 @@ return Page.extend({
             var privateCode = '';
             var namespaceCode = [];
 
-            code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, memo) {
+            code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+(,\d+){0,1}\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, point, memo) {
                 var ext;
                 var emptyAble = false;
                 var params = {};
@@ -125,7 +125,11 @@ return Page.extend({
 
                 switch (type) {
                     case "number":
-                        privateCode += "private int " + name + ";\n";
+                        if (point) {
+                            privateCode += "private float " + name + ";\n";
+                        } else {
+                            privateCode += "private int " + name + ";\n";
+                        }
                         break;
 
                     case "varchar":
@@ -417,7 +421,7 @@ return Page.extend({
 
 
                         var hasSort = false;
-                        var chooseOrderByXml = ['order by <trim suffixOverrides=\",\">\n<choose>\n<when test="', '">'
+                        var chooseOrderByXml = [' order by <trim suffixOverrides=\",\">\n<choose>\n<when test="', '">'
                             , '</when>\n<otherwise>' + primaryKey.name + ' desc</otherwise>\n</choose>\n</trim>'];
 
                         var orderByXml;
@@ -433,7 +437,7 @@ return Page.extend({
 
                             orderBy.push(item.name);
 
-                            chooseOrderByXml.splice(1, 0, (i == 0 ? '' : ' or ') + 'order_by_' + item.name + '!=0');
+                            chooseOrderByXml.splice(1 + i, 0, (i == 0 ? '' : ' or ') + 'order_by_' + item.name + '!=0');
 
                             var result = '<choose><when test="order_by_' + item.name + '==1">' + item.name + ' asc,</when>\n\
                             <otherwise>' + item.name + ' desc,</otherwise>\n</choose>';
@@ -444,7 +448,7 @@ return Page.extend({
                         if (hasSort) {
                             orderByXml = chooseOrderByXml.join('');
                         } else {
-                            orderByXml = "order by " + primaryKey.name + ' desc';
+                            orderByXml = " order by " + primaryKey.name + ' desc';
                         }
 
                         console.log(orderByXml);
@@ -454,6 +458,14 @@ return Page.extend({
                             + "\npublic class " + className + " {\n";
                         classCode += privateCode;
                         classCode += getSetterAndGetter(privateCode);
+
+                        classCode += '\n@Override\n'
+                            + 'public String toString() {\n'
+                            + 'return "' + className + '={' + columnsList.map(function (item) {
+                                return ' ' + item.name + ':" + ' + item.name + ' + "';
+                            }).join(',') + '}";\n'
+                            + '}';
+
                         classCode += "}";
 
                         if (formData.writeModel != 0 && javaDir) {
@@ -558,7 +570,7 @@ return Page.extend({
 
                             firstXml += columnsList.map(function (item) {
                                 return item.name;
-                            }).join(",") + " from " + tableName + where + '</select>';
+                            }).join(",") + " from " + tableName + where + ' and ROWNUM=1\n</select>';
                         }
 
 
@@ -652,70 +664,69 @@ return Page.extend({
                                 return oracle.getNextId(\""+ tableInfo.seq_name + "\");\n\
                             }\n\
                             public Integer exists("+ className + " data) { return mapper.exists(data); }\n\
-                            public int add("+ className + " data) { int id = getNextId();\ndata.set" + toUpper(primaryKey.name) + "(id);\n return mapper.add(data) > 0 ? id : 0; }\n\
+                            public int add("+ className + " data) { int id = data.get" + toUpper(primaryKey.name) + "();\n"
+                            + "if(0 == id) {\nid=getNextId();\ndata.set" + toUpper(primaryKey.name) + "(id);\n}\n"
+                            + "return mapper.add(data) > 0 ? id : 0; }\n\
                             public int update("+ className + " data) { return mapper.update(data); }\n\
                             public int updateAllFields("+ className + " data) { return mapper.updateAllFields(data); }\n\
                             public int delete("+ className + " data) { return mapper.delete(data); }\n\
                             public int deleteById(int "+ primaryKey.name + ") { return mapper.deleteById(" + primaryKey.name + "); }\n\
                             public "+ className + " getById(int " + primaryKey.name + ") { return mapper.getById(" + primaryKey.name + "); }\n\
                             public List<"+ className + "> filter(" + className + " data) { return mapper.filter(data); }\n\
-                            public List<UserYunmi> filter(Integer[] ids) {\n\
+                            public List<"+ className + "> filter(Integer[] ids) {\n\
                                 return oracle.query("+ className + ".class, \"select "
                             + columnsList.map(function (item) { return item.name; }).join(",")
                             + " from " + tableName
                             + " where " + primaryKey.name + " in (\" + StringUtils.join(ids, \",\") + \")\");\n\
                             }\n\
                             public "+ className + " first(" + className + " data) { return mapper.first(data); }\n\
-                            public List<"+ className + "> getAll() { return mapper.getAll(); }\n\
-                            public PageResult<List<"+ className + ">> getPage(int page, int pageSize, " + className + " search) {\n\n\
-                                List<Object> objs = new ArrayList<Object>();\n\n\
-                                String sql = \"select "+ primaryKey.name + " from " + tableName + " where 1=1\";\n\n\
-                            "+ columnsList.map(function (item) {
+                            public List<"+ className + "> getAll() { return mapper.getAll(); }\n\n";
 
-                                var res = 'if (';
-                                switch (item.type) {
-                                    case "file":
-                                    case "varchar":
-                                    case "clob":
-                                        res += "null != search.get" + toUpper(item.name) + "() && !\"\".equals(search.get" + toUpper(item.name) + "())";
-                                        break;
-                                    case "date":
-                                        if (item.search) {
-                                            var start = "getStart_" + item.name + "()";
-                                            var end = "getEnd_" + item.name + "()";
+                        var serviceFilter = "sql += \" where 1=1\";\n\n" + columnsList.map(function (item) {
 
-                                            res += 'null != search.' + start + ') {\n'
-                                                + 'sql += " and ' + item.name + '>=?";\n'
-                                                + 'objs.add(search.' + start + ');\n'
-                                                + '}\n'
-                                                + 'if (null != search.' + end + ') {\n'
-                                                + 'sql += " and ' + item.name + '<=?";\n'
-                                                + 'objs.add(search.' + end + ');\n'
-                                                + '}\nif (';
-                                        }
-                                        res += "null != search.get" + toUpper(item.name) + "()";
-                                        break;
-                                    case "number":
-                                        res += "0 != search.get" + toUpper(item.name) + "()";
-                                        break;
-                                }
-                                res += ') {\n\
+                            var res = 'if (';
+                            switch (item.type) {
+                                case "file":
+                                case "varchar":
+                                case "clob":
+                                    res += "null != search.get" + toUpper(item.name) + "() && !\"\".equals(search.get" + toUpper(item.name) + "())";
+                                    break;
+                                case "date":
+                                    if (item.search) {
+                                        var start = "getStart_" + item.name + "()";
+                                        var end = "getEnd_" + item.name + "()";
+
+                                        res += 'null != search.' + start + ') {\n'
+                                            + 'sql += " and ' + item.name + '>=?";\n'
+                                            + 'objs.add(search.' + start + ');\n'
+                                            + '}\n'
+                                            + 'if (null != search.' + end + ') {\n'
+                                            + 'sql += " and ' + item.name + '<=?";\n'
+                                            + 'objs.add(search.' + end + ');\n'
+                                            + '}\nif (';
+                                    }
+                                    res += "null != search.get" + toUpper(item.name) + "()";
+                                    break;
+                                case "number":
+                                    res += "0 != search.get" + toUpper(item.name) + "()";
+                                    break;
+                            }
+                            res += ') {\n\
                                     sql+=" and '+ item.name + '=?";\n\
                                     objs.add(search.get'+ toUpper(item.name) + '());\n\
                                     }';
 
-                                return res;
+                            return res;
 
-                            }).join('\n');
+                        }).join('\n');
 
-                        service += "\nsql += \" order by \";";
-                        service += "\nString orderBySql = \"\";";
-
-                        var serviceOrderBy;
+                        var serviceOrderBy = "";
 
                         if (orderBy.length) {
+                            serviceOrderBy += "\nString orderBySql = \"\";";
+
                             orderBy.forEach(function (name) {
-                                service += '\n'
+                                serviceOrderBy += '\n'
                                     + 'if (-1 ==search.get' + toUpper("order_by_" + name) + '()) {'
                                     + '\nif (!\"\".equals(orderBySql)) orderBySql+=",";'
                                     + '\norderBySql+="' + name + ' desc";'
@@ -724,19 +735,46 @@ return Page.extend({
                                     + '\norderBySql+="' + name + ' asc";'
                                     + '\n}';
                             });
-                            "\nif (!\"\".equals(orderBySql)) orderBySql=\"" + primaryKey.name + " desc\";"
+                            serviceOrderBy += "\nif (\"\".equals(orderBySql)) orderBySql=\"" + primaryKey.name + " desc\";"
 
                         } else {
-                            "\norderBySql=\"" + primaryKey.name + " desc\";"
+                            serviceOrderBy += "\nString orderBySql=\"" + primaryKey.name + " desc\";"
                         }
 
-                        service += "\nsql += orderBySql;\n\
-                                return oracle.queryPage("
+                        service += "public List<" + className + "> filter(String columns, " + className + " search) {\n\n\
+                            if (!java.util.regex.Pattern.compile(\"^[\\\\sa-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
+                                return null;\n\
+                            }\n\
+                            List<Object> objs = new ArrayList<Object>();\n\n\
+                            String sql = sqlWhere(\"select \"+columns+\" from " + tableName + "\", search, objs)+\" order by \"+sqlOrderBy(search);";
+                        service += "return oracle.query("
+                            + className + ".class, sql, objs.toArray());\n }\n";
+
+                        //service getPage();
+                        service += "public PageResult<List<" + className + ">> getPage(int page, int pageSize, " + className + " search) {\n\n\
+                                List<Object> objs = new ArrayList<Object>();\n\n\
+                                String orderBySql = sqlOrderBy(search);\n\
+                                String sql = sqlWhere(\"select "+ primaryKey.name + " from "
+                            + tableName + "\", search, objs)+\" order by \"+orderBySql;\n";
+
+                        service += "return oracle.queryPage("
                             + className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \""
                             + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + " order by b.\""
                             + ' + orderBySql.replaceAll(",\\\\s*", ", b.")'
-                            + ", page, pageSize, objs.toArray());\n }\n\
-                        }";
+                            + ", page, pageSize, objs.toArray());\n }\n";
+
+
+                        service += "private String sqlWhere(String sql, " + className + " search, List<Object> objs) {\n"
+                            + serviceFilter
+                            + "return sql;\n"
+                            + "}\n";
+
+                        service += "private String sqlOrderBy(" + className + " search) {\n"
+                            + serviceOrderBy
+                            + "\nreturn orderBySql;\n"
+                            + "}\n";
+
+                        service += "}";
 
                         if (formData.writeService != 0 && javaDir) {
                             Http.post("http://" + location.host + "/create", {

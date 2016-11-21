@@ -269,18 +269,11 @@ create sequence contacts_backup_seq minvalue 1 maxvalue 999999999999 start with 
 
 
 
-
-
-
------------------------------
---<<2016-11-16 up to date here
------------------------------
-
 create table user_yunmi (--云米时段
     yunmi_id number(12) primary key,--时段ID
     user_id number(10),--用户ID
-    amount number(10),--云米数量
-    start_date date,--时段开始时间 --search=true
+    amount number(10,2),--云米数量
+    start_date date,--时段开始时间 --sort=true --search=true
     end_date date,--时段结束时间 --sort=true --search=true
     create_date date,--云米生成时间
     status number(3),--状态 --options=1:已领取,2:未领取,3:已过期 --formType=select
@@ -288,6 +281,75 @@ create table user_yunmi (--云米时段
 ) tablespace cmccuser;
 create sequence user_yunmi_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
+
+create table yunmi_trade (--云米交易明细
+    trade_id number(12) primary key,--交易ID
+    trade_no varchar(32),--交易码
+    charge_id varchar(32),--流量平台交易码
+    trade_type number(3),--交易类型 --options=1:自己领取,2:摇一摇,3:他人赠送,4:赠送他人,5:赠送退回,6:发红包,7:收红包,8:红包退回,9:任务,10:别人帮领,11:兑换流量 --formType=select
+    yunmi_id number(12),--云米编号
+    amount number(10,2),--交易云米数量
+    user_id number(10),--用户ID
+    friend_id number(10),--交易对象
+    task_id number(10),--任务id
+    status number(3),--交易状态 --options=1:交易结束,2:交易进行中,3:已过期 --formType=select
+    trade_date date,--交易时间 --search=true
+    overdue_date date,--过期时间 --search=true
+    memo varchar(140)--备注
+) tablespace cmccuser;
+create sequence yunmi_trade_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table user_ext (--用户扩展信息
+    user_id number(12) primary key,--用户ID
+    total_yunmi number(12,2),--云米总数
+    invited_code number(11),--邀请码
+    device_type number(2),--设备类型 --options=1:iOS,2:android --formType=select
+    device_token varchar(128),--消息推送token
+    valid_new_friend number(1),--加好友时需要验证
+    can_search_me number(1),--能否搜索到我
+    can_someone_call_me number(1),--是否允许call_black的人拨号给我
+    can_call_me number(1),--允许陌生人拨号给我
+    can_see_some number(1)--允许陌生人看十张照片
+) tablespace cmccuser;
+
+
+create table yunmi_redbag (--云米红包
+    redbag_id number(12) primary key,--红包ID
+    trade_id number(12),--交易ID
+    amount number(10),--红包云米数量
+    user_id number(10),--发红包的用户
+    type number(2),--红包类型 --options=1:普通红包,2:手气红包 --formType=select
+    status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
+    quantity number(3),--红包数量
+    memo varchar(140)--备注
+) tablespace cmccuser;
+create sequence yunmi_redbag_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+create table yunmi_redbag_friends (--手气红包可领取好友
+    receive_id number(12) primary key,--自增ID
+    redbag_id number(12),--红包ID
+    friend_id number(12)--好友ID
+) tablespace cmccuser;
+create sequence yunmi_redbag_friends_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+create table yunmi_redbag_detail (--手气红包领取记录
+    receive_id number(12) primary key,--自增ID
+    redbag_id number(12),--红包ID
+    trade_id number(12),--交易ID
+    status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
+    amount number(10),--红包云米数量
+    friend_id number(10)--领红包的好友ID
+) tablespace cmccuser;
+create sequence yunmi_redbag_detail_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+
+
+
+-----------------------------
+--<<2016-11-16 up to date here
+-----------------------------
 
 
 create table user_open_history (--用户打开app历史记录
@@ -300,20 +362,6 @@ create table user_open_history (--用户打开app历史记录
     record_date date--打开app时间
 ) tablespace cmccuser;
 create sequence user_open_history_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
-
-
-create table user_ext (--用户扩展信息
-    user_id number(12) primary key,--用户ID
-    total_yunmi number(12),--云米总数
-    invited_code number(11),--邀请码
-    device_type number(2),--设备类型 --options=1:iOS,2:android --formType=select
-    device_token varchar(128),--消息推送token
-    valid_new_friend number(1),--加好友时需要验证
-    can_search_me number(1),--能否搜索到我
-    can_someone_call_me number(1),--是否允许call_black的人拨号给我
-    can_call_me number(1),--允许陌生人拨号给我
-    can_see_some number(1)--允许陌生人看十张照片
-) tablespace cmccuser;
 
 
 create table quan_black (--圈子黑名单
@@ -332,50 +380,6 @@ create table call_black (--拨号黑名单
 ) tablespace cmccuser;
 create sequence call_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
-
-create table yunmi_trade (--云米交易明细
-    trade_id number(12) primary key,--交易ID
-    trade_no varchar(32),--交易码
-    trade_type number(3),--交易类型 --options=1:自己领取,2:摇一摇,3:他人赠送,4:赠送他人,5:赠送退回,6:发红包,7:收红包,8:红包退回,9:任务,10:别人帮领,11:兑换流量 --formType=select
-    amount number(10),--交易云米数量
-    user_id number(10),--用户ID
-    friend_id number(10),--交易对象
-    task_id number(10),--任务id
-    status number(3),--交易状态 --options=1:交易结束,2:交易进行中 --formType=select
-    trade_date date--交易时间 --search=true
-) tablespace cmccuser;
-create sequence yunmi_trade_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
-
-
-create table yunmi_redbag (--云米红包
-    redbag_id number(12) primary key,--红包ID
-    trade_id number(12),--交易ID
-    amount number(10),--红包云米数量
-    user_id number(10),--发红包的用户
-    type number(2),--红包类型 --options=1:普通红包,2:手气红包 --formType=select
-    status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
-    quantity number(3)--红包数量
-) tablespace cmccuser;
-create sequence yunmi_redbag_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
-
-
-create table yunmi_redbag_detail (--手气红包领取记录
-    receive_id number(12) primary key,--自增ID
-    redbag_id number(12),--红包ID
-    trade_id number(12),--交易ID
-    status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
-    amount number(10),--红包云米数量
-    friend_id number(10)--领红包的好友ID
-) tablespace cmccuser;
-create sequence yunmi_redbag_detail_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
-
-
-create table yunmi_redbag_friends (--手气红包可领取好友
-    receive_id number(12) primary key,--自增ID
-    redbag_id number(12),--红包ID
-    friend_id number(12)--好友ID
-) tablespace cmccuser;
-create sequence yunmi_redbag_friends_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
 create table business (--业务

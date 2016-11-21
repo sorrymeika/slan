@@ -6,6 +6,8 @@ var Promise = require('promise');
 var Event = require('core/event');
 var Loader = require('widget/loader');
 
+var friends = require('models/friends');
+
 var contact = Event.mixin({
     newFriends: function () {
         return Http.post('/friends/getNewFriends');
@@ -40,6 +42,40 @@ var contact = Event.mixin({
         });
     },
 
+    getCombinedContacts: function () {
+        return Promise.all([this.getCachedFriends(), this.getCachedContacts()]).then(function (results) {
+            results[0].data.forEach(function (item) {
+                item.isFriend = true;
+            });
+
+            var list = results[0].data;
+
+            results[1].data.forEach(function (item) {
+                if (util.indexOf(list, 'user_id', item.user_id) == -1) {
+                    list.push(item);
+                }
+            });
+
+            return list;
+        });
+    },
+
+    getCachedContacts: function () {
+        var cached = friends.getContacts();
+
+        if (cached.size() == 0) {
+            return this.contactList();
+        } else {
+            return new Promise(function (resolve, reject) {
+
+                resolve({
+                    success: true,
+                    data: cached.getAll()
+                });
+            });
+        }
+    },
+
     contactList: function () {
         return new Promise(function (resolve, reject) {
 
@@ -63,6 +99,8 @@ var contact = Event.mixin({
                             var userinfo = util.first(res.data, 'account', item.phoneNumber);
                             userinfo && Object.assign(item, userinfo);
                         });
+                        friends.getContacts().set(data);
+
                         resolve({
                             success: true,
                             data: data
@@ -123,8 +161,30 @@ var contact = Event.mixin({
         });
     },
 
+    getCachedFriends: function () {
+        var cached = friends.getFriends();
+
+        if (cached.size() == 0) {
+            return this.friends();
+        } else {
+            return new Promise(function (resolve, reject) {
+
+                resolve({
+                    success: true,
+                    data: cached.getAll()
+                });
+            });
+        }
+
+    },
+
     friends: function () {
-        return Http.post('/friends/getFriends');
+        return Http.post('/friends/getFriends').then(function (res) {
+
+            friends.getFriends().set(res.data);
+
+            return res;
+        });
     },
 
     setFriendMemo: function (friend_id, memo) {

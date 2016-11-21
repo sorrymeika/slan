@@ -70,10 +70,12 @@
             "logical/quan": "./logical/quan",
             "logical/contact": "./logical/contact",
             "logical/auth": "./logical/auth",
-            "logical/district": "./logical/district"
+            "logical/district": "./logical/district",
+            "logical/yunmi": "./logical/yunmi"
         },
         "models": {
             "models/user": "./models/user",
+            "models/friends": "./models/friends",
             "models/messagesList": "./models/messagesList"
         }
     },

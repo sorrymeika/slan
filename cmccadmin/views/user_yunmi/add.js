@@ -55,8 +55,7 @@ module.exports = Page.extend({
                 field: "status",
                 type: "select",
                 emptyAble: false,
-                emptyText: "状态不可为空"
-                ,
+                emptyText: "状态不可为空",
                 options: [{ "value": "1", "text": "已领取" }, { "value": "2", "text": "未领取" }, { "value": "3", "text": "已过期" }]
             }],
             buttons: [{

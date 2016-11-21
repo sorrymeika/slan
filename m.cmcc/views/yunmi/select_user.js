@@ -15,9 +15,12 @@ module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
+        var routeData = this.route.data;
 
         var model = this.model = new Model(this.$el, {
-            title: '我的好友'
+            title: '我的好友',
+            friends: routeData.friends || [],
+            type: routeData.type
         });
 
         model.back = function () {
@@ -25,6 +28,15 @@ module.exports = Activity.extend({
         }
 
         model.save = function () {
+
+            var groups = this.get('groups');
+            var friends = [];
+
+            groups.forEach(function (group) {
+                friends = friends.concat(util.filter(group.list, 'checked', true));
+            });
+
+            self.setResult(routeData.type == 2 ? 'select_rich_user' : 'select_redbag_user', friends);
             this.back();
         }
 
@@ -35,6 +47,13 @@ module.exports = Activity.extend({
         Promise.all([contact.friends(), this.waitLoad()]).then(function (results) {
 
             var friendList = results[0].data;
+            var selected = model.get('friends');
+
+            friendList.forEach(function (item) {
+                item.isFriend = true;
+                if (-1 != util.indexOf(selected, 'user_id', item.user_id)) item.checked = true;
+            });
+
             model.set({
                 friendList: friendList,
                 groups: self.groups(friendList)

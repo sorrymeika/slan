@@ -271,8 +271,36 @@ define(function (require, exports, module) {
         if (bridge.isInApp)
             alert('slapp://' + JSON.stringify(data));
 
-        else if (data.method == 'system' && data.params.type == "info") {
-            hybridFunctions[data.callback]({});
+        else {
+            var cb = hybridFunctions[data.callback];
+            switch (data.method) {
+                case 'system':
+                    switch (data.params.type) {
+                        case "info":
+                            cb({});
+                            break;
+                    }
+                    break;
+                case "contact":
+                    switch (data.params.type) {
+                        case "getContacts":
+                            cb({
+                                success: true,
+                                data: [{
+                                    phoneNumber: '18721979478',
+                                    contactName: 'asdf'
+                                }, {
+                                    phoneNumber: '15900914293',
+                                    contactName: 'asdf1'
+                                }, {
+                                    phoneNumber: '13900914293',
+                                    contactName: 'asdf2'
+                                }]
+                            });
+                            break;
+                    }
+                    break;
+            }
         }
     }
 

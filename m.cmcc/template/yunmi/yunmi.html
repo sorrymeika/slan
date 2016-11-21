@@ -7,15 +7,15 @@
         <div class="flex">
             <dl class="flex_0">
                 <dt class="pt_m_rem">累计获得</dt>
-                <dd class="pt_l_rem fs_xl fw_b">8000</dd>
+                <dd class="pt_l_rem fs_xl fw_b">{amount||0}</dd>
             </dl>
-            <dl class="flex_0" data-forward="/yunmi/detail">
+            <dl class="flex_0" sn-tap="this.receiveYunmi()">
                 <dt class="ym-point-rem pt_m_rem"></dt>
-                <dd class="fs_xxl ym_idx__timeout">15:25</dd>
+                <dd class="pt_s_rem fs_l ym_idx__timeout">{current.amount||("倒计时:"+next.timeLeft)}</dd>
             </dl>
             <dl class="flex_0">
                 <dt class="pt_m_rem">当日获得</dt>
-                <dd class="pt_l_rem fs_xl fw_b">15.5</dd>
+                <dd class="pt_l_rem fs_xl fw_b">{today_amount||0}</dd>
             </dl>
         </div>
         <div class="ta_c fs_s pt_s_rem pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
@@ -27,52 +27,25 @@
     </ul>
 
     <div class="ym_idx__shake" sn-if="{tab==0}">
-        <div sn-if="shakeResult" class="ym-shake ta_c pt_xxl pb_xxl">
+        <div sn-if="!shakeResult||!shakeResult.length" class="ym-shake ta_c pt_xxl pb_xxl" sn-tap="this.motion()">
             <p class="ta_c pt_xl">摇一摇</p>
         </div>
-        <ul class="ym_idx__bags of_h pb_xl" sn-if="!shakeResult">
-            <li class="fl_l">
-                <p class="name">aasdf</p>
-                <div class="ym-bag-rem ym_idx__bag">
-                    <p class="ym_idx__num">+123</p>
+        <ul class="ym_idx__bags of_h pb_xl" sn-if="shakeResult&&shakeResult.length">
+            <li class="fl_l" sn-repeat="item in shakeResult" sn-tap="this.getShakeYunmi(item)">
+                <p class="name">{item.user_name||item.contactName}
+                    <span sn-if="{!item.isFriend||!item.user_id}" class="dp_b fs_s">（{item.user_id?'非好友':'未注册'}）</span></p>
+                <div sn-if="{item.isFriend}" class="ym-bag-rem ym_idx__bag">
+                    <p class="ym_idx__num">+{item.amount/2||0}</p>
                 </div>
-            </li>
-            <li class="fl_l">
-                <p class="name">aasdf<span class="dp_b fs_s">（未注册）</span></p>
-                <div class="ym-bag_empty-rem ym_idx__bag">
-                    <p class="ym_idx__bag_lab">邀请</p>
-                    <p class="ym_idx__num">+123</p>
-                </div>
-            </li>
-            <li class="fl_l">
-                <p class="name">aasdf<span class="dp_b fs_s">（非好友）</span></p>
-                <div class="ym-bag_empty-rem ym_idx__bag">
-                    <p class="ym_idx__bag_lab">添加好友</p>
-                    <p class="ym_idx__num">+123</p>
-                </div>
-            </li>
-            <li class="fl_l">
-                <p class="name">aasdf</p>
-                <div class="ym-bag-rem ym_idx__bag">
-                    <p class="ym_idx__num">+123</p>
-                </div>
-            </li>
-            <li class="fl_l">
-                <p class="name">aasdf</p>
-                <div class="ym-bag-rem ym_idx__bag">
-                    <p class="ym_idx__num">+123</p>
-                </div>
-            </li>
-            <li class="fl_l">
-                <p class="name">aasdf</p>
-                <div class="ym-bag-rem ym_idx__bag">
-                    <p class="ym_idx__num">+123</p>
+                <div sn-else class="ym-bag_empty-rem ym_idx__bag">
+                    <p class="ym_idx__bag_lab">{item.user_id?'添加好友':'邀请'}</p>
+                    <p class="ym_idx__num">+{item.user_id?item.amount/2:50}</p>
                 </div>
             </li>
         </ul>
 
         <div class="pt_l pb_xxl">
-            <div class="ta_c cl_app pb_m">本日你还能摇取100云米</div>
+            <div class="ta_c cl_app pb_m">本日你还能摇取{100-(Math.max(today_amount||0,0))}云米</div>
         </div>
     </div>
 
@@ -106,7 +79,7 @@
                     <i class="dp_b fs_s">+50云米</i></p>
                 <button class="ym_task__btn">未完成</button>
             </li>
-             <li class="icon-info flex h_bar pl_m bd_b">
+            <li class="icon-info flex h_bar pl_m bd_b">
                 <input class="fs_m pl_m flex_0" placeholder="请输入您的邀请码（选填）" />
             </li>
             <li class="ym-timeout flex h_l pl_m bd_b">
@@ -123,14 +96,12 @@
 
         </ul>
     </div>
-
-
 </div>
 <footer class="h_l bg_fff bd_t pt_1 flex ta_c ym_idx__foot">
-    <div class="flex_0 br_aaa">
+    <div class="flex_0 br_aaa" sn-tap="this.findRich()">
         <i class="icon-money mr_m"></i> <span class="va_m">找土豪</span>
     </div>
-    <div class="flex_0">
+    <div class="flex_0" sn-tap="this.motion()">
         <i class="icon-refresh2 mr_m"></i> <span class="va_m">换一批</span>
     </div>
 </footer>

@@ -71,7 +71,7 @@ module.exports = Activity.extend({
         Promise.all([chat.getMessages(personId), this.waitLoad()]).then(function (results) {
 
             var res = results[0];
-            var messages = res.data;
+            var messages = chat.formatMessages(res.data);
 
             var scroll = self.scroll = self.bindScrollTo(model.refs.main).eq(0);
 
@@ -94,7 +94,7 @@ module.exports = Activity.extend({
                             });
 
                         } else {
-                            model._('messages').insert(0, res.data)
+                            model._('messages').insert(0, chat.formatMessages(res.data));
                             model.next(function () {
                                 scroll.scrollTop(scroll.scrollHeight() - scrollBottom);
                             });

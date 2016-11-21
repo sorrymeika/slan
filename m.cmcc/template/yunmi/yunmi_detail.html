@@ -1,60 +1,43 @@
 <header>
     <div class="head_back" sn-tap="this.back()"></div>
     <div class="head_title">{title}</div>
-    <div class="head_right icon-share pr_m pl_m"></div>
 </header>
 <div class="main ym_detail" ref="main">
     <div class="ym_detail__bg cl_fff">
         <dl class="pt_m">
             <dt class="pl_xxl fs_m">当前可用云米</dt>
-            <dd class="ta_c fs_xxl">8000</dd>
+            <dd class="ta_c fs_xxl">{amount}</dd>
         </dl>
     </div>
     <div class="fs_m lh_m ta_c cl_666">&lt;{util.formatDate(new Date(),'yyyy年MM月')}&gt;</div>
-    <div class="lh_m bg_fff ym_detail__overview"><span>收入：</span><b>+174.00</b>
-        <span>支出：</span><em>-50.00</em>
-        <span>结余：</span><i>1023.00</i>
+    <div class="lh_m bg_fff ym_detail__overview"><span>收入：</span><b>+{ym_get}</b>
+        <span>支出：</span><em>{ym_use}</em>
+        <span>结余：</span><i>{ym_get+ym_use}</i>
     </div>
 
-    <div class="ym_detail__list bg_fff">
+    <div class="ym_detail__list bg_fff" sn-repeat="item in data">
         <div class="hd flex fs_s">
-            <p class="flex_0">{util.formatDate(new Date(),'yy-M-d W')}</p>
-            <p>收：1234</p>
+            <p class="flex_0">{item.key.day}</p>
+            <p>{item.sum.amount>0?'收':'支'}：{item.sum.amount}</p>
         </div>
-        <dl class="bd_b">
+        <dl class="bd_b" sn-repeat="detail in item.group">
             <dt class="flex fs_l pl_m pr_m  pt_m">
-                <p class="flex_0">{util.formatDate(new Date(),'yy-M-d W')}</p>
-                <p>+1234</p>
+                <p class="flex_0">{detail.trade_type==1?'捡云米':
+                    detail.trade_type==2?'摇一摇':
+                    detail.trade_type==3?'赠送':
+                    detail.trade_type==4?'赠送':
+                    detail.trade_type==5?'赠送退回':
+                    detail.trade_type==6?'发红包':
+                    detail.trade_type==7?'收红包':
+                    detail.trade_type==8?'红包退回':
+                    detail.trade_type==9?'新人任务':
+                    detail.trade_type==10?'摇一摇':
+                    detail.trade_type==11?'兑换流量':'未知类型'}</p>
+                <p>{detail.amount>=0?'+'+detail.amount:detail.amount}</p>
             </dt>
             <dd class="flex fs_m pl_m pr_m  pb_m cl_666">
                 <p class="flex_0">无备注</p>
-                <p>21:01</p>
-            </dd>
-        </dl>
-        <dl>
-            <dt class="flex fs_l pl_m pr_m  pt_m">
-                <p class="flex_0">{util.formatDate(new Date(),'yy-M-d W')}</p>
-                <p>+1234</p>
-            </dt>
-            <dd class="flex fs_m pl_m pr_m pb_m cl_666">
-                <p class="flex_0">无备注</p>
-                <p>21:01</p>
-            </dd>
-        </dl>
-    </div>
-    <div class="ym_detail__list bg_fff">
-        <div class="hd flex fs_s">
-            <p class="flex_0">{util.formatDate(new Date(),'yy-M-d W')}</p>
-            <p>收：1234</p>
-        </div>
-        <dl>
-            <dt class="flex fs_l pl_m pr_m  pt_m">
-                <p class="flex_0">{util.formatDate(new Date(),'yy-M-d W')}</p>
-                <p>+1234</p>
-            </dt>
-            <dd class="flex fs_m pl_m pr_m pb_m cl_666">
-                <p class="flex_0">无备注</p>
-                <p>21:01</p>
+                <p>{util.formatDate(detail.trade_date,'HH:mm')}</p>
             </dd>
         </dl>
     </div>

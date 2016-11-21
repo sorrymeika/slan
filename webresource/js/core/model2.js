@@ -56,7 +56,7 @@ var filterCode = (function () {
 })();
 
 function testRegExp(regExp, val) {
-    return (regExp.lastIndex = 0) || regExp.test(val);
+    return regExp.lastIndex != 0 && (regExp.lastIndex = 0) || regExp.test(val);
 }
 
 function valueCode(str, variables) {
@@ -691,7 +691,17 @@ var Collection = function (parent, attr, data) {
 Collection.prototype = {
     _changedAndUpdateViewNextTick: ModelProto._changedAndUpdateViewNextTick,
 
+    size: function () {
+        return this.data.length;
+    },
+
+    getAll: function (i) {
+        return $.extend(true, [], this.data);
+    },
+
     get: function (i) {
+        if (i == undefined) return this.getAll();
+
         return this.models[i];
     },
 
@@ -1221,16 +1231,45 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         var attrs = el.snAttrs || (el.snAttrs = {});
 
-        for (var attr in attrsBinding) {
+        var keys = [];
 
-            if (attr == 'sn-else') {
-                if (!el.parentNode) {
-                    el.snIf.nextSibling
-                        ? el.snIf.parentNode.insertBefore(el, el.snIf.nextSibling)
-                        : el.snIf.parentNode.appendChild(el);
-                }
-                continue;
+        for (var key in attrsBinding) {
+            switch (key) {
+                case "sn-else":
+                    if (!el.parentNode) {
+                        el.snIf.nextSibling
+                            ? el.snIf.parentNode.insertBefore(el, el.snIf.nextSibling)
+                            : el.snIf.parentNode.appendChild(el);
+                    }
+                    break;
+                case "sn-if":
+                case "sn-else-if":
+                    var val = self.fns[attrsBinding[key]].call(self, data);
+
+                    if (util.isFalse(val)) {
+                        if (el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                        return;
+
+                    } else {
+                        if (!el.parentNode) {
+                            el.snIf.nextSibling
+                                ? el.snIf.parentNode.insertBefore(el, el.snIf.nextSibling)
+                                : el.snIf.parentNode.appendChild(el);
+                        }
+                    }
+                    break;
+                default:
+                    keys.push(key);
+                    break;
             }
+        }
+
+        var attr;
+        for (var i = 0, n = keys.length; i < n; i++) {
+
+            attr = keys[i];
 
             var val = self.fns[attrsBinding[attr]].call(self, data);
 
@@ -1268,21 +1307,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 case 'sn-html':
                     el.innerHTML = val;
                     break;
-                case 'sn-else-if':
-                case 'sn-if':
-                    if (util.isFalse(val)) {
-                        if (el.parentNode) {
-                            el.parentNode.removeChild(el);
-                        }
 
-                    } else {
-                        if (!el.parentNode) {
-                            el.snIf.nextSibling
-                                ? el.snIf.parentNode.insertBefore(el, el.snIf.nextSibling)
-                                : el.snIf.parentNode.appendChild(el);
-                        }
-                    }
-                    break;
                 case 'sn-visible':
                     el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                     break;

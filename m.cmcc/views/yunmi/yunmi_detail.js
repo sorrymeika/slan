@@ -7,6 +7,9 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var ym = require('logical/yunmi');
+
+
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -24,7 +27,28 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Promise.all([ym.getYunmiDetails(), this.waitLoad()]).then(function (results) {
+            var res = results[0];
+
+
+
+            var data = util.groupBy('day,sum(amount)', res.data.map(function (item) {
+                item.day = util.formatDate(item.trade_date, 'yy-M-d W');
+                return item;
+            }));
+
+            console.log(data);
+
+            model.set({
+                amount: res.amount,
+                data: data,
+                ym_get: util.sum(res.data, function (item) {
+                    return item.amount > 0 ? item.amount : 0;
+                }),
+                ym_use: util.sum(res.data, function (item) {
+                    return item.amount < 0 ? item.amount : 0;
+                })
+            });
 
             self.bindScrollTo(model.refs.main);
 

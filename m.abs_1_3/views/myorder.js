@@ -143,7 +143,7 @@ define(function (require, exports, module) {
                 openOrder: function (order, e) {
                     if ($(e.target).hasClass('btn_sml') && $(e.target).html() != '立即付款') return;
 
-                    self.forward('/order/' + order.PUR_ID);
+                    self.forward('/order/' + order.PUR_ID + "?refresh=0");
 
                     //bridge.openInApp(api.API.prototype.baseUri + '/AlipayDirect/Pay/' + order.PUR_ID + "?UserID=" + self.user.ID + "&Auth=" + self.user.Auth);
                     //if (order.PUS_DESC == '待付款') {

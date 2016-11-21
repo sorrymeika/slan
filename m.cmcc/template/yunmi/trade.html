@@ -1,0 +1,16 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main" ref="main">
+    <div class="{icon} ta_c pt_xxl"></div>
+    <div class="ta_c pt_l" sn-if="type==2">{status==0?'待领取':'已领取'}</div>
+    <div class="ta_c pt_l">{status==-1?'红包已被领完':status==0&&type==1?'待领取':Math.abs(amount)}<span sn-if="status>0||type==2" class="fs_s">云米</span></div>
+    <div class="ta_c pt_s cl_999">{memo}</div>
+    <div class="mg_m mb_l pt_l" sn-if="status==0">
+        <div class="btn_xl" sn-tap="this.receive()">{type==1?'立即领取':'确认收款'}</div>
+    </div>
+    <div class="mg_m mb_l pt_xxl fs_m ta_c">
+        交易时间：{util.formatDate(date)}
+    </div>
+</div>

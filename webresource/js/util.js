@@ -1,4 +1,4 @@
-﻿var ArrayProto = Array.prototype,
+var ArrayProto = Array.prototype,
     slice = ArrayProto.slice,
     concat = ArrayProto.concat,
     ua = navigator.userAgent,
@@ -172,6 +172,84 @@ var util = {
         this.$log.html(msg + '<br>' + this.$log.html());
     },
 
+    groupBy: function (query, data) {
+        var results = [];
+        var keys = [];
+        var operations = [];
+
+        query.split(/\s*,\s*/).forEach(function (item) {
+            var m = /(sum|avg)\(([^\)]+)\)/.exec(item);
+
+            console.log(m);
+
+            if (m) {
+                operations.push({
+                    operation: m[1],
+                    key: m[2]
+                })
+
+            } else {
+                keys.push(item);
+            }
+        });
+
+        data.forEach(function (item) {
+            var key = {};
+            var group = false;
+
+            for (var j = 0, k = keys.length; j < k; j++) {
+                key[keys[j]] = item[keys[j]];
+            }
+
+            for (var i = 0, n = results.length; i < n; i++) {
+
+                if (!isDiffObject(results[i].key, key)) {
+                    group = results[i];
+                    break;
+                }
+            }
+
+            if (!group) {
+                group = {
+                    key: key,
+                    count: 0,
+                    group: []
+                }
+                results.push(group);
+            }
+
+            for (var i = 0, n = operations.length; i < n; i++) {
+                var okey = operations[i].key;
+
+                switch (operations[i].operation) {
+                    case 'sum':
+                        if (!group.sum) {
+                            group.sum = {};
+                        }
+                        if (group.sum[okey] === undefined) {
+                            group.sum[okey] = 0;
+                        }
+                        group.sum[okey] += item[okey];
+                        break;
+                    case 'avg':
+                        if (!group.avg) {
+                            group.avg = {};
+                        }
+                        if (group.avg[okey] === undefined) {
+                            group.avg[okey] = 0;
+                        }
+                        group.avg[okey] = (group.avg[okey] * group.count + item[okey]) / (group.count + 1);
+                        break;
+                }
+            }
+
+            group.count++;
+            group.group.push(item);
+
+        });
+        return results;
+    },
+
     indexOf: function (arr, key, val) {
         if (typeof key === 'string' && val !== undefined) {
             var compare = val;
@@ -207,10 +285,49 @@ var util = {
         return -1;
     },
 
+    sum: function (arr, key) {
+        var fn;
+
+        if (typeof key === 'string') {
+            fn = function (item) {
+                return item[key];
+            }
+        }
+        else fn = key;
+
+        var result = 0;
+
+        for (var i = 0, n = arr.length; i < n; i++) {
+            result += fn(arr[i], i);
+        }
+        return result;
+    },
+
+    map: function (arr, key) {
+        var fn;
+
+        if (typeof key === 'string') {
+            fn = function (item) {
+                return item[key];
+            }
+        }
+        else fn = key;
+
+        var item;
+        var result = [];
+
+        for (var i = 0, len = arr.length; i < len; i++) {
+            item = arr[i];
+
+            result.push(fn(item, i));
+        }
+        return result;
+    },
+
     first: function (arr, key, val) {
         var fn;
 
-        if (typeof key === 'string' && val !== undefined) {
+        if (typeof key === 'string') {
             fn = function (item) {
                 return item[key] == val;
             }
@@ -227,15 +344,17 @@ var util = {
         return null;
     },
 
-    find: function (arr, key, val) {
+    find: function (arr, key, val, flag) {
         var fn;
 
-        if (typeof key === 'string' && val !== undefined) {
+        if (typeof key === 'string') {
             fn = function (item) {
                 return item[key] == val;
             }
         }
-        else fn = key;
+        else fn = key, flag = val;
+
+        if (flag !== false) flag = true;
 
         var result = [],
             item;
@@ -243,7 +362,7 @@ var util = {
         for (var i = 0, n = arr.length; i < n; i++) {
             item = arr[i];
 
-            if (fn(item, i))
+            if (fn(item, i) == flag)
                 result.push(item);
         }
         return result;
@@ -306,6 +425,34 @@ var util = {
         })
     },
 
+    timeLeft: function (timestamp) {
+        var days = Math.floor(timestamp / (1000 * 60 * 60 * 24));
+        timestamp = timestamp % (1000 * 60 * 60 * 24);
+
+        var hours = Math.floor(timestamp / (1000 * 60 * 60));
+        timestamp = timestamp % (1000 * 60 * 60);
+
+        var minutes = Math.floor(timestamp / (1000 * 60));
+        timestamp = timestamp % (1000 * 60);
+
+        var seconds = Math.floor(timestamp / 1000);
+        timestamp = timestamp % (1000);
+
+        return (days == 0 ? '' : (days + '天 '))
+            + pad(hours) + ":"
+            + pad(minutes) + ":"
+            + pad(seconds)
+    },
+
+    //yyyy-MM-dd HH:mm:ss
+    parseDate: function (date) {
+        date = date.split(/\s+|\:|\-|年|月|日/).map(function (time) {
+            return parseInt(time);
+        });
+
+        return new Date(date[0], date[1] - 1, date[2], date[3], date[4], date[5]);
+    },
+
     formatDate: function (d, f) {
         if (typeof d === "string" && /^\/Date\(\d+\)\/$/.test(d)) {
             d = new Function("return new " + d.replace(/\//g, ''))();
@@ -316,7 +463,6 @@ var util = {
         } else if (!(d instanceof Date)) {
             return '';
         }
-
 
         if (f === 'minutes') {
             var now = new Date();
@@ -387,7 +533,7 @@ var util = {
             .replace(/s/, s)
             .replace(/f+/, function (w) {
                 return mill.substr(0, w.length)
-            })
+            });
     },
 
     style: function (css) {

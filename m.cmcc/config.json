@@ -75,6 +75,7 @@
         "/yunmi/invite": "yunmi/invite",
         "/yunmi/send_yunmi": "yunmi/send_yunmi",
         "/yunmi/redbag": "yunmi/redbag",
-        "/yunmi/select_user": "yunmi/select_user"
+        "/yunmi/select_user": "yunmi/select_user",
+        "/yunmi/trade/{id:\\d+}": "yunmi/trade"
     }
 }
