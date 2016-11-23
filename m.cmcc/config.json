@@ -17,16 +17,13 @@
         "out": "./images",
         "split": true,
         "margin": 1,
-        "dimension": [
-            {
-                "ratio": 1,
-                "dpi": 72
-            },
-            {
-                "ratio": 2,
-                "dpi": 192
-            }
-        ]
+        "dimension": [{
+            "ratio": 1,
+            "dpi": 72
+        }, {
+            "ratio": 2,
+            "dpi": 192
+        }]
     },
     "images": [
         "./images"
@@ -55,6 +52,7 @@
         "/contact/friend/{id:\\d+}": "contact/friend",
         "/contact/memo/{id:\\d+}": "contact/memo",
         "/contact/chat/{id:\\d+}": "contact/chat",
+        "/friend/valid/{friend_id:\\d+}": "contact/friend_valid",
         "/user/person": "user/person",
         "/user/qrcode": "user/qrcode",
         "/user/fav": "user/fav",
@@ -76,6 +74,9 @@
         "/yunmi/send_yunmi": "yunmi/send_yunmi",
         "/yunmi/redbag": "yunmi/redbag",
         "/yunmi/select_user": "yunmi/select_user",
-        "/yunmi/trade/{id:\\d+}": "yunmi/trade"
+        "/yunmi/trade/{id:\\d+}": "yunmi/trade",
+        "/hdh/index": "hdh/hdh_index",
+        "/hdh/call": "hdh/hdh_call",
+        "/hdh/subphone/{id:\\d+}": "hdh/hdh_subphone"
     }
 }

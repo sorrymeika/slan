@@ -26,8 +26,10 @@ var Cart = Model.extend({
 			$el: self.$el,
 			checkData: false,
 
-			params: {
-				pspcode: self.user.PSP_CODE
+			beforeSend: function () {
+				this.setParam({
+					pspcode: userModel.get().PSP_CODE
+				});
 			},
 
 			success: function (res) {

@@ -18,4 +18,9 @@
             <div class="sold_out" sn-display="{{item.PRD_NUM==0}}">脱 销<br>Sold Out</div>
         </li>
     </ul>
+    <div class="my_nodata" sn-if="{{!isLoading&&!data.length}}">
+        <div class="icon"></div>
+        <div class="text">您还没有相关的商品</div>
+        <div class="btn" data-back="/?tab=0">去逛逛吧</div>
+    </div>
 </div>

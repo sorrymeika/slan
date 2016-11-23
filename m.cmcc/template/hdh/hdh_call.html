@@ -1,0 +1,19 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+    <div class="head_right"><button class="btn_xs cl_333" sn-tap="this.showMenu()">设置</button></div>
+</header>
+<div class="main" ref="main">
+</div>
+<div class="hm_quan__menu_mask" style="display:none" ref="menuMask" sn-tap="this.hideMenu()">
+</div>
+<div class="hm_quan__menu" ref="menu" style="display:none">
+    <ul>
+        <li class="pl_m icon-add" sn-tap="this.add()">
+            <span class="va_m ml_s">新增副号</span>
+        </li>
+        <li class="pl_m icon-phone" sn-tap="this.setSubphone()">
+            <span class="va_m ml_s">副号1</span>
+        </li>
+    </ul>
+</div>

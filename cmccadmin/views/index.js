@@ -1,5 +1,4 @@
-﻿
-var $ = require('$');
+﻿var $ = require('$');
 var util = require('util');
 var Model = require('core/model2').Model;
 var Page = require('core/page');
@@ -12,7 +11,7 @@ var auth = require('logical/auth');
 return Page.extend({
     events: {},
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {});
@@ -43,12 +42,12 @@ return Page.extend({
             page: 1,
             pageSize: 10
 
-        }).then(function () {
+        }).then(function() {
 
         });
 
         function toUpper(name) {
-            return name.replace(/^[a-z]/g, function (a) {
+            return name.replace(/^[a-z]/g, function(a) {
                 return a.toUpperCase();
             })
         }
@@ -61,7 +60,7 @@ return Page.extend({
             var privateCode = '';
             var namespaceCode = [];
 
-            code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+(,\d+){0,1}\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function (match, name, type, point, memo) {
+            code.replace(/\s([a-z0-9A-Z_]+)\s+(number|varchar|date|clob)(?:\(\d+(,\d+){0,1}\)){0,1}(?:\s+primary\s+key|\s+not|\s+null)*(?:,|\)|\s|$|-)[^\n\r]*?(?:-{1,2}((?:\s+--[^\n]+|[^\n])+)){0,1}/mgi, function(match, name, type, point, memo) {
                 var ext;
                 var emptyAble = false;
                 var params = {};
@@ -72,12 +71,12 @@ return Page.extend({
                     if (filter.length > 1) {
                         memo = filter.shift();
 
-                        filter.forEach(function (item) {
+                        filter.forEach(function(item) {
                             var _name = item.substr(0, item.indexOf('='));
                             var _val = item.substr(item.indexOf('=') + 1);
 
-                            params[_name] = _val == 'true' ? true : _val == 'false' ? false
-                                : _val.indexOf('{') == 0 ? new Function('return ' + _val + ';')() : _val;
+                            params[_name] = _val == 'true' ? true : _val == 'false' ? false :
+                                _val.indexOf('{') == 0 ? new Function('return ' + _val + ';')() : _val;
                         });
                     }
                 }
@@ -89,7 +88,7 @@ return Page.extend({
                     if (params.formType === 'select') {
                         params.options = [];
 
-                        po.split(',').forEach(function (item) {
+                        po.split(',').forEach(function(item) {
                             item = item.split(':');
 
                             params.options.push({
@@ -100,7 +99,7 @@ return Page.extend({
 
                     } else {
                         params.options = {};
-                        po.split(',').forEach(function (item) {
+                        po.split(',').forEach(function(item) {
                             item = item.split(':');
                             params.options[item.shift()] = item.join(":");
                         });
@@ -167,12 +166,12 @@ return Page.extend({
         }
 
         function getSetterAndGetter(code) {
-            var result = code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+);(?:\s*)/g, function (match, type, v) {
+            var result = code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+);(?:\s*)/g, function(match, type, v) {
 
                 return 'public ' + type + " get" + toUpper(v) + "(){ return " + v + "; }\n";
             });
 
-            result += code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+)\;(\s*)/mg, function (match, type, v) {
+            result += code.replace(/(?:\s*)private\s+([a-zA-Z><]+)\s+([^\;]+)\;(\s*)/mg, function(match, type, v) {
 
                 return 'public void set' + toUpper(v) + "(" + type + " " + v + "){ this." + v + " = " + v + "; }\n";
             });
@@ -187,139 +186,141 @@ return Page.extend({
 
         var form = new Form({
             url: '',
-            fields: [[{
-                label: '写前端',
-                field: 'writeFe',
-                value: localStorage.getItem('writeFe'),
-                type: 'select',
-                options: [{
-                    text: '是',
-                    value: 1
+            fields: [
+                [{
+                    label: '写前端',
+                    field: 'writeFe',
+                    value: localStorage.getItem('writeFe'),
+                    type: 'select',
+                    options: [{
+                        text: '是',
+                        value: 1
+                    }, {
+                        text: '否',
+                        value: 0
+                    }]
                 }, {
-                    text: '否',
-                    value: 0
-                }]
-            }, {
-                label: 'model',
-                field: 'writeModel',
-                value: localStorage.getItem('writeModel'),
-                type: 'select',
-                options: [{
-                    text: '是',
-                    value: 1
+                    label: 'model',
+                    field: 'writeModel',
+                    value: localStorage.getItem('writeModel'),
+                    type: 'select',
+                    options: [{
+                        text: '是',
+                        value: 1
+                    }, {
+                        text: '否',
+                        value: 0
+                    }]
                 }, {
-                    text: '否',
-                    value: 0
-                }]
-            }, {
-                label: 'mapper',
-                field: 'writeMapper',
-                value: localStorage.getItem('writeMapper'),
-                type: 'select',
-                options: [{
-                    text: '是',
-                    value: 1
+                    label: 'mapper',
+                    field: 'writeMapper',
+                    value: localStorage.getItem('writeMapper'),
+                    type: 'select',
+                    options: [{
+                        text: '是',
+                        value: 1
+                    }, {
+                        text: '否',
+                        value: 0
+                    }]
                 }, {
-                    text: '否',
-                    value: 0
-                }]
-            }, {
-                label: 'service',
-                field: 'writeService',
-                value: localStorage.getItem('writeService'),
-                type: 'select',
-                options: [{
-                    text: '是',
-                    value: 1
+                    label: 'service',
+                    field: 'writeService',
+                    value: localStorage.getItem('writeService'),
+                    type: 'select',
+                    options: [{
+                        text: '是',
+                        value: 1
+                    }, {
+                        text: '否',
+                        value: 0
+                    }]
                 }, {
-                    text: '否',
-                    value: 0
-                }]
-            }, {
-                label: 'controller',
-                field: 'writeController',
-                value: localStorage.getItem('writeController'),
-                type: 'select',
-                options: [{
-                    text: '是',
-                    value: 1
+                    label: 'controller',
+                    field: 'writeController',
+                    value: localStorage.getItem('writeController'),
+                    type: 'select',
+                    options: [{
+                        text: '是',
+                        value: 1
+                    }, {
+                        text: '否',
+                        value: 0
+                    }]
+                }], {
+                    label: 'javaDir',
+                    field: 'javaDir',
+                    value: localStorage.getItem('javaDir'),
+                    colSpan: 9
                 }, {
-                    text: '否',
-                    value: 0
-                }]
-            }], {
-                label: 'javaDir',
-                field: 'javaDir',
-                value: localStorage.getItem('javaDir'),
-                colSpan: 9
-            }, {
-                label: '前端文件夹',
-                field: 'feDir',
-                value: localStorage.getItem('feDir'),
-                colSpan: 9
-            }, {
-                label: 'package',
-                field: 'pack',
-                value: localStorage.getItem('pack'),
-                colSpan: 9
-            }, {
-                label: '文本框',
-                field: 'code',
-                type: "textarea",
-                value: localStorage.getItem('code'),
-                colSpan: 9
-            }, {
-                label: 'model',
-                field: 'model',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'mapperXml',
-                field: 'mapperXml',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'mapper',
-                field: 'mapper',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'service',
-                field: 'service',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'controller',
-                field: 'controller',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'insertForm',
-                field: 'insertForm',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'updateForm',
-                field: 'updateForm',
-                type: "textarea",
-                colSpan: 9
-            }, {
-                label: 'grid',
-                field: 'grid',
-                type: "textarea",
-                colSpan: 9
-            }],
+                    label: '前端文件夹',
+                    field: 'feDir',
+                    value: localStorage.getItem('feDir'),
+                    colSpan: 9
+                }, {
+                    label: 'package',
+                    field: 'pack',
+                    value: localStorage.getItem('pack'),
+                    colSpan: 9
+                }, {
+                    label: '文本框',
+                    field: 'code',
+                    type: "textarea",
+                    value: localStorage.getItem('code'),
+                    colSpan: 9
+                }, {
+                    label: 'model',
+                    field: 'model',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'mapperXml',
+                    field: 'mapperXml',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'mapper',
+                    field: 'mapper',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'service',
+                    field: 'service',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'controller',
+                    field: 'controller',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'insertForm',
+                    field: 'insertForm',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'updateForm',
+                    field: 'updateForm',
+                    type: "textarea",
+                    colSpan: 9
+                }, {
+                    label: 'grid',
+                    field: 'grid',
+                    type: "textarea",
+                    colSpan: 9
+                }
+            ],
             buttons: [{
                 value: 'asdf',
                 style: 'position: fixed; top: 200px; left: 700px;',
-                click: function () {
+                click: function() {
                     var formData = this.data();
 
                     var feDir = formData.feDir;
                     var javaDir = formData.javaDir;
                     var pack = formData.pack;
 
-                    ['writeFe', "writeModel", 'writeMapper', "writeService", "writeController", 'code', 'pack', 'feDir', 'javaDir'].forEach(function (name) {
+                    ['writeFe', "writeModel", 'writeMapper', "writeService", "writeController", 'code', 'pack', 'feDir', 'javaDir'].forEach(function(name) {
                         localStorage.setItem(name, formData[name]);
                     })
 
@@ -327,7 +328,7 @@ return Page.extend({
                     var result;
 
                     function getClassName(name) {
-                        return name.replace(/^[a-z]|_[a-zA-Z]/g, function (match) {
+                        return name.replace(/^[a-z]|_[a-zA-Z]/g, function(match) {
                             return match.replace('_', '').toUpperCase();
                         });
                     }
@@ -352,7 +353,7 @@ return Page.extend({
                     if (tableDesc) {
                         tableDesc = tableDesc.split(/\s+--/)
                         tableInfo.desc = tableDesc.shift();
-                        tableDesc.forEach(function (item) {
+                        tableDesc.forEach(function(item) {
                             var _name = item.substr(0, item.indexOf('='));
                             var _val = item.substr(item.indexOf('=') + 1);
                             tableInfo[_name] = _val == 'true' ? true : _val == 'false' ? false : _val;
@@ -362,7 +363,7 @@ return Page.extend({
                     console.log(tableInfo);
 
                     var commentCode;
-                    code = code.replace(/\/\*([\s\S]+?)\*\//img, function (match, ext) {
+                    code = code.replace(/\/\*([\s\S]+?)\*\//img, function(match, ext) {
                         commentCode = ext;
                         return '';
                     });
@@ -382,7 +383,7 @@ return Page.extend({
                     var columns = columnsInfo.columns;
 
                     if (tableInfo.children) {
-                        tableInfo.children.split(',').forEach(function (name) {
+                        tableInfo.children.split(',').forEach(function(name) {
                             privateCode += 'private ' + getClassName(name) + ' ' + name + ";\n";
                         });
                     }
@@ -390,13 +391,13 @@ return Page.extend({
                     if (tableInfo.listChildren) {
                         namespaceCode.push("import java.util.List;");
 
-                        tableInfo.listChildren.split(',').forEach(function (name) {
+                        tableInfo.listChildren.split(',').forEach(function(name) {
                             privateCode += 'private List<' + getClassName(name) + '> ' + name + ";\n";
                         });
                     }
 
                     if (tableInfo.props) {
-                        tableInfo.props.split(',').forEach(function (prop) {
+                        tableInfo.props.split(',').forEach(function(prop) {
                             privateCode += 'private ' + prop + ";\n";
                         })
                     }
@@ -409,11 +410,11 @@ return Page.extend({
                     }
 
 
-                    (function (callback) {
+                    (function(callback) {
 
                         callback.call(scope);
 
-                    })(function () {
+                    })(function() {
                         //Model.java
                         if (expand) {
                             privateCode += expand.privateCode;
@@ -421,16 +422,15 @@ return Page.extend({
 
 
                         var hasSort = false;
-                        var chooseOrderByXml = [' order by <trim suffixOverrides=\",\">\n<choose>\n<when test="', '">'
-                            , '</when>\n<otherwise>' + primaryKey.name + ' desc</otherwise>\n</choose>\n</trim>'];
+                        var chooseOrderByXml = [' order by <trim suffixOverrides=\",\">\n<choose>\n<when test="', '">', '</when>\n<otherwise>' + primaryKey.name + ' desc</otherwise>\n</choose>\n</trim>'];
 
                         var orderByXml;
                         var orderBy = [];
 
-                        columnsList.filter(function (column) {
+                        columnsList.filter(function(column) {
                             return column.sort === true;
 
-                        }).forEach(function (item, i) {
+                        }).forEach(function(item, i) {
 
                             hasSort = true;
                             privateCode += 'private short order_by_' + item.name + ';\n';
@@ -453,18 +453,18 @@ return Page.extend({
 
                         console.log(orderByXml);
 
-                        var classCode = "package " + pack + ".model;\n\n"
-                            + namespaceCode.join('\n')
-                            + "\npublic class " + className + " {\n";
+                        var classCode = "package " + pack + ".model;\n\n" +
+                            namespaceCode.join('\n') +
+                            "\npublic class " + className + " {\n";
                         classCode += privateCode;
                         classCode += getSetterAndGetter(privateCode);
 
-                        classCode += '\n@Override\n'
-                            + 'public String toString() {\n'
-                            + 'return "' + className + '={' + columnsList.map(function (item) {
+                        classCode += '\n@Override\n' +
+                            'public String toString() {\n' +
+                            'return "' + className + '={' + columnsList.map(function(item) {
                                 return ' ' + item.name + ':" + ' + item.name + ' + "';
-                            }).join(',') + '}";\n'
-                            + '}';
+                            }).join(',') + '}";\n' +
+                            '}';
 
                         classCode += "}";
 
@@ -477,18 +477,18 @@ return Page.extend({
 
                         //Mapper.java
                         var mapper = "package " + pack + ".mapper;\n\n\
-                        import "+ pack + ".model." + className + ";\n\
+                        import " + pack + ".model." + className + ";\n\
                         import java.util.List;\n\
                         public interface " + className + "Mapper {\n\
-                            public Integer exists("+ className + " data);\n\
-                            public int add("+ className + " data);\n\
-                            public int update("+ className + " data);\n\
-                            public int updateAllFields("+ className + " data);\n\
-                            public "+ className + " getById(int " + primaryKey.name + ");\n\
-                            public List<"+ className + "> getAll();\n\
-                            public List<"+ className + "> filter(" + className + " data);\n\
-                            public "+ className + " first(" + className + " data);\n\
-                            public int delete("+ className + " data);\n\
+                            public Integer exists(" + className + " data);\n\
+                            public int add(" + className + " data);\n\
+                            public int update(" + className + " data);\n\
+                            public int updateAllFields(" + className + " data);\n\
+                            public " + className + " getById(int " + primaryKey.name + ");\n\
+                            public List<" + className + "> getAll();\n\
+                            public List<" + className + "> filter(" + className + " data);\n\
+                            public " + className + " first(" + className + " data);\n\
+                            public int delete(" + className + " data);\n\
                             public int deleteById(int " + primaryKey.name + ");\n\
                         }";
 
@@ -503,7 +503,7 @@ return Page.extend({
                         var primaryKeyCondition = '<when test="' + primaryKey.name + '!=0">' + primaryKey.name + '=#{' + primaryKey.name + '}</when>';
                         var ifCondition = [];
 
-                        columnsList.forEach(function (item) {
+                        columnsList.forEach(function(item) {
                             if (item.name == primaryKey.name) {
                                 return;
                             }
@@ -527,7 +527,7 @@ return Page.extend({
                         });
                         ifCondition = ifCondition.join('\n');
                         var existsMapper = "<select id=\"exists\" resultType=\"Integer\" parameterType=\"" + typeAlias + "\">\n\
-                            select "+ primaryKey.name + " from " + tableName;
+                            select " + primaryKey.name + " from " + tableName;
 
                         var ifAnd = '<if test="' + primaryKey.name + '!=0"> and ' + primaryKey.name + '=#{' + primaryKey.name + '}</if>\n' + ifCondition + '\n'
 
@@ -535,10 +535,10 @@ return Page.extend({
 
                         var where = '<where>\n' + ifAnd + '</where>\n';
 
-                        var selectListColumns = columnsList.filter(function (column) {
+                        var selectListColumns = columnsList.filter(function(column) {
                             return column.type != "clob" || column.grid === false;
 
-                        }).map(function (item) {
+                        }).map(function(item) {
                             return item.name;
                         }).join(",");
 
@@ -554,25 +554,23 @@ return Page.extend({
 
 
                         //Mapper.xml id=first
-                        var firstXml = "<select id=\"first\" resultType=\"" + typeAlias + "\" parameterType=\""
-                            + typeAlias + "\">\n\
+                        var firstXml = "<select id=\"first\" resultType=\"" + typeAlias + "\" parameterType=\"" +
+                            typeAlias + "\">\n\
                             select ";
 
                         if (hasSort) {
-                            firstXml += columnsList.map(function (item) {
-                                return "b." + item.name;
-
-                            }).join(",") + " from (select " + primaryKey.name + " from " + tableName + where + orderByXml + ") a join "
-                                + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name
-                                + ' where ROWNUM=1</select>';
+                            firstXml += "select * from (select " + columnsList.map(function(item) {
+                                    return item.name;
+                                }).join(",") + " from " + tableName + where + orderByXml + ") a " +
+                                tableName +
+                                ' where ROWNUM=1</select>';
 
                         } else {
 
-                            firstXml += columnsList.map(function (item) {
+                            firstXml += columnsList.map(function(item) {
                                 return item.name;
-                            }).join(",") + " from " + tableName + where + ' and ROWNUM=1\n</select>';
+                            }).join(",") + " from " + tableName + '<where>\n' + ifAnd + ' and ROWNUM=1\n</where>\n' + '</select>';
                         }
-
 
                         //Mapper.xml id=getAll
                         var getAll = "<select id=\"getAll\" resultType=\"" + typeAlias + "\">\n\
@@ -581,39 +579,39 @@ return Page.extend({
 
                         //Mapper.xml id=add
                         var insert = "<insert id=\"add\" parameterType=\"" + typeAlias + "\">\n\
-                        insert into " + tableName + " (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
+                        insert into " + tableName + " (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function(field) {
                                 if (field.type != "number")
                                     return '<if test="' + field.name + '!=null">' + field.name + ',</if>'
                                 else return field.name + ','
 
-                            }).join("\n") + "\n</trim>) values (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function (field) {
+                            }).join("\n") + "\n</trim>) values (\n<trim suffixOverrides=\",\">\n" + columnsList.map(function(field) {
                                 if (field.type != "number")
                                     return '<if test="' + field.name + '!=null">#{' + field.name + '},</if>'
                                 else return '#{' + field.name + '},'
 
-                            }).join("\n") + "\n</trim>\n)"
-                            + "\n</insert>";
+                            }).join("\n") + "\n</trim>\n)" +
+                            "\n</insert>";
 
                         var update = "<update id=\"update\" parameterType=\"" + typeAlias + "\">\n\
-                        update " + tableName + "\n<set>\n" + columnsList.map(function (field) {
+                        update " + tableName + "\n<set>\n" + columnsList.map(function(field) {
                                 if (field.name == primaryKey.name) return '';
                                 if (field.type == "number")
                                     return '<if test="' + field.name + '!=0">' + field.name + "=#{" + field.name + "},</if>"
                                 else
                                     return '<if test="' + field.name + '!=null">' + field.name + "=#{" + field.name + "},</if>"
-                            }).join('\n')
-                            + "\n</set>\n\
+                            }).join('\n') +
+                            "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
                         var updateAllFields = "<update id=\"updateAllFields\" parameterType=\"" + typeAlias + "\">\n\
-                        update " + tableName + "\n<set>\n" + columnsList.map(function (field) {
+                        update " + tableName + "\n<set>\n" + columnsList.map(function(field) {
                                 if (field.name == primaryKey.name) return '';
                                 if (field.type == "number")
                                     return field.name + "=#{" + field.name + "},";
                                 else
                                     return '<if test="' + field.name + '!=null">' + field.name + "=#{" + field.name + "},</if>"
-                            }).join('\n')
-                            + "\n</set>\n\
+                            }).join('\n') +
+                            "\n</set>\n\
                              where " + primaryKey.name + "=#{" + primaryKey.name + "}\n</update>";
 
                         var deleteXml = "<delete id=\"delete\" parameterType=\"" + typeAlias + "\">\n\
@@ -625,7 +623,7 @@ return Page.extend({
 
                         var mapperXml = '<?xml version="1.0" encoding="UTF-8" ?>\n\
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">\n\
-<mapper namespace="'+ pack + '.mapper.' + className + 'Mapper">\n';
+<mapper namespace="' + pack + '.mapper.' + className + 'Mapper">\n';
 
                         mapperXml += [existsMapper, filterXml, firstXml, getById, getAll, insert, update, updateAllFields, deleteById, deleteXml].join("\n\n")
                         mapperXml += '\n</mapper>';
@@ -643,12 +641,12 @@ return Page.extend({
                             import java.util.List;\n\
                             import javax.annotation.Resource;\n\
                             import org.springframework.stereotype.Service;\n\
-                            import "+ pack + ".util.StringUtils;\n\
-                            import "+ pack + ".data.Oracle;\n\
-                            import "+ pack + ".data.RedisDB;\n\
-                            import "+ pack + ".mapper." + className + "Mapper;\n\
-                            import "+ pack + ".model.PageResult;\n\
-                            import "+ pack + ".model." + className + ";\n";
+                            import " + pack + ".util.StringUtils;\n\
+                            import " + pack + ".data.Oracle;\n\
+                            import " + pack + ".data.RedisDB;\n\
+                            import " + pack + ".mapper." + className + "Mapper;\n\
+                            import " + pack + ".model.PageResult;\n\
+                            import " + pack + ".model." + className + ";\n";
 
                         var service = serviceImport + "\n\n\
                         @Service\npublic class " + className + "Service {\n\
@@ -659,30 +657,32 @@ return Page.extend({
                             @Resource\n\
                             private AuthService authService;\n\n\
                             @Resource\n\
-                            private "+ className + "Mapper mapper;\n\n\
+                            private " + className + "Mapper mapper;\n\n\
                             public int getNextId() {\n\
-                                return oracle.getNextId(\""+ tableInfo.seq_name + "\");\n\
+                                return oracle.getNextId(\"" + tableInfo.seq_name + "\");\n\
                             }\n\
-                            public Integer exists("+ className + " data) { return mapper.exists(data); }\n\
-                            public int add("+ className + " data) { int id = data.get" + toUpper(primaryKey.name) + "();\n"
-                            + "if(0 == id) {\nid=getNextId();\ndata.set" + toUpper(primaryKey.name) + "(id);\n}\n"
-                            + "return mapper.add(data) > 0 ? id : 0; }\n\
-                            public int update("+ className + " data) { return mapper.update(data); }\n\
-                            public int updateAllFields("+ className + " data) { return mapper.updateAllFields(data); }\n\
-                            public int delete("+ className + " data) { return mapper.delete(data); }\n\
-                            public int deleteById(int "+ primaryKey.name + ") { return mapper.deleteById(" + primaryKey.name + "); }\n\
-                            public "+ className + " getById(int " + primaryKey.name + ") { return mapper.getById(" + primaryKey.name + "); }\n\
-                            public List<"+ className + "> filter(" + className + " data) { return mapper.filter(data); }\n\
-                            public List<"+ className + "> filter(Integer[] ids) {\n\
-                                return oracle.query("+ className + ".class, \"select "
-                            + columnsList.map(function (item) { return item.name; }).join(",")
-                            + " from " + tableName
-                            + " where " + primaryKey.name + " in (\" + StringUtils.join(ids, \",\") + \")\");\n\
+                            public Integer exists(" + className + " data) { return mapper.exists(data); }\n\
+                            public int add(" + className + " data) { int id = data.get" + toUpper(primaryKey.name) + "();\n" +
+                            "if(0 == id) {\nid=getNextId();\ndata.set" + toUpper(primaryKey.name) + "(id);\n}\n" +
+                            "return mapper.add(data) > 0 ? id : 0; }\n\
+                            public int update(" + className + " data) { return mapper.update(data); }\n\
+                            public int updateAllFields(" + className + " data) { return mapper.updateAllFields(data); }\n\
+                            public int delete(" + className + " data) { return mapper.delete(data); }\n\
+                            public int deleteById(int " + primaryKey.name + ") { return mapper.deleteById(" + primaryKey.name + "); }\n\
+                            public " + className + " getById(int " + primaryKey.name + ") { return mapper.getById(" + primaryKey.name + "); }\n\
+                            public List<" + className + "> filter(" + className + " data) { return mapper.filter(data); }\n\
+                            public List<" + className + "> filter(Integer[] ids) {\n\
+                                return oracle.query(" + className + ".class, \"select " +
+                            columnsList.map(function(item) {
+                                return item.name;
+                            }).join(",") +
+                            " from " + tableName +
+                            " where " + primaryKey.name + " in (\" + StringUtils.join(ids, \",\") + \")\");\n\
                             }\n\
-                            public "+ className + " first(" + className + " data) { return mapper.first(data); }\n\
-                            public List<"+ className + "> getAll() { return mapper.getAll(); }\n\n";
+                            public " + className + " first(" + className + " data) { return mapper.first(data); }\n\
+                            public List<" + className + "> getAll() { return mapper.getAll(); }\n\n";
 
-                        var serviceFilter = "sql += \" where 1=1\";\n\n" + columnsList.map(function (item) {
+                        var serviceFilter = "sql += \" where 1=1\";\n\n" + columnsList.map(function(item) {
 
                             var res = 'if (';
                             switch (item.type) {
@@ -696,14 +696,14 @@ return Page.extend({
                                         var start = "getStart_" + item.name + "()";
                                         var end = "getEnd_" + item.name + "()";
 
-                                        res += 'null != search.' + start + ') {\n'
-                                            + 'sql += " and ' + item.name + '>=?";\n'
-                                            + 'objs.add(search.' + start + ');\n'
-                                            + '}\n'
-                                            + 'if (null != search.' + end + ') {\n'
-                                            + 'sql += " and ' + item.name + '<=?";\n'
-                                            + 'objs.add(search.' + end + ');\n'
-                                            + '}\nif (';
+                                        res += 'null != search.' + start + ') {\n' +
+                                            'sql += " and ' + item.name + '>=?";\n' +
+                                            'objs.add(search.' + start + ');\n' +
+                                            '}\n' +
+                                            'if (null != search.' + end + ') {\n' +
+                                            'sql += " and ' + item.name + '<=?";\n' +
+                                            'objs.add(search.' + end + ');\n' +
+                                            '}\nif (';
                                     }
                                     res += "null != search.get" + toUpper(item.name) + "()";
                                     break;
@@ -712,8 +712,8 @@ return Page.extend({
                                     break;
                             }
                             res += ') {\n\
-                                    sql+=" and '+ item.name + '=?";\n\
-                                    objs.add(search.get'+ toUpper(item.name) + '());\n\
+                                    sql+=" and ' + item.name + '=?";\n\
+                                    objs.add(search.get' + toUpper(item.name) + '());\n\
                                     }';
 
                             return res;
@@ -725,15 +725,15 @@ return Page.extend({
                         if (orderBy.length) {
                             serviceOrderBy += "\nString orderBySql = \"\";";
 
-                            orderBy.forEach(function (name) {
-                                serviceOrderBy += '\n'
-                                    + 'if (-1 ==search.get' + toUpper("order_by_" + name) + '()) {'
-                                    + '\nif (!\"\".equals(orderBySql)) orderBySql+=",";'
-                                    + '\norderBySql+="' + name + ' desc";'
-                                    + '\n} else if (1 ==search.get' + toUpper("order_by_" + name) + '()) {'
-                                    + '\nif (!\"\".equals(orderBySql)) orderBySql+=",";'
-                                    + '\norderBySql+="' + name + ' asc";'
-                                    + '\n}';
+                            orderBy.forEach(function(name) {
+                                serviceOrderBy += '\n' +
+                                    'if (-1 ==search.get' + toUpper("order_by_" + name) + '()) {' +
+                                    '\nif (!\"\".equals(orderBySql)) orderBySql+=",";' +
+                                    '\norderBySql+="' + name + ' desc";' +
+                                    '\n} else if (1 ==search.get' + toUpper("order_by_" + name) + '()) {' +
+                                    '\nif (!\"\".equals(orderBySql)) orderBySql+=",";' +
+                                    '\norderBySql+="' + name + ' asc";' +
+                                    '\n}';
                             });
                             serviceOrderBy += "\nif (\"\".equals(orderBySql)) orderBySql=\"" + primaryKey.name + " desc\";"
 
@@ -741,38 +741,52 @@ return Page.extend({
                             serviceOrderBy += "\nString orderBySql=\"" + primaryKey.name + " desc\";"
                         }
 
+                        //service filter(columns)
                         service += "public List<" + className + "> filter(String columns, " + className + " search) {\n\n\
                             if (!java.util.regex.Pattern.compile(\"^[\\\\sa-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
                                 return null;\n\
                             }\n\
                             List<Object> objs = new ArrayList<Object>();\n\n\
                             String sql = sqlWhere(\"select \"+columns+\" from " + tableName + "\", search, objs)+\" order by \"+sqlOrderBy(search);";
-                        service += "return oracle.query("
-                            + className + ".class, sql, objs.toArray());\n }\n";
+                        service += "return oracle.query(" +
+                            className + ".class, sql, objs.toArray());\n }\n";
+
+
+                        //service first(columns)
+                        service += "public " + className + " first(String columns, " + className + " search) {\n\n\
+                            if (!java.util.regex.Pattern.compile(\"^[\\\\sa-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
+                                return null;\n\
+                            }\n\
+                            List<Object> objs = new ArrayList<Object>();\n\n\
+                            String sql = \"select * from (\"+sqlWhere(\"select \"+columns+\" from " + tableName + "\", search, objs)+\" order by \"+sqlOrderBy(search)+\") a where ROWNUM=1\";\n";
+                        service += "List<" + className + "> results =oracle.query(" +
+                            className + ".class, sql, objs.toArray());\n" +
+                            "return null==results||0==results.size()?null:results.get(0);\n" +
+                            "}\n";
 
                         //service getPage();
                         service += "public PageResult<List<" + className + ">> getPage(int page, int pageSize, " + className + " search) {\n\n\
                                 List<Object> objs = new ArrayList<Object>();\n\n\
                                 String orderBySql = sqlOrderBy(search);\n\
-                                String sql = sqlWhere(\"select "+ primaryKey.name + " from "
-                            + tableName + "\", search, objs)+\" order by \"+orderBySql;\n";
+                                String sql = sqlWhere(\"select " + primaryKey.name + " from " +
+                            tableName + "\", search, objs)+\" order by \"+orderBySql;\n";
 
-                        service += "return oracle.queryPage("
-                            + className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \""
-                            + tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + " order by b.\""
-                            + ' + orderBySql.replaceAll(",\\\\s*", ", b.")'
-                            + ", page, pageSize, objs.toArray());\n }\n";
+                        service += "return oracle.queryPage(" +
+                            className + ".class, \"b." + columns.join(",b.") + "\", sql, \"a\", \"" +
+                            tableName + " b on a." + primaryKey.name + "=b." + primaryKey.name + " order by b.\"" +
+                            ' + orderBySql.replaceAll(",\\\\s*", ", b.")' +
+                            ", page, pageSize, objs.toArray());\n }\n";
 
 
-                        service += "private String sqlWhere(String sql, " + className + " search, List<Object> objs) {\n"
-                            + serviceFilter
-                            + "return sql;\n"
-                            + "}\n";
+                        service += "private String sqlWhere(String sql, " + className + " search, List<Object> objs) {\n" +
+                            serviceFilter +
+                            "return sql;\n" +
+                            "}\n";
 
-                        service += "private String sqlOrderBy(" + className + " search) {\n"
-                            + serviceOrderBy
-                            + "\nreturn orderBySql;\n"
-                            + "}\n";
+                        service += "private String sqlOrderBy(" + className + " search) {\n" +
+                            serviceOrderBy +
+                            "\nreturn orderBySql;\n" +
+                            "}\n";
 
                         service += "}";
 
@@ -790,19 +804,19 @@ return Page.extend({
                             import org.springframework.web.bind.annotation.RequestMapping;\n\
                             import org.springframework.web.bind.annotation.RestController;\n\n\
                             import javax.annotation.Resource;\n\
-                            import "+ pack + ".data.RedisDB;\n\
-                            import "+ pack + ".service." + className + "Service;\n\
-                            import "+ pack + ".model.PageResult;\n\
-                            import "+ pack + ".model.WebDataResult;\n\
-                            import "+ pack + ".model.WebErrorResult;\n\
-                            import "+ pack + ".model.WebResult;\n\
-                            import "+ pack + ".model." + className + ";\n\n\
+                            import " + pack + ".data.RedisDB;\n\
+                            import " + pack + ".service." + className + "Service;\n\
+                            import " + pack + ".model.PageResult;\n\
+                            import " + pack + ".model.WebDataResult;\n\
+                            import " + pack + ".model.WebErrorResult;\n\
+                            import " + pack + ".model.WebResult;\n\
+                            import " + pack + ".model." + className + ";\n\n\
                             import org.springframework.web.multipart.MultipartFile;\n\
-                            import "+ pack + ".service.MultipartFileService;\n\n";
+                            import " + pack + ".service.MultipartFileService;\n\n";
 
-                        var controllerFile = function () {
+                        var controllerFile = function() {
                             var fl = "";
-                            columnsList.map(function (item) {
+                            columnsList.map(function(item) {
                                 switch (item.type) {
                                     case "file":
                                         fl += "MultipartFile " + item.field + ", ";
@@ -812,9 +826,9 @@ return Page.extend({
                             return fl;
                         };
 
-                        var validate = function (sqlType) {
+                        var validate = function(sqlType) {
 
-                            return columnsList.map(function (item) {
+                            return columnsList.map(function(item) {
 
                                 if (sqlType == 'delete') {
                                     if (item.deletion_key !== true) {
@@ -830,10 +844,10 @@ return Page.extend({
                                     case "file":
                                         res += "null==" + item.field + " || " + item.field + ".isEmpty()";
                                         fileRes += ' else {\n\
-                                        String fileName = '+ item.field + '.getOriginalFilename();\n\
+                                        String fileName = ' + item.field + '.getOriginalFilename();\n\
                                         String ext = fileName.substring(fileName.lastIndexOf(".")+1);\n\
-                                        if (java.util.regex.Pattern.compile("'+ item.ext + '").matcher(ext).find()) {\n\
-                                            data.set'+ toUpper(item.name) + '(multipartFileService.saveFile(' + item.field + '));\n\
+                                        if (java.util.regex.Pattern.compile("' + item.ext + '").matcher(ext).find()) {\n\
+                                            data.set' + toUpper(item.name) + '(multipartFileService.saveFile(' + item.field + '));\n\
                                         } else {\n\
                                             return new WebErrorResult(WebErrorResult.PARAMS_ERROR, "文件格式错误");\n\
                                         }\n\n\
@@ -852,24 +866,24 @@ return Page.extend({
                                         break;
                                 }
                                 res += ') {\n\
-                                    '+ ((item.emptyAble || (sqlType == "update" && item.type == "file")) ? '' : 'return new WebErrorResult(WebErrorResult.PARAMS_ERROR, "' + (item.memo || item.name) + '不可为空");') + '\n\
-                                    }'+ fileRes + "\n\n";
+                                    ' + ((item.emptyAble || (sqlType == "update" && item.type == "file")) ? '' : 'return new WebErrorResult(WebErrorResult.PARAMS_ERROR, "' + (item.memo || item.name) + '不可为空");') + '\n\
+                                    }' + fileRes + "\n\n";
 
                                 //唯一
                                 if (item.unique) {
                                     res += className + " exsitsData = new " + className + "();\n\
-                                        exsitsData.set"+ toUpper(item.name) + "(data.get" + toUpper(item.name) + "());\n\
+                                        exsitsData.set" + toUpper(item.name) + "(data.get" + toUpper(item.name) + "());\n\
                                         Integer id = service.exists(exsitsData);\n";
 
                                     if (sqlType == 'insert') {
                                         res += "if (null != id && id > 0) {\n\
-                                            return new WebErrorResult(WebErrorResult.PARAMS_ERROR, \""+ (item.memo || item.name) + "不可重复\");\n\
+                                            return new WebErrorResult(WebErrorResult.PARAMS_ERROR, \"" + (item.memo || item.name) + "不可重复\");\n\
                                         }\n\n";
                                         return res;
 
                                     } else {
                                         res += "if (id > 0 && id != data.get" + toUpper(primaryKey.name) + "()) {\n\
-                                            return new WebErrorResult(WebErrorResult.PARAMS_ERROR, \""+ (item.memo || item.name) + "不可重复\");\n\
+                                            return new WebErrorResult(WebErrorResult.PARAMS_ERROR, \"" + (item.memo || item.name) + "不可重复\");\n\
                                         }\n\n";
                                         return res;
                                     }
@@ -880,58 +894,58 @@ return Page.extend({
                             }).join('');
                         }
                         var controller = controllerImport + "@RestController\n\
-                        @RequestMapping(\"/"+ tableName + "\")\n\
-                        public class "+ className + "Controller {\n\n\
+                        @RequestMapping(\"/" + tableName + "\")\n\
+                        public class " + className + "Controller {\n\n\
                         @Resource\n\
 	                    private MultipartFileService multipartFileService;\n\n\
                         @Resource\n\
-                        private "+ className + "Service service;\n\n\
+                        private " + className + "Service service;\n\n\
                         @RequestMapping(value = \"/getPage\")\n\
-	                    public WebResult getPage(int page, int pageSize, "+ className + " data) throws Exception {\n\
+	                    public WebResult getPage(int page, int pageSize, " + className + " data) throws Exception {\n\
                             return service.getPage(page, pageSize, data);\n\
                         }\n\n\
                         @RequestMapping(value = \"/getAll\")\n\
                         public WebResult getAll() throws Exception {\n\
-                            return new WebDataResult<List<"+ className + ">>(service.getAll());\n\
+                            return new WebDataResult<List<" + className + ">>(service.getAll());\n\
                         }\n\n\
                         @RequestMapping(value = \"/getById\")\n\
-                        public WebResult getById(int "+ primaryKey.name + ") throws Exception {\n\
-                            return new WebDataResult<"+ className + ">(service.getById(" + primaryKey.name + "));\n\
+                        public WebResult getById(int " + primaryKey.name + ") throws Exception {\n\
+                            return new WebDataResult<" + className + ">(service.getById(" + primaryKey.name + "));\n\
                         }\n\n\
                         @RequestMapping(value = \"/filter\")\n\
-                        public WebResult filter("+ className + " data) throws Exception {\n\
-                            return new WebDataResult<List<"+ className + ">>(service.filter(data));\n\
+                        public WebResult filter(" + className + " data) throws Exception {\n\
+                            return new WebDataResult<List<" + className + ">>(service.filter(data));\n\
                         }\n\n\
                         @RequestMapping(value = \"/first\")\n\
-                        public WebResult first("+ className + " data) throws Exception {\n\
-                            return new WebDataResult<"+ className + ">(service.first(data));\n\
+                        public WebResult first(" + className + " data) throws Exception {\n\
+                            return new WebDataResult<" + className + ">(service.first(data));\n\
                         }\n\n\
                         @RequestMapping(value = \"/add\")\n\
                         public WebResult add(" + controllerFile() + className + " data) throws Exception {\n\
-                            "+ validate('insert') + "\
+                            " + validate('insert') + "\
                             return new WebDataResult<Integer>(service.add(data));\n\
                         }\n\n\
                         @RequestMapping(value = \"/update\")\n\
                         public WebResult update(" + controllerFile() + className + " data) throws Exception {\n\
-                            "+ validate('update') + "\
+                            " + validate('update') + "\
                             return new WebDataResult<Integer>(service.update(data));\n\
                         }\n\
                         @RequestMapping(value = \"/updateAllFields\")\n\
                         public WebResult updateAllFields(" + controllerFile() + className + " data) throws Exception {\n\
-                            "+ validate('update') + "\
+                            " + validate('update') + "\
                             return new WebDataResult<Integer>(service.updateAllFields(data));\n\
                         }\n\
                         @RequestMapping(value = \"/delete\")\n\
-                        public WebResult delete("+ className + " data) throws Exception {\n\
-                            "+ validate('delete') + "\n\
+                        public WebResult delete(" + className + " data) throws Exception {\n\
+                            " + validate('delete') + "\n\
                             return new WebDataResult<Integer>(service.delete(data));\n\
                         }\n";
                         controller += "@RequestMapping(value = \"/deleteById\")\n\
-                        public WebResult deleteById(int "+ primaryKey.name + ") throws Exception {\n\
-                            if ("+ primaryKey.name + "==0){\n\
+                        public WebResult deleteById(int " + primaryKey.name + ") throws Exception {\n\
+                            if (" + primaryKey.name + "==0){\n\
                                 return new WebErrorResult(WebErrorResult.PARAMS_ERROR, \"参数错误\");\n\
                             }\n\
-                            return new WebDataResult<Integer>(service.deleteById("+ primaryKey.name + ")); }\n\
+                            return new WebDataResult<Integer>(service.deleteById(" + primaryKey.name + ")); }\n\
                         }";
 
                         if (formData.writeController != 0 && javaDir) {
@@ -952,14 +966,14 @@ return Page.extend({
                         var Toast = require('widget/toast');\n\
                         var popup = require('widget/popup')\n\n";
 
-                        var pageCode = function (code, title, pageInfo) {
+                        var pageCode = function(code, title, pageInfo) {
                             return requires + "module.exports = Page.extend({\n\n\
-    "+ (pageInfo || '') + "\n\
+    " + (pageInfo || '') + "\n\
     onCreate: function () {\n\
         var self = this;\n\n\
         var model = this.model = new Model(this.$el, {\n\
-            title: '"+ tableInfo.desc + title + "'\n\
-        });\n"+ code + "\n},\n\
+            title: '" + tableInfo.desc + title + "'\n\
+        });\n" + code + "\n},\n\
     onShow: function () {\n\
     }\n\
 });"
@@ -970,69 +984,69 @@ return Page.extend({
 
                         console.log(formList);
 
-                        formList.sort(function (a, b) {
+                        formList.sort(function(a, b) {
                             if (!a.formSort || !b.formSort) return 0;
 
                             return a.formSort > b.formSort ? 1 : a.formSort < b.formSort ? -1 : 0;
                         })
 
                         var insertForm = "\nvar form = this.form = new Form({\n\
-                            url: '/"+ tableName + "/add',\n\
-                            fields: ["+ formList.map(function (item) {
+                            url: '/" + tableName + "/add',\n\
+                            fields: [" + formList.map(function(item) {
 
-                                if (item.name == primaryKey.name) return '';
+                            if (item.name == primaryKey.name) return '';
 
-                                var res = '{\n\
-                                    label: "'+ (item.memo || item.name) + '",\n\
-                                    field: "'+ item.field + '",\n\
+                            var res = '{\n\
+                                    label: "' + (item.memo || item.name) + '",\n\
+                                    field: "' + item.field + '",\n\
                                     type:';
 
-                                if (item.formType) {
-                                    res += '"' + item.formType + '"';
+                            if (item.formType) {
+                                res += '"' + item.formType + '"';
 
-                                } else {
-                                    switch (item.type) {
-                                        case "varchar":
-                                            res += '"text"';
-                                            break;
-                                        case "file":
-                                            res += '"file"';
-                                            break;
-                                        case "clob":
-                                            res += '"richTextBox"';
-                                            break;
-                                        case "date":
-                                            res += '"timePicker"';
-                                            break;
-                                        case "number":
-                                            res += '"number",\n\
+                            } else {
+                                switch (item.type) {
+                                    case "varchar":
+                                        res += '"text"';
+                                        break;
+                                    case "file":
+                                        res += '"file"';
+                                        break;
+                                    case "clob":
+                                        res += '"richTextBox"';
+                                        break;
+                                    case "date":
+                                        res += '"timePicker"';
+                                        break;
+                                    case "number":
+                                        res += '"number",\n\
                                         regex: /^\\d+$/,\n\
                                         regexText: "格式错误"';
-                                            break;
-                                    }
+                                        break;
                                 }
+                            }
 
-                                if (item.route) {
-                                    res += ',\nvalue: this.route.params.' + item.route;
-                                } else if (item.query) {
-                                    res += ',\nvalue: this.route.query.' + item.query;
-                                } else if (item.value) {
-                                    res += ',\nvalue: "' + item.value + '"';
-                                }
+                            if (item.route) {
+                                res += ',\nvalue: this.route.params.' + item.route;
+                            } else if (item.query) {
+                                res += ',\nvalue: this.route.query.' + item.query;
+                            } else if (item.value) {
+                                res += ',\nvalue: "' + item.value + '"';
+                            }
 
-                                if (!item.emptyAble)
-                                    res += ',\nemptyAble:false,\n\
-                                        emptyText: "'+ (item.memo || item.name) + '不可为空"\n';
+                            if (!item.emptyAble)
+                                res += ',\nemptyAble:false,\n\
+                                        emptyText: "' + (item.memo || item.name) + '不可为空"\n';
 
-                                if (item.options) {
-                                    res += ',\noptions: ' + JSON.stringify(item.options);
-                                }
+                            if (item.options) {
+                                res += ',\noptions: ' + JSON.stringify(item.options);
+                            }
 
-                                res += '},';
+                            res += '},';
 
-                                return res;
+                            return res;
 
-                            }).join(' ').replace(/\,$/, '') + "],\n\
+                        }).join(' ').replace(/\,$/, '') + "],\n\
                         buttons: [{\n\
                             value:'添加',\n\
                             click: function(){\n\
@@ -1040,7 +1054,7 @@ return Page.extend({
                                     Toast.showToast('添加成功');\n\
                                     form.reset();\n\
                                     history.back();\n\
-                                    self.setResult('"+ tableName + "change');\n\
+                                    self.setResult('" + tableName + "change');\n\
                                 },function(e){ Toast.showToast(e.message); });\n\
                                 }\n\
                         },{\n\
@@ -1070,72 +1084,72 @@ return Page.extend({
 
                         //后台修改数据
                         var updateForm = "\nvar form = this.form = new Form({\n\
-                            url: '/"+ tableName + "/update',\n\
-                            fields: ["+ formList.map(function (item) {
+                            url: '/" + tableName + "/update',\n\
+                            fields: [" + formList.map(function(item) {
 
-                                var res = '{\n\
-                                    label: "'+ (item.memo || item.name) + '",\n\
-                                    field: "'+ item.field + '",\n\
+                            var res = '{\n\
+                                    label: "' + (item.memo || item.name) + '",\n\
+                                    field: "' + item.field + '",\n\
                                     type:';
 
-                                if (item.name == primaryKey.name) {
-                                    res += '"hidden",\n\
-                                    value: this.route.params.'+ (item.route || "id");
+                            if (item.name == primaryKey.name) {
+                                res += '"hidden",\n\
+                                    value: this.route.params.' + (item.route || "id");
+
+                            } else {
+                                if (item.formType) {
+                                    res += '"' + item.formType + '"';
 
                                 } else {
-                                    if (item.formType) {
-                                        res += '"' + item.formType + '"';
-
-                                    } else {
-                                        switch (item.type) {
-                                            case "varchar":
-                                                res += '"text"';
-                                                break;
-                                            case "file":
-                                                res += '"file"';
-                                                break;
-                                            case "clob":
-                                                res += '"richTextBox"';
-                                                break;
-                                            case "date":
-                                                res += '"timePicker"';
-                                                break;
-                                            case "number":
-                                                res += '"number",\n\
+                                    switch (item.type) {
+                                        case "varchar":
+                                            res += '"text"';
+                                            break;
+                                        case "file":
+                                            res += '"file"';
+                                            break;
+                                        case "clob":
+                                            res += '"richTextBox"';
+                                            break;
+                                        case "date":
+                                            res += '"timePicker"';
+                                            break;
+                                        case "number":
+                                            res += '"number",\n\
                                         regex: /^\\d+$/,\n\
                                         regexText: "格式错误"';
-                                                break;
-                                        }
-                                    }
-
-
-                                    if (item.route) {
-                                        res += ',\nvalue: this.route.params.' + item.route;
-                                    } else if (item.query) {
-                                        res += ',\nvalue: this.route.query.' + item.query;
+                                            break;
                                     }
                                 }
 
-                                if (item.options) {
-                                    res += ',\noptions: ' + JSON.stringify(item.options);
+
+                                if (item.route) {
+                                    res += ',\nvalue: this.route.params.' + item.route;
+                                } else if (item.query) {
+                                    res += ',\nvalue: this.route.query.' + item.query;
                                 }
+                            }
 
-                                if (item.emptyAble !== true && item.type != 'file')
-                                    res += ',\nemptyAble:false,\n\
-                                        emptyText: "'+ (item.memo || item.name) + '不可为空"\n';
+                            if (item.options) {
+                                res += ',\noptions: ' + JSON.stringify(item.options);
+                            }
 
-                                res += '},';
+                            if (item.emptyAble !== true && item.type != 'file')
+                                res += ',\nemptyAble:false,\n\
+                                        emptyText: "' + (item.memo || item.name) + '不可为空"\n';
 
-                                return res;
+                            res += '},';
 
-                            }).join(' ').replace(/\,$/, '') + "],\n\
+                            return res;
+
+                        }).join(' ').replace(/\,$/, '') + "],\n\
                         buttons: [{\n\
                             value:'修改',\n\
                             click: function(){\n\
                                 this.submit(function(){\n\
                                     Toast.showToast('修改成功');\n\
                                     history.back();\n\
-                                    self.setResult('"+ tableName + "change');\n\
+                                    self.setResult('" + tableName + "change');\n\
                                 },function(e){ Toast.showToast(e.message); });\n\
                             }\n\
                         },{\n\
@@ -1146,7 +1160,7 @@ return Page.extend({
                         }]";
 
                         updateForm += "});\n\
-                        Http.post('/"+ tableName + "/getById',{\n\
+                        Http.post('/" + tableName + "/getById',{\n\
                             " + primaryKey.name + ": this.route.params." + (primaryKey.route || "id") + "\n\
                         }).then(function(res) { form.set(res.data); });\n\
                         form.$el.appendTo(model.refs.main);\n"
@@ -1168,85 +1182,85 @@ return Page.extend({
                         var gridCode = "var grid = this.grid = new Grid({\n\
                             pageEnabled: true,\n\
                             search: {\n\
-                                url: '/"+ tableName + "/getPage',\n\
+                                url: '/" + tableName + "/getPage',\n\
                                 type: 'POST',\n\
                                 beforeSend: function () {\n\
                                 },\n\
                                 data: {\n\
-                                    "+ formList.map(function (item) {
-                                if (!item.search) {
-                                    return null;
+                                    " + formList.map(function(item) {
+                            if (!item.search) {
+                                return null;
+                            }
+
+                            var searchType;
+                            var res;
+
+                            if (item.type == "date") {
+                                searchType = "calendar";
+
+                            } else if (item.formType) {
+                                searchType = item.formType;
+                            }
+
+                            function getCode(name, memo, options) {
+                                var code = name + ": {\n";
+                                if (options) {
+                                    code += 'options:' + JSON.stringify(options) + ",\n";
                                 }
 
-                                var searchType;
-                                var res;
+                                if (item.route) {
+                                    code += 'value: this.route.params.' + item.route + ",\n";
+                                    code += 'type: "hidden",\n';
+                                    memo = '';
+                                } else if (item.query) {
+                                    code += 'value: this.route.query.' + item.query + ",\n";
+                                    code += 'type: "hidden",\n';
+                                    memo = '';
 
-                                if (item.type == "date") {
-                                    searchType = "calendar";
-
-                                } else if (item.formType) {
-                                    searchType = item.formType;
+                                } else if (searchType) {
+                                    code += 'type:"' + searchType + '",\n';
                                 }
+                                code += "label: '" + memo + "'";
+                                code += '\n}';
 
-                                function getCode(name, memo, options) {
-                                    var code = name + ": {\n";
-                                    if (options) {
-                                        code += 'options:' + JSON.stringify(options) + ",\n";
-                                    }
+                                return code;
+                            }
 
-                                    if (item.route) {
-                                        code += 'value: this.route.params.' + item.route + ",\n";
-                                        code += 'type: "hidden",\n';
-                                        memo = '';
-                                    } else if (item.query) {
-                                        code += 'value: this.route.query.' + item.query + ",\n";
-                                        code += 'type: "hidden",\n';
-                                        memo = '';
+                            if (searchType == "calendar") {
+                                res = getCode("start_" + item.name, (item.memo || item.name) + " 从", item.options);
+                                res += "," + getCode("end_" + item.name, "到");
 
-                                    } else if (searchType) {
-                                        code += 'type:"' + searchType + '",\n';
-                                    }
-                                    code += "label: '" + memo + "'";
-                                    code += '\n}';
+                            } else {
+                                res = getCode(item.name, item.memo || item.name, item.options);
+                            }
 
-                                    return code;
-                                }
+                            return res;
 
-                                if (searchType == "calendar") {
-                                    res = getCode("start_" + item.name, (item.memo || item.name) + " 从", item.options);
-                                    res += "," + getCode("end_" + item.name, "到");
-
-                                } else {
-                                    res = getCode(item.name, item.memo || item.name, item.options);
-                                }
-
-                                return res;
-
-                            }).filter(function (item) {
-                                return item != null;
-                            }).join(',\n') + "\
+                        }).filter(function(item) {
+                            return item != null;
+                        }).join(',\n') + "\
                                 }\n\
                             },\n\
                             onSelectRow: function () {},\n\
-                            columns: ["+ columnsList.map(function (item) {
-                                if (item.grid === false || item.type == "clob" || item.type == "file") {
-                                    return null;
-                                }
-                                var res = '{\n\
-                                    text: \"'+ (item.memo || item.name) + '\",\n\
-                                    bind: \"'+ item.name + '\",\n';
+                            columns: [" + columnsList.map(function(item) {
+                            if (item.grid === false || item.type == "clob" || item.type == "file") {
+                                return null;
+                            }
+                            var res = '{\n\
+                                    text: \"' + (item.memo || item.name) + '\",\n\
+                                    bind: \"' + item.name + '\",\n';
 
-                                if (item.type == "date") {
-                                    res += "format: util.formatDate,\n";
-                                }
-                                res += 'width: ' + (item.gridWidth || (item.type == 'number' ? 5 : 10)) + '\n\
+                            if (item.type == "date") {
+                                res += "format: util.formatDate,\n";
+                            }
+                            res += 'width: ' + (item.gridWidth || (item.type == 'number' ? 5 : 10)) + '\n\
                                 }';
-                                return res;
+                            return res;
 
-                            }).filter(function (item) {
-                                return item != null;
+                        }).filter(function(item) {
+                            return item != null;
 
-                            }).join(',') + ", {\n\
+                        }).join(',') + ", {\n\
                                 text: \"操作\",\n\
                                 width: 10,\n\
                                 align: 'center',\n\
@@ -1257,14 +1271,14 @@ return Page.extend({
                                 }\
                             }]\
                         });\n\
-                        this.onResult('"+ tableName + "change', function() { grid.search(); });\n\
+                        this.onResult('" + tableName + "change', function() { grid.search(); });\n\
                         grid.$el.appendTo($(model.refs.main));\ngrid.search();\n";
 
                         gridCode = pageCode(gridCode, '管理', "events: {\
         'click .js_grid_delete': function(e) {\n\
             if(window.confirm('确认删除吗?')) {\nvar self = this;\n\
-                Http.post('/"+ tableName + "/delete',{ " + primaryKey.name + ": $(e.currentTarget).data('id') }).then(function(){\n\
-                    self.setResult('"+ tableName + "change');\n\
+                Http.post('/" + tableName + "/delete',{ " + primaryKey.name + ": $(e.currentTarget).data('id') }).then(function(){\n\
+                    self.setResult('" + tableName + "change');\n\
                 });\
             }\n\
         }\n\
@@ -1278,7 +1292,7 @@ return Page.extend({
                             Http.post("http://" + location.host + "/create", {
                                 savePath: feDir + "/template/" + tableName + "/index.html",
                                 data: '<div class="main" ref="main">\n\
-    <h1>{title}</h1>\n<div class="toobar pb_m"><a class="button" href="/'+ tableName + '/add"><i class="ico-add"></i>添加</a></div>\n\
+    <h1>{title}</h1>\n<div class="toobar pb_m"><a class="button" href="/' + tableName + '/add"><i class="ico-add"></i>添加</a></div>\n\
     </div>'
                             });
                         }
@@ -1337,6 +1351,5 @@ return Page.extend({
         form.$el.appendTo(this.$el);
     },
 
-    onShow: function () {
-    }
+    onShow: function() {}
 });

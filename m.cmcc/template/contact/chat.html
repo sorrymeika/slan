@@ -15,7 +15,7 @@
             <img sn-else-if="item.type==2" sn-src="{sl.resource(item.content)}" />
             <div sn-else-if="item.type==3" class="fs_m" data-forward="/yunmi/trade/{item.content.trade_id}">
                 <div class="ym-send2-rem cl_fff of_h">
-                    <p class="fl_r pl_s ym_redbag__amount">{item.content.amount}云米
+                    <p class="fl_r pl_s ym_redbag__amount">{Math.abs(item.content.amount)}云米
                         <span class="dp_b fs_s">{item.content.memo||'恭喜发财，大吉大利！'}</span></p>
                 </div>
                 <p class="ct_chat__redbag_ft">云米转赠</p>
@@ -23,7 +23,7 @@
             <div sn-else-if="item.type==4" class="fs_m" data-forward="/yunmi/trade/{item.content.trade_id}">
                 <div class="ym-receive-rem cl_fff of_h">
                     <p class="fl_r pl_s ym_redbag__amount">已收钱
-                        <span class="dp_b fs_s">{item.content.amount}云米</span></p>
+                        <span class="dp_b fs_s">{Math.abs(item.content.amount)}云米</span></p>
                 </div>
                 <p class="ct_chat__redbag_ft">云米转赠</p>
             </div>

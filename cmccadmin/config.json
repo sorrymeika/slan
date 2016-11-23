@@ -23,6 +23,11 @@
         "/pub_quan_comments/index/{msg_id:\\d+}": "/pub_quan_comments/index",
         "/pub_quan_comments/add/{msg_id:\\d+}": "/pub_quan_comments/add",
         "/pub_quan_comments/update/{id:\\d+}": "/pub_quan_comments/update",
+
+        "/pub_quan_recommend/index": "pub_quan_recommend/index",
+        "/pub_quan_recommend/add": "pub_quan_recommend/add",
+        "/pub_quan_recommend/update/{id:\\d+}": "pub_quan_recommend/update",
+
         "/userinfo/update/{id:\\d+}": "/userinfo/update",
         "/quan_msgs/index": "quan_msgs/index",
         "/login_history/index/{user_id:\\d+}": "/login_history/index",

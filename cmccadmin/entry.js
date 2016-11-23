@@ -2,7 +2,7 @@ var Base = require('core/base');
 
 function startApp(routes, resourceMapping) {
 
-    seajs.on('fetch', function (emitData) {
+    seajs.on('fetch', function(emitData) {
 
         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
@@ -17,7 +17,7 @@ function startApp(routes, resourceMapping) {
         }
     });
 
-    seajs.use(['$', 'core/navigation', 'common/menu', 'logical/auth'], function ($, Navigation, Menu, auth) {
+    seajs.use(['$', 'core/navigation', 'common/menu', 'logical/auth'], function($, Navigation, Menu, auth) {
 
         var app = new Navigation().mapRoute(routes).start();
 
@@ -47,6 +47,12 @@ function startApp(routes, resourceMapping) {
                 }, {
                     title: '文章管理',
                     url: '/pub_quan_msg/index/0'
+                }, {
+                    title: '推荐管理',
+                    url: '/pub_quan_recommend/index'
+                }, {
+                    title: '添加推荐',
+                    url: '/pub_quan_recommend/add'
                 }]
             }, {
                 title: '圈管理',

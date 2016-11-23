@@ -10,7 +10,7 @@
             <div class="loc">收货地址：{address.MBA_FULL_ADDRESS}</div>
         </div>
         <ul class="sp_buy__info top_bottom_border">
-            <li class="bottom_border" sn-tap="this.useCoupon(false)"><span>使用优惠券</span><em>{selectedCoupon.CSV_CODE?selectedCoupon.CSV_CODE.split(',').length+"张":((coupon.length||0)+'张可用')}</em><b>-¥{selectedCoupon.CSV_CODE?selectedCoupon.VCA_DEDUCT_AMOUNT:'0'}</b></li>
+            <li class="bottom_border" sn-tap="this.useCoupon(false)"><span>使用优惠券</span><em>{selectedCoupon.CSV_CODE?selectedCoupon.CSV_CODE.split(',').length+"张":((coupon.length||0)+'张可用')}</em><b>-¥{selectedCoupon.CSV_CODE?Math.round(selectedCoupon.VCA_DEDUCT_AMOUNT*100)/100:'0'}</b></li>
             <li class="bottom_border" sn-tap="this.usePoint()"><span>积分抵扣</span><em>{Points}积分</em><b>-¥{Points/100||0}</b></li>
             <li sn-tap="this.useCoupon(true)"><span>运费</span><em ref="freight">{this.getFreight(bag_amount,full_amount_free,selectedCoupon,Points||0,selectedFreeCoupon.CSV_CODE)}</em></li>
         </ul>

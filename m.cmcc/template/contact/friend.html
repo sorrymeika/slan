@@ -28,7 +28,6 @@
         <p class="mr_m cp_switch{person.enable_push?' cp_switch_on':''}" sn-tap="person.enable_push=!person.enable_push"></p>
     </div>
 
-
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m">
         清空聊天记录
     </div>
@@ -37,8 +36,8 @@
         删除联系人
     </div>
 
-    <div class="mg_m mb_l">
-        <div class="btn_xl">拨号</div>
-        <div class="btn_xl mt_m" data-forward="/contact/chat/{personId}">发消息</div>
+    <div class="mg_m mb_l ta_c pt_m">
+        <button class="quan-call2 bg_0000 mr_m" sn-tap="this.openPhoneCall()"></button>
+        <button class="quan-message bg_0000 ml_m" data-forward="/contact/chat/{person.user_id}"></button>
     </div>
 </div>

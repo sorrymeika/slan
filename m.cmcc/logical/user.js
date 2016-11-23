@@ -14,24 +14,24 @@ var FAVORITE_TYPE = {
 var User = {
     FAVORITE_TYPE: FAVORITE_TYPE,
 
-    set: function (type, value) {
+    set: function(type, value) {
         var params = {};
         params[type] = value;
 
-        return Http.post('/userinfo/update', params).then(function (res) {
+        return Http.post('/userinfo/update', params).then(function(res) {
             userModel.set(type, value);
             return res;
         });
     },
 
-    setAvatars: function (imageId) {
+    setAvatars: function(imageId) {
         var sign = auth.getSign();
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             bridge.image.upload(Loader.url('/userinfo/update'), Object.assign({}, sign), {
                 avatars_file: imageId
 
-            }, true, function (res) {
+            }, true, function(res) {
                 if (res.success) {
                     resolve(res);
 
@@ -42,8 +42,8 @@ var User = {
         });
     },
 
-    getMe: function () {
-        return Http.post('/userinfo/getMe').then(function (res) {
+    getMe: function() {
+        return Http.post('/userinfo/getMe').then(function(res) {
             if (res.data) {
                 userModel.set(res.data);
             }
@@ -51,20 +51,31 @@ var User = {
         });
     },
 
-    getFav: function () {
+    getFav: function() {
         return Http.post('/user_fav/getPage', {
             page: 1,
             pageSize: 20
         });
     },
 
-    delFav: function (fav_id) {
+    delFav: function(fav_id) {
         return Http.post('/user_fav/delete', {
             fav_id: fav_id
         });
     },
 
-    getMessages: function (type) {
+    getPrivacy: function() {
+        return Http.post('/userinfo/getPrivacy');
+    },
+
+    updateExt: function(key, value) {
+        return Http.post('/userinfo/updateExt', {
+            key: key,
+            value: value
+        });
+    },
+
+    getMessages: function(type) {
         if (sl.isDev)
             return Promise.resolve({
                 success: true,

@@ -15,29 +15,28 @@ var friendsModel = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '云米账户'
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction);
         }
 
-        model.seeRules = function () {
+        model.seeRules = function() {
             popup.alert({
                 className: 'ym_rules__popup',
                 title: '云米规则',
                 content: yunMiRules.rule,
                 btn: '关闭',
-                action: function () {
-                }
+                action: function() {}
             })
         }
 
-        model.getShakeYunmi = function (item) {
+        model.getShakeYunmi = function(item) {
             if (item.isFriend && item.user_id) {
                 if (!item.amount || !item.yunmi_id) {
                     Toast.showToast('该好友暂时没有云米可收！');
@@ -47,11 +46,11 @@ module.exports = Activity.extend({
                     className: "bg_0000",
                     tapMaskToHide: true,
                     content: '<div class="ym-redbag2 ps_r"><div click="getYunmi" class="ps_a ta_c cl_fff ym_idx__receive"><i>+</i><em>' + (item.amount / 2) + '</em><span>云米</span></div></div>',
-                    getYunmi: function () {
+                    getYunmi: function() {
                         var pop = this;
                         loader.showLoading();
 
-                        ym.receiveShakeYunmi(item.yunmi_id).then(function (res) {
+                        ym.receiveShakeYunmi(item.yunmi_id).then(function(res) {
                             Toast.showToast("收取成功！");
 
                             pop.hide();
@@ -64,27 +63,30 @@ module.exports = Activity.extend({
                                     amount: 0
                                 });
 
-                        }).catch(function (e) {
+                        }).catch(function(e) {
                             Toast.showToast(e.message);
 
-                        }).then(function () {
+                        }).then(function() {
                             loader.hideLoading();
                         });
                     }
                 });
 
-            } else {
+            } else if (item.user_id) {
+                self.forward("/contact/person/" + item.user_id);
 
+            } else {
+                contact.inviteFriend();
             }
         }
 
-        self.onResult('select_rich_user', function (e, results) {
+        self.onResult('select_rich_user', function(e, results) {
             var ids = util.map(results, 'user_id');
 
-            return ym.getUsersYunmi(ids.join(',')).then(function (res) {
+            return ym.getUsersYunmi(ids.join(',')).then(function(res) {
 
                 if (res.data) {
-                    res.data.forEach(function (item) {
+                    res.data.forEach(function(item) {
                         var first = util.first(results, 'user_id', item.user_id);
                         first.amount = item.amount;
                         first.yunmi_id = item.yunmi_id;
@@ -96,13 +98,13 @@ module.exports = Activity.extend({
             });
         });
 
-        model.findRich = function () {
+        model.findRich = function() {
             self.forward("/yunmi/select_user", {
                 type: 2
             });
         }
 
-        model.receiveYunmi = function () {
+        model.receiveYunmi = function() {
             var data = this.get('current');
 
             if (!data) {
@@ -112,17 +114,17 @@ module.exports = Activity.extend({
 
             loader.showLoading();
 
-            ym.receiveYunmi(data.yunmi_id).then(function (res) {
+            ym.receiveYunmi(data.yunmi_id).then(function(res) {
                 model.set({
                     current: null,
                     today_amount: model.get('today_amount') + data.amount,
                     amount: model.get('amount') + data.amount
                 });
 
-            }).catch(function (e) {
+            }).catch(function(e) {
                 Toast.showToast(e.message);
 
-            }).then(function () {
+            }).then(function() {
                 loader.hideLoading();
             });
         }
@@ -131,7 +133,7 @@ module.exports = Activity.extend({
 
         this.getYunmi();
 
-        this.onResult('refresh_yunmi', function () {
+        this.onResult('refresh_yunmi', function() {
             this.getYunmi();
         });
 
@@ -145,24 +147,24 @@ module.exports = Activity.extend({
 
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
         $(window).off('motion', this.motion);
         bridge.motion.stop();
     },
 
-    getYunmi: function () {
+    getYunmi: function() {
         var self = this;
         var loader = this.loader;
         var model = this.model;
 
         loader.showLoading();
 
-        Promise.all([ym.getYunmi(), this.waitLoad()]).then(function (results) {
+        Promise.all([ym.getYunmi(), this.waitLoad()]).then(function(results) {
             var current = results[0].data;
             var next = results[0].next;
 
@@ -173,7 +175,7 @@ module.exports = Activity.extend({
                 next.timeFix = now - serverNow;
                 next.timeLeft = util.timeLeft(next.start_date - serverNow);
 
-                self.timer = setInterval(function () {
+                self.timer = setInterval(function() {
                     var next = model.get('next');
                     var timeLeft = next.start_date - (Date.now() - next.timeFix);
 
@@ -199,22 +201,22 @@ module.exports = Activity.extend({
                 next: next
             });
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
     },
 
-    motion: function () {
+    motion: function() {
         var self = this;
         var loader = this.loader;
         var model = this.model;
 
         loader.showLoading();
 
-        contact.getCombinedContacts().then(function (res) {
+        contact.getCombinedContacts().then(function(res) {
             var friends = res;
             var shakeResult;
 
@@ -231,10 +233,10 @@ module.exports = Activity.extend({
 
             var ids = util.map(util.filter(shakeResult, 'user_id', undefined, false), 'user_id');
 
-            return ym.getUsersYunmi(ids.join(',')).then(function (res) {
+            return ym.getUsersYunmi(ids.join(',')).then(function(res) {
 
                 if (res.data) {
-                    res.data.forEach(function (item) {
+                    res.data.forEach(function(item) {
                         var first = util.first(shakeResult, 'user_id', item.user_id);
                         first.amount = item.amount;
                         first.yunmi_id = item.yunmi_id;
@@ -248,10 +250,10 @@ module.exports = Activity.extend({
                 });
             });
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
 

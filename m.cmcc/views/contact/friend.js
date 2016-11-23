@@ -1,6 +1,7 @@
 var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
+var bridge = require('bridge');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
 var Promise = require('promise');
@@ -12,7 +13,7 @@ var contact = require('logical/contact');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
         var type = this.route.query.type;
         var personId = this.route.params.id;
@@ -22,31 +23,35 @@ module.exports = Activity.extend({
             personId: personId
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
-        model.deleteFriend = function () {
+        model.deleteFriend = function() {
 
             popup.confirm({
                 title: '温馨提示',
-                comfirmText: '确定要删除吗？',
-                confirmAction: function () {
+                content: '删除好友，同时删除与该好友的聊天记录？',
+                confirmText: '删除',
+                confirmAction: function() {
                     this.hide();
 
                     contact.deleteFriend(personId);
                 }
-            })
-
+            });
         }
 
-        model.toMemo = function () {
+        model.toMemo = function() {
             self.forward('/contact/memo/' + personId, {
                 memo: this.get('ext.memo')
             })
         }
 
-        self.onResult("friendMemoChange:" + personId, function (e, memo) {
+        model.openPhoneCall = function() {
+            bridge.system.openPhoneCall(this.get('person.account'));
+        }
+
+        self.onResult("friendMemoChange:" + personId, function(e, memo) {
             model.set('ext.memo', memo);
         });
 
@@ -55,7 +60,7 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.friend(personId), this.waitLoad()]).then(function (results) {
+        Promise.all([contact.friend(personId), this.waitLoad()]).then(function(results) {
             var res = results[0];
             model.set({
                 person: res.data,
@@ -65,19 +70,19 @@ module.exports = Activity.extend({
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

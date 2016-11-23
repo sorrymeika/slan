@@ -16,7 +16,7 @@
         </div>
         <div class="uc_couponitem__ft">
             <button class="btn_xl" sn-if="{data.VCA_VCT_ID!=4}" sn-tap="this.use(data.Products)">立即使用</button>
-            <button class="btn_light_xl" sn-tap="this.share(data)">赠送好友</button>
+            <button class="btn_light_xl" sn-if="{canShare}" sn-tap="this.share(data)">赠送好友</button>
         </div>
     </div>
 </div>

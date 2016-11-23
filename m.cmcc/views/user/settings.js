@@ -9,31 +9,56 @@ var popup = require('widget/popup');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '系统设置'
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Object.assign(model, {
+
+            clearCache: function() {
+                Toast.showToast('清除成功');
+            },
+
+            update: function() {
+                popup.alert({
+                    content: '<p class="ta_c">已经是最新版本，无需更新</p>'
+                })
+            },
+
+            logout: function() {
+                popup.confirm({
+                    content: '<p class="ta_c">确定退出当前帐号吗</p>',
+                    confirmAction: function() {
+                        this.hide();
+
+                        userModel.set(null);
+                        Application.forward('/login')
+                    }
+                })
+            }
+        });
+
+        Promise.all([this.waitLoad()]).then(function(results) {
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
         });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

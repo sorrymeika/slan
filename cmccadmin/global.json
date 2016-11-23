@@ -28,15 +28,19 @@
     ],
     "env": {
         "production": {
+            "api": "http://10.46.110.222/manage",
+            "UMEditorImagePath": "http://10.46.110.222/upload/",
+            "UMEditorImageUrl": "http://10.46.110.222/manage/admin/uploadfile"
+        },
+        "uat": {
+            "api": "http://10.46.110.85/api",
+            "UMEditorImagePath": "http://10.46.110.85/upload/",
+            "UMEditorImageUrl": "http://10.46.110.85/manage/admin/uploadfile"
+        },
+        "test": {
             "api": "http://wxcs.ie1e.com/manage",
             "UMEditorImagePath": "http://wxcs.ie1e.com/upload/",
             "UMEditorImageUrl": "http://wxcs.ie1e.com/manage/admin/uploadfile"
-        },
-        "test": {
-            "api": "http://localhost:6006"
-        },
-        "dev": {
-            "api": "http://127.0.0.1:6006"
         }
     },
     "copy": {

@@ -68,7 +68,7 @@ footer { position: absolute; bottom: 0px; left: 0px; width: 100%; z-index: 200; 
 .cp_popup__action .btn_cancel { background: #9fa7a9; }
 .cp_popup__up { width: auto; -webkit-transform: translate(0%,100%); -webkit-transform-origin: 0% 0%; top: auto; left: 0px; right: 0px; bottom: 0px; border-radius: 0; }
 .cp_popup__up.show{ opacity: 1; -webkit-transform: translate(0%,0%); }
-.cp_popup__options {left: 15px; right: 15px; bottom: 15px; border-radius: 6px; }
+.cp_popup__options { left: 15px; right: 15px; bottom: 15px; border-radius: 6px; }
 .cp_popup__option { height: 44px; line-height: 44px; text-align: center; position: relative; }
 .cp_popup__option:after { content: ''; display: block; width: 200%; border-bottom: 1px solid #ddd; -webkit-transform: scale(.5); -webkit-transform-origin: 0% 0%; }
 
@@ -185,3 +185,8 @@ input[type="password"].prompt-text { letter-spacing: 2px; }
 .table { width: 100%; display: table; }
 .table-row { display: table-row; }
 .table-cell { display: table-cell; text-align: center; padding-top: 5px; }
+
+
+.sn-display { opacity: 1; -webkit-transition: opacity 300ms ease-out 0ms; transition: opacity 300ms ease-out 0ms; }
+.sn-display-show { opacity: 1; }
+.sn-display-hide { opacity: 0; }

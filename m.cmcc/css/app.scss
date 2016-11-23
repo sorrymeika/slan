@@ -44,6 +44,7 @@ header img { display: block; width: 33px; height: 33px; }
 .head_back:before { content: ""; @include arrow_left(#999); top: -1px; }
 
 .head_right .btn_xs { color: $color; }
+.head_right .btn_xs.cl_333 { color: #333; }
 
 .header_trans { background: transparent; }
 .header_trans:after { display: none; }
@@ -127,6 +128,8 @@ input.flexitem,input.flex_1,input.flex_0 { border: 0; height: 100%; background-c
 .dock_tl { position: absolute; top: 0; left: 0; }
 .dock_tlr { position: absolute; top: 0; left: 0; right: 0; }
 .dock_tr { position: absolute; top: 0; right: 0; }
+.dock_tbl { position: absolute; top: 0; bottom: 0; left: 0; }
+.dock_tbr { position: absolute; top: 0; bottom: 0; right: 0; }
 .dock_blr { position: absolute; bottom: 0; left: 0; right: 0; }
 .dock_bl { position: absolute; bottom: 0; left: 0; }
 .dock_br { position: absolute; bottom: 0; right: 0; }
@@ -256,9 +259,10 @@ input.flexitem,input.flex_1,input.flex_0 { border: 0; height: 100%; background-c
 .sqr_xl { width: 60px; height: 60px; }
 .sqr_xxl { width: 90px; height: 90px; }
 
-.zi_1 { z-index: 1; }
-.zi_2 { z-index: 2; }
-.zi_3 { z-index: 3; }
+.zi_1,.z_1 { z-index: 1; }
+.zi_2,.z_2 { z-index: 2; }
+.zi_3,.z_3 { z-index: 3; }
+
 
 .h_xs { height: 24px; }
 .h_s { height: 34px; }
@@ -273,6 +277,9 @@ input.flexitem,input.flex_1,input.flex_0 { border: 0; height: 100%; background-c
 .w_l { width: 50px; }
 .w_xl { width: 60px; }
 .w_bar { width: 44px; }
+
+.w_fill,.w_x1 { width: 100%; }
+.w_320,.w_screen { width: 3.2rem; }
 
 .mw_app { max-width: 3.2rem; }
 
@@ -289,6 +296,8 @@ input.flexitem,input.flex_1,input.flex_0 { border: 0; height: 100%; background-c
 .gl_center { position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%,-50%); -webkit-transform-origin: 50% 50%; }
 .gl_border { position: relative; }
 .gl_border:after { @include border(#ccc); }
+
+.bd_app { border: 1px solid $color; }
 
 .gl_tag { position: relative; height: 34px; line-height: 34px; padding: 0 10px; color: #666; }
 .gl_tag:after { @include border($color); border-radius: 34px; }

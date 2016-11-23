@@ -25,25 +25,6 @@
     "projects": [
         "./"
     ],
-    "env": {
-        "production": {
-            "api": "http://10.46.110.85/api",
-            "resources": "http://10.46.110.85/upload/"
-        },
-        "uat": {
-            "api": "http://wxcs.ie1e.com/api",
-            "resources": "http://wxcs.ie1e.com/upload/"
-        },
-        "test": {
-            "api": "http://appuser2.abs.cn"
-        },
-        "debug": {
-            "api": "http://10.0.76.119:5559/proxy1"
-        },
-        "dev": {
-            "api": "http://10.0.76.119:6005"
-        }
-    },
     "js": {
         "components": {
             "components/menu": "./components/menu",
@@ -71,7 +52,8 @@
             "logical/contact": "./logical/contact",
             "logical/auth": "./logical/auth",
             "logical/district": "./logical/district",
-            "logical/yunmi": "./logical/yunmi"
+            "logical/yunmi": "./logical/yunmi",
+            "logical/hdh": "./logical/hdh"
         },
         "models": {
             "models/user": "./models/user",
@@ -121,5 +103,25 @@
         "widget/slider": "../webresource/m/js/widget/slider",
         "anim/default": "../webresource/m/js/anim/default",
         "entry": "entry"
+    },
+    "env": {
+        "production": {
+            "api": "http://10.46.110.222/api",
+            "resources": "http://10.46.110.222/upload/"
+        },
+        "uat": {
+            "api": "http://10.46.110.85/api",
+            "resources": "http://10.46.110.85/upload/"
+        },
+        "test": {
+            "api": "http://wxcs.ie1e.com/api",
+            "resources": "http://wxcs.ie1e.com/upload/"
+        },
+        "debug": {
+            "api": "http://10.0.76.119:5559/proxy1"
+        },
+        "dev": {
+            "api": "http://10.0.76.119:6005"
+        }
     }
 }

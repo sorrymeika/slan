@@ -32,20 +32,8 @@ var Menu = Model.extend({
             <li class="user-setting" data-forward="/user/settings">
                 <span class="va_m">系统设置</span>
             </li>
-            <li class="user-del" sn-tap="this.clearCache()">
-                <span class="va_m">清除缓存</span>
-            </li>
-            <li class="user-new" sn-tap="this.update()">
-                <span class="va_m">检测更新</span>
-            </li>
-            <li class="user-list" data-forward="/user/qa">
+             <li class="user-list" data-forward="/user/qa">
                 <span class="va_m">常见问题</span>
-            </li>
-            <li class="user-about" data-forward="/user/about">
-                <span class="va_m">关于和生活</span>
-            </li>
-            <li class="user-user" sn-tap="this.logout()">
-                <span class="va_m">退出登录</span>
             </li>
         </ul>
     </div>,
@@ -56,29 +44,6 @@ var Menu = Model.extend({
         });
 
         this.bindScrollTo(this.refs.list);
-    },
-
-    clearCache: function () {
-        Toast.showToast('清除成功');
-    },
-
-    update: function () {
-        popup.alert({
-            content: '<p class="ta_c">已经是最新版本，无需更新</p>'
-        })
-    },
-
-    logout: function () {
-        popup.confirm({
-            content: '<p class="ta_c">确定退出当前帐号吗</p>',
-            confirmAction: function () {
-                this.hide();
-
-                userModel.set(null);
-                Application.forward('/login')
-            }
-        })
-
     }
 })
 

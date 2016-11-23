@@ -27,7 +27,7 @@
             <li class="icon-has">满99包邮</li>
             <li class="icon-has" sn-if="data.XPR_RTN_DAYS">{data.XPR_RTN_DAYS}天退换货保障</li>
         </ul>
-        <div class="pd_select_plus" sn-if="{Package.PPG_ID}" data-forward="/news/package{Package.PPG_ID}?from={url}">
+        <div class="pd_select_plus" sn-if="{Package.PPG_ID}" data-forward="{isLogin?'/news/package'+Package.PPG_ID+'?from='+url:('/login?success='+url)}">
             {Package.PPG_NAME}
         </div>
         <div class="pd_select_size js_select_size top_bottom_border">

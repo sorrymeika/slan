@@ -25,12 +25,12 @@ var Tab = Model.extend({
         cursorX: 0
     },
 
-    viewDidUpdate: function () {
+    viewDidUpdate: function() {
         var self = this;
         this.wapperW = this.refs.body.offsetWidth;
         this.touch.maxX = this.refs.content.offsetWidth - this.wapperW;
 
-        this.refs.items.forEach(function (item) {
+        this.refs.items.forEach(function(item) {
             if (!item.scroll)
                 self.bindScrollTo(item);
         });
@@ -41,7 +41,7 @@ var Tab = Model.extend({
             });
     },
 
-    initialize: function (data) {
+    initialize: function(data) {
 
         var self = this;
 
@@ -51,11 +51,11 @@ var Tab = Model.extend({
             momentum: false
         });
 
-        this.touch.on('start', function () {
+        this.touch.on('start', function() {
 
             this.minX = 0;
 
-        }).on('move', function () {
+        }).on('move', function() {
 
             self.refs.content.style.webkitTransform = 'translate3d(' + this.x * -1 + 'px,' + this.y * -1 + 'px,0)';
 
@@ -80,7 +80,7 @@ var Tab = Model.extend({
                 });
             }
 
-        }).on('end bounceBack', function (e) {
+        }).on('end bounceBack', function(e) {
 
             if (e.type == 'end' && this.shouldBounceBack()) {
                 return;
@@ -94,32 +94,34 @@ var Tab = Model.extend({
                         ? self.data.index - 1
                         : self.data.index;
 
+            console.log(index, self.data.index, this.x, this.startX);
+
             self.tab(index < 0 ? 0 : index >= self.data.items.length ? self.data.items.length - 1 : index, e.type == 'bounceBack' ? 0 : 250);
         });
 
-        this.promise = new Promise(function (resove) {
+        this.promise = new Promise(function(resove) {
             self.next(resove);
         });
 
-        this.on('change:index', function (e, value) {
+        this.on('change:index', function(e, value) {
             this.tab(value);
         });
     },
 
-    fix: function (index) {
+    fix: function(index) {
         return index < 0 ? 0 : index >= this.data.items.length ? this.data.items.length - 1 : index;
     },
 
-    tab: function (page, duration) {
+    tab: function(page, duration) {
         var self = this;
         var index = page >= this.data.items.length ? 0 : page < 0 ? this.data.items.length - 1 : page;
 
-        this.promise.then(function () {
+        this.promise.then(function() {
             var scrollLeft = self.refs.body.offsetWidth * index;
 
             if (scrollLeft != self.touch.x) {
 
-                self.touch.scrollTo(scrollLeft, 0, duration, function () {
+                self.touch.scrollTo(scrollLeft, 0, duration, function() {
                     if (index !== self.data.index) {
                         self.trigger('tabChange', index, self.data.index);
                     }

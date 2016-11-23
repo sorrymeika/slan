@@ -4,96 +4,51 @@
 </header>
 
 @helper orderList(index) {
-<ul class="uc_orderlist__item">
-    <li class="bd_t mb_m bg_fff" sn-repeat="item in data@(index==0?'':index)">
-        <div class="lh_m flex fs_m ml_m bd_b" sn-tap="this.openOrder(item)">
-            <p class="icon-list"></p>
-            <p class="ml_m flexitem">{item.CNL_DESC}</p>
-            <p class="ta_r mr_m" sn-html="item.PUS_DESC"></p>
-        </div>
-        <div class="sp_cart__listitem_con bd_b" sn-repeat="prd in item.Children">
-            <img sn-tap="this.openPrd(prd,item)" sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
-            <div class="con" sn-tap="this.openOrder(item)">
-                <b class="name">{ prd.PRD_NAME }</b>
-                <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
-                <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</p>
+<div>
+    <ul class="uc_orderlist__item">
+        <li class="bd_t mb_m bg_fff" sn-repeat="item in data@(index==0?'':index)">
+            <div class="lh_m flex fs_m ml_m bd_b" sn-tap="this.openOrder(item)">
+                <p class="icon-list"></p>
+                <p class="ml_m flexitem">{item.CNL_DESC}</p>
+                <p class="ta_r mr_m" sn-html="item.PUS_DESC"></p>
             </div>
-            <p class="ft">
-                <span class="qty">x{prd.LPK_QTY}</span>
-            </p>
-        </div>
-        <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span></div>
-        <div class="flex pb_m">
-            <p class="flexitem"></p>
-            <button class="btn_s mr_s cl_000 bg_ddd" sn-if="item.PUR_PUS_ID==7" sn-tap="this.openOrder(item)">查看详情</button>
-            <button class="btn_s mr_s" sn-if="{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}" data-forward="/news/order{item.PUR_ID}?from={url}">分享有惊喜</button>
-            <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'}" sn-tap="this.openOrder(item)">立即付款</button>
-            <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</button>
-        </div>
-    </li>
-    <li ref="refreshing" class="refreshing">
-        <p class="loading js_loading"></p>
-        <p class="msg js_msg"></p>
-    </li>
-</ul>
+            <div class="sp_cart__listitem_con bd_b" sn-repeat="prd in item.Children">
+                <img sn-tap="this.openPrd(prd,item)" sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
+                <div class="con" sn-tap="this.openOrder(item)">
+                    <b class="name">{ prd.PRD_NAME }</b>
+                    <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
+                    <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</p>
+                </div>
+                <p class="ft">
+                    <span class="qty">x{prd.LPK_QTY}</span>
+                </p>
+            </div>
+            <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span></div>
+            <div class="flex pb_m">
+                <p class="flexitem"></p>
+                <button class="btn_s mr_s cl_000 bg_ddd" sn-if="item.PUS_DESC!='待付款'&&item.PUS_DESC!='已取消'" sn-tap="this.openOrder(item)">查看详情</button>
+                <button class="btn_s mr_s" sn-if="{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}" data-forward="/news/order{item.PUR_ID}?from={url}">分享有惊喜</button>
+                <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'}" sn-tap="this.openOrder(item)">立即付款</button>
+                <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</button>
+            </div>
+        </li>
+        <li ref="refreshing" class="refreshing">
+            <p class="loading js_loading"></p>
+            <p class="msg js_msg"></p>
+        </li>
+    </ul>
+    <div class="my_nodata" sn-if="{!isLoading&&!data@(index==0?'':index).length}">
+        <div class="icon"></div>
+        <div class="text">您还没有相关的订单</div>
+        <div class="btn" data-back="/?tab=0">去逛逛吧</div>
+    </div>
+</div>
 }
 
 <div class="uc_orderlist fs_m" sn-require="widget/tab" ref="tab" sn-data="{{items:['全部','待付款','待发货','配送中','已完成']}}">
     @this.helpers.orderList(0) @this.helpers.orderList(1) @this.helpers.orderList(2) @this.helpers.orderList(3) @this.helpers.orderList(4)
 </div>
 
-<div class="main myorder" style="display:none">
-    <ul class="con" sn-display="{data.length}">
-        <li sn-repeat="item in data" class="type{item.CNL_CLT_ID}" sn-tap="this.openOrder(item)">
-            <div class="hd" data-id="{item.PUS_ID}"><b class="from" sn-html="item.CNL_DESC"></b><span class="status" sn-html="item.PUS_DESC"></span></div>
-            <div class="info" sn-tap="this.openOrder(item)">
-                <span>订单号：{item.PUR_CODE}</span>
-                <span>{util.formatDate(item.PUR_DT)}</span>
-            </div>
-            <div class="bd" sn-repeat="prd in item.Children" sn-tap="this.openPrd(prd,item)">
-                <img sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
-                <div class="con">
-                    <h2>{prd.PRD_NAME}</h2>
-                    <h3>颜色：<span>{prd.PRD_COLOR}</span></h3>
-                    <h4>尺寸：<span>{prd.PRD_SPEC}</span></h4>
-                </div>
-                <p class="priceinfo">
-                    <span class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</span>
-                    <span class="qty">x{prd.LPK_QTY}</span>
-                </p>
-            </div>
-            <div class="ft">
-                总价：<span>{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span>
-                <b class="btn_sml" sn-display="{item.XPU_EXPRESS_CODE}" sn-tap="this.showExpress(item,model)">查看物流</b>
-                <b class="btn_sml" sn-display="{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}" data-forward="/news/order{item.PUR_ID}?from={url}">分享有惊喜</b>
-                <b class="btn_sml" sn-display="{item.PUS_DESC=='待付款'}">立即付款</b>
-                <b class="btn_sml btn_dark" sn-display="{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</b>
-            </div>
-            <div class="express" sn-display="item.showExpress" style="display:none">
-                <div class="express_con">
-                    <p>物流公司：<span>{item.EXP_NAME}</span></p>
-                    <p>运单号码：<span>{item.XPU_EXPRESS_CODE}</span></p>
-                </div>
-                <dl class="express_list">
-                    <dd sn-repeat="express in item.express">
-                        <p>{util.formatDate(express.EXP_DT)}</p>
-                        <p>{express.EXP_STATE_DETAIL}</p>
-                    </dd>
-                </dl>
-            </div>
-        </li>
-    </ul>
-    <div class="my_nodata" sn-display="{currentType==0&&!data.length&&!isLoading}" style="display:none">
-        <div class="icon"></div>
-        <div class="text">您目前还没有购物记录哦</div>
-        <div class="btn" data-forward="/all">去逛逛吧</div>
-    </div>
-    <div class="my_nodata" sn-display="{currentType!=0&&!data.length}" style="display:none">
-        <div class="icon"></div>
-        <div class="text">您还没有相关的订单</div>
-        <div class="btn" data-forward="/all">去逛逛吧</div>
-    </div>
-</div>
 <div class="open_msg" style="display:none">
     <div class="msg_bd msg_alert">
         这款产品已经售罄喽

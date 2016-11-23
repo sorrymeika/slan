@@ -16,7 +16,7 @@ var bridge = require('bridge');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
@@ -25,18 +25,19 @@ module.exports = Activity.extend({
         });
 
         var user = userModel.get();
+        var loader = new Loader(this.$el);
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction);
         }
 
-        model.selectImage = function () {
+        model.selectImage = function() {
 
             if (this.get('imgs').length >= 4) {
                 return;
             }
 
-            imagePicker.show(false, function (res) {
+            imagePicker.show(false, function(res) {
 
                 model.getModel('imgs').add({
                     id: res.id,
@@ -45,7 +46,7 @@ module.exports = Activity.extend({
             });
         }
 
-        model.submit = function () {
+        model.submit = function() {
 
             var content = this.data.content;
             if (!content) {
@@ -58,16 +59,20 @@ module.exports = Activity.extend({
 
             if (images) {
                 postImages = {};
-                images.forEach(function (img, i) {
+                images.forEach(function(img, i) {
                     postImages["img" + i] = img.id;
                 })
             }
+
+            if (loader.isLoading) return;
+
+            loader.showLoading();
 
             bridge.image.upload(api.ShopAPI.url('/api/user/AddSuggestion'), {
                 pspcode: user.PSP_CODE,
                 content: content
 
-            }, postImages, function (res) {
+            }, postImages, function(res) {
                 Toast.showToast(res.msg);
 
                 if (res.success) {
@@ -77,16 +82,17 @@ module.exports = Activity.extend({
                 }
 
                 loader.hideLoading();
+
+                model.back();
             });
         }
 
         this.bindScrollTo(model.refs.main);
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
-    }
+    onDestory: function() {}
 });

@@ -9,48 +9,53 @@ var Loader = require('widget/loader');
 var friends = require('models/friends');
 
 var contact = Event.mixin({
-    newFriends: function () {
+    newFriends: function() {
         return Http.post('/friends/getNewFriends');
     },
 
-    addFriend: function (user_id) {
+    addFriend: function(user_id, msg) {
 
         return Http.post('/friends/sendRequest', {
-            friend_id: user_id
+            friend_id: user_id,
+            msg: msg
         });
     },
 
-    hideItem: function (fid) {
+    hideItem: function(fid) {
         return Http.post('/friends/hideItem', {
             fid: fid
         });
     },
 
-    pageLoaderForSearch: function (model) {
+    inviteFriend: function(mobile) {
+        bridge.system.sendSMS(mobile, "快来加入和生活吧！");
+    },
+
+    pageLoaderForSearch: function(model) {
         return Loader.pageLoader('/userinfo/search', 'searchResult', model);
     },
 
-    person: function (user_id) {
+    person: function(user_id) {
         return Http.post('/userinfo/getById', {
             user_id: user_id
         });
     },
 
-    isFriend: function (user_id) {
+    isFriend: function(user_id) {
         return Http.post('/userinfo/isFriend', {
             user_id: user_id
         });
     },
 
-    getCombinedContacts: function () {
-        return Promise.all([this.getCachedFriends(), this.getCachedContacts()]).then(function (results) {
-            results[0].data.forEach(function (item) {
+    getCombinedContacts: function() {
+        return Promise.all([this.getCachedFriends(), this.getCachedContacts()]).then(function(results) {
+            results[0].data.forEach(function(item) {
                 item.isFriend = true;
             });
 
             var list = results[0].data;
 
-            results[1].data.forEach(function (item) {
+            results[1].data.forEach(function(item) {
                 if (util.indexOf(list, 'user_id', item.user_id) == -1) {
                     list.push(item);
                 }
@@ -60,13 +65,13 @@ var contact = Event.mixin({
         });
     },
 
-    getCachedContacts: function () {
+    getCachedContacts: function() {
         var cached = friends.getContacts();
 
         if (cached.size() == 0) {
             return this.contactList();
         } else {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function(resolve, reject) {
 
                 resolve({
                     success: true,
@@ -76,16 +81,16 @@ var contact = Event.mixin({
         }
     },
 
-    contactList: function () {
-        return new Promise(function (resolve, reject) {
+    contactList: function() {
+        return new Promise(function(resolve, reject) {
 
-            bridge.contact.getContacts(function (result) {
+            bridge.contact.getContacts(function(result) {
 
                 if (result.success) {
                     var data = result.data;
                     var ids = [];
 
-                    data.forEach(function (item) {
+                    data.forEach(function(item) {
                         if (/^1\d{10}$/.test(item.phoneNumber)) {
                             ids.push(item.phoneNumber);
                         }
@@ -94,8 +99,8 @@ var contact = Event.mixin({
                     Http.post("/userinfo/contacts", {
                         ids: ids.join(',')
 
-                    }).then(function (res) {
-                        data.forEach(function (item) {
+                    }).then(function(res) {
+                        data.forEach(function(item) {
                             var userinfo = util.first(res.data, 'account', item.phoneNumber);
                             userinfo && Object.assign(item, userinfo);
                         });
@@ -117,11 +122,11 @@ var contact = Event.mixin({
 
     },
 
-    backup: function () {
+    backup: function() {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
 
-            bridge.contact.getContacts(function (result) {
+            bridge.contact.getContacts(function(result) {
                 if (result.success) {
                     resolve(result);
                 } else {
@@ -137,19 +142,19 @@ var contact = Event.mixin({
 
     },
 
-    acceptFriend: function (user_id) {
+    acceptFriend: function(user_id) {
 
         return Http.post('/friends/accept', {
             friend_id: user_id
         });
     },
 
-    rejectFriend: function (user_id) {
+    rejectFriend: function(user_id) {
 
         if (sl.isDev)
-            return new Promise(function (resolve, reject) {
+            return new Promise(function(resolve, reject) {
 
-                setTimeout(function () {
+                setTimeout(function() {
                     resolve({
                         success: true
                     });
@@ -161,13 +166,13 @@ var contact = Event.mixin({
         });
     },
 
-    getCachedFriends: function () {
+    getCachedFriends: function() {
         var cached = friends.getFriends();
 
         if (cached.size() == 0) {
             return this.friends();
         } else {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function(resolve, reject) {
 
                 resolve({
                     success: true,
@@ -178,8 +183,8 @@ var contact = Event.mixin({
 
     },
 
-    friends: function () {
-        return Http.post('/friends/getFriends').then(function (res) {
+    friends: function() {
+        return Http.post('/friends/getFriends').then(function(res) {
 
             friends.getFriends().set(res.data);
 
@@ -187,21 +192,21 @@ var contact = Event.mixin({
         });
     },
 
-    setFriendMemo: function (friend_id, memo) {
+    setFriendMemo: function(friend_id, memo) {
         return Http.post('/friends/setFriendMemo', {
             friend_id: friend_id,
             memo: memo
         });
     },
 
-    friend: function (user_id) {
+    friend: function(user_id) {
 
         return Http.post('/friends/getById', {
             friend_id: user_id
         });
     },
 
-    deleteFriend: function (user_id) {
+    deleteFriend: function(user_id) {
 
         return Http.post('/contact/deleteFriend', {
             user_id: user_id

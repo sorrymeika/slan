@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function(require, exports, module) {
 
     var $ = require('$');
     var util = require('util');
@@ -14,24 +14,24 @@ define(function (require, exports, module) {
 
     return Activity.extend({
         events: {
-            'tap .open_msg': function (e) {
+            'tap .open_msg': function(e) {
                 if ($(e.target).hasClass('open_msg')) {
                     $(e.target).removeClass('show');
                 }
             },
-            'tap .btn_go': function () {
+            'tap .btn_go': function() {
                 this.back('/?tab=0');
             }
         },
 
         swipeRightBackAction: '/',
 
-        onCreate: function () {
+        onCreate: function() {
             var self = this;
 
             self.user = util.store('user');
 
-            var state = self.route.query.state || 0;
+            var state = parseInt(self.route.query.state) || 0;
 
             var loaders = {};
 
@@ -40,14 +40,13 @@ define(function (require, exports, module) {
                 url: encodeURIComponent(this.route.url),
                 title: '我买到的',
                 currentType: 0,
-                isLoading: true,
-                isShowShare: true
+                isShowShare: true,
+                isLoading: true
 
-            }).next(function () {
+            }).next(function() {
                 var tab = self.tab = this.refs.tab;
 
-
-                var createLoader = function (index) {
+                var createLoader = function(index) {
                     if (loaders[index]) return;
 
                     var key = 'data' + (index || '');
@@ -58,15 +57,19 @@ define(function (require, exports, module) {
                         $refreshing: $(tab.refs.items[index]).find('.refreshing'),
                         $scroll: $(tab.refs.items[index]),
                         checkData: false,
-                        success: function (res) {
-                            var data = {
-                                isLoading: false
-                            }
+                        beforeSend: function() {
+                            self.model.set("isLoading", true);
+                        },
+                        success: function(res) {
+                            var data = {}
                             data[key] = res.data;
                             self.model.set(data);
                         },
-                        append: function (res) {
+                        append: function(res) {
                             self.model.getModel(key).add(res.data);
+                        },
+                        complete: function() {
+                            self.model.set("isLoading", false);
                         }
                     });
 
@@ -78,11 +81,10 @@ define(function (require, exports, module) {
                     }).load();
                 }
 
-                tab.on('tabChange', function (e, index) {
+                tab.on('tabChange', function(e, index) {
                     createLoader(index)
 
-                }).next(function () {
-                    createLoader(0);
+                }).next(function() {
                     tab.tab(state);
                 });
 
@@ -90,7 +92,7 @@ define(function (require, exports, module) {
 
             this.wxPayApi = new api.WxPayAPI({
                 $el: self.$el,
-                success: function (res) {
+                success: function(res) {
                     console.log(res);
                     bridge.open(res.url);
                 }
@@ -98,18 +100,15 @@ define(function (require, exports, module) {
 
             var expressApi = new api.ExpressAPI({
                 $el: self.$el,
-                success: function (res) {
-                },
-                error: function () {
-                }
+                success: function(res) {},
+                error: function() {}
             });
 
             var orderShareAPI = new api.OrderShareAPI({
                 $el: this.$el,
                 checkData: false,
-                success: function (res) {
-                },
-                error: function (res) {
+                success: function(res) {},
+                error: function(res) {
                     self.model.set({
                         isShowShare: false
                     });
@@ -120,7 +119,7 @@ define(function (require, exports, module) {
 
             $.extend(this.model, {
 
-                showExpress: function (item, itemModel, e) {
+                showExpress: function(item, itemModel, e) {
                     itemModel.set('showExpress', !item.showExpress);
                     e.stopPropagation();
 
@@ -131,7 +130,7 @@ define(function (require, exports, module) {
                             pur_code: item.PUR_CODE,
                             pspcode: self.user.PSP_CODE
 
-                        }).load(function (res) {
+                        }).load(function(res) {
                             if (res && res.success) {
                                 itemModel.set('express', res.data);
                             }
@@ -140,7 +139,7 @@ define(function (require, exports, module) {
 
 
                 },
-                openOrder: function (order, e) {
+                openOrder: function(order, e) {
                     if ($(e.target).hasClass('btn_sml') && $(e.target).html() != '立即付款') return;
 
                     self.forward('/order/' + order.PUR_ID + "?refresh=0");
@@ -150,15 +149,15 @@ define(function (require, exports, module) {
                     //}
                     e.stopPropagation();
                 },
-                cancelOrder: function (order, e) {
+                cancelOrder: function(order, e) {
 
                     popup.confirm({
                         title: '温馨提示',
                         content: '你确定取消订单吗？',
                         cancelText: '不取消',
-                        cancelAction: function () { },
+                        cancelAction: function() {},
                         confirmText: '确定取消',
-                        confirmAction: function () {
+                        confirmAction: function() {
                             this.hide();
 
                             self.cancelOrderApi.setParam({
@@ -171,7 +170,7 @@ define(function (require, exports, module) {
                     e.stopPropagation();
                     e.preventDefault();
                 },
-                openPrd: function (prd, order, e) {
+                openPrd: function(prd, order, e) {
                     e.stopPropagation();
                     if (order.PUS_DESC != '待付款' || e.target.tagName == "IMG") {
                         if (prd.PRD_DISCONTINUED_FLAG) {
@@ -188,13 +187,13 @@ define(function (require, exports, module) {
                 }
             })
 
-            self.$open_msg = this.$('.open_msg').on($.fx.transitionEnd, function (e) {
+            self.$open_msg = this.$('.open_msg').on($.fx.transitionEnd, function(e) {
                 if (!self.$open_msg.hasClass('show')) {
                     self.$open_msg.hide();
                 }
             });
 
-            self.onResult("OrderChange", function () {
+            self.onResult("OrderChange", function() {
                 if (!self.tab) return;
                 var loader = loaders[self.tab.get('index')];
 
@@ -207,7 +206,7 @@ define(function (require, exports, module) {
                 params: {
                     pspcode: self.user.PSP_CODE
                 },
-                success: function (res) {
+                success: function(res) {
                     if (res.success) {
                         sl.tip('订单已成功取消');
                         loaders[self.tab.get('index')].reload();
@@ -216,17 +215,17 @@ define(function (require, exports, module) {
                         self.setResult("UserChange");
                     }
                 },
-                error: function (res) {
+                error: function(res) {
                     sl.tip(res.msg);
                 }
             });
         },
 
-        onShow: function () {
+        onShow: function() {
             var self = this;
         },
 
-        onDestory: function () {
+        onDestory: function() {
             var self = this;
             self.timer && clearTimeout(self.timer);
         }

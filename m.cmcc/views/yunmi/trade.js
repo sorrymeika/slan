@@ -12,7 +12,7 @@ var userModel = require('models/user');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
         var trade_id = this.route.params.id;
         var user_id = userModel.get('user_id');
@@ -23,27 +23,33 @@ module.exports = Activity.extend({
             title: ''
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction);
         }
 
-        model.receive = function () {
+        model.receive = function() {
             loader.showLoading();
 
             if (this.get('type') == 1) {
-                ym.receiveRedbag(this.get('redbag_id')).catch(function (e) {
-                    Toast.showToast(e.message);
+                ym.receiveRedbag(this.get('redbag_id')).then(function() {
+                    Toast.showToast('领取成功！');
                     self.load();
 
-                }).then(function () {
+                }).catch(function(e) {
+                    Toast.showToast(e.message);
+
+                }).then(function() {
                     loader.hideLoading();
                 });
             } else {
-                ym.receiveSend(trade_id).catch(function (e) {
-                    Toast.showToast(e.message);
+                ym.receiveSend(trade_id).then(function() {
+                    Toast.showToast('领取成功！');
                     self.load();
 
-                }).then(function () {
+                }).catch(function(e) {
+                    Toast.showToast(e.message);
+
+                }).then(function() {
                     loader.hideLoading();
                 });
             }
@@ -54,7 +60,7 @@ module.exports = Activity.extend({
         this.load();
     },
 
-    load: function () {
+    load: function() {
         var self = this;
 
         var model = this.model;
@@ -64,7 +70,7 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([ym.getTrade(trade_id), this.waitLoad()]).then(function (results) {
+        Promise.all([ym.getTrade(trade_id), this.waitLoad()]).then(function(results) {
             var trade = results[0].data;
 
             switch (trade.trade_type) {
@@ -73,7 +79,7 @@ module.exports = Activity.extend({
                     var details = results[0].redbag_details;
                     var amount = -1;
                     var receive_id = 0;
-                    details.forEach(function (item) {
+                    details.forEach(function(item) {
                         if (item.friend_id == user_id) {
                             amount = item.amount;
 
@@ -122,19 +128,19 @@ module.exports = Activity.extend({
             }
 
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

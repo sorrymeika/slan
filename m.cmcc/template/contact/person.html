@@ -18,14 +18,19 @@
             个性签名：{person.sign_text}
         </li>
         <li class="bd_b lh_l pl_m" sn-if="person.status==-1">
-            验证消息：{person.msg}
+            验证消息：{person.tag}
         </li>
     </ul>
-
-    <div class="ct_person__actions">
-        <div class="btn_xl" sn-if="person.status==-1" sn-tap="this.acceptFriend()">接受</div>
-        <div class="btn_xl btn_reject" sn-if="person.status==-1" sn-tap="this.rejectFriend()">拒绝</div>
-
-        <div class="btn_xl" t="user.user_id!person.user_id&&" sn-if="person.status==-2" sn-tap="this.addFriend()">加为好友</div>
+    <div class="ct_person__actions" sn-if="person.status==-1">
+        <div class="btn_xl" sn-tap="this.acceptFriend()">接受</div>
+        <div class="btn_xl btn_reject" sn-tap="this.rejectFriend()">拒绝</div>
+    </div>
+    <div class="ct_person__actions ta_c" sn-else-if="person.status==-2">
+        <button class="quan-add_friend bg_0000 mr_m" sn-tap="this.addFriend()"></button>
+        <button class="quan-call2 bg_0000 ml_m" sn-tap="this.openPhoneCall()"></button>
+    </div>
+    <div class="ct_person__actions ta_c" sn-else-if="person.status==-11">
+        <button class="quan-add_friend bg_0000 mr_m" sn-tap="this.addFriend()"></button>
+        <button class="quan-call2 bg_0000 ml_m" sn-tap="this.openPhoneCall()"></button>
     </div>
 </div>

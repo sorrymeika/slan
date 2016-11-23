@@ -13,7 +13,7 @@ var popup = require('widget/popup')
 module.exports = Page.extend({
 
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
@@ -56,21 +56,32 @@ module.exports = Page.extend({
                 type: "select",
                 emptyAble: false,
                 emptyText: "状态不可为空",
-                options: [{ "value": "1", "text": "已领取" }, { "value": "2", "text": "未领取" }, { "value": "3", "text": "已过期" }]
+                options: [{
+                    "value": "1",
+                    "text": "已领取"
+                }, {
+                    "value": "2",
+                    "text": "未领取"
+                }, {
+                    "value": "3",
+                    "text": "已过期"
+                }]
             }],
             buttons: [{
                 value: '添加',
-                click: function () {
-                    this.submit(function () {
+                click: function() {
+                    this.submit(function() {
                         Toast.showToast('添加成功');
                         form.reset();
                         history.back();
                         self.setResult('user_yunmichange');
-                    }, function (e) { Toast.showToast(e.message); });
+                    }, function(e) {
+                        Toast.showToast(e.message);
+                    });
                 }
             }, {
                 value: '取消',
-                click: function () {
+                click: function() {
                     history.back();
                 }
             }]
@@ -78,6 +89,5 @@ module.exports = Page.extend({
         form.$el.appendTo(model.refs.main);
 
     },
-    onShow: function () {
-    }
+    onShow: function() {}
 });

@@ -166,11 +166,11 @@ create table pub_quan_follow (
 create sequence pub_quan_follow_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
 
-create table pub_quan_recommend (
+create table pub_quan_recommend (--公众圈推荐 --children=pub_quan_msg --props=String quan_name,String quan_pic
     recommend_id number(11) primary key,--编号
     quan_id number(10),--公众圈ID
     recommend_date date,--推荐时间
-    sort number(10)--排序
+    sort number(10)--排序 --sort=true
 ) tablespace cmccuser;
 
 create sequence pub_quan_recommend_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
@@ -344,11 +344,31 @@ create table yunmi_redbag_detail (--手气红包领取记录
 create sequence yunmi_redbag_detail_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
+-----------------------------
+--<<2016-11-22 up to date here
+-----------------------------
+
+create table user_hdh (--和多号
+    hdh_id number(12) primary key,--副号ID
+    user_id number(10),--用户编号
+    subphone varchar(11),--副号
+    alias varchar(20),--备注
+    type number(1),--类型 --options=1:虚拟副号码,2:实体副号码
+    order number(2),--排序序号
+    business_state number(1),--副号码业务状态 --options=1:正常,2:预开户,3:申请中,4:取消中
+    state number(2),--副号码功能状态 --options=1:逻辑开机,2:逻辑关机和取消托管,3:限制语音呼入,4:限制短、彩信接收,5:限制语音呼入和短、彩信接收
+    incoming_state number(1),--来电提醒开关 --options=1:关闭,2:打开
+    powertiming1 varchar(2000),
+    powertiming2 varchar(2000),
+    bind_date date--绑定日期 --search=true
+) tablespace cmccuser;
+create sequence user_hdh_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+create sequence hdh_nc_seq minvalue 1 maxvalue 999999999999 start with 240 increment by 1;
 
 
 
 -----------------------------
---<<2016-11-16 up to date here
 -----------------------------
 
 

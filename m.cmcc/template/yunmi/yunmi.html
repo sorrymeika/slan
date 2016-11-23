@@ -11,11 +11,11 @@
             </dl>
             <dl class="flex_0" sn-tap="this.receiveYunmi()">
                 <dt class="ym-point-rem pt_m_rem"></dt>
-                <dd class="pt_s_rem fs_l ym_idx__timeout">{current.amount||("倒计时:"+next.timeLeft)}</dd>
+                <dd class="pt_s_rem fs_l ym_idx__timeout">{current.amount||(next.timeLeft?"倒计时:"+next.timeLeft:'')}</dd>
             </dl>
             <dl class="flex_0">
                 <dt class="pt_m_rem">当日获得</dt>
-                <dd class="pt_l_rem fs_xl fw_b">{today_amount||0}</dd>
+                <dd class="pt_l_rem fs_xl fw_b">{today_get_amount||0}</dd>
             </dl>
         </div>
         <div class="ta_c fs_s pt_s_rem pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
