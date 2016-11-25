@@ -76,7 +76,7 @@ module.exports = Activity.extend({
                 self.forward("/contact/person/" + item.user_id);
 
             } else {
-                contact.inviteFriend();
+                contact.inviteFriend(item.phoneNumber);
             }
         }
 

@@ -232,7 +232,7 @@
                 </li>
             </ul>
             <ul class="bd_t mt_l pt_1 hm_contacts__messages" sn-if="messagesList.list.length">
-                <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list|orderByDesc:date" data-forward="/contact/chat/{item.user_id}">
+                <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
                     <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>
                     <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
                         <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>

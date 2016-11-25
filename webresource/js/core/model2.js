@@ -24,7 +24,7 @@ var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURICom
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
-var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9\(\,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*(orderBy|orderByDesc)\:(.+)){0,1}(\s|$)/;
+var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9\(\,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
 var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
@@ -411,22 +411,25 @@ var ModelProto = {
                     if (model.key == key) {
                         return model;
 
-                    } else if (model.keys) {
-                        if (model.keys.indexOf(key) != -1) {
-                            return model;
+                    } else {
+                        var linkedParents = model._linkedParents;
+                        if (linkedParents) {
 
-                        } else {
-                            for (var i = 0, len = model.keys.length; i < len; i++) {
-                                if (key.indexOf(model.keys[i] + '.') == 0) {
+                            for (var i = 0, len = linkedParents.length; i < len; i++) {
+                                var childModelKey = linkedParents[i].childModelKey;
+                                if (key == childModelKey) {
+                                    return model;
+
+                                } else if (key.indexOf(childModelKey + '.') == 0) {
                                     flag = true;
-                                    key = key.substr(model.keys[i].length + 1);
+                                    key = key.substr(childModelKey.length + 1);
                                     break;
                                 }
                             }
-                        }
 
-                    } else if (key.indexOf(model.key + '.') == 0) {
-                        flag = true;
+                        } else if (key.indexOf(model.key + '.') == 0) {
+                            flag = true;
+                        }
                     }
 
                     if (flag && model.model) {
@@ -594,14 +597,22 @@ var ModelProto = {
             value = attrs[attr];
 
             if (origin !== value) {
-                if (origin === undefined && (value instanceof ViewModel || value instanceof Collection)) {
+                if (origin === undefined && (value instanceof Model || value instanceof Collection)) {
                     model[attr] = value;
                     data[attr] = value.data;
 
-                    (value.keys || (value.keys = [])).push(self.key ? self.key + '.' + attr : attr);
+                    var link = {
+                        childModelKey: self.key ? self.key + '.' + attr : attr,
+                        childModel: value,
+                        childRoot: value.root,
+                        model: this,
+                        root: root
+                    };
 
-                    (value.root.parents || (value.root.parents = [])).push(root);
-                    (root._children || (root._children = [])).push(value.root);
+                    (value._linkedParents || (value._linkedParents = [])).push(link);
+
+                    (value.root._linked || (value.root._linked = [])).push(link);
+                    (root._linkedModels || (root._linkedModels = [])).push(link);
                     hasChange = true;
 
                 } else if (origin instanceof Model) {
@@ -768,6 +779,45 @@ Collection.prototype = {
         }
     },
 
+    update: function(arr, primaryKey) {
+        var fn;
+
+        if (typeof primaryKey === 'string' && val !== undefined) {
+            fn = function(a, b) {
+                return a[primaryKey] == b[primaryKey];
+            }
+        } else fn = primaryKey;
+
+        var item;
+        var arrItem;
+        var appends = [];
+
+        if (!Array.isArray(arr)) arr = [arr];
+
+        for (var i = 0, length = this.models.length = 1; i <= length; i++) {
+            item = this.data[i];
+
+            for (var j = 0, n = arr.length; j < n; j++) {
+                arrItem = arr[j];
+
+                if (arrItem != undefined) {
+                    if (fn.call(this, item, arrItem)) {
+                        this.model[j].set(arrItem);
+                        arr[j] = undefined;
+                        break;
+                    }
+                    if (i == length) {
+                        appends.push(arrItem);
+                    }
+                }
+            }
+        }
+        if (appends.length) {
+            this.add(appends);
+        }
+        return this;
+    },
+
     unshift: function(data) {
         this.insert(0, data);
     },
@@ -912,10 +962,19 @@ function RepeatSource(viewModel, el, parent) {
     this.parent = parent;
     this.source = el;
     this.children = [];
-    this.orderByType = match[5];
-    this.orderBy = match[6];
     this.attrs = attrs;
     this.parentAlias = parentAlias;
+
+    var orderByCode = match[5];
+    if (orderByCode) {
+        self.orderBy = [];
+
+        orderByCode.split(/\s*,\s*/).forEach(function(sort) {
+            sort = sort.split(' ');
+
+            self.orderBy.push(sort[0], sort[1] == 'desc' ? false : true);
+        });
+    }
 
     var replacement = document.createComment(collectionKey);
     replacement.snRepeatSource = this;
@@ -972,7 +1031,7 @@ function ViewModel(el, data, children) {
     if ((typeof data === 'undefined' || $.isArray(data)) && (el === undefined || el === null || $.isPlainObject(el)))
         children = data, data = el, el = this.el;
 
-    this.children = [].concat(children);
+    this.children = children ? [].concat(children) : [];
 
     this.updateView = this.updateView.bind(this);
     this._handleEvent = this._handleEvent.bind(this);
@@ -1398,7 +1457,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var model;
         var offsetParent = repeatSource.offsetParent;
         var orderBy = repeatSource.orderBy;
-        var isDesc = repeatSource.orderByType == "orderByDesc";
 
         var parentSnData = {};
 
@@ -1507,12 +1565,29 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         });
 
-        if (orderBy)
-            list.sort(function(a, b) {
-                a = a.model.data[orderBy];
-                b = b.model.data[orderBy];
-                return isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
+        if (orderBy && orderBy.length) {
+
+            list.sort(function(am, bm) {
+                var ret = 0;
+                var isDesc;
+                var sort;
+                var a, b;
+
+                for (var i = 0; i < orderBy.length; i += 2) {
+                    sort = orderBy[i];
+                    isDesc = orderBy[i + 1] == false;
+
+                    a = am.model.data[sort];
+                    b = bm.model.data[sort];
+
+                    ret = isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
+
+                    if (ret != 0) return ret;
+                }
+
+                return ret;
             });
+        }
 
         list.forEach(function(item, index) {
             var elem = item.el;
@@ -1559,9 +1634,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             return updateNode(self, el);
         });
 
-        if (this.parents) {
-            this.parents.forEach(function(parent) {
-                !parent._nextTick && parent.updateView();
+        if (this._linked) {
+            this._linked.forEach(function(link) {
+                !link.root._nextTick && link.root.updateView();
             })
         }
 
@@ -1587,6 +1662,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                 case 'hidden':
                                 case 'radio':
                                 case 'checkbox':
+                                case 'file':
                                     break;
                                 default:
                                     return;
@@ -1760,12 +1836,15 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
         }
 
-        var children = this._children;
+        var children = this._linkedModels;
         if (children) {
             for (var i = 0, len = children.length; i < len; i++) {
-                var parents = children[i].parents;
+                var link = children[i]
+                var linked = link.childRoot._linked;
+                var linkedParents = link.childModel._linkedParents;
 
-                parents.splice(parents.indexOf(this), 1);
+                linked.splice(linked.indexOf(link), 1);
+                linkedParents.splice(linkedParents.indexOf(link), 1);
             }
         }
 

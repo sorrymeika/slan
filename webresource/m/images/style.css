@@ -19,7 +19,7 @@ footer { position: absolute; bottom: 0px; left: 0px; width: 100%; z-index: 200; 
 .has_status_bar .main { top: 64px; }
 
 .viewport,.cp_photoviewer { position: absolute; overflow: hidden; width: 100%; background: #fff; bottom: 0px; top: 0px; right: 0; left: 0; z-index: 1; }
-.view { position: absolute; width: 100%; top: 0; left: 0; bottom: 0; background: #eeefef; overflow: hidden; -webkit-box-shadow: -3px 2px 5px rgba(49,60,75,.35); box-shadow: -3px 2px 5px rgba(49,60,75,.35); }
+.view { position: absolute; width: 100%; top: 0; left: 0; bottom: 0; background: #eeefef; overflow: hidden; -webkit-box-shadow: -3px 2px 5px rgba(49,60,75,.35); box-shadow: -3px 2px 5px rgba(49,60,75,.35); z-index: 0; }
 .view:before { display: block; content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; }
 .view.active { z-index: 4; }
 .view.active:before { display: none; }

@@ -118,10 +118,8 @@
             "resources": "http://wxcs.ie1e.com/upload/"
         },
         "debug": {
-            "api": "http://10.0.76.119:5559/proxy1"
+            "api": "http://${ip}:5559/proxy1"
         },
-        "dev": {
-            "api": "http://10.0.76.119:6005"
-        }
+        "dev": {}
     }
 }
