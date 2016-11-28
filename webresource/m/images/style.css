@@ -134,8 +134,8 @@ input[type="password"].prompt-text { letter-spacing: 2px; }
 .selectorbar { border-bottom: .5px solid #ccc; height: 38px; z-index: 3; background: #fff; position: absolute; top: 0; left: 0; right: 0; line-height: 38px; }
 .selectorbar b { width: 80px; padding-right: 10px; float: right; height: 100%; font-weight: normal; text-align: right; color: #0079FF; font-size: 16px; }
 .selector { display: -webkit-box; background: #fff; text-align: center; height: 172px; position: relative; z-index: 1; margin: 38px 0 0 0; width: 100%; }
-.selector > :nth-child(n) { -webkit-box-flex: 1; width: 0; }
-.selector > :nth-child(n+2) { border-left: 1px solid #ddd; }
+.selector_item { -webkit-box-flex: 1; width: 0; overflow:hidden; }
+.selector_item:nth-child(n+2) { border-left: 1px solid #ddd; }
 .selector:before { content: ''; display: block; background: -webkit-linear-gradient(top, rgb(255, 255, 255) 5%, rgba(255, 255, 255, 0) 50%, rgb(255, 255, 255) 95%); position: absolute; width: 100%; top: 0; left: 0; bottom: 0px; z-index: 2; pointer-events: none; }
 .selectorcon { position: relative; z-index: 1; margin-top: -3px; }
 .selector:after { content: ''; display: block; margin-top: -11px; position: absolute; left: 0; top: 50%; height: 32px; border-top: .5px solid #ddd; border-bottom: .5px solid #ddd; width: 100%; z-index: 100; pointer-events: none; }
@@ -185,8 +185,3 @@ input[type="password"].prompt-text { letter-spacing: 2px; }
 .table { width: 100%; display: table; }
 .table-row { display: table-row; }
 .table-cell { display: table-cell; text-align: center; padding-top: 5px; }
-
-
-.sn-display { opacity: 1; -webkit-transition: opacity 300ms ease-out 0ms; transition: opacity 300ms ease-out 0ms; }
-.sn-display-show { opacity: 1; }
-.sn-display-hide { opacity: 0; }

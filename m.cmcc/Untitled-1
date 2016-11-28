@@ -1,0 +1,24 @@
+PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			Key privateKey = keyFactory.generatePrivate(pkcs8KeySpec);
+
+			System.out.println("rsa pub key: " + privateKey);
+
+
+
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(keyBytes); 
+
+			PemReader reader = new PemReader(new InputStreamReader(bais));
+			PemObject pemObject = reader.readPemObject();
+			reader.close();
+
+			System.out.println("pemObject: " + pemObject);
+
+			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pemObject.getContent());
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+			PrivateKey privateKey = kf.generatePrivate(keySpec);
+			RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey) privateKey;
+			RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(rsaPrivateCrtKey.getModulus(),
+					rsaPrivateCrtKey.getPublicExponent());
+			PublicKey publicKey = kf.generatePublic(publicKeySpec);

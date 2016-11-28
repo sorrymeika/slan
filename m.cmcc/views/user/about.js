@@ -13,7 +13,7 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '关于和生活'
+            title: '关于'
         });
 
         model.back = function () {

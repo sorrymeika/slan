@@ -43,7 +43,7 @@
 
     SelectorItem.prototype = {
 
-        el: '<div style="overflow:hidden"></div>',
+        el: '<div class="selector_item"></div>',
 
         template: util.template('<li><%=text%></li>'),
 

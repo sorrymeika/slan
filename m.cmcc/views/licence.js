@@ -6,25 +6,30 @@ var animation = require('animation');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '使用协议'
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
+        }
+
+        model.agree = function() {
+            self.setResult('agree_licence');
+            this.back();
         }
 
         this.bindScrollTo(model.refs.main);
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

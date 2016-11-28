@@ -3,6 +3,10 @@ var Base = require('./base');
 var util = require('util');
 var Event = require('./event');
 
+util.style('.sn-display { opacity: 1; -webkit-transition: opacity 300ms ease-out 0ms; transition: opacity 300ms ease-out 0ms; }\
+.sn-display-show { opacity: 1; }\
+.sn-display-hide { opacity: 0; }');
+
 var toString = {}.toString;
 
 var ModelEvents = {
@@ -27,7 +31,7 @@ var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
 var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9\(\,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
-var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|$)/g;
+var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;])+?)(?=\;|\,|\)|$)/g;
 var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
 var rSnAttr = /^sn-/;
 
@@ -782,7 +786,7 @@ Collection.prototype = {
     update: function(arr, primaryKey) {
         var fn;
 
-        if (typeof primaryKey === 'string' && val !== undefined) {
+        if (typeof primaryKey === 'string' && primaryKey !== undefined) {
             fn = function(a, b) {
                 return a[primaryKey] == b[primaryKey];
             }
@@ -794,7 +798,7 @@ Collection.prototype = {
 
         if (!Array.isArray(arr)) arr = [arr];
 
-        for (var i = 0, length = this.models.length = 1; i <= length; i++) {
+        for (var i = 0, length = this.models.length - 1; i <= length; i++) {
             item = this.data[i];
 
             for (var j = 0, n = arr.length; j < n; j++) {
@@ -802,7 +806,7 @@ Collection.prototype = {
 
                 if (arrItem != undefined) {
                     if (fn.call(this, item, arrItem)) {
-                        this.model[j].set(arrItem);
+                        this.models[i].set(arrItem);
                         arr[j] = undefined;
                         break;
                     }
@@ -1380,10 +1384,13 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     break;
                 case 'sn-display':
                     var $el = $(el);
+                    var isInitDisplay = true;
                     if (!$el.hasClass('sn-display')) {
+                        isInitDisplay = false;
                         $el.addClass('sn-display').clientHeight;
                     }
                     var display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+
                     if (display == 'none') {
                         if (!$el.hasClass('sn-display-hide'))
                             $el.addClass('sn-display-hide')
@@ -1392,7 +1399,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                     $el.hide();
                             });
 
-                    } else if ($el.hasClass('sn-display-hide')) {
+                    } else if (!isInitDisplay || $el.hasClass('sn-display-hide')) {
                         $el.css({
                             display: display
                         });
@@ -1848,7 +1855,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
         }
 
-        this.$el = null;
     }
 
 });

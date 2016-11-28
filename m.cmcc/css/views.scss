@@ -1,6 +1,12 @@
 @import "global.scss";
 
 //登录注册
+.uc_login.main { top: 0px; }
+.uc_login__bg { border-top: 44px solid $color; }
+.has_status_bar .uc_login__bg { border-top: 64px solid $color; }
+.uc_login__bg:before { content: ''; display: block; background: url(../images/login_bg.png) no-repeat; height: 1.54rem; background-size: 100% auto; }
+
+
 .uc_login__form { background-color: #fff; }
 .uc_login__form li { height: 40px; }
 
@@ -89,7 +95,7 @@
 .hm_pubquan__myfollow .hd img { width: 40px; height: 25px; display: block; background-color: #fff; }
 .v .hd .name { font-size: 14px; }
 .hm_pubquan__myfollow .hd .date { font-size: 10px; }
-.hm_pubquan__myfollow .imgs img { max-height: 60px; max-width: 300px; }
+.hm_pubquan__myfollow .imgs img { width: .9rem; height: .9rem; margin-right: .05rem; }
 
 .hm_quan__item { position: relative; }
 .hm_quan__item .avatars { width: 46px; height: 46px; }
@@ -131,7 +137,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .pq_item__info img { width: 60px; height: 60px; border-radius: 4px; overflow: hidden; }
 .pq_item__info .follow { color: #b2b2b2; }
 .pq_item__articles .hd { height: 44px; color: $color; line-height: 44px; font-size: 14px; padding-left: 10px; }
-.pq_item__articles_item img { max-width: 1.2rem; }
+.pq_item__articles_item .img img { width: .9rem;height: .9rem; margin-right: 5px; }
 
 .quan-publish { position: absolute; bottom: 60px; right: 10px; z-index: 100; background: rgba(0,0,0,0); }
 .quan-publish:active { opacity: .7; }

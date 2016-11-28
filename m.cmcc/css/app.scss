@@ -34,7 +34,6 @@ header img { display: block; width: 33px; height: 33px; }
 .header_app { background-color: $color; color: #fff; }
 .header_app:after { content: none; }
 
-
 .head_title { color: $fontcolor; font-size: 16px; font-weight: 400; position: absolute; left: 0px; top: 0; right: 0; bottom: 0; }
 .head_left { position: absolute; left: 0px; top: 0; z-index: 10; text-align: center; display: -webkit-box; }
 .head_right { position: absolute; right: 0px; top: 0; text-align: center; display: -webkit-box; }
@@ -53,7 +52,7 @@ header img { display: block; width: 33px; height: 33px; }
 
 .has_status_bar header.header_trans { border-top-color: transparent; }
 
-.main { background-color: #eeefef; top: 44px; }
+.main { background-color: #f3f3f3; top: 44px; }
 .refreshing { background: transparent; color: #333; }
 
 .footer { background-color: rgba(255, 255, 255, .95); height: 48px; }

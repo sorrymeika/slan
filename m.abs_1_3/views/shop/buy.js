@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function(require, exports, module) {
 
     var $ = require('$');
     var util = require('util');
@@ -12,7 +12,7 @@ define(function (require, exports, module) {
 
     return Activity.extend({
 
-        onCreate: function () {
+        onCreate: function() {
             var self = this;
             var $main = self.$('.main');
 
@@ -29,11 +29,11 @@ define(function (require, exports, module) {
 
             $.extend(self.model, {
 
-                selectAddress: function () {
+                selectAddress: function() {
                     self.forward('/address?buy=1&from=' + encodeURIComponent(self.route.url));
                 },
 
-                useCoupon: function (isFree) {
+                useCoupon: function(isFree) {
                     if (isFree && this.refs.freight.innerHTML == '免邮费') return;
                     self.forward('/shop/useCoupon?from=' + encodeURIComponent(self.route.url), {
                         coupon: this.data.coupon,
@@ -43,13 +43,13 @@ define(function (require, exports, module) {
                     });
                 },
 
-                usePoint: function () {
+                usePoint: function() {
                     self.forward('/shop/usePoint?from=' + encodeURIComponent(self.route.url), {
                         points: this.data.Points
                     });
                 },
 
-                useInv: function () {
+                useInv: function() {
                     self.forward('/shop/useInv?from=' + encodeURIComponent(self.route.url), {
                         requireInv: this.data.requireInv,
                         company: this.data.company,
@@ -57,7 +57,7 @@ define(function (require, exports, module) {
                     });
                 },
 
-                getPrice: function (bag_amount, coupon, Points) {
+                getPrice: function(bag_amount, coupon, Points) {
                     var couponPrice = coupon && coupon.VCA_DEDUCT_AMOUNT ? coupon.VCA_DEDUCT_AMOUNT : 0;
                     if (coupon && coupon.VCA_VCT_ID == 5) {
                         couponPrice = 0;
@@ -65,7 +65,7 @@ define(function (require, exports, module) {
                     return Math.max(0, bag_amount - couponPrice - (Points / 100));
                 },
 
-                getFreight: function (bag_amount, full_amount_free, coupon, Points, freecouponcode) {
+                getFreight: function(bag_amount, full_amount_free, coupon, Points, freecouponcode) {
 
                     console.log(bag_amount, full_amount_free, coupon, Points, freecouponcode);
 
@@ -75,7 +75,7 @@ define(function (require, exports, module) {
                     return (self.user.XPS_CTG_ID && self.user.XPS_CTG_ID >= 4 || price >= full_amount_free) ? "免邮费" : ('¥' + Math.round(freight * 100) / 100);
                 },
 
-                getTotal: function (bag_amount, full_amount_free, coupon, Points, freecouponcode) {
+                getTotal: function(bag_amount, full_amount_free, coupon, Points, freecouponcode) {
                     var couponPrice = coupon && coupon.VCA_DEDUCT_AMOUNT ? coupon.VCA_DEDUCT_AMOUNT : 0;
                     var total;
                     var price;
@@ -94,7 +94,7 @@ define(function (require, exports, module) {
                     return '¥' + (Math.round(total * 100) / 100);
                 },
 
-                createOrder: function () {
+                createOrder: function() {
                     self.orderCreateApi.load();
                 }
             });
@@ -105,10 +105,10 @@ define(function (require, exports, module) {
                     pspcode: self.user.PSP_CODE
                 },
                 checkData: false,
-                success: function (res) {
+                success: function(res) {
                     if (res.data && res.data[0]) {
                         self.model.set({
-                            address: util.first(res.data, function (item) {
+                            address: util.first(res.data, function(item) {
                                 return item.MBA_DEFAULT_FLAG
                             }) || res.data[0]
                         });
@@ -123,11 +123,11 @@ define(function (require, exports, module) {
                 params: {
                     pspcode: self.user.PSP_CODE
                 }
-            }).request().then(function (res) {
+            }).request().then(function(res) {
                 self.model.set({
                     bag_amount: res.bag_amount,
                     full_amount_free: parseInt(res.full_amount_free),
-                    coupon: util.find(res.coupon, function (item) {
+                    coupon: util.find(res.coupon, function(item) {
                         return item.VCT_ID != 4;
                     }),
                     freight: res.freight
@@ -142,26 +142,26 @@ define(function (require, exports, module) {
                 params: {
                     pspcode: self.user.PSP_CODE
                 },
-                success: function (res) {
+                success: function(res) {
                     var data = res.data;
 
-                    cartPromise.then(function (cartInfo) {
+                    cartPromise.then(function(cartInfo) {
                         var packageList = cartInfo.data_package;
 
-                        data.forEach(function (item) {
+                        data.forEach(function(item) {
                             var resultPackageList = [];
                             var tagPackageList = item.packagelist;
                             if (tagPackageList) {
 
                                 console.log(packageList)
 
-                                packageList.forEach(function (ppg) {
+                                packageList.forEach(function(ppg) {
                                     var flag = false;
 
                                     //判断套餐是否属于该仓库
-                                    ppg.PackageList.forEach(function (prd) {
+                                    ppg.PackageList.forEach(function(prd) {
 
-                                        var index = util.indexOf(tagPackageList, function (tagPrd) {
+                                        var index = util.indexOf(tagPackageList, function(tagPrd) {
                                             return tagPrd.SPB_ID == prd.SPB_ID;
                                         });
 
@@ -192,7 +192,7 @@ define(function (require, exports, module) {
 
             self.orderCreateApi = new api.OrderCreateAPI({
                 $el: this.$el,
-                beforeSend: function () {
+                beforeSend: function() {
                     var address = self.model.get('address');
                     if (!address) {
                         sl.tip('请填写收货地址信息');
@@ -215,7 +215,7 @@ define(function (require, exports, module) {
                     });
                 },
                 checkData: false,
-                success: function (res) {
+                success: function(res) {
                     if (res.success) {
                         sl.tip("生成订单成功！");
 
@@ -232,7 +232,7 @@ define(function (require, exports, module) {
                                         spUrl: api.API.prototype.baseUri + '/AlipayApp/Pay',
                                         orderCode: res.code
 
-                                    }, function (res) {
+                                    }, function(res) {
                                         sl.tip(res.msg);
                                     });
                                     break;
@@ -244,7 +244,7 @@ define(function (require, exports, module) {
                                         orderName: 'ABS商品',
                                         orderPrice: res.pur_amount
 
-                                    }, function (res) {
+                                    }, function(res) {
                                         sl.tip(res.msg);
                                     });
                                     break;
@@ -260,19 +260,19 @@ define(function (require, exports, module) {
 
                     }
                 },
-                error: function (res) {
+                error: function(res) {
                     sl.tip(res.msg);
                 }
             });
 
-            self.onResult('useAddress', function (e, address) {
+            self.onResult('useAddress', function(e, address) {
                 self.model.set({
                     address: address
                 });
             });
         },
 
-        onShow: function () {
+        onShow: function() {
             var self = this;
             var routeData = self.route.data;
 
@@ -300,6 +300,6 @@ define(function (require, exports, module) {
             self.cart.load();
         },
 
-        onDestory: function () { }
+        onDestory: function() {}
     });
 });

@@ -15,18 +15,18 @@ var Http = require('core/http');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             smsTime: 0
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
-        model.login = function () {
+        model.login = function() {
             var phoneNo = this.data.phoneNo;
             var password = this.data.password;
 
@@ -67,19 +67,19 @@ module.exports = Activity.extend({
                                         Loader.hideLoading();
                                     });
             */
-            bridge.cmcc.login(phoneNo, password, "sms", function (res) {
+            bridge.cmcc.login(phoneNo, password, "sms", function(res) {
                 if (res.success) {
 
                     new Http({
-                        url: '/user/login',
-                        params: auth.encryptParams({
-                            account: phoneNo,
-                            password: auth.md5(password),
-                            token: res.token
-                        })
+                            url: '/user/login',
+                            params: auth.encryptParams({
+                                account: phoneNo,
+                                password: auth.md5(password),
+                                token: res.token
+                            })
 
-                    }).request()
-                        .then(function (res) {
+                        }).request()
+                        .then(function(res) {
                             auth.setAuthToken(res.data.tk);
 
                             delete res.data.tk;
@@ -88,10 +88,10 @@ module.exports = Activity.extend({
 
                             model.back();
 
-                        }).catch(function (e) {
+                        }).catch(function(e) {
                             Toast.showToast(e.message);
 
-                        }).then(function () {
+                        }).then(function() {
                             Loader.hideLoading();
                         });
 
@@ -102,7 +102,7 @@ module.exports = Activity.extend({
             });
         }
 
-        model.sendSms = function () {
+        model.sendSms = function() {
             if (this.data.smsTime > 0) return;
 
             var phoneNo = this.data.phoneNo;
@@ -116,7 +116,7 @@ module.exports = Activity.extend({
 
             this.leftTime = Date.now() + 60 * 1000;
 
-            this.timer = setInterval(function () {
+            this.timer = setInterval(function() {
 
                 var left = Math.round((model.leftTime - Date.now()) / 1000);
 
@@ -141,13 +141,18 @@ module.exports = Activity.extend({
         var loader = this.loader = new Loader(this.$el);
 
         self.bindScrollTo(model.refs.main);
+
+        this.onResult('agree_licence', function() {
+            model.set('agree', true);
+        });
+
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

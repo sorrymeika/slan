@@ -47,8 +47,7 @@ create table account (
 user_id number(11) primary key,--用户ID
 account varchar(20) not null,--用户账号 --search=true
 password varchar(32) not null,--用户密码
-register_date DATE,--注册时间 --search=true
-
+register_date DATE--注册时间 --search=true
 ) tablespace cmccuser;
 
 

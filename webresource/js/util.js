@@ -1,7 +1,7 @@
 var ArrayProto = Array.prototype,
     slice = ArrayProto.slice,
     concat = ArrayProto.concat,
-    ua = navigator.userAgent,
+    ua = typeof navigator == 'undefined' ? '' : navigator.userAgent,
     ios = ua.match(/(iPhone|iPad|iPod).*OS\s([\d_]+)/i),
     ie = ua.match(/MSIE (\d+)/i),
     android = ua.match(/(Android);?[\s\/]+([\d.]+)?/),
@@ -17,7 +17,7 @@ if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
 else if (ie) osVersion = ie[1].split('.');
 
-var pad = function (num, n) {
+var pad = function(num, n) {
     var a = '0000000000000000' + num;
     return a.substr(a.length - (n || 2));
 };
@@ -61,21 +61,47 @@ function isDiffObject(a, b) {
     return false;
 }
 
+function compareWith(a, b) {
+    var typeA = toString.call(a);
+
+    switch (typeA) {
+        case '[object Object]':
+            var keysA = Object.keys(a);
+
+            for (var i = keysA.length; i >= 0; i--) {
+                var key = keysA[i];
+
+                if (a[key] != b[key]) return false;
+            }
+            break;
+
+        case '[object Array]':
+            for (var i = a.length; i >= 0; i--) {
+                if (b.indexOf(a[i]) == -1) return false;
+            }
+            break;
+
+        default:
+            return a == b;
+    }
+    return true;
+}
+
 var util = {
-    isDiffObject: isDiffObject,
+
     isInApp: /SLApp/.test(ua),
     ios: !!ios,
     ie: !!ie,
     android: isAndroid,
     osVersion: osVersion ? parseFloat(osVersion[0] + '.' + osVersion[1]) : 0,
-    isInWechat: /micromessenger/i.test(navigator.userAgent),
-    combinePath: function () {
+    isInWechat: /micromessenger/i.test(ua),
+    combinePath: function() {
         var args = [].slice.apply(arguments);
         var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^\:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
         var flag = true;
         while (flag) {
             flag = false;
-            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function (match, name) {
+            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function(match, name) {
                 if (name == '..') return match;
                 if (!flag) flag = true;
                 return '';
@@ -83,12 +109,15 @@ var util = {
         }
         return result.replace(/\/$/, '');
     },
-    guid: function () {
+    guid: function() {
         return ++guid;
     },
 
-    randomString: function (len) {
-        var chars = CHARS, uuid = '', rnd = 0, r;
+    randomString: function(len) {
+        var chars = CHARS,
+            uuid = '',
+            rnd = 0,
+            r;
         for (var i = 0; i < len; i++) {
             if (i == 8 || i == 13 || i == 18 || i == 23) {
                 uuid += '-';
@@ -104,26 +133,34 @@ var util = {
         return uuid;
     },
 
-    uuid: function () {
+    uuid: function() {
         return this.randomString(36);
     },
 
-    isFalse: function (value) {
+    isFalse: function(value) {
         return !value || ($.isArray(value) && !value.length) || (typeof value == 'object' && util.isEmptyObject(value));
     },
 
-    isTrue: function (value) {
+    isTrue: function(value) {
         return !this.isFalse(value);
     },
 
-    isEmptyObject: function (obj) {
+    isEmptyObject: function(obj) {
         for (var name in obj) {
             return false;
         }
         return true;
     },
 
-    keys: function (obj) {
+    isDiffObject: isDiffObject,
+
+    compareWith: compareWith,
+
+    equal: function(a, b) {
+        return !isDiffObject(a, b);
+    },
+
+    keys: function(obj) {
         if (nativeKeys) return nativeKeys(obj);
         var keys = [];
         for (var key in obj)
@@ -131,13 +168,13 @@ var util = {
         return keys;
     },
 
-    extend: function (proto) {
+    extend: function(proto) {
         var parent = this,
-            child = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function () {
+            child = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function() {
                 return parent.apply(this, arguments);
             };
 
-        var Surrogate = function () {
+        var Surrogate = function() {
             this.constructor = child;
         };
         Surrogate.prototype = parent.prototype;
@@ -154,7 +191,7 @@ var util = {
         return child;
     },
 
-    random: function (min, max) {
+    random: function(min, max) {
         if (max == null) {
             max = min;
             min = 0;
@@ -162,7 +199,7 @@ var util = {
         return min + Math.floor(Math.random() * (max - min + 1));
     },
 
-    log: function (msg) {
+    log: function(msg) {
         if (!this.$log) {
             this.$log = $('<div style="height:40px;position:fixed;top:0;left:0;right:0;z-index:100000;background:#fff;overflow-y:scroll;word-break:break-all;word-wrap:break-word;"></div>').appendTo('body');
         }
@@ -172,12 +209,12 @@ var util = {
         this.$log.html(msg + '<br>' + this.$log.html());
     },
 
-    groupBy: function (query, data) {
+    groupBy: function(query, data) {
         var results = [];
         var keys = [];
         var operations = [];
 
-        query.split(/\s*,\s*/).forEach(function (item) {
+        query.split(/\s*,\s*/).forEach(function(item) {
             var m = /(sum|avg)\(([^\)]+)\)/.exec(item);
 
             console.log(m);
@@ -193,7 +230,7 @@ var util = {
             }
         });
 
-        data.forEach(function (item) {
+        data.forEach(function(item) {
             var key = {};
             var group = false;
 
@@ -250,135 +287,162 @@ var util = {
         return results;
     },
 
-    indexOf: function (arr, key, val) {
-        if (typeof key === 'string' && val !== undefined) {
-            var compare = val;
-
-            val = function (item) {
-                return item[key] == compare;
-            }
-        }
-        else val = key;
-
-        var isFn = typeof val === 'function',
-            length = arr.length;
-
-        for (var i = 0; i < length; i++) {
-            if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;
-        }
-        return -1;
-    },
-
-    lastIndexOf: function (arr, key, val) {
-        if (typeof key === 'string' && val !== undefined) {
-            var compare = val;
-            val = function (item) {
-                return item[key] == compare;
-            }
-        }
-        else val = key;
-
-        var isFn = typeof val === 'function';
-        for (var i = arr.length - 1; i >= 0; i--) {
-            if (isFn ? val(arr[i], i) : (arr[i] == val)) return i;
-        }
-        return -1;
-    },
-
-    sum: function (arr, key) {
+    sum: function(arr, key) {
         var fn;
-
-        if (typeof key === 'string') {
-            fn = function (item) {
-                return item[key];
-            }
-        }
-        else fn = key;
-
         var result = 0;
 
-        for (var i = 0, n = arr.length; i < n; i++) {
-            result += fn(arr[i], i);
+        if (typeof key === 'string') {
+            for (var i = 0, n = arr.length; i < n; i++) {
+                result += arr[i][key];
+            }
+
+        } else {
+            for (var i = 0, n = arr.length; i < n; i++) {
+                result += key(arr[i], i);
+            }
         }
+
         return result;
     },
 
-    map: function (arr, key) {
-        var fn;
+    indexOf: function(arr, key, val) {
+        var length = arr.length;
+        var keyType = typeof key;
 
-        if (typeof key === 'string') {
-            fn = function (item) {
-                return item[key];
+        if (keyType === 'string' && arguments.length == 3) {
+            for (var i = 0; i < length; i++) {
+                if (arr[i][key] == val) return i;
+            }
+
+        } else if (keyType === 'function') {
+            for (var i = 0; i < length; i++) {
+                if (key(arr[i], i)) return i;
+            }
+
+        } else {
+            for (var i = 0; i < length; i++) {
+                if (compareWith(key, arr[i])) return i;
             }
         }
-        else fn = key;
 
-        var item;
+        return -1;
+    },
+
+    lastIndexOf: function(arr, key, val) {
+        var length = arr.length;
+        var keyType = typeof key;
+
+        if (keyType === 'string' && arguments.length == 3) {
+            for (var i = arr.length - 1; i >= 0; i--) {
+                if (arr[i][key] == val) return i;
+            }
+
+        } else if (keyType === 'function') {
+            for (var i = arr.length - 1; i >= 0; i--) {
+                if (key(arr[i], i)) return i;
+            }
+
+        } else {
+            for (var i = arr.length - 1; i >= 0; i--) {
+                if (compareWith(key, arr[i])) return i;
+            }
+        }
+
+        return -1;
+    },
+
+    map: function(arr, key) {
         var result = [];
 
-        for (var i = 0, len = arr.length; i < len; i++) {
-            item = arr[i];
+        if (typeof key === 'string') {
+            for (var i = 0, len = arr.length; i < len; i++) {
+                result.push(arr[i][key]);
+            }
 
-            result.push(fn(item, i));
+        } else {
+            for (var i = 0, len = arr.length; i < len; i++) {
+                result.push(key(arr[i], i));
+            }
         }
+
         return result;
     },
 
-    first: function (arr, key, val) {
-        var fn;
+    first: function(arr, key, val) {
 
-        if (typeof key === 'string') {
-            fn = function (item) {
-                return item[key] == val;
+        if (typeof key === 'string' && arguments.length == 3) {
+            for (var i = 0, len = arr.length; i < len; i++) {
+                if (arr[i][key] == val) return arr[i];
+            }
+        } else if (typeof key === 'function') {
+
+            for (var i = 0, len = arr.length; i < len; i++) {
+                if (key(arr[i], i)) return arr[i];
+            }
+        } else {
+            for (var i = 0, len = arr.length; i < len; i++) {
+                if (compareWith(key, arr[i])) return arr[i];
             }
         }
-        else fn = key;
 
-        var item;
-
-        for (var i = 0, len = arr.length; i < len; i++) {
-            item = arr[i];
-
-            if (fn(item, i)) return item;
-        }
         return null;
     },
 
-    find: function (arr, key, val, flag) {
-        var fn;
+    exclude: function(arr, key, val) {
+        var length = arr.length;
+        var keyType = typeof key;
+        var result = [];
 
-        if (typeof key === 'string') {
-            fn = function (item) {
-                return item[key] == val;
+        if (keyType === 'string' && arguments.length == 3) {
+            for (var i = 0; i < length; i++) {
+                if (arr[i][key] != val)
+                    result.push(arr[i]);
+            }
+
+        } else if (keyType === 'function') {
+            for (var i = 0; i < length; i++) {
+                if (!key(arr[i], i))
+                    result.push(arr[i]);
+            }
+
+        } else {
+            for (var i = 0; i < length; i++) {
+                if (!compareWith(key, arr[i]))
+                    result.push(arr[i]);
             }
         }
-        else fn = key, flag = val;
 
-        if (flag !== false) flag = true;
+        return result;
+    },
 
-        var result = [],
-            item;
+    find: function(arr, key, val) {
+        var length = arr.length;
+        var keyType = typeof key;
+        var result = [];
 
-        for (var i = 0, n = arr.length; i < n; i++) {
-            item = arr[i];
+        if (keyType === 'string' && arguments.length == 3) {
+            for (var i = 0; i < length; i++) {
+                if (arr[i][key] == val)
+                    result.push(arr[i]);
+            }
 
-            if (fn(item, i) == flag)
-                result.push(item);
+        } else if (keyType === 'function') {
+            for (var i = 0; i < length; i++) {
+                if (key(arr[i], i))
+                    result.push(arr[i]);
+            }
+
+        } else {
+            for (var i = 0; i < length; i++) {
+                if (compareWith(key, arr[i]))
+                    result.push(arr[i]);
+            }
         }
-        return result;
-    },
-
-    select: function (arr, fn) {
-        var result = [],
-            length = arr.length;
-
-        for (var i = 0; i < length; i++)
-            result.push(fn(arr[i], i));
 
         return result;
     },
 
-    pick: function (obj, iteratee) {
+    pick: function(obj, iteratee) {
         var result = {},
             key;
         if (obj == null) return result;
@@ -399,15 +463,15 @@ var util = {
 
     pad: pad,
 
-    formatMoney: function (number) {
-        return (number + '').replace(/(\d{3})+(\.|$)/, function (match, a) {
-            return match.replace(/\d{3}/g, function (a) {
+    formatMoney: function(number) {
+        return (number + '').replace(/(\d{3})+(\.|$)/, function(match, a) {
+            return match.replace(/\d{3}/g, function(a) {
                 return ',' + a
             })
         }).replace(/^,/, '');
     },
 
-    deepValue: function (data, names) {
+    deepValue: function(data, names) {
         if (typeof names === 'string')
             names = names.split('.');
 
@@ -418,14 +482,14 @@ var util = {
         return data;
     },
 
-    format: function (format, str) {
+    format: function(format, str) {
         var args = arguments;
-        return format.replace(/\{(\d+)\}/g, function (match, index) {
+        return format.replace(/\{(\d+)\}/g, function(match, index) {
             return args[parseInt(index) + 1];
         })
     },
 
-    timeLeft: function (timestamp) {
+    timeLeft: function(timestamp) {
         var days = Math.floor(timestamp / (1000 * 60 * 60 * 24));
         timestamp = timestamp % (1000 * 60 * 60 * 24);
 
@@ -438,22 +502,22 @@ var util = {
         var seconds = Math.floor(timestamp / 1000);
         timestamp = timestamp % (1000);
 
-        return (days == 0 ? '' : (days + '天 '))
-            + pad(hours) + ":"
-            + pad(minutes) + ":"
-            + pad(seconds)
+        return (days == 0 ? '' : (days + '天 ')) +
+            pad(hours) + ":" +
+            pad(minutes) + ":" +
+            pad(seconds)
     },
 
     //yyyy-MM-dd HH:mm:ss
-    parseDate: function (date) {
-        date = date.split(/\s+|\:|\-|年|月|日/).map(function (time) {
+    parseDate: function(date) {
+        date = date.split(/\s+|\:|\-|年|月|日/).map(function(time) {
             return parseInt(time);
         });
 
         return new Date(date[0], date[1] - 1, date[2], date[3], date[4], date[5]);
     },
 
-    formatDate: function (d, f) {
+    formatDate: function(d, f) {
         if (typeof d === "string" && /^\/Date\(\d+\)\/$/.test(d)) {
             d = new Function("return new " + d.replace(/\//g, ''))();
         } else if (typeof d === 'string' && !f) {
@@ -531,12 +595,12 @@ var util = {
             .replace(/m/, m)
             .replace(/s{2,}/, pad(s))
             .replace(/s/, s)
-            .replace(/f+/, function (w) {
+            .replace(/f+/, function(w) {
                 return mill.substr(0, w.length)
             });
     },
 
-    style: function (css) {
+    style: function(css) {
         var doc = document,
             head = doc.getElementsByTagName("head")[0],
             style = doc.createElement("style");
@@ -552,24 +616,24 @@ var util = {
         return style;
     },
 
-    currency: function (str, p) {
+    currency: function(str, p) {
         return (p === undefined || p === null ? '￥' : p) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
     },
 
-    template: function (str, data) {
+    template: function(str, data) {
         var tmpl = 'var __p=[];var $data=obj||{};with($data){__p.push(\'' +
             str.replace(/\\/g, '\\\\')
-                .replace(/'/g, '\\\'')
-                .replace(/<%=([\s\S]+?)%>/g, function (match, code) {
-                    return '\',' + code.replace(/\\'/, '\'') + ',\'';
-                })
-                .replace(/<%([\s\S]+?)%>/g, function (match, code) {
-                    return '\');' + code.replace(/\\'/, '\'')
-                        .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
-                })
-                .replace(/\r/g, '\\r')
-                .replace(/\n/g, '\\n')
-                .replace(/\t/g, '\\t') +
+            .replace(/'/g, '\\\'')
+            .replace(/<%=([\s\S]+?)%>/g, function(match, code) {
+                return '\',' + code.replace(/\\'/, '\'') + ',\'';
+            })
+            .replace(/<%([\s\S]+?)%>/g, function(match, code) {
+                return '\');' + code.replace(/\\'/, '\'')
+                    .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
+            })
+            .replace(/\r/g, '\\r')
+            .replace(/\n/g, '\\n')
+            .replace(/\t/g, '\\t') +
             '\');}return __p.join("");',
 
             func = new Function('obj', tmpl);
@@ -577,15 +641,15 @@ var util = {
         return data ? func(data) : func;
     },
 
-    encodeHTML: function (text) {
+    encodeHTML: function(text) {
         return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
     },
 
-    getPath: function (url) {
+    getPath: function(url) {
         return url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase();
     },
 
-    cookie: function (a, b, c, p) {
+    cookie: function(a, b, c, p) {
         if (typeof b === 'undefined') {
             var res = document.cookie.match(new RegExp("(^| )" + a + "=([^;]*)(;|$)"));
             if (res != null)
@@ -605,14 +669,14 @@ var util = {
             document.cookie = a + "=" + escape(b) + (c || "") + ";path=" + (p || '/')
         }
     },
-    store: window.localStorage ? function (key, value) {
+    store: typeof localStorage !== 'undefined' ? function(key, value) {
         if (typeof value === 'undefined')
             return JSON.parse(localStorage.getItem(key));
         if (value === null)
             localStorage.removeItem(key);
         else
             localStorage.setItem(key, JSON.stringify(value));
-    } : function () {
+    } : function() {
         if (typeof value === 'undefined')
             return JSON.parse(this.cookie(key));
         if (value === null)
@@ -620,19 +684,19 @@ var util = {
         else
             this.cookie(key, JSON.stringify(value));
     },
-    noop: function () { },
+    noop: function() {},
 
-    circlePoint: function (x0, y0, r, a) {
+    circlePoint: function(x0, y0, r, a) {
         return {
             x: x0 + r * Math.cos(a * Math.PI / 180),
             y: y0 + r * Math.sin(a * Math.PI / 180)
         };
     },
 
-    validateEmail: function (email) {
+    validateEmail: function(email) {
         return /^[-_a-zA-Z0-9\.]+@([-_a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,3}$/.test(email)
     },
-    validateMobile: function (str) {
+    validateMobile: function(str) {
         return /^1[0-9]{10}$/.test(str)
     }
 };

@@ -39,7 +39,7 @@
             sl.isDebug=@debug;
             sl.buildVersion=@(Date.now());
             
-            var app = new Navigation().mapRoute(@(JSON.stringify(routes))).start();
+            var app = new Navigation({ routes:@(JSON.stringify(routes)) }).start();
             
             var menu = new Menu({
                 data: [{

@@ -18,7 +18,7 @@
         <div class="pq_item__articles_item bd_tb bg_fff mb_l" sn-repeat="item in newArticles|orderBy:add_date desc" data-forward="/pubquan/article/{item.msg_id}">
             <p class="title fs_m h_m lh_m ta_e ml_m mr_m">{item.title}</p>
             <ul class="imgs clearfix">
-                <li class="img fl_l ml_m" sn-repeat="img in item.imgs"><img sn-src="{sl.resource(img)}" /></li>
+                <li class="img fl_l ml_m" sn-repeat="img in item.imgs"><img sn-src="{sl.thumbnail(img)}" /><img sn-src="{sl.thumbnail(img)}" /><img sn-src="{sl.thumbnail(img)}" /><img sn-src="{sl.thumbnail(img)}" /></li>
             </ul>
             <div class="flex lh_s fs_s pb_m pt_s">
                 <img sn-src="{sl.resource(quanInfo.quan_pic)}" class="dp_b cir_s ml_m" />

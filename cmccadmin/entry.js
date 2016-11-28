@@ -19,7 +19,10 @@ function startApp(routes, resourceMapping) {
 
     seajs.use(['$', 'core/navigation', 'common/menu', 'logical/auth'], function($, Navigation, Menu, auth) {
 
-        var app = new Navigation().mapRoute(routes).start();
+        var app = new Navigation({
+            routes: routes
+
+        }).start();
 
         var menu = new Menu({
             data: [{

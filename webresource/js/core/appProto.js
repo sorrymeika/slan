@@ -43,7 +43,7 @@
             }
         },
 
-        mapRoute: function (routes) {
+        mapRoutes: function (routes) {
             this.route = new Route(routes);
             return this;
         },

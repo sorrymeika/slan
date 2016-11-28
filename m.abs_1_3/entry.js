@@ -13,7 +13,7 @@ var Model = require('core/model2').Model;
 
 var ModelProto = Model.prototype;
 
-ModelProto.bindScrollTo = function (el, options) {
+ModelProto.bindScrollTo = function(el, options) {
     var sbr = Scroll.bind(el, options);
 
     if (!this._scrolls) {
@@ -25,12 +25,12 @@ ModelProto.bindScrollTo = function (el, options) {
     return sbr;
 }
 
-ModelProto.getScrollView = function (el) {
+ModelProto.getScrollView = function(el) {
     return this._scrolls.get(el);
 }
 
 var oldModelDestroy = ModelProto.destory;
-ModelProto.destory = function () {
+ModelProto.destory = function() {
     oldModelDestroy.call(this);
 
     if (this._scrolls) this._scrolls.destory();
@@ -41,7 +41,7 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
     $.extend(routes, remoteRoutes || {});
 
-    seajs.on('fetch', function (emitData) {
+    seajs.on('fetch', function(emitData) {
 
         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
@@ -60,18 +60,20 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
             }
         }
     });
-    seajs.on("error", function (errorData) {
+    seajs.on("error", function(errorData) {
         errorData.pause = true;
 
         console.log("can not fetch:", errorData.uri);
 
-        Offline.getInstance().show(function () {
+        Offline.getInstance().show(function() {
             this.hide();
             seajs.request(errorData.uri, errorData.callback);
         });
     });
 
-    new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
+    new App({
+        routes: routes
+    }).start(sl.isInApp ? 2000 : 0);
 }
 
 function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {
@@ -87,11 +89,11 @@ function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {
         timeout: 5000,
         checkData: false,
         $el: $('body'),
-        error: function () {
+        error: function() {
             Offline.getInstance().show(loadResourceMapping);
             console.log("cantload:" + remoteUrl);
         },
-        success: function (res) {
+        success: function(res) {
             Offline.getInstance().hide();
 
             startApp(routes, resourceMapping, res.routes, res.data);

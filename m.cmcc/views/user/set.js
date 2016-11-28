@@ -177,7 +177,7 @@ module.exports = Activity.extend({
                     result = userLogical.set("gender", this.get('gender'));
                     break;
                 case 'hometown':
-                    if (!this.get('home_city_id')) {
+                    if (!this.get('city_id')) {
                         Toast.showToast('未做修改');
                         return;
                     }

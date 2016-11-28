@@ -108,7 +108,9 @@
                         });
                     });
 
-                    new App().mapRoute(routes).start(sl.isInApp?2000:0);
+                    new App({
+                        routes:routes
+                    }).start(sl.isInApp?2000:0);
 
                 }
             });

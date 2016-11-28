@@ -231,7 +231,7 @@ module.exports = Activity.extend({
                 }
             }
 
-            var ids = util.map(util.filter(shakeResult, 'user_id', undefined, false), 'user_id');
+            var ids = util.map(util.exclude(shakeResult, 'user_id', undefined), 'user_id');
 
             return ym.getUsersYunmi(ids.join(',')).then(function(res) {
 

@@ -15,7 +15,7 @@ var Model = vm.Model;
 
 var ModelProto = Model.prototype;
 
-ModelProto.bindScrollTo = function (el, options) {
+ModelProto.bindScrollTo = function(el, options) {
     var sbr = Scroll.bind(el, options);
 
     if (!this._scrolls) {
@@ -27,18 +27,18 @@ ModelProto.bindScrollTo = function (el, options) {
     return sbr;
 }
 
-ModelProto.getScrollView = function (el) {
+ModelProto.getScrollView = function(el) {
     return this._scrolls.get(el);
 }
 
 var oldModelDestroy = ModelProto.destory;
-ModelProto.destory = function () {
+ModelProto.destory = function() {
     oldModelDestroy.call(this);
 
     if (this._scrolls) this._scrolls.destory();
 }
 
-util.cnNum = function (num) {
+util.cnNum = function(num) {
     if (num > 10000) {
         num = (num + '');
         return num.substr(0, num.length - 4) + "万";
@@ -55,7 +55,7 @@ util.cnNum = function (num) {
 bridge.cmcc = {
 
     //@bizType="register"|"resetPwd"|"smsLogin"
-    sendSms: function (phoneNo, bizType) {
+    sendSms: function(phoneNo, bizType) {
         if (!bizType) throw new Error('require bizType!!');
 
         bridge.exec('cmcc', {
@@ -65,7 +65,7 @@ bridge.cmcc = {
         });
     },
 
-    registerUser: function (phoneNo, password, validCode, callback) {
+    registerUser: function(phoneNo, password, validCode, callback) {
 
         bridge.exec('cmcc', {
             type: 'registerUser',
@@ -78,7 +78,7 @@ bridge.cmcc = {
     },
 
     //@loginType="sms"|"password"
-    login: function (phoneNo, password, loginType, callback) {
+    login: function(phoneNo, password, loginType, callback) {
 
         bridge.exec('cmcc', {
             type: 'login',
@@ -94,7 +94,7 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
     Object.assign(routes, remoteRoutes || {});
 
-    seajs.on('fetch', function (emitData) {
+    seajs.on('fetch', function(emitData) {
 
         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
@@ -111,19 +111,22 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
             }
         }
     });
-    seajs.on("error", function (errorData) {
+    seajs.on("error", function(errorData) {
         errorData.pause = true;
 
         console.log("can not fetch:", errorData.uri);
 
-        Offline.getInstance().show(function () {
+        Offline.getInstance().show(function() {
             this.hide();
             seajs.request(errorData.uri, errorData.callback);
         });
     });
 
-    seajs.use(['logical/auth'], function (auth) {
-        window.Application = new App().mapRoute(routes).start(sl.isInApp ? 2000 : 0);
+    seajs.use(['logical/auth'], function(auth) {
+        window.Application = new App({
+            routes: routes
+
+        }).start(sl.isInApp ? 2000 : 0);
     });
 }
 
@@ -140,11 +143,11 @@ function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {
         timeout: 5000,
         checkData: false,
         $el: $('body'),
-        error: function () {
+        error: function() {
             Offline.getInstance().show(loadResourceMapping);
             console.log("cantload:" + remoteUrl);
         },
-        success: function (res) {
+        success: function(res) {
             Offline.getInstance().hide();
 
             startApp(routes, resourceMapping, res.routes, res.data);
