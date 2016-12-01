@@ -12,7 +12,6 @@ var bridge = require('bridge');
 var auth = require('logical/auth');
 var Http = require('core/http');
 
-
 module.exports = Activity.extend({
 
     onCreate: function() {
@@ -27,6 +26,10 @@ module.exports = Activity.extend({
         }
 
         model.login = function() {
+            if (!this.get('agree')) {
+                Toast.showToast('请先同意《八闽生活用户使用协议》！');
+                return;
+            }
             var phoneNo = this.data.phoneNo;
             var password = this.data.password;
 

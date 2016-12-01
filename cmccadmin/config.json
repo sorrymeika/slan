@@ -32,6 +32,14 @@
         "/quan_msgs/index": "quan_msgs/index",
         "/login_history/index/{user_id:\\d+}": "/login_history/index",
         "/user_yunmi/index": "/user_yunmi/index",
-        "/user_yunmi/add": "/user_yunmi/add"
+        "/user_yunmi/add": "/user_yunmi/add",
+
+        "/business/index": "/business/business",
+        "/business/update/{id:\\d+}": "/business/update_business",
+        "/business/add": "/business/add_business",
+
+
+        "/notification/index": "/notification/notification",
+        "/notification/add": "/notification/add_notification"
     }
 }

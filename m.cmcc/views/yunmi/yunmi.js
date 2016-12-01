@@ -104,11 +104,21 @@ module.exports = Activity.extend({
             });
         }
 
+        model.hideTimeout = function() {
+            $(model.refs.timeout).hide();
+            $(model.refs.timeoutMask).hide();
+        }
         model.receiveYunmi = function() {
             var data = this.get('current');
 
             if (!data) {
-                Toast.showToast('还未到领取时间哦!');
+                if (this.get('next')) {
+                    $(model.refs.timeout).show();
+                    $(model.refs.timeoutMask).show();
+
+                } else {
+                    Toast.showToast('暂无云米可以领取！');
+                }
                 return;
             }
 
@@ -152,6 +162,7 @@ module.exports = Activity.extend({
     },
 
     onDestory: function() {
+        this.timer && clearInterval(this.timer);
         this.model.destroy();
         $(window).off('motion', this.motion);
         bridge.motion.stop();
@@ -214,6 +225,8 @@ module.exports = Activity.extend({
         var loader = this.loader;
         var model = this.model;
 
+        if (loader.isLoading) return;
+
         loader.showLoading();
 
         contact.getCombinedContacts().then(function(res) {
@@ -232,6 +245,13 @@ module.exports = Activity.extend({
             }
 
             var ids = util.map(util.exclude(shakeResult, 'user_id', undefined), 'user_id');
+
+            if (!ids.length) {
+                model.set({
+                    shakeResult: shakeResult
+                });
+                return;
+            }
 
             return ym.getUsersYunmi(ids.join(',')).then(function(res) {
 

@@ -13,8 +13,8 @@ define(function(require, exports, module) {
 
     window.hybridFunctions = hybridFunctions;
 
-    window.trigger = function() {
-        $.fn.trigger.apply($win, arguments);
+    window.trigger = function(e, data) {
+        $win.trigger(e.type, e);
     };
 
     window.callJS = function(data) {
@@ -33,8 +33,14 @@ define(function(require, exports, module) {
             tip: function(msg) {
                 hybrid('tip', msg + "");
             },
-            openInApp: function(url) {
-                hybrid('openInApp', url + '');
+            openInApp: function(title, url) {
+
+                hybrid('openInApp', url == undefined ? {
+                    url: url
+                } : {
+                    title: title,
+                    url: url
+                });
             },
             open: function(url) {
                 hybrid('open', url + '');
@@ -304,6 +310,10 @@ define(function(require, exports, module) {
                             break;
                     }
                     break;
+                case 'getDeviceToken':
+                    cb('46e68c4b71854f9943edaac95a9d1552a3352c91');
+                    break;
+
                 case "contact":
                     switch (data.params.type) {
                         case "getContacts":
@@ -318,6 +328,9 @@ define(function(require, exports, module) {
                                 }, {
                                     phoneNumber: '13900914293',
                                     contactName: 'asdf2'
+                                }, {
+                                    phoneNumber: '112-13900914293',
+                                    contactName: 'asdaaf2'
                                 }]
                             });
                             break;

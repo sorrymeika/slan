@@ -359,6 +359,18 @@ var util = {
                 result.push(arr[i][key]);
             }
 
+        } else if (Array.isArray(key)) {
+            var item;
+            var k;
+            for (var i = 0, len = arr.length; i < len; i++) {
+                item = {};
+                for (var j = key.length - 1; j >= 0; j--) {
+                    k = key[j];
+                    if (k in arr[i]) item[k] = arr[i][k];
+                }
+                result.push(item);
+            }
+
         } else {
             for (var i = 0, len = arr.length; i < len; i++) {
                 result.push(key(arr[i], i));
@@ -371,6 +383,7 @@ var util = {
     first: function(arr, key, val) {
 
         if (typeof key === 'string' && arguments.length == 3) {
+
             for (var i = 0, len = arr.length; i < len; i++) {
                 if (arr[i][key] == val) return arr[i];
             }

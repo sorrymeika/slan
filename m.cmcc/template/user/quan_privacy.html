@@ -1,0 +1,14 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main" ref="main">
+    <ul class="of_h">
+        <li class="fl_l ml_m mt_m ps_r" sn-repeat="item in data">
+            <img onerror="this.src='images/default.jpg'" class="sqr_l dp_b" sn-src="sl.thumbnail(item.avatars)" />
+            <p class="name ta_c to_e fs_m">{item.user_name}</p>
+            <div class="del_icon" sn-tap="this.del(item)"></div>
+        </li>
+        <li class="sqr_l bd_ddd icon-add2 fl_l flex jc_c br_4 ml_m mt_m" sn-tap="this.selectUser()"></li>
+    </ul>
+</div>

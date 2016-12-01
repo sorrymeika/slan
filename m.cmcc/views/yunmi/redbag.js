@@ -56,6 +56,9 @@ module.exports = Activity.extend({
             } else if (!/^\d+$/.test(qty)) {
                 Toast.showToast("请填写正确的云米数量");
                 return;
+            } else if (parseInt(qty) > 100) {
+                Toast.showToast("红包数量上限100个");
+                return;
             }
 
             if (!friends.length) {

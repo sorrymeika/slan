@@ -1009,6 +1009,7 @@
                         if (e.isImmediatePropagationStopped()) return
                         e.data = data
                         var result = callback.apply(element, e._args == undefined ? [e] : [e].concat(e._args))
+                        e.executeCount = (e.executeCount||0) + 1;
                         if (result === false) e.preventDefault(), e.stopPropagation()
                         return result
                     }
@@ -1518,7 +1519,7 @@
                     xhr.abort()
                     ajaxError(null, 'timeout', xhr, settings, deferred)
                 }, settings.timeout)
-
+                
                 // avoid sending empty string (#319)
                 xhr.send(settings.data ? settings.data : null)
                 return xhr

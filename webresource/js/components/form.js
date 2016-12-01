@@ -53,7 +53,7 @@ var form = new FormComponent({
 form.$el.appendTo(this.$el);
 */
 
-var FormComponent = function (options) {
+var FormComponent = function(options) {
 
     var self = this;
     var fields;
@@ -111,7 +111,7 @@ var FormComponent = function (options) {
                         fieldOptions.data = [sd];
                     }
 
-                    field.options = fieldOptions.data.map(function (item) {
+                    field.options = fieldOptions.data.map(function(item) {
                         return {
                             text: item[fieldOptions.text],
                             value: item[fieldOptions.value]
@@ -140,12 +140,12 @@ var FormComponent = function (options) {
     });
 
     if (selectsOptions.length)
-        model.on('datachanged', function (e) {
-            selectsOptions.forEach(function (selectOptions) {
+        model.on('datachanged', function(e) {
+            selectsOptions.forEach(function(selectOptions) {
                 var params = {};
                 var willReturn = false;
 
-                selectOptions.params && Object.keys(selectOptions.params).forEach(function (key) {
+                selectOptions.params && Object.keys(selectOptions.params).forEach(function(key) {
                     var field = selectOptions.params[key];
                     var value = model.get("data." + field);
                     params[key] = value;
@@ -161,10 +161,10 @@ var FormComponent = function (options) {
                 if (selectOptions.paramsId == paramsId) return;
                 selectOptions.paramsId = paramsId;
 
-                Http.post(selectOptions.url, params).then(function (res) {
+                Http.post(selectOptions.url, params).then(function(res) {
                     console.log(model.getModel('fields.' + selectOptions.field + ".options"))
 
-                    model.set('fields.' + selectOptions.field + ".options", selectOptions.data.concat(res.data).map(function (item) {
+                    model.set('fields.' + selectOptions.field + ".options", selectOptions.data.concat(res.data).map(function(item) {
                         return {
                             text: item[selectOptions.text],
                             value: item[selectOptions.value]
@@ -188,7 +188,7 @@ var FormComponent = function (options) {
     this.valid = new Validator(validator, model.data.data);
 
     this.$el.on('blur', '[name]', $.proxy(this._validInput, this))
-        .on('focus', '[name]', function (e) {
+        .on('focus', '[name]', function(e) {
             var $target = $(e.currentTarget);
             var name = $target.attr('name');
             var valid = validator[name];
@@ -204,16 +204,16 @@ var FormComponent = function (options) {
         var plugin = this.plugins[i];
         var $hidden = this.$el.find('[name="' + plugin.field + '"]');
 
-        var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $hidden, plugin) : new (FormComponent.require(plugin.type))($hidden, plugin);
+        var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $hidden, plugin) : new(FormComponent.require(plugin.type))($hidden, plugin);
 
         var value = model.data.data[plugin.field];
 
         if (value !== undefined && value !== null)
             compo.val(value);
 
-        model.on('change:data.' + plugin.field, (function (compo, plugin) {
+        model.on('change:data.' + plugin.field, (function(compo, plugin) {
 
-            return function (e, value) {
+            return function(e, value) {
 
                 compo.val(value);
             }
@@ -230,22 +230,22 @@ FormComponent.prototype = {
 
     useIFrame: false,
 
-    set: function (arg0, arg1, arg2) {
+    set: function(arg0, arg1, arg2) {
 
         this.model.getModel('data').set(arg0, arg1, arg2);
 
         return this;
     },
 
-    get: function (key) {
+    get: function(key) {
         return this.model.getModel('data').get(key);
     },
 
-    data: function () {
+    data: function() {
         return $.extend({}, this.model.data.data);
     },
 
-    reset: function () {
+    reset: function() {
         for (var key in this.compo) {
             this.compo[key].val('');
         }
@@ -254,10 +254,10 @@ FormComponent.prototype = {
         return this;
     },
 
-    submit: function (success, error) {
+    submit: function(success, error) {
         var self = this;
 
-        this.$el.find('select').each(function () {
+        this.$el.find('select').each(function() {
             if (this.selectedIndex == -1) {
                 this.selectedIndex = 0;
             }
@@ -274,7 +274,7 @@ FormComponent.prototype = {
                 var resultText;
                 var $iframe = $('<iframe style="top:-999px;left:-999px;position:absolute;display:none;" frameborder="0" width="0" height="0" name="' + target + '"></iframe>')
                     .appendTo(document.body)
-                    .on('load', function () {
+                    .on('load', function() {
                         var result = this.contentWindow.document.body.innerHTML;
                         var match = /\<[^\>]+\>\s*\{/m.exec(result);
                         if (match && match[0].length) {
@@ -288,7 +288,12 @@ FormComponent.prototype = {
                         if (!resultText || result != resultText) {
                             resultText = result;
                             try {
-                                success.call(self, JSON.parse(resultText));
+                                var res = JSON.parse(resultText);
+                                if (res.success)
+                                    success.call(self, res);
+                                else
+                                    error && error.call(self, res, resultText);
+
                             } catch (e) {
                                 error && error.call(self, e, resultText);
                             }
@@ -305,7 +310,7 @@ FormComponent.prototype = {
                     xhrFields: this.xhrFields,
                     contentType: this.contentType ? this.contentType : undefined,
                     data: this.contentType == "application/json" ? JSON.stringify(this.model.data.data) : this.$el.serialize(),
-                    success: function (res) {
+                    success: function(res) {
                         if (res.success) {
                             success.call(self, res);
                         } else {
@@ -320,49 +325,51 @@ FormComponent.prototype = {
         }
     },
 
-    validate: function () {
+    validate: function() {
         var res = this.valid.validate();
         this.model.set(res);
 
         return res;
     },
 
-    _validInput: function (e) {
+    _validInput: function(e) {
         var $target = $(e.currentTarget);
         var name = $target.attr('name');
         var res = this.valid.validate(name);
 
-        if (!this.model.data.result) this.model.set({ result: {} });
+        if (!this.model.data.result) this.model.set({
+            result: {}
+        });
 
         this.model.set('result.' + name, res);
     },
 
-    destory: function () {
+    destory: function() {
         this.$el.on('off', '[name]', this._validInput);
     }
 };
 
 var plugins = {};
-FormComponent.define = function (id, Func) {
+FormComponent.define = function(id, Func) {
     plugins[id.toLowerCase()] = Func;
 };
 
-FormComponent.require = function (id) {
+FormComponent.require = function(id) {
     return plugins[id.toLowerCase()];
 };
 
-var RichTextBox = function ($input, options) {
+var RichTextBox = function($input, options) {
     var self = this;
     self.$input = $input;
     self.id = 'UMEditor' + (RichTextBox.guid++);
 
     window.UMEDITOR_HOME_URL = seajs.resolve('components/umeditor/');
 
-    self.async = new Async(function (done) {
+    self.async = new Async(function(done) {
         window.jQuery ? done(window.jQuery) : seajs.use(['components/umeditor/third-party/jquery.min'], done);
 
-    }).then(function (res, err, done) {
-        seajs.use(['components/umeditor/umeditor.config', 'components/umeditor/umeditor', 'components/umeditor/themes/default/css/umeditor.css'], function (a) {
+    }).then(function(res, err, done) {
+        seajs.use(['components/umeditor/umeditor.config', 'components/umeditor/umeditor', 'components/umeditor/themes/default/css/umeditor.css'], function(a) {
             var editorOptions = {};
             if (options.toolbar) editorOptions.toolbar = options.toolbar;
             else if (options.simple) editorOptions.toolbar = ['source | undo redo | bold italic underline strikethrough | removeformat | justifyleft justifycenter justifyright justifyjustify | link unlink | image'];
@@ -375,7 +382,7 @@ var RichTextBox = function ($input, options) {
 
             var editor = UM.getEditor(self.id, editorOptions);
 
-            editor.addListener('blur', function () {
+            editor.addListener('blur', function() {
                 var content = editor.getContent();
                 var original = $input[0].value;
 
@@ -385,7 +392,7 @@ var RichTextBox = function ($input, options) {
             });
 
             self.editor = editor;
-            editor.ready(function () {
+            editor.ready(function() {
                 done();
             });
         });
@@ -395,9 +402,9 @@ var RichTextBox = function ($input, options) {
 };
 
 RichTextBox.prototype = {
-    val: function (val) {
+    val: function(val) {
         var self = this;
-        self.async.await(function () {
+        self.async.await(function() {
 
             self.editor.setContent(val, false);
         });
@@ -410,20 +417,20 @@ RichTextBox.guid = 0;
 FormComponent.define('RichTextBox', RichTextBox);
 FormComponent.define('TimePicker', TimePicker);
 
-var CheckBoxList = function ($input, options) {
+var CheckBoxList = function($input, options) {
     var self = this;
     self.$input = $input;
     self.options = options;
 
-    options.options.forEach(function (item) {
+    options.options.forEach(function(item) {
         $('<input pname="' + options.field + '" type="checkbox" value="' + item.value + '" /><span style="margin-right: 10px">' + item.text + '</span>').insertBefore($input);
     })
 
     self.$checkBoxList = self.$input.siblings('[pname="' + self.options.field + '"]');
 
-    self.$checkBoxList.on('click', function () {
+    self.$checkBoxList.on('click', function() {
         var res = [];
-        self.$checkBoxList.each(function () {
+        self.$checkBoxList.each(function() {
             if (this.checked) {
                 res.push(this.value);
             }
@@ -437,16 +444,16 @@ var CheckBoxList = function ($input, options) {
     });
 }
 CheckBoxList.prototype = {
-    val: function (val) {
+    val: function(val) {
         var self = this;
 
-        self.$input.siblings('[pname="' + self.options.field + '"]').removeAttr('checked').each(function () {
+        self.$input.siblings('[pname="' + self.options.field + '"]').removeAttr('checked').each(function() {
             this.checked = false;
 
-        }).filter((val || 'null').split('|').map(function (item) {
+        }).filter((val || 'null').split('|').map(function(item) {
             return '[value="' + item + '"]';
 
-        }).join(',')).attr('checked', 'checked').each(function () {
+        }).join(',')).attr('checked', 'checked').each(function() {
             this.checked = true;
         });
 
@@ -457,4 +464,3 @@ CheckBoxList.prototype = {
 FormComponent.define('CheckBoxList', CheckBoxList);
 
 module.exports = FormComponent;
-

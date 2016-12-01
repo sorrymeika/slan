@@ -42,7 +42,6 @@ comment on column cmcc_admin.role is '权限:{ 0: 废弃, 1: 普通管理员, 2:
 -- select * from user_col_comments where table_name='CMCC_ADMIN';
 
 
-
 create table account (
 user_id number(11) primary key,--用户ID
 account varchar(20) not null,--用户账号 --search=true
@@ -50,6 +49,7 @@ password varchar(32) not null,--用户密码
 register_date DATE--注册时间 --search=true
 ) tablespace cmccuser;
 
+create sequence user_seq minvalue 1 maxvalue 99999999999 start with 1000 increment by 1 cache 100;
 
 drop table userinfo;
 create table userinfo (--用户 --props=String account,int status,int country_id,String country_name,String province_name,int province_id,String city_name,int home_country_id,String home_country_name,String home_province_name,int home_province_id,String home_city_name --children=friends_ext
@@ -67,7 +67,7 @@ email varchar(100),--email --emptyAble=true
 constellation number(2)--星座 --emptyAble=true
 ) tablespace cmccuser;
 
-create sequence user_seq minvalue 1 maxvalue 99999999999 start with 1000 increment by 1 cache 100;
+
 
 create table login_history (
 login_id number(12) primary key,
@@ -343,9 +343,6 @@ create table yunmi_redbag_detail (--手气红包领取记录
 create sequence yunmi_redbag_detail_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
------------------------------
---<<2016-11-22 up to date here
------------------------------
 
 create table user_hdh (--和多号
     hdh_id number(12) primary key,--副号ID
@@ -353,7 +350,7 @@ create table user_hdh (--和多号
     subphone varchar(11),--副号
     alias varchar(20),--备注
     type number(1),--类型 --options=1:虚拟副号码,2:实体副号码
-    order number(2),--排序序号
+    sort number(2),--排序序号
     business_state number(1),--副号码业务状态 --options=1:正常,2:预开户,3:申请中,4:取消中
     state number(2),--副号码功能状态 --options=1:逻辑开机,2:逻辑关机和取消托管,3:限制语音呼入,4:限制短、彩信接收,5:限制语音呼入和短、彩信接收
     incoming_state number(1),--来电提醒开关 --options=1:关闭,2:打开
@@ -366,9 +363,53 @@ create sequence user_hdh_seq minvalue 1 maxvalue 999999999999 start with 1 incre
 create sequence hdh_nc_seq minvalue 1 maxvalue 999999999999 start with 240 increment by 1;
 
 
+-----------------------------
+-----------------------------
+
+create table quan_black (--圈子黑名单 --props=String user_name,String avatars
+    black_id number(12) primary key,--黑名单ID
+    user_id number(12),--用户ID
+    friend_id number(12),--黑名单用户ID
+    type number(2)--类型 --options=1:我不看他,2:不准他看我 --formType=select
+) tablespace cmccuser;
+create sequence quan_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+create table business (--第三方业务
+    business_id number(10) primary key,--业务ID
+    business_name varchar(200),--业务名称
+    business_pic varchar(200),--业务图片 --type=file
+    secret_key varchar(32),--业务密码
+    type number(2),--业务类型 --options=1:移动业务,2:生活,3:娱乐,4:社交 --search=true --formType=select
+    linkurl varchar(200)--跳转链接
+) tablespace cmccuser;
+create sequence business_seq minvalue 1 maxvalue 9999999999 start with 100001 increment by 1;
+
+insert into business (business_id,business_name,secret_key,type) values (100001,'移动官微','4411d2e0eddc54cb19ef568443257efb',1);
+
+create table notification (--消息提醒
+    notify_id number(12) primary key,--自增ID
+    title varchar(140),--提醒标题
+    order_id varchar(20),--关联流水id
+    content varchar(200),--提醒内容
+    linkurl varchar(400),--跳转链接
+    user_id number(12),--用户ID
+    image varchar(200),--图片
+    type number(2),--类型
+    business_id number(10),--业务编号 --formType=select --options={ url: '/business/getAll', text: 'business_name', value: 'business_id' }
+    feature varchar(4000),--扩展字段
+    send_date date--发送日期 --search=true
+) tablespace cmccuser;
+create sequence notification_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+-----------------------------
+--<<2016-11-22 up to date here
+-----------------------------
 
 -----------------------------
 -----------------------------
+
 
 
 create table user_open_history (--用户打开app历史记录
@@ -383,13 +424,6 @@ create table user_open_history (--用户打开app历史记录
 create sequence user_open_history_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
-create table quan_black (--圈子黑名单
-    black_id number(12) primary key,--黑名单ID
-    user_id number(12),--用户ID
-    friend_id number(12),--黑名单用户ID
-    type number(2)--类型 --options=1:我不看他,2:不准他看我 --formType=select
-) tablespace cmccuser;
-create sequence quan_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
 create table call_black (--拨号黑名单
@@ -401,28 +435,6 @@ create sequence call_black_seq minvalue 1 maxvalue 999999999999 start with 1 inc
 
 
 
-create table business (--业务
-    business_id number(10) primary key,--业务ID
-    business_name varchar(200),--业务名称
-    business_pic varchar(200),--业务图片 --type=file
-    type number(2),--业务类型 --options=1:移动业务,2:生活
-    linkurl varchar(200)--跳转链接
-) tablespace cmccuser;
-create sequence business_seq minvalue 1 maxvalue 9999999999 start with 1 increment by 1;
-
-
-create table notification (--消息提醒
-    notify_id number(12) primary key,--自增ID
-    summary varchar(200),--提醒摘要
-    linkurl varchar(200),--跳转链接
-    user_id number(12),--用户ID
-    image varchar(200),--图片
-    type number(2),--类型 --options=1:后台发送,2:系统自动发送 --formType=select
-    business_id number(10),--业务编号
-    feature varchar(2000),--扩展字段
-    send_date date--发送日期
-) tablespace cmccuser;
-create sequence notification_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
 create table notification_status (--消息提醒状态

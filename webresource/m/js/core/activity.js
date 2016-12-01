@@ -254,7 +254,6 @@ var Activity = Component.extend({
             application.activeInput = null;
         }
         application.mask.show();
-        self.$el.removeClass('active');
     },
 
     _enterAnimationEnd: function () {

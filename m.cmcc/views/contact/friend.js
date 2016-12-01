@@ -41,6 +41,18 @@ module.exports = Activity.extend({
             });
         }
 
+        model.clearHistory = function() {
+
+            popup.confirm({
+                title: '温馨提示',
+                content: '确定删除与该好友的聊天记录？',
+                confirmText: '删除',
+                confirmAction: function() {
+                    this.hide();
+                }
+            });
+        }
+
         model.toMemo = function() {
             self.forward('/contact/memo/' + personId, {
                 memo: this.get('ext.memo')

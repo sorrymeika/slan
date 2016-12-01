@@ -75,6 +75,14 @@ var User = {
         });
     },
 
+    updateDeviceToken: function(deviceToken) {
+
+        return Http.post('/user/updateDeviceToken', {
+            device_token: deviceToken,
+            device_type: util.ios ? 1 : 2
+        });
+    },
+
     getMessages: function(type) {
         if (sl.isDev)
             return Promise.resolve({

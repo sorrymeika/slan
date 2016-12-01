@@ -30,14 +30,14 @@ function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
     exitFrom.zIndex = isForward ? anim.openExitZIndex : anim.closeExitZIndex;
 
     return [{
-        el: activity.$el,
-        start: enterFrom,
-        css: anim[type + 'EnterAnimationTo'],
-        ease: ease
-    }, {
         el: currentActivity.$el,
         start: exitFrom,
         css: anim[type + 'ExitAnimationTo'],
+        ease: ease
+    }, {
+        el: activity.$el,
+        start: enterFrom,
+        css: anim[type + 'EnterAnimationTo'],
         ease: ease
     }];
 }
@@ -195,7 +195,7 @@ var Application = Component.extend(Object.assign(appProto, {
             var target = $(e.currentTarget);
             var href = target.attr('href');
 
-            if (!/^(http\:|https\:|javascript\:|mailto\:|tel\:)/.test(href)) {
+            if (!/^(http\:|https\:|javascript\:|mailto\:|tel\:|[a-zA-Z0-9]+\:\/\/)/.test(href)) {
                 if (e.type == 'tap') {
                     if (!/^#/.test(href)) href = '#' + href;
 
@@ -204,6 +204,9 @@ var Application = Component.extend(Object.assign(appProto, {
 
             } else if (sl.isInApp && href.indexOf('http') == 0) {
                 bridge.openInApp(href);
+
+            } else if (sl.isInApp && !/^(javascript\:|mailto\:|tel\:)/.test(href)) {
+                bridge.open(href);
 
             } else {
                 target.addClass('js-link-default');
@@ -216,7 +219,6 @@ var Application = Component.extend(Object.assign(appProto, {
             this.back($(e.currentTarget).attr('data-back'));
         },
         'tap [data-forward]': function(e) {
-
             this.forward($(e.currentTarget).attr('data-forward'));
         },
         'focus input': function(e) {
@@ -262,6 +264,10 @@ var Application = Component.extend(Object.assign(appProto, {
             } else {
                 that.back(that._currentActivity.referrer || '/');
             }
+
+        }).on('urlchange', function(e, data) {
+
+            that.forward(data.url);
         });
 
         if (options.routes) {
@@ -427,6 +433,8 @@ var Application = Component.extend(Object.assign(appProto, {
                     queueDone();
                 };
 
+                console.log(anims, duration);
+
                 for (var i = 0, n = anims.length; i < n; i++) {
                     anim = anims[i];
 
@@ -441,6 +449,8 @@ var Application = Component.extend(Object.assign(appProto, {
                             .animate(animation.transform(anim.css).css, duration, ease, finish);
                     }
                 }
+                currentActivity.$el.addClass('active');
+
                 if (!duration) {
                     finish();
                 }

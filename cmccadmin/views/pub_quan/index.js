@@ -26,6 +26,7 @@ module.exports = Page.extend({
         var model = this.model = new Model(this.$el, {
             title: '公众圈管理'
         });
+
         var grid = this.grid = new Grid({
             pageEnabled: true,
             search: {

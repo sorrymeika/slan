@@ -16,7 +16,10 @@
     <div class="pq_item__articles">
         <div class="hd">最新帖子</div>
         <div class="pq_item__articles_item bd_tb bg_fff mb_l" sn-repeat="item in newArticles|orderBy:add_date desc" data-forward="/pubquan/article/{item.msg_id}">
-            <p class="title fs_m h_m lh_m ta_e ml_m mr_m">{item.title}</p>
+            <div class="title fs_m h_m lh_m ml_m mr_m flex">
+                <p class="to_e flex_0">{item.title}</p>
+                <p class="date pl_m fs_s">{util.formatDate(item.add_date,'short')}</p>
+            </div>
             <ul class="imgs clearfix">
                 <li class="img fl_l ml_m" sn-repeat="img in item.imgs"><img sn-src="{sl.thumbnail(img)}" /><img sn-src="{sl.thumbnail(img)}" /><img sn-src="{sl.thumbnail(img)}" /><img sn-src="{sl.thumbnail(img)}" /></li>
             </ul>
@@ -24,8 +27,8 @@
                 <img sn-src="{sl.resource(quanInfo.quan_pic)}" class="dp_b cir_s ml_m" />
                 <p class="ml_s">{quanInfo.quan_name}</p>
                 <p class="flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.see)}看过</span></p>
-                <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.like)}</span></p>
-                <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.comment)}</span></p>
+                <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.likes)}</span></p>
+                <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.comments)}</span></p>
             </div>
         </div>
     </div>

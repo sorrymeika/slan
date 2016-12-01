@@ -2,10 +2,7 @@
 
 //登录注册
 .uc_login.main { top: 0px; }
-.uc_login__bg { border-top: 44px solid $color; }
-.has_status_bar .uc_login__bg { border-top: 64px solid $color; }
-.uc_login__bg:before { content: ''; display: block; background: url(../images/login_bg.png) no-repeat; height: 1.54rem; background-size: 100% auto; }
-
+.uc_login__bg:before { content: ''; display: block; background: url(../images/login_bg.png) no-repeat; height: 2.14rem; background-size: 100% auto; }
 
 .uc_login__form { background-color: #fff; }
 .uc_login__form li { height: 40px; }
@@ -22,26 +19,31 @@
 .ym_rules { max-height: 300px; overflow: scroll; -webkit-overflow-scrolling: touch; }
 .ym_rules__popup { width: 256px; }
 
-.hm_idx.main { bottom: 50px; }
+.hm_idx.main { bottom: 48px; top: 0; background-color: #e6e6ed; }
 .hm_idx__left { position: relative; margin: 0 auto; text-align: center; font-size: 12px; line-height: 1.2; padding-top: 5px; color: #fff; }
 .hm_idx__left span { display: block; font-size: 10px; }
 .hm-icons-more ~ .icon-more { height: 13px; padding-top: 4px; overflow: hidden; line-height: 0; }
 
-.hm_idx__head { position: relative; width: 100%; height: 1.38rem; overflow: hidden; background: url(../images/hm_idx__head.png) no-repeat; background-size: 100%; }
+.hm_idx__head { position: relative; width: 100%; height: 2.21rem; overflow: hidden; background: url(../images/bg-life.png) no-repeat; background-size: 100%; padding-top: .38rem; }
+.hm_idx__head .hm-yunmi-rem { width: 0.99rem; height: 0.98rem; }
+.hm_idx__head .num { position: absolute; right: .08rem; top: .08rem; display: block; width: 20px; height: 20px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 12px; line-height: 20px; }
+.hm_idx__life { padding-top: 1px; margin-bottom: 20px; }
+.hm_idx__life .item { background: #fff; border-top: 2px solid #f2f2f2; padding: 8px 10px; margin-top: 10px; position: relative; }
+.hm_idx__life .item .show:before { -webkit-transform: rotate(180deg); transform: rotate(180deg); }
+.hm_idx__life .subitem { padding: 6px 10px; position: relative; }
+.hm_idx__life .subitem img { width: 30px; height: 30px; display: block; }
+.hm_idx__life .con { max-width: 180px; }
+
+.hm_idx__life .item i,.hm_idx__life .subitem i { position: absolute; left: 34px; top: 8px; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }
+
+.hm_idx__to_mask { background: rgba(0,0,0,.5); z-index: 1000; }
+.hm-timeout { position: absolute; z-index: 1001; }
+.hm-timeout .close { position: absolute; top: 0; right: 0; height: 44px; width: 44px; }
+.hm-timeout .ft { position: absolute; bottom: 0; left: 0; right: 0; height: 35px; font-size: 14px; text-align: center; }
 
 .hm_ym__present { background: url(../images/present.png) no-repeat; background-size: 100%; width: 3.20rem; height: 2.95rem; }
 .hm_ym__present .fs_s { padding: 1.9rem 0 0 1.2rem; color: #fff; line-height: .25rem; font-size: .12rem; }
 
-.hm-yunmi-rem { padding-top: .63rem; color: #ffe618; }
-.hm-yunmi-rem:before { position: absolute; top: .13rem; left: 50%; margin-left: -0.81rem; }
-.hm-yunmi-rem i,.hm-yunmi-rem em { position: relative; z-index: 1; line-height: 1; }
-.hm-yunmi-rem em { font-size: 10px; }
-.hm-yunmi-rem i { font-size: 20px; padding-top: .03rem; }
-.hm-totip-rem { width: 0.65rem; height: 0.24rem; position: absolute; right: .04rem; bottom: .05rem; line-height: .14rem; text-align: center; color: #3f3f3f; }
-.hm-totip-rem:before { position: absolute; left: 0; top: 0; }
-.hm_idx__more { height: 30px; line-height: 30px; text-align: center; font-size: 12px; background-color: #f3f3f3; color: #999; margin-left: 30px; margin-right: 30px; border-radius: 10px; }
-.hm_idx__more .icon-drop_arrow { position: relative; top: -1px; margin-left: 10px; }
-.hm_idx__msg { margin-top: -3px; margin-right: 5px; }
 
 .hm_home { -webkit-transition: all 300ms ease-out 0ms; }
 .menu_aexit { -webkit-transform: translate3d(-80%,0%,0); }
@@ -137,7 +139,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .pq_item__info img { width: 60px; height: 60px; border-radius: 4px; overflow: hidden; }
 .pq_item__info .follow { color: #b2b2b2; }
 .pq_item__articles .hd { height: 44px; color: $color; line-height: 44px; font-size: 14px; padding-left: 10px; }
-.pq_item__articles_item .img img { width: .9rem;height: .9rem; margin-right: 5px; }
+.pq_item__articles_item .img img { width: .9rem; height: .9rem; margin-right: 5px; }
 
 .quan-publish { position: absolute; bottom: 60px; right: 10px; z-index: 100; background: rgba(0,0,0,0); }
 .quan-publish:active { opacity: .7; }
@@ -271,7 +273,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .lf_notice__tab_title.curr { background-color: $color; color: #fff; border-top-right-radius: 6px; border-top-left-radius: 6px; }
 
 //云米 - 首页
-.ym_idx__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: 1.14rem; }
+.ym_idx__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: 1.15rem; background-size: 100% auto; padding-bottom: 1px; }
 .ym-arrow-rem { padding-top: .45rem; }
 .ym_idx__tab { padding: 8px 0; }
 .ym_idx__tab > li { height: 28px; line-height: 28px; }
@@ -287,6 +289,9 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .ym_idx__bag_lab~.ym_idx__num { font-size: 12px; top: .5rem; }
 
 .ym_idx.main { bottom: 50px; }
+
+.ym-point-rem { width: 0.75rem; height: 0.7rem; position: relative; margin: 0 auto; }
+.ym-point-rem .num { position: absolute; right: .1rem; top: .1rem; width: .16rem; height: .16rem; line-height: .16rem; font-size: .1rem; border-radius: 50%; background: #f00; }
 
 .ym_task__btn { height: 26px; color: #fff; background: #f60; padding: 0 16px; border-radius: 13px; font-size: 12px; margin-right: 10px; }
 
@@ -330,3 +335,23 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .ym__redbag__friends { display: inline-block; height: 30px; line-height: 30px; border-radius: 15px; padding: 0 10px; color: #fff; }
 
 .hdh_index__num { margin: 10px 50px 0 50px; height: 34px; line-height: 34px; text-align: center; }
+
+.del_icon { position: absolute; right: -20px; top: -12px; width: 44px; height: 44px; text-align: center; }
+.del_icon:before { content: '+'; display: inline-block; background: #c00; height: 12px; width: 12px; color: #fff; line-height: 12px; text-align: center; font-size: 12px; border-radius: 50%; -webkit-transform: rotate(45deg); transform: rotate(45deg); }
+
+.bs_notify__item {
+    position: relative; margin: 10px;
+    .con {
+        position: relative; z-index: 1; padding: 10px;
+        .name { color: #000; font-size: 16px; }
+        .date { color: #999; font-size: 12px; }
+        .sp+.item{ margin-top: 5px; }
+        .item+.sp{ margin-top: 5px; }
+        .item em { color: #e5a730;  }
+    }
+    &:after{ @include border(#999,4px); background-color: #fff; }
+}
+
+.bs_notify.main.has_footer { bottom: 54px; }
+.bs_notify__footer { height: 54px; }
+.bs_notify__footer .btn_l { margin-top: 5px; border-radius: 4px; }

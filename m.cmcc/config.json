@@ -43,6 +43,7 @@
         "/quan/history": "quan/history",
         "/quan/publish": "quan/publish",
         "/quan/comment": "quan/comment",
+        "/quan/select_user": "quan/select_user",
         "/contact/new": "contact/new",
         "/contact/search": "contact/search",
         "/contact/person/{id:\\d+}": "contact/person",
@@ -63,6 +64,7 @@
         "/user/remind": "user/remind",
         "/user/remind/{type:\\w+}": "user/remind_one",
         "/user/privacy": "user/privacy",
+        "/user/quan_privacy/{type:\\d+}": "user/quan_privacy",
         "/user/qa": "user/qa",
         "/user/about": "user/about",
         "/life/notice": "life/notice",
@@ -75,6 +77,7 @@
         "/yunmi/redbag": "yunmi/redbag",
         "/yunmi/select_user": "yunmi/select_user",
         "/yunmi/trade/{id:\\d+}": "yunmi/trade",
+        "/business/{id:\\d+}": "business/notifications",
         "/hdh/index": "hdh/hdh_index",
         "/hdh/call": "hdh/hdh_call",
         "/hdh/subphone/{id:\\d+}": "hdh/hdh_subphone"

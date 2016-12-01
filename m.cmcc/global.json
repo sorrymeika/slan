@@ -53,11 +53,13 @@
             "logical/auth": "./logical/auth",
             "logical/district": "./logical/district",
             "logical/yunmi": "./logical/yunmi",
+            "logical/business": "./logical/business",
             "logical/hdh": "./logical/hdh"
         },
         "models": {
             "models/user": "./models/user",
             "models/friends": "./models/friends",
+            "models/business": "./models/business",
             "models/messagesList": "./models/messagesList"
         }
     },

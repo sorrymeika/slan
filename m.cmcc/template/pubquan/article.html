@@ -29,7 +29,7 @@
     <div class="pq_article__comments bd_tb bg_fff mt_l" ref="comments">
         <div class="lh_m pl_m bd_b fs_m flex">
             <div class="flexitem">评论</div>
-            <p class="icon-refresh sqr_d ta_r pr_m"></p>
+            <p class="icon-refresh sqr_d ta_r pr_m" sn-tap="this.reloadComments()"></p>
             <p class="sort" sn-tap="this.sortBy()"><span>倒序</span>
                 <i class="icon-sort"></i></p>
         </div>
@@ -40,7 +40,7 @@
                     <p class="fs_m">{item.user_name}</p>
                     <p class="fs_s cl_999">{util.formatDate(item.add_date)}</p>
                 </div>
-                <a class="icon-comment dp_b" href="javascript:;" sn-tap="this.comment(item.user_id,item.user_name)"></a>
+                <a sn-if="item.user_id!=user.user_id" class="icon-comment dp_b" href="javascript:;" sn-tap="this.comment(item.user_id,item.user_name)"></a>
                 <a sn-if="item.user_id==user.user_id" sn-tap="this.delComment(item.comment_id)" class="icon-del2 dp_b" href="javascript:;"></a>
             </div>
             <div class="mt_s pb_m fs_m">
@@ -54,6 +54,6 @@
     <div class="text flexitem pt_s pl_m" sn-tap="this.comment()">
         <span class="fs_m cl_ccc dp_b">说几句话吧...</span>
     </div>
-    <div class="icon-comment3 sqr_l" data-forward="/pubquan/myarticles"></div>
+    <!--<div class="icon-comment3 sqr_l" data-forward="/pubquan/myarticles"></div>-->
     <div class="icon-heart3 sqr_l" sn-tap="this.fav()"></div>
 </footer>

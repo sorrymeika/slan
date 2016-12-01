@@ -743,7 +743,7 @@ return Page.extend({
 
                         //service filter(columns)
                         service += "public List<" + className + "> filter(String columns, " + className + " search) {\n\n\
-                            if (!java.util.regex.Pattern.compile(\"^[\\\\sa-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
+                            if (!java.util.regex.Pattern.compile(\"^[a-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
                                 return null;\n\
                             }\n\
                             List<Object> objs = new ArrayList<Object>();\n\n\
@@ -754,7 +754,7 @@ return Page.extend({
 
                         //service first(columns)
                         service += "public " + className + " first(String columns, " + className + " search) {\n\n\
-                            if (!java.util.regex.Pattern.compile(\"^[\\\\sa-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
+                            if (!java.util.regex.Pattern.compile(\"^[a-zA-Z0-9_,]+$\").matcher(columns).find()) {\n\
                                 return null;\n\
                             }\n\
                             List<Object> objs = new ArrayList<Object>();\n\n\
@@ -846,7 +846,7 @@ return Page.extend({
                                         fileRes += ' else {\n\
                                         String fileName = ' + item.field + '.getOriginalFilename();\n\
                                         String ext = fileName.substring(fileName.lastIndexOf(".")+1);\n\
-                                        if (java.util.regex.Pattern.compile("' + item.ext + '").matcher(ext).find()) {\n\
+                                        if (java.util.regex.Pattern.compile("' + (item.ext || 'png|jpeg|jpg|bmp') + '").matcher(ext).find()) {\n\
                                             data.set' + toUpper(item.name) + '(multipartFileService.saveFile(' + item.field + '));\n\
                                         } else {\n\
                                             return new WebErrorResult(WebErrorResult.PARAMS_ERROR, "文件格式错误");\n\
@@ -1072,11 +1072,11 @@ return Page.extend({
 
                         if (formData.writeFe != 0 && feDir) {
                             Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/views/" + tableName + "/add.js",
+                                savePath: feDir + "/views/" + tableName + "/add_" + tableName + ".js",
                                 data: insertForm
                             });
                             Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/template/" + tableName + "/add.html",
+                                savePath: feDir + "/template/" + tableName + "/add_" + tableName + ".html",
                                 data: template
                             });
                         }
@@ -1121,7 +1121,6 @@ return Page.extend({
                                             break;
                                     }
                                 }
-
 
                                 if (item.route) {
                                     res += ',\nvalue: this.route.params.' + item.route;
@@ -1169,11 +1168,11 @@ return Page.extend({
 
                         if (formData.writeFe != 0 && feDir) {
                             Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/views/" + tableName + "/update.js",
+                                savePath: feDir + "/views/" + tableName + "/update_" + tableName + ".js",
                                 data: updateForm
                             });
                             Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/template/" + tableName + "/update.html",
+                                savePath: feDir + "/template/" + tableName + "/update_" + tableName + ".html",
                                 data: template
                             });
                         }
@@ -1286,17 +1285,16 @@ return Page.extend({
 
                         if (formData.writeFe != 0 && feDir) {
                             Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/views/" + tableName + "/index.js",
+                                savePath: feDir + "/views/" + tableName + "/" + tableName + ".js",
                                 data: gridCode
                             });
                             Http.post("http://" + location.host + "/create", {
-                                savePath: feDir + "/template/" + tableName + "/index.html",
+                                savePath: feDir + "/template/" + tableName + "/" + tableName + ".html",
                                 data: '<div class="main" ref="main">\n\
     <h1>{title}</h1>\n<div class="toobar pb_m"><a class="button" href="/' + tableName + '/add"><i class="ico-add"></i>添加</a></div>\n\
     </div>'
                             });
                         }
-
 
                         //result = [classCode, service, mapper, controller, select, getAll, insert, update].join("\n\n\n");
 

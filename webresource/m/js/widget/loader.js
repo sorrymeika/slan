@@ -12,9 +12,13 @@ var extend = ['$el', '$refreshing', 'url', 'method', 'headers', 'dataType', 'xhr
     check: function(res) { return true|false; } //验证数据是否正确
 }
 */
-var Loader = function (options) {
-    if (options.nodeType) options = { el: options };
-    else if (options.length !== undefined && options[0].nodeType) options = { $el: options };
+var Loader = function(options) {
+    if (options.nodeType) options = {
+        el: options
+    };
+    else if (options.length !== undefined && options[0].nodeType) options = {
+        $el: options
+    };
 
     $.extend(this, _.pick(options, extend));
 
@@ -32,19 +36,19 @@ var Loader = function (options) {
     this.url && this.setUrl(this.url);
 }
 
-Loader.url = function (url) {
+Loader.url = function(url) {
     return /^http\:\/\//.test(url) ? url : (this.prototype.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
 }
 
 var _loader;
 
-Loader.showLoading = function () {
+Loader.showLoading = function() {
     !_loader && (_loader = new Loader($("body")));
 
     _loader.showLoading();
 }
 
-Loader.hideLoading = function () {
+Loader.hideLoading = function() {
     _loader && _loader.hideLoading();
 }
 
@@ -76,7 +80,7 @@ Loader.prototype = {
     success: _.noop,
     error: _.noop,
 
-    createError: function (errorCode, errorMsg) {
+    createError: function(errorCode, errorMsg) {
         return {
             success: false,
             code: errorCode,
@@ -84,28 +88,28 @@ Loader.prototype = {
         }
     },
 
-    check: function (res) {
+    check: function(res) {
         var flag = !!(res && res.success);
         return flag;
     },
 
     checkEmptyData: false,
 
-    isEmptyData: function (res) {
+    isEmptyData: function(res) {
 
         return (this._hasData = (this.checkEmptyData === false || this.hasData(res)));
     },
 
-    hasData: function (res) {
+    hasData: function(res) {
         return !!(res.data && res.data.length);
     },
 
-    showMoreLoading: function () {
+    showMoreLoading: function() {
         this.showMoreMsg(this.MSG_LOADING_MORE);
         this.$refreshing.find('.js_loading').show();
     },
 
-    showMsg: function (msg) {
+    showMsg: function(msg) {
         if (this.pageIndex == 1) {
             this.$loading.find('.js_msg').show().html(msg);
             this.$loading.show().find('.js_loading').hide();
@@ -114,7 +118,7 @@ Loader.prototype = {
         }
     },
 
-    showMoreMsg: function (msg) {
+    showMoreMsg: function(msg) {
 
         var $refreshing = (this.$refreshing || (this.$refreshing = $(this.refreshTemplate)).appendTo(this.$content));
 
@@ -123,15 +127,17 @@ Loader.prototype = {
     },
 
     //@option='error message!' || {msg:'error message!',showReload:true}
-    showError: function (option) {
+    showError: function(option) {
         var that = this;
 
         if (this.pageIndex == 1) {
 
             that.$loading && this.$loading.animate({
                 opacity: 0
-            }, 300, 'ease-out', function () {
-                that.$loading.hide().css({ opacity: '' });
+            }, 300, 'ease-out', function() {
+                that.$loading.hide().css({
+                    opacity: ''
+                });
             });
 
             var $error = (that.$error || (that.$error = $(that.errorTemplate).on('tap', '.js_reload', $.proxy(that.reload, that)).appendTo(that.$el)));
@@ -154,7 +160,7 @@ Loader.prototype = {
         }
     },
 
-    showLoading: function () {
+    showLoading: function() {
         var that = this,
             $refreshing;
 
@@ -165,7 +171,7 @@ Loader.prototype = {
         if (that.pageIndex == 1) {
 
             if (!that.$loading) {
-                that.$loading = $(that.template).on($.fx.transitionEnd, function () {
+                that.$loading = $(that.template).on($.fx.transitionEnd, function() {
                     if (!$(this).hasClass('show')) {
                         this.style.display = "none";
                     }
@@ -182,7 +188,7 @@ Loader.prototype = {
         }
     },
 
-    hideLoading: function () {
+    hideLoading: function() {
         this.$error && this.$error.hide();
         this.$refreshing && this.$refreshing.hide();
         this.$loading.removeClass('show');
@@ -190,7 +196,7 @@ Loader.prototype = {
         this.isLoading = false;
     },
 
-    setHeaders: function (key, val) {
+    setHeaders: function(key, val) {
         var attrs;
         if (!val)
             attrs = key
@@ -205,12 +211,12 @@ Loader.prototype = {
         return this;
     },
 
-    clearParams: function () {
+    clearParams: function() {
         this.params = {};
         return this;
     },
 
-    setParam: function (key, val) {
+    setParam: function(key, val) {
         var attrs;
         if (!val)
             attrs = key
@@ -230,37 +236,37 @@ Loader.prototype = {
         return this;
     },
 
-    getParam: function (key) {
+    getParam: function(key) {
         if (key) return this.params[key];
         return this.params;
     },
 
-    setUrl: function (url) {
+    setUrl: function(url) {
         this.url = /^http\:\/\//.test(url) ? url : (this.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
         return this;
     },
 
-    reload: function () {
+    reload: function() {
         if (!this.isLoading) {
             this.pageIndex = 1;
             return this.request();
         }
     },
 
-    request: function (resolve, reject) {
+    request: function(resolve, reject) {
         var self = this;
 
         if (typeof resolve === 'function') {
             return this.request().then(resolve, reject)
 
         } else
-            return new Promise(function (_resolve, _reject) {
+            return new Promise(function(_resolve, _reject) {
 
                 self._request(_resolve, _reject);
             });
     },
 
-    _request: function (resolve, reject) {
+    _request: function(resolve, reject) {
         var that = this;
 
         if (that.beforeSend && that.beforeSend() === false) return;
@@ -283,14 +289,13 @@ Loader.prototype = {
             type: that.method,
             dataType: that.dataType,
             cache: false,
-            error: function (xhr) {
+            error: function(xhr) {
                 that.isShowLoading && that.hideLoading();
 
                 var err;
                 try {
                     err = JSON.parse(xhr.responseText);
-                } catch (e) {
-                }
+                } catch (e) {}
 
                 !err && (err = that.createError(10001, '网络错误'));
 
@@ -298,7 +303,7 @@ Loader.prototype = {
 
                 reject && reject.call(that, err, xhr);
             },
-            success: function (res, status, xhr) {
+            success: function(res, status, xhr) {
                 that.isShowLoading && that.hideLoading();
 
                 if (!that.check || that.check(res)) {
@@ -322,7 +327,7 @@ Loader.prototype = {
                     reject && reject.call(that, res, xhr);
                 }
             },
-            complete: function () {
+            complete: function() {
                 that._xhr = null;
                 that.isLoading = false;
                 that.complete();
@@ -332,7 +337,7 @@ Loader.prototype = {
         return that;
     },
 
-    autoLoadMore: function (append) {
+    autoLoadMore: function(append) {
         this.append = append;
 
         if (this._hasData) {
@@ -341,11 +346,11 @@ Loader.prototype = {
         }
     },
 
-    _refresh: function () {
+    _refresh: function() {
         this.abort().load();
     },
 
-    dataNotFound: function () {
+    dataNotFound: function() {
         if (this.pageIndex == 1) {
             this.showError('暂无数据');
         } else {
@@ -354,11 +359,10 @@ Loader.prototype = {
         }
     },
 
-    _scroll: function (e, options) {
+    _scroll: function(e, options) {
         var that = this;
 
         if (!that.isLoading && options.height + options.y + options.height / 2 >= options.scrollHeight) {
-            //&& that._scrollY < y && y + that.$scroll.height() >= that.$refreshing[0].offsetTop
 
             that._refresh();
         }
@@ -366,13 +370,13 @@ Loader.prototype = {
 
     _autoRefreshingEnabled: false,
 
-    checkAutoRefreshing: function (res) {
+    checkAutoRefreshing: function(res) {
         var that = this,
             data = that.params;
 
-        if (that.append && (!that.pageEnabled && that.hasData(res)
-            || ((that.DATAKEY_PAGENUM && res[that.DATAKEY_PAGENUM] && res[that.DATAKEY_PAGENUM] > data[that.KEY_PAGE])
-                || (that.DATAKEY_TOTAL && res[that.DATAKEY_TOTAL] && res[that.DATAKEY_TOTAL] > data[that.KEY_PAGE] * parseInt(data[that.KEY_PAGESIZE]))))) {
+        if (that.append && (!that.pageEnabled && that.hasData(res) ||
+                ((that.DATAKEY_PAGENUM && res[that.DATAKEY_PAGENUM] && res[that.DATAKEY_PAGENUM] > data[that.KEY_PAGE]) ||
+                    (that.DATAKEY_TOTAL && res[that.DATAKEY_TOTAL] && res[that.DATAKEY_TOTAL] > data[that.KEY_PAGE] * parseInt(data[that.KEY_PAGESIZE]))))) {
 
             that.pageIndex++;
             that.enableAutoRefreshing();
@@ -382,7 +386,7 @@ Loader.prototype = {
         }
     },
 
-    enableAutoRefreshing: function () {
+    enableAutoRefreshing: function() {
 
         this.showMoreLoading('正在载入...');
 
@@ -392,24 +396,27 @@ Loader.prototype = {
         this.$scroll.on('scrollStop', $.proxy(this._scroll, this));
 
         var self = this;
+        console.log('enableAutoRefreshing')
 
-        setTimeout(function () {
+        setTimeout(function() {
             if (self.el && self.el.scrollTop + self.$scroll.height() >= self.$refreshing[0].offsetTop) {
                 self._refresh();
             }
         }, 200);
     },
 
-    disableAutoRefreshing: function () {
+    disableAutoRefreshing: function() {
         if (!this._autoRefreshingEnabled) return;
         this._autoRefreshingEnabled = false;
+
+        console.log('disableAutoRefreshing')
 
         this.$scroll.off('scrollStop', this._scroll);
 
         this.showMoreMsg(this.MSG_NO_MORE);
     },
 
-    abort: function () {
+    abort: function() {
         if (this._xhr) {
             this.isLoad = false;
             this._xhr.abort();
@@ -420,7 +427,7 @@ Loader.prototype = {
         return this;
     },
 
-    destory: function () {
+    destory: function() {
         this.abort();
         this.disableAutoRefreshing();
         this.$error && this.$error.off('tap', '.js_reload', this.reload);
@@ -431,23 +438,28 @@ Loader.prototype.load = Loader.prototype.request;
 
 Loader.extend = _.extend;
 
-Loader.pageLoader = function (url, key, model) {
+Loader.pageLoader = function(url, key, model, beforeRender) {
 
-    if (!model) model = key, key == 'data';
+    if (key instanceof require('core/model2').Model)
+        beforeRender = model, model = key, key = 'data';
 
     return new Loader({
         url: url,
         $el: model.$el,
 
-        $scroll: $(model.refs.main),
+        $scroll: $(model.refs.main || model.$el[0]),
 
-        success: function (res) {
+        success: function(res) {
+
+            beforeRender && beforeRender(res);
 
             model.set(key, res.data);
         },
 
-        append: function (res) {
-            model._(key).append(res.data);
+        append: function(res) {
+            beforeRender && beforeRender(res);
+
+            model._(key).add(res.data);
         }
     });
 }

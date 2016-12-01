@@ -115,6 +115,10 @@ module.exports = Activity.extend({
                 .reload();
         }
 
+        model.reloadComments=function(){
+            commentsLoader.reload();
+        }
+
         Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function () { }), this.waitLoad()]).then(function (results) {
             var res = results[0];
             var data = res.data;

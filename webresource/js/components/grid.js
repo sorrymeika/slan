@@ -36,7 +36,6 @@ var Page = require('./page'),
 
 
 
-
 var Cell = Event.extend(function(row, options) {
     var self = this,
         settings = row.grid.options;
@@ -760,9 +759,11 @@ var Grid = Component.extend({
                     if (val) {
                         param[key] = util.formatDate(Date.parse(val), 'yyyy-MM-dd HH:mm:ss');
                     } else {
-                        delete param;
+                        delete param[key];
                     }
 
+                } else if (val === '') {
+                    delete param[key];
                 } else {
                     param[key] = val;
                 }

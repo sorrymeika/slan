@@ -1,4 +1,6 @@
+var $ = require('$');
 var Base = require('core/base');
+var Navigation = require('core/navigation');
 
 function startApp(routes, resourceMapping) {
 
@@ -17,7 +19,7 @@ function startApp(routes, resourceMapping) {
         }
     });
 
-    seajs.use(['$', 'core/navigation', 'common/menu', 'logical/auth'], function($, Navigation, Menu, auth) {
+    seajs.use(['common/menu', 'logical/auth'], function(Menu, auth) {
 
         var app = new Navigation({
             routes: routes
@@ -45,17 +47,11 @@ function startApp(routes, resourceMapping) {
                 title: '公众圈管理',
                 url: '/pub_quan/index',
                 children: [{
-                    title: '添加',
-                    url: '/pub_quan/add'
-                }, {
                     title: '文章管理',
                     url: '/pub_quan_msg/index/0'
                 }, {
                     title: '推荐管理',
                     url: '/pub_quan_recommend/index'
-                }, {
-                    title: '添加推荐',
-                    url: '/pub_quan_recommend/add'
                 }]
             }, {
                 title: '圈管理',
@@ -70,6 +66,13 @@ function startApp(routes, resourceMapping) {
                 children: [{
                     title: '添加云米时段',
                     url: '/user_yunmi/add'
+                }]
+            },{
+                title: '提醒业务管理',
+                url: '/business/index',
+                children: [{
+                    title: '通知管理',
+                    url: '/notification/index'
                 }]
             }]
         });

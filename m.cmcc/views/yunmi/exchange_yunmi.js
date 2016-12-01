@@ -13,7 +13,8 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '云米兑换流量'
+            title: '云米兑换流量',
+            type: 1
         });
 
         model.back = function () {
@@ -25,7 +26,6 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         Promise.all([this.waitLoad()]).then(function (results) {
-
 
             self.bindScrollTo(model.refs.main);
 

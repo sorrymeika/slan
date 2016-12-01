@@ -8,14 +8,14 @@
         <div class="ta_c ym_exchange__total">2000</div>
     </div>
     <ul class="of_h ym_exchange__list flex ta_c">
-        <li class="gl_tag flex_0">50MB</li>
-        <li class="gl_tag flex_0 curr">100MB</li>
-        <li class="gl_tag flex_0">200MB</li>
+        <li class="gl_tag flex_0{type==1?' curr':''}" sn-tap="type=1">50MB</li>
+        <li class="gl_tag flex_0{type==2?' curr':''}" sn-tap="type=2">100MB</li>
+        <li class="gl_tag flex_0{type==3?' curr':''}" sn-tap="type=3">200MB</li>
     </ul>
     <ul class="of_h ym_exchange__list flex ta_c pt_m">
-        <li class="gl_tag flex_0">300MB</li>
-        <li class="gl_tag flex_0">500MB</li>
-        <li class="gl_tag flex_0">1G</li>
+        <li class="gl_tag flex_0{type==4?' curr':''}" sn-tap="type=4">300MB</li>
+        <li class="gl_tag flex_0{type==5?' curr':''}" sn-tap="type=5">500MB</li>
+        <li class="gl_tag flex_0{type==6?' curr':''}" sn-tap="type=6">1G</li>
     </ul>
     <div class="pt_m fs_s ml_m cl_666">
         兑换规则：1云米=1MB，套餐包有效期为当月<br /> 注：凑足100MB云米方可兑换，兑换流量均为省内流量

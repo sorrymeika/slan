@@ -1,24 +1,45 @@
-PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-			Key privateKey = keyFactory.generatePrivate(pkcs8KeySpec);
+推送消息的接口
 
-			System.out.println("rsa pub key: " + privateKey);
+http://wxcs.ie1e.com/api/notification/receive
+
+移动官微
+appid=100001
+secret_key=4411d2e0eddc54cb19ef568443257efb
+
+content为json格式
+ContentType: application/json
+
+他们传我们的数据格式如下
+
+{
+    "appid": "appid推送业务的id",
+    "sign": "md5(appid+","+title+","+content+","+request_seq+","+msisdn+","+request_time+","+notify_type+","+new JSONObject(feature).toString()+","+secret_key)",
+    "title": "系统通知中心显示标题",
+    "content": "系统通知中心显示内容",
+    "icon_url": "系统通知中心icon链接(可选)",
+    "request_seq": "108157146148",
+    "request_time": "20161123155112123",
+    "msisdn": "13459857970",
+    "notify_type": "1",
+    "feature": {
+        "product_type_name": "省内包时段",
+        "product_name": "积分兑换省内流量30天档",
+        "dun_value": "0000000000100000",
+        "product_remain": "0",
+        "product_use": "9831",
+        "product_total": "9831",
+        "product_unit": "1",
+        "product_over": "0",
+        "product_over_unit": "1",
+        "timestamp": "2016-11-21 16:57:05"
+    }
+}
 
 
-
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(keyBytes); 
-
-			PemReader reader = new PemReader(new InputStreamReader(bais));
-			PemObject pemObject = reader.readPemObject();
-			reader.close();
-
-			System.out.println("pemObject: " + pemObject);
-
-			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pemObject.getContent());
-			KeyFactory kf = KeyFactory.getInstance("RSA");
-			PrivateKey privateKey = kf.generatePrivate(keySpec);
-			RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey) privateKey;
-			RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(rsaPrivateCrtKey.getModulus(),
-					rsaPrivateCrtKey.getPublicExponent());
-			PublicKey publicKey = kf.generatePublic(publicKeySpec);
+响应
+{
+    "response": {  
+      "resp_code": "0000",
+      "resp_desc": []
+    } 
+}

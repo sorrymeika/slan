@@ -48,7 +48,7 @@ var contact = Event.mixin({
     },
 
     getCombinedContacts: function() {
-        return Promise.all([this.getCachedFriends(), this.getCachedContacts()]).then(function(results) {
+        return Promise.all([this.friends(), this.getCachedContacts()]).then(function(results) {
             results[0].data.forEach(function(item) {
                 item.isFriend = true;
             });
@@ -56,7 +56,14 @@ var contact = Event.mixin({
             var list = results[0].data;
 
             results[1].data.forEach(function(item) {
-                if (util.indexOf(list, 'user_id', item.user_id) == -1) {
+
+                if (util.indexOf(list, function(newItem) {
+                        if (item.user_id && !newItem.user_id || newItem.user_id && !item.user_id) return false;
+                        else if (!item.user_id && !newItem.user_id) return item.phoneNumber == newItem.phoneNumber;
+                        return item.user_id == newItem.user_id;
+
+                    }) == -1) {
+
                     list.push(item);
                 }
             });
@@ -96,21 +103,31 @@ var contact = Event.mixin({
                         }
                     });
 
-                    Http.post("/userinfo/contacts", {
-                        ids: ids.join(',')
+                    if (ids.length) {
+                        Http.post("/userinfo/contacts", {
+                            ids: ids.join(',')
 
-                    }).then(function(res) {
-                        data.forEach(function(item) {
-                            var userinfo = util.first(res.data, 'account', item.phoneNumber);
-                            userinfo && Object.assign(item, userinfo);
-                        });
-                        friends.getContacts().set(data);
+                        }).then(function(res) {
+                            data.forEach(function(item) {
+                                var userinfo = util.first(res.data, 'account', item.phoneNumber);
+                                userinfo && Object.assign(item, userinfo);
+                            });
 
+                            friends.getContacts().set(data);
+
+                            resolve({
+                                success: true,
+                                data: data
+                            });
+                        }, reject);
+
+                    } else {
                         resolve({
                             success: true,
-                            data: data
+                            data: []
                         });
-                    }, reject);
+                    }
+
 
                 } else {
                     reject(result);

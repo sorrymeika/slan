@@ -476,6 +476,8 @@ var ModelProto = {
     },
 
     get: function(key) {
+        if (typeof key === 'undefined') return $.extend(true, {}, this.data);
+
         if (typeof key == 'string' && key.indexOf('.') != -1) {
             key = key.split('.');
         }
@@ -781,10 +783,16 @@ Collection.prototype = {
 
             this._changedAndUpdateViewNextTick();
         }
+        return this;
     },
 
     update: function(arr, primaryKey) {
         var fn;
+        var length = this.models.length;
+
+        if (!length) {
+            return this.add(arr);
+        }
 
         if (typeof primaryKey === 'string' && primaryKey !== undefined) {
             fn = function(a, b) {
@@ -797,8 +805,9 @@ Collection.prototype = {
         var appends = [];
 
         if (!Array.isArray(arr)) arr = [arr];
+        else arr = [].concat(arr);
 
-        for (var i = 0, length = this.models.length - 1; i <= length; i++) {
+        for (var i = 0, length = length - 1; i <= length; i++) {
             item = this.data[i];
 
             for (var j = 0, n = arr.length; j < n; j++) {
@@ -816,6 +825,7 @@ Collection.prototype = {
                 }
             }
         }
+
         if (appends.length) {
             this.add(appends);
         }
@@ -1387,17 +1397,21 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     var isInitDisplay = true;
                     if (!$el.hasClass('sn-display')) {
                         isInitDisplay = false;
-                        $el.addClass('sn-display').clientHeight;
+                        $el.addClass('sn-display')[0].clientHeight;
                     }
                     var display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
 
                     if (display == 'none') {
-                        if (!$el.hasClass('sn-display-hide'))
-                            $el.addClass('sn-display-hide')
-                            .one($.fx.transitionEnd, function() {
+                        if (!$el.hasClass('sn-display-hide')) {
+
+                            var onHide = function() {
                                 if ($el.hasClass('sn-display-hide'))
                                     $el.hide();
-                            });
+                            }
+                            $el.addClass('sn-display-hide')
+                                .one($.fx.transitionEnd, onHide);
+                            setTimeout(onHide, 300);
+                        }
 
                     } else if (!isInitDisplay || $el.hasClass('sn-display-hide')) {
                         $el.css({
@@ -1702,7 +1716,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             if (node.snViewModel) return false;
 
-            self.twoWayBinding(node);
+            if (node.nodeType != 8)
+                self.twoWayBinding(node);
 
             var parentRepeatSource;
             for (var parentNode = (node.snIf || node).parentNode; parentNode && !parentNode.snViewModel; parentNode = (parentNode.snIf || parentNode).parentNode) {

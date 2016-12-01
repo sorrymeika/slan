@@ -11,7 +11,7 @@ var auth = require('logical/auth');
 
 var quan = Event.mixin({
 
-    getAll: function ($scroll) {
+    getAll: function($scroll) {
 
         var loader = new Loader({
             url: '/quan_msgs/getAll',
@@ -24,11 +24,11 @@ var quan = Event.mixin({
         return Promise.all([loader, loader.request()]);
     },
 
-    like: function (msg_id) {
+    like: function(msg_id) {
 
         return Http.post('/quan_likes/add', {
             msg_id: msg_id
-        }).then(function (res) {
+        }).then(function(res) {
 
             quan.trigger('like:' + msg_id, {
                 isLike: true
@@ -39,31 +39,31 @@ var quan = Event.mixin({
     },
 
     //屏蔽
-    black: function (msg_id) {
+    black: function(msg_id) {
         return Http.post('/quan_msg_black/add', {
             msg_id: msg_id
-        }).then(function (res) {
+        }).then(function(res) {
             quan.trigger('black:' + msg_id);
             return res;
         });
     },
 
     //@params = { content:'', images:{}}
-    publish: function (params) {
+    publish: function(params) {
         if (!sl.isInApp) {
             return Http.post('/quan_msgs/add', {
                 content: params.content
             });
         }
 
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
 
             var sign = auth.getSign();
 
             bridge.image.upload(Loader.url('/quan_msgs/add'), Object.assign({
                 content: params.content
 
-            }, sign), params.images, function (res) {
+            }, sign), params.images, function(res) {
                 if (res.success) {
                     resolve(res);
 
@@ -75,25 +75,32 @@ var quan = Event.mixin({
 
     },
 
-    sendComment: function (msg_id, content) {
+    sendComment: function(msg_id, content) {
         return Http.post('/quan_comments/add', {
             msg_id: msg_id,
             content: content
         });
     },
 
-    deleteQuan: function (msg_id) {
+    deleteQuan: function(msg_id) {
 
         return Http.post('/quan_msgs/delete', {
             msg_id: msg_id
         });
     },
 
-    getHistory: function () {
+    getHistory: function() {
 
         return Http.post('/quan_msgs/getMine', {
             page: 1,
             pageSize: 20
+        });
+    },
+
+    getQuanBlack: function(type) {
+
+        return Http.post('/quan/getQuanBlack', {
+            type: type
         });
     }
 })

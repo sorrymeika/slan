@@ -3,22 +3,24 @@
     <div class="head_title">{title}</div>
 </header>
 <div class="main ym_idx" ref="main">
-    <div class="ym_idx__bg cl_fff ta_c">
+    <div class="ym_idx__bg cl_fff ta_c bd_b">
         <div class="flex">
             <dl class="flex_0">
                 <dt class="pt_m_rem">累计获得</dt>
                 <dd class="pt_l_rem fs_xl fw_b">{amount||0}</dd>
             </dl>
             <dl class="flex_0" sn-tap="this.receiveYunmi()">
-                <dt class="ym-point-rem pt_m_rem"></dt>
-                <dd class="pt_s_rem fs_l ym_idx__timeout">{current.amount||(next.timeLeft?"倒计时:"+next.timeLeft:'')}</dd>
+                <dt class="ym-point-rem pt_s_rem">
+                    <i class="num" sn-if="current.amount">+{current.amount||0}</i>
+                </dt>
+                <dd class="pt_s_rem fs_m ym_idx__timeout" sn-if="false">{current.amount||(next.timeLeft?"倒计时:"+next.timeLeft:'')}</dd>
             </dl>
             <dl class="flex_0">
                 <dt class="pt_m_rem">当日获得</dt>
                 <dd class="pt_l_rem fs_xl fw_b">{today_get_amount||0}</dd>
             </dl>
         </div>
-        <div class="ta_c fs_s pt_s_rem pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
+        <div class="ta_c fs_s pt_m_rem pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
     </div>
     <ul class="ym_idx__tab flex ta_c fs_m bd_b bg_fff">
         <li class="flex_0 br_a {tab==0?'curr':''}" sn-tap="tab=0">摇云米</li>
@@ -97,7 +99,7 @@
         </ul>
     </div>
 </div>
-<footer class="h_l bg_fff bd_t pt_1 flex ta_c ym_idx__foot">
+<footer class="h_l bg_fff bd_t pt_1 flex ta_c ym_idx__foot" sn-if="{tab==0}">
     <div class="flex_0 br_aaa" sn-tap="this.findRich()">
         <i class="icon-money mr_m"></i> <span class="va_m">找土豪</span>
     </div>
@@ -105,3 +107,10 @@
         <i class="icon-refresh2 mr_m"></i> <span class="va_m">换一批</span>
     </div>
 </footer>
+
+<div class="hm_idx__to_mask dock" style="display:none" ref="timeoutMask">
+</div>
+<div class="hm-timeout gl_center" ref="timeout" style="display:none">
+    <div class="close" sn-tap="this.hideTimeout()"></div>
+    <div class="ft">还有{next.timeLeft}分钟后才能收获</div>
+</div>

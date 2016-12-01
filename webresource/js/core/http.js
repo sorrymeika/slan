@@ -2,7 +2,7 @@ var $ = require('$');
 var _ = require('util');
 var Promise = require('promise');
 
-var extend = ['url', 'check', 'method', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete'];
+var extend = ['url', 'check', 'method', 'contentType', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete'];
 
 //@options={url:'', params: {}, method:"POST", dataType:"json", headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }, xhrFields: { withCredentials: true }}
 var Http = function(options) {
@@ -130,6 +130,13 @@ Http.prototype = {
         Object.keys(that.params).forEach(function(key) {
             (that.params[key] !== undefined) && (postData[key] = that.params[key]);
         });
+
+        if (this.contentType == 'json') {
+            this.setHeaders('Content-Type', 'application/json');
+            postData = JSON.stringify(postData);
+
+        } else if (this.contentType)
+            this.setHeaders('Content-Type', this.contentType);
 
         that._xhr = $.ajax({
             url: that.url,

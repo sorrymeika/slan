@@ -13,14 +13,16 @@ var popup = require('widget/popup')
 module.exports = Page.extend({
 
     events: {
-        'click .js_grid_delete': function (e) {
+        'click .js_grid_delete': function(e) {
             if (window.confirm('确认删除吗?')) {
-                Http.post('/pub_quan_msg/delete', { msg_id: $(e.currentTarget).data('id') })
+                Http.post('/pub_quan_msg/delete', {
+                    msg_id: $(e.currentTarget).data('id')
+                })
             }
         }
     },
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var quan_id = self.route.params.quan_id;
@@ -28,9 +30,9 @@ module.exports = Page.extend({
         var model = this.model = new Model(this.$el, {
             title: '公众圈文章管理'
         });
-        model.add = function () {
+        model.add = function() {
             if (quan_id == 0) {
-                Toast.showToast('请选择发布的圈');
+                Toast.showToast('请在该列表中找到需要发布文章的圈并点击发布');
                 self.forward('/pub_quan/index');
                 return;
             }
@@ -41,8 +43,7 @@ module.exports = Page.extend({
             search: {
                 url: '/pub_quan_msg/getPage',
                 type: 'POST',
-                beforeSend: function () {
-                },
+                beforeSend: function() {},
                 data: {
                     title: {
                         label: '标题'
@@ -55,13 +56,14 @@ module.exports = Page.extend({
                     start_add_date: {
                         type: "calendar",
                         label: '添加时间 从'
-                    }, end_add_date: {
+                    },
+                    end_add_date: {
                         type: "calendar",
                         label: '到'
                     }
                 }
             },
-            onSelectRow: function () { },
+            onSelectRow: function() {},
             columns: [{
                 text: "文章编号",
                 bind: "msg_id",
@@ -100,7 +102,7 @@ module.exports = Page.extend({
                 width: 10,
                 align: 'center',
                 valign: 'center',
-                render: function (data) {
+                render: function(data) {
                     this.append($('<a class="js_click" data-id="' + data.msg_id + '" href="/pub_quan_msg/update/' + data.msg_id + '">[修改]</a>'));
                     this.append(' <a href="javascript:;" data-id="' + data.msg_id + '" class="js_grid_delete">[删除]</a>');
                     this.append($('<a class="js_click" href="/pub_quan_comments/index/' + data.msg_id + '">[查看评论]</a>'));
@@ -108,11 +110,12 @@ module.exports = Page.extend({
                 }
             }]
         });
-        this.onResult('pub_quan_msgchange', function () { grid.search(); });
+        this.onResult('pub_quan_msgchange', function() {
+            grid.search();
+        });
         grid.$el.appendTo($(model.refs.main));
         grid.search();
 
     },
-    onShow: function () {
-    }
+    onShow: function() {}
 });
