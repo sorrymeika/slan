@@ -10,20 +10,22 @@ var popup = require('widget/popup');
 var firstLetter = require('util/firstLetter');
 
 var contact = require('logical/contact');
+var friends = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '我的好友',
-            letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('')
+            letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(''),
+            friendList: friends._('friends')
         });
 
         model.groups = this.groups.bind(this);
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
@@ -31,40 +33,34 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.friends(), this.waitLoad()]).then(function (results) {
-
-            var friendList = results[0].data;
-
-            model.set({
-                friendList: friendList
-            });
+        Promise.all([contact.friends(), this.waitLoad()]).then(function(results) {
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     },
 
-    groups: function () {
+    groups: function() {
         var model = this.model;
         var groups = {};
         var data = model.data.friendList;
 
         if (!data) return;
 
-        data.forEach(function (item) {
+        data.forEach(function(item) {
             var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
 
             if (!groups[letter]) {
@@ -74,7 +70,7 @@ module.exports = Activity.extend({
             groups[letter].push(item);
         });
 
-        groups = Object.keys(groups).map(function (key) {
+        groups = Object.keys(groups).map(function(key) {
 
             return {
                 letter: key,

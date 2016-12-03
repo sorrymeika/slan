@@ -280,7 +280,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .ym_idx__tab > li.curr { color: $color; }
 
 .ym_idx__bags > li { margin: .1rem .1rem 0 .23rem; height: 1.15rem; }
-.ym_idx__bags > li .name { color: #ffc017; text-align: center; height: .4rem }
+.ym_idx__bags > li .name { color: #ffc017; text-align: center; height: .4rem; width: .73rem; }
 .ym_idx__bag { position: relative; }
 .ym_idx__bag:before { position: relative; }
 .ym_idx__num, .ym_idx__bag_lab { color: #ffc017; position: absolute; z-index: 100; top: .4rem; font-size: 14px; right: 0; text-align: center; left: 0; }
@@ -347,7 +347,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
         .date { color: #999; font-size: 12px; }
         .sp+.item{ margin-top: 5px; }
         .item+.sp{ margin-top: 5px; }
-        .item em { color: #e5a730;  }
+        .item em { color: #e5a730; }
     }
     &:after{ @include border(#999,4px); background-color: #fff; }
 }
@@ -355,3 +355,15 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .bs_notify.main.has_footer { bottom: 54px; }
 .bs_notify__footer { height: 54px; }
 .bs_notify__footer .btn_l { margin-top: 5px; border-radius: 4px; }
+
+.bs_service .cp_tab { top: 15px; background: transparent; }
+.bs_service .cp_tab__head_con { position: relative; z-index: 1; }
+.bs_service .cp_tab__head:after { @include border($color,0px); border-left: 0; border-right: 0; }
+.bs_service .cp_tab__head_item { position: relative; z-index: 1; }
+.bs_service .cp_tab__head_item.curr { color: #fff; }
+.bs_service .cp_tab__cursor { top: 0; height: 100%; }
+
+.bs_service__list { margin-top: 15px; background-color: #fff; overflow: hidden; }
+.bs_service__item { width: .8rem; height: .8rem; float: left; text-align: center; position: relative; }
+.bs_service__item img { width: .3rem; height: .3rem; }
+.bs_service__item .unread { position: absolute; top: .08rem; right: .18rem; position: absolute; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }

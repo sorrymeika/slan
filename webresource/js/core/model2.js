@@ -8,6 +8,7 @@ util.style('.sn-display { opacity: 1; -webkit-transition: opacity 300ms ease-out
 .sn-display-hide { opacity: 0; }');
 
 var toString = {}.toString;
+var LINKEDCHANGE = 'linkedchange';
 
 var ModelEvents = {
     tap: 'tap',
@@ -151,7 +152,7 @@ function setRefs(viewModel, el) {
 
 function updateRequireView(viewModel, el) {
     var id = el.getAttribute('sn-data');
-    var data = !id ? null : viewModel.fns[id].call(viewModel, viewModel.formatData(el.snData, el));
+    var data = !id ? null : viewModel.executeFunction(id, viewModel.formatData(el.snData, el));
     var instance;
 
     if (el.snRequireInstance) {
@@ -307,6 +308,46 @@ function closestElement(el, fn) {
     return null;
 }
 
+function linkModels(model, value, key) {
+    var root = model.root;
+
+    var link = {
+        childModelKey: key,
+        childModel: value,
+        childRoot: value.root,
+        model: model,
+        cb: function() {
+
+            root.updateViewNextTick();
+        }
+    };
+
+    value.root.on(LINKEDCHANGE + ":" + value.cid, link.cb);
+
+    (value._linkedParents || (value._linkedParents = [])).push(link);
+    (root._linkedModels || (root._linkedModels = [])).push(link);
+}
+
+function unlinkModels(model, value) {
+    var root = model.root;
+    var link;
+    var linkedModels = root._linkedModels;
+    var linkedParents = value._linkedParents;
+    if (linkedModels && linkedParents) {
+
+        for (var i = linkedModels.length - 1; i >= 0; i--) {
+            link = linkedModels[i];
+            if (link.model == model && link.childModel == value) {
+                linkedModels.splice(i, 1);
+                linkedParents.splice(linkedParents.indexOf(link));
+                value.root.off(LINKEDCHANGE + ":" + value.cid, link.cb);
+                break;
+            }
+        }
+
+    }
+}
+
 
 function genFunction(expression) {
     if (!testRegExp(rmatch, expression)) return;
@@ -384,6 +425,8 @@ var Model = function(parent, key, data) {
         throw new Error('Model\'s parent mast be Collection or Model');
     }
 
+    this.cid = util.guid();
+
     this.type = typeof data == 'object' ? 'object' : 'value';
     this.data = this.type == 'object' ? $.extend({}, data) : data;
 
@@ -397,6 +440,46 @@ var Model = function(parent, key, data) {
 
 
 var ModelProto = {
+    _changedAndUpdateViewNextTick: function() {
+        if (this.changed) return;
+
+        var self = this;
+        this.changed = true;
+
+        if (this.parent instanceof Collection) {
+            this.parent._changedAndUpdateViewNextTick();
+        }
+
+        this.root.one('datachanged', function() {
+            self.changed = false;
+
+            self.key && self.root.trigger("datachanged:" + self.key);
+
+            self._linkedParents && self._linkedParents.length && self.root.trigger(LINKEDCHANGE + ":" + self.cid);
+
+        }).updateViewNextTick();
+    },
+
+    _setByKeys: function(cover, keys, val) {
+        var lastKey = keys.pop();
+        var model = this;
+        var tmp;
+
+        for (var i = 0, len = keys.length; i < len; i++) {
+            key = keys[i];
+
+            if (!(model.model[key] instanceof Model)) {
+                tmp = model.model[key] = new Model(model, key, {});
+                model.data[key] = tmp.data;
+
+                model = tmp;
+
+            } else {
+                model = model.model[key];
+            }
+        }
+        return model.set(cover, lastKey, val);
+    },
 
     findByKey: function(key) {
         if (this.key == key) return this;
@@ -417,7 +500,7 @@ var ModelProto = {
 
                     } else {
                         var linkedParents = model._linkedParents;
-                        if (linkedParents) {
+                        if (linkedParents && linkedParents.length) {
 
                             for (var i = 0, len = linkedParents.length; i < len; i++) {
                                 var childModelKey = linkedParents[i].childModelKey;
@@ -481,51 +564,23 @@ var ModelProto = {
         if (typeof key == 'string' && key.indexOf('.') != -1) {
             key = key.split('.');
         }
-        if ($.isArray(key)) {
-            var data = this.data;
+        var data;
+        if (Array.isArray(key)) {
+            data = this.data;
 
             for (var i = key[0] == 'this' ? 1 : 0, len = key.length; i < len; i++) {
                 if (!(data = data[key[i]]))
                     return null;
             }
-            return data;
+
+        } else if (key == 'this') {
+            return this.data;
+
+        } else {
+            data = this.data[key];
         }
-        return key == 'this' ? this : key == '' ? this.data : this.data[key];
-    },
 
-    _setByKeys: function(cover, keys, val) {
-        var lastKey = keys.pop();
-        var model = this;
-        var tmp;
-
-        for (var i = 0, len = keys.length; i < len; i++) {
-            key = keys[i];
-
-            if (!(model.model[key] instanceof Model)) {
-                tmp = model.model[key] = new Model(model, key, {});
-                model.data[key] = tmp.data;
-
-                model = tmp;
-
-            } else {
-                model = model.model[key];
-            }
-        }
-        return model.set(cover, lastKey, val);
-    },
-
-    _changedAndUpdateViewNextTick: function() {
-        if (this.changed) return;
-
-        var self = this;
-        this.changed = true;
-
-        this.root.one('datachanged', function() {
-            self.changed = false;
-
-            self.root.trigger("datachanged:" + self.key);
-
-        }).updateViewNextTick();
+        return typeof data == 'object' ? $.extend(true, Array.isArray(data) ? [] : {}, data) : data;
     },
 
     //[cover,object]|[cover,key,val]|[key,va]|[object]
@@ -607,18 +662,8 @@ var ModelProto = {
                     model[attr] = value;
                     data[attr] = value.data;
 
-                    var link = {
-                        childModelKey: self.key ? self.key + '.' + attr : attr,
-                        childModel: value,
-                        childRoot: value.root,
-                        model: this,
-                        root: root
-                    };
+                    linkModels(self, value, model.key ? model.key + '.' + attr : attr);
 
-                    (value._linkedParents || (value._linkedParents = [])).push(link);
-
-                    (value.root._linked || (value.root._linked = [])).push(link);
-                    (root._linkedModels || (root._linkedModels = [])).push(link);
                     hasChange = true;
 
                 } else if (origin instanceof Model) {
@@ -646,11 +691,13 @@ var ModelProto = {
                     switch (toString.call(value)) {
                         case '[object Object]':
                             value = new Model(this, attr, value);
+                            model[attr] = value;
                             data[attr] = value.data;
                             break;
 
                         case '[object Array]':
                             value = new Collection(this, attr, value);
+                            model[attr] = value;
                             data[attr] = value.data;
                             break;
 
@@ -659,7 +706,6 @@ var ModelProto = {
                             root.trigger("change:" + (this.key ? this.key + "." + attr : attr), value);
                             break;
                     }
-                    model[attr] = value;
 
                     if (!hasChange) hasChange = true;
                 }
@@ -717,13 +763,29 @@ Collection.prototype = {
         return this.data.length;
     },
 
-    getAll: function(i) {
+    map: function(fn) {
+        return util.map(this.getAll(), fn);
+    },
+
+    indexOf: function(key, val) {
+        return util.indexOf(this.data, key, val);
+    },
+
+    lastIndexOf: function(key, val) {
+        return util.lastIndexOf(this.data, key, val);
+    },
+
+    getAll: function() {
         return $.extend(true, [], this.data);
     },
 
     get: function(i) {
         if (i == undefined) return this.getAll();
 
+        return this.models[i].get();
+    },
+
+    _: function(i) {
         return this.models[i];
     },
 
@@ -741,12 +803,29 @@ Collection.prototype = {
 
             var i = 0;
             var hasChange = this.changed;
+            var item;
 
             this.each(function(model) {
-                model.set(true, data[i]);
+                item = data[i];
 
-                if (!hasChange && model.changed) {
-                    hasChange = true;
+                if (item instanceof Model) {
+
+                    if (item != model) {
+                        if (!hasChange) {
+                            hasChange = true;
+                        }
+                        unlinkModels(this, model);
+                        linkModels(this, item, this.key + '^child');
+
+                        this.models[i] = item;
+                        this.data[i] = item.data;
+                    }
+
+                } else {
+                    model.set(true, item);
+                    if (!hasChange && model.changed) {
+                        hasChange = true;
+                    }
                 }
 
                 i++;
@@ -764,37 +843,48 @@ Collection.prototype = {
 
     add: function(data) {
         var model;
-        var length;
+        var isArray = Array.isArray(data);
 
-        if (!$.isArray(data)) {
+        if (!isArray) {
             data = [data];
         }
         var dataLen = data.length;
+        var results = [];
 
         if (dataLen) {
             for (var i = 0; i < dataLen; i++) {
                 var dataItem = data[i];
-                length = this.models.length;
-                model = new Model(this, length, dataItem);
+
+                if (dataItem instanceof Model) {
+
+                    linkModels(this, dataItem, this.key + '^child');
+                    model = dataItem;
+                } else {
+                    model = new Model(this, this.models.length, dataItem);
+                }
 
                 this.models.push(model);
                 this.data.push(model.data);
+
+                results.push(model);
             }
 
             this._changedAndUpdateViewNextTick();
         }
-        return this;
+        return isArray ? results : results[0];
     },
 
-    update: function(arr, primaryKey) {
+    //@updateType=undefined:collection中存在既覆盖，不存在既添加|true:根据arr更新，不在arr中的项将被删除|false:只更新collection中存在的
+    update: function(arr, primaryKey, updateType) {
         var fn;
         var length = this.models.length;
 
         if (!length) {
-            return this.add(arr);
+            this.add(arr);
+            return this;
         }
 
-        if (typeof primaryKey === 'string' && primaryKey !== undefined) {
+        if (typeof primaryKey === 'string') {
             fn = function(a, b) {
                 return a[primaryKey] == b[primaryKey];
             }
@@ -802,13 +892,15 @@ Collection.prototype = {
 
         var item;
         var arrItem;
+        var exists;
         var appends = [];
 
         if (!Array.isArray(arr)) arr = [arr];
         else arr = [].concat(arr);
 
-        for (var i = 0, length = length - 1; i <= length; i++) {
+        for (var i = length - 1; i >= 0; i--) {
             item = this.data[i];
+            exists = false;
 
             for (var j = 0, n = arr.length; j < n; j++) {
                 arrItem = arr[j];
@@ -817,12 +909,17 @@ Collection.prototype = {
                     if (fn.call(this, item, arrItem)) {
                         this.models[i].set(arrItem);
                         arr[j] = undefined;
+                        exists = true;
                         break;
                     }
-                    if (i == length) {
+                    if (i == 0 && updateType !== false) {
                         appends.push(arrItem);
                     }
                 }
+            }
+
+            if (updateType === true && !exists) {
+                this.splice(i, 1);
             }
         }
 
@@ -848,8 +945,13 @@ Collection.prototype = {
         for (var i = 0, dataLen = data.length; i < dataLen; i++) {
             var dataItem = data[i];
 
-            count = index + i;
-            model = new Model(this, count, dataItem);
+            if (dataItem instanceof Model) {
+                model = dataItem;
+                linkModels(this, model, this.key + '^child');
+            } else {
+                count = index + i;
+                model = new Model(this, count, dataItem);
+            }
 
             this.models.splice(count, 0, model);
             this.data.splice(count, 0, model.data);
@@ -858,17 +960,26 @@ Collection.prototype = {
         this._changedAndUpdateViewNextTick();
     },
 
-
     splice: function(start, count, data) {
         if (!count) count = 1;
+        var root = this.root;
+        var spliced = this.models.splice(start, count);
+        if (root._linkedModels) {
+            var self = this;
 
-        this.models.splice(start, count);
+            spliced.forEach(function(model) {
+                model._linkedParents && unlinkModels(self, model);
+            });
+        }
+
         this.data.splice(start, count);
 
         if (data)
             this.insert(start, data);
         else
             this._changedAndUpdateViewNextTick();
+
+        return spliced;
     },
 
     //@[key,val]|function(){return true|false;}|Model
@@ -981,13 +1092,32 @@ function RepeatSource(viewModel, el, parent) {
 
     var orderByCode = match[5];
     if (orderByCode) {
-        self.orderBy = [];
+        if (orderByCode.indexOf('this.') == 0) {
+            self.orderBy = orderByCode.substr(5).replace(/\(.*\)/, '');
 
-        orderByCode.split(/\s*,\s*/).forEach(function(sort) {
-            sort = sort.split(' ');
+        } else {
+            self.orderBy = [];
 
-            self.orderBy.push(sort[0], sort[1] == 'desc' ? false : true);
-        });
+            orderByCode.split(/\s*,\s*/).forEach(function(sort) {
+                sort = sort.split(' ');
+                var sortKey = sort[0];
+                var sortType = sort[1];
+
+                if (sortKey.charAt(0) == '{' && sortKey.charAt(sortKey.length - 1) == '}') {
+                    sortKey = viewModel.createFunction(sortKey).id;
+                }
+
+                if (sortType.charAt(0) == '{' && sortType.charAt(sortType.length - 1) == '}') {
+                    sortType = viewModel.createFunction(sortType).id;
+
+                } else {
+                    sortType = sortType == 'desc' ? false : true;
+                }
+
+                self.orderBy.push(sortKey, sortType);
+            });
+        }
+
     }
 
     var replacement = document.createComment(collectionKey);
@@ -1006,7 +1136,7 @@ function RepeatSource(viewModel, el, parent) {
 
     } else if (parentAlias == 'this') {
         this.isFn = true;
-        this.fid = viewModel.getFunctionId('{' + collectionKey + '}').id;
+        this.fid = viewModel.createFunction('{' + collectionKey + '}').id;
 
         collectionKey = collectionKey.replace(/\./g, '/');
 
@@ -1055,7 +1185,6 @@ function ViewModel(el, data, children) {
 
     this.data = $.extend({}, this.defaultData, data);
 
-
     this.model = {};
     this.repeats = {};
     this._expressions = {
@@ -1074,7 +1203,7 @@ function ViewModel(el, data, children) {
 
 ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
-    getDataFromElement: function(el, modelName) {
+    getDataByElement: function(el, modelName) {
         var attrs = modelName.split('.');
         var model;
 
@@ -1086,7 +1215,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         return model.get(attrs);
     },
 
-    setDataFromElement: function(el, modelName, value) {
+    setDataByElement: function(el, modelName, value) {
         var attrs = modelName.split('.');
         var model;
 
@@ -1120,7 +1249,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             snData.e = e;
 
-            var res = this.fns[eventCode].call(this, snData);
+            var res = this.executeFunction(eventCode, snData);
 
             return res;
         }
@@ -1128,7 +1257,21 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
     initialize: util.noop,
 
-    getFunctionId: function(expression) {
+    observe: function(key, fn) {
+        if (arguments.length == 1) {
+            fn = key;
+            key = null;
+        } else {
+            key = ':' + key;
+        }
+        return this.on('datachanged' + key, fn);
+    },
+
+    executeFunction: function(functionId, data) {
+        return this.fns[functionId].call(this, data);
+    },
+
+    createFunction: function(expression) {
         if (!expression) return null;
 
         expression = expression.replace(/^\s+|\s+$/g, '');
@@ -1163,7 +1306,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var self = this;
 
         if (el.nodeType == 3) {
-            var fid = self.getFunctionId(el.textContent);
+            var fid = self.createFunction(el.textContent);
 
             if (fid) {
                 el.snBinding = {
@@ -1206,7 +1349,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                             val = '{' + val + '}';
                         }
                     case attr.replace(rSnAttr):
-                        var fid = self.getFunctionId(val);
+                        var fid = self.createFunction(val);
 
                         if (attr == "sn-data" && fid) {
                             el.setAttribute(attr, fid.id);
@@ -1257,9 +1400,9 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                                                                         return match;
 
                                                                     })*/
-                                    .replace(rset, 'this.setDataFromElement(e.currentTarget,"$1",$2)');
+                                    .replace(rset, 'this.setDataByElement(e.currentTarget,"$1",$2)');
 
-                                var fid = self.getFunctionId('{' + content + '}');
+                                var fid = self.createFunction('{' + content + '}');
                                 if (fid) {
                                     el.setAttribute(attr, fid.id);
                                 }
@@ -1322,7 +1465,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     break;
                 case "sn-if":
                 case "sn-else-if":
-                    var val = self.fns[attrsBinding[key]].call(self, data);
+                    var val = self.executeFunction(attrsBinding[key], data);
 
                     if (util.isFalse(val)) {
                         if (el.parentNode) {
@@ -1349,7 +1492,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
             attr = keys[i];
 
-            var val = self.fns[attrsBinding[attr]].call(self, data);
+            var val = self.executeFunction(attrsBinding[attr], data);
 
             if (attrs[attr] === val) continue;
             attrs[attr] = val;
@@ -1494,7 +1637,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         if (repeatSource.isFn) {
 
-            collectionData = this.fns[repeatSource.fid].call(this, this.formatData(parentSnData, el));
+            collectionData = this.executeFunction(repeatSource.fid, this.formatData(parentSnData, el));
         }
 
         if (!collection) {
@@ -1586,28 +1729,42 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
         });
 
-        if (orderBy && orderBy.length) {
+        if (orderBy) {
 
-            list.sort(function(am, bm) {
-                var ret = 0;
-                var isDesc;
-                var sort;
-                var a, b;
+            if (typeof orderBy == 'string') {
+                list.sort(this[orderBy]);
 
-                for (var i = 0; i < orderBy.length; i += 2) {
-                    sort = orderBy[i];
-                    isDesc = orderBy[i + 1] == false;
+            } else {
+                orderBy = orderBy.map(function(item) {
+                    if (typeof item === 'number') {
 
-                    a = am.model.data[sort];
-                    b = bm.model.data[sort];
+                        return self.executeFunction(item, self.formatData(parentSnData, el));
+                    }
+                    return item;
+                });
 
-                    ret = isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
 
-                    if (ret != 0) return ret;
-                }
+                list.sort(function(am, bm) {
+                    var ret = 0;
+                    var isDesc;
+                    var sort;
+                    var a, b;
 
-                return ret;
-            });
+                    for (var i = 0; i < orderBy.length; i += 2) {
+                        sort = orderBy[i];
+                        isDesc = orderBy[i + 1] == false;
+
+                        a = am.model.data[sort];
+                        b = bm.model.data[sort];
+
+                        ret = isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
+
+                        if (ret != 0) return ret;
+                    }
+
+                    return ret;
+                });
+            }
         }
 
         list.forEach(function(item, index) {
@@ -1655,12 +1812,6 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             return updateNode(self, el);
         });
 
-        if (this._linked) {
-            this._linked.forEach(function(link) {
-                !link.root._nextTick && link.root.updateView();
-            })
-        }
-
         console.timeEnd('updateView');
 
         this.viewDidUpdate && this.viewDidUpdate();
@@ -1693,7 +1844,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     break;
             }
 
-            self.setDataFromElement(target, target.getAttribute(self.snModelKey), target.value);
+            self.setDataByElement(target, target.getAttribute(self.snModelKey), target.value);
         });
 
         this._bindElement($el);
@@ -1861,12 +2012,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
         var children = this._linkedModels;
         if (children) {
             for (var i = 0, len = children.length; i < len; i++) {
-                var link = children[i]
-                var linked = link.childRoot._linked;
-                var linkedParents = link.childModel._linkedParents;
+                var link = children[i];
+                var childModel = link.childModel;
+                var linkedParents = childModel._linkedParents;
 
-                linked.splice(linked.indexOf(link), 1);
                 linkedParents.splice(linkedParents.indexOf(link), 1);
+                childModel.root.off(LINKEDCHANGE + ':' + childModel.cid, link.cb);
             }
         }
 

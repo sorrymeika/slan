@@ -21,6 +21,8 @@ var quan = require('../logical/quan');
 var messagesList = require('../models/messagesList');
 var user = require('../models/user');
 
+var friends = require('models/friends');
+
 var userLogical = require('../logical/user');
 var ym = require('logical/yunmi');
 var auth = require('../logical/auth');
@@ -28,6 +30,7 @@ var contact = require('../logical/contact');
 var business = require('../logical/business');
 
 var businessModel = require('models/business');
+var businessGroup = businessModel.getGroups();
 
 module.exports = Activity.extend({
 
@@ -56,11 +59,28 @@ module.exports = Activity.extend({
             messagesList: messagesList,
             user: user,
             tab: 1,
-            recommendIndex: 0
+            recommendIndex: 0,
+            business: businessGroup
         });
 
         model.openEnt = function() {
-            bridge.openInApp("娱乐", 'http://movie.miguvideo.com/mobile/app/index.jsp#/level1?channelId=100800140000013');
+            if (this.get('tab') != 2) {
+
+                this.set({
+                    tab: 2
+                }).next(function() {
+                    this.set({
+                        iframeHeight: this.refs.ent.clientHeight
+                    })
+                    var iframe = this.refs.iframe;
+                    if (!iframe.src) {
+
+                        iframe.onload = function() {}
+                        self.bindScrollTo(model.refs.ent);
+                        iframe.src = 'http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006';
+                    }
+                });
+            }
         };
 
         model.showQuanMenu = function() {
@@ -133,7 +153,7 @@ module.exports = Activity.extend({
         }
 
         model.enterShop = function() {
-            bridge.openInApp('http://wap.fj.10086.cn/servicecb/touch/index.jsp');
+
         }
 
         model.hideTimeout = function() {
@@ -186,51 +206,17 @@ module.exports = Activity.extend({
             }
         });
 
-        var handleBusiness = function() {
-            var data = {};
-            for (var i = 1; i <= 4; i++) {
-                data['type' + i + 'data'] = {
-                    unread: 0,
-                    list: []
-                };
-            }
-            var notifications = businessModel.get('notifications');
-            businessModel._('list').each(function(busiModel) {
-                var busi = busiModel.get();
-
-                var item = data['type' + busi.type + 'data'];
-                item.title = busi.title;
-                item.content = busi.content;
-                item.send_date = busi.send_date ? util.formatDate(busi.send_date, 'short') : '';
-                item.list.push(busi);
-
-                var unread = 0;
-
-                for (var i = 0, len = notifications.length; i < len; i++) {
-                    if (notifications[i] && !notifications[i].isRead && notifications[i].business_id == busi.business_id) {
-                        unread++;
-                    }
-                }
-
-                item.unread += unread;
-
-                if (busi.unread != unread) {
-                    busiModel.set('unread', unread);
-                }
-            });
-
-            model.set(data);
-        }
-        businessModel.on('datachanged', handleBusiness);
-
         this.onceTrue('Show', function() {
             if (auth.getAuthToken() && userLogical.getMe()) {
 
-                business.getAllBusinessAndUnread().then(handleBusiness);
+                contact.friends();
+
+                business.getAllBusinessAndUnread();
 
                 this.getYunmi();
 
-                bridge.getDeviceToken(function(token) {
+                bridge.getDeviceToken(function(res) {
+                    var token = res.token;
                     var storedToken = util.store('device_token');
                     if (token != 'get_token_failure' && token != storedToken) {
                         userLogical.updateDeviceToken(token).then(function() {

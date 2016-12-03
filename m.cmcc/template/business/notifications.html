@@ -1,9 +1,9 @@
 <header>
     <div class="head_back" sn-tap="this.back()"></div>
-    <div class="head_title">{title}</div>
+    <div class="head_title" sn-tap="desc=!desc">{title}</div>
 </header>
 <div class="main bs_notify{business_id==100001?' has_footer':''}" ref="main">
-    <div class="bs_notify__item" sn-repeat="item in data">
+    <div class="bs_notify__item" sn-repeat="item in data|orderBy:send_date {desc}">
         <div class="con">
             <p class="name">{item.title}</p>
             <p class="date lh_xs">{util.formatDate(item.send_date,'short')}</p>

@@ -1,3 +1,4 @@
+var $ = require('$');
 var util = require('util');
 var vm = require('core/model2');
 var Http = require('core/http');
@@ -72,71 +73,46 @@ var contact = Event.mixin({
         });
     },
 
-    getCachedContacts: function() {
-        var cached = friends.getContacts();
-
-        if (cached.size() == 0) {
-            return this.contactList();
-        } else {
-            return new Promise(function(resolve, reject) {
-
-                resolve({
-                    success: true,
-                    data: cached.getAll()
-                });
-            });
-        }
-    },
-
-    contactList: function() {
+    contactList: function(options) {
         return new Promise(function(resolve, reject) {
 
-            bridge.contact.getContacts(function(result) {
+            bridge.contact.getContacts(options, function(result) {
 
                 if (result.success) {
                     var data = result.data;
                     var ids = [];
+                    var list = [];
 
                     data.forEach(function(item) {
-                        if (/^1\d{10}$/.test(item.phoneNumber)) {
+                        if (/^(134|135|136|137|138|139|147|150|151|152|157|158|159|178|182|183|184|187|188)\d{8}$/.test(item.phoneNumber)) {
                             ids.push(item.phoneNumber);
+                            list.push(item);
                         }
                     });
 
-                    if (ids.length) {
-                        Http.post("/userinfo/contacts", {
-                            ids: ids.join(',')
+                    friends.getContacts().update(list, 'phoneNumber', true);
 
-                        }).then(function(res) {
-                            data.forEach(function(item) {
-                                var userinfo = util.first(res.data, 'account', item.phoneNumber);
-                                userinfo && Object.assign(item, userinfo);
-                            });
-
-                            friends.getContacts().set(data);
-
-                            resolve({
-                                success: true,
-                                data: data
-                            });
-                        }, reject);
-
-                    } else {
-                        resolve({
-                            success: true,
-                            data: []
-                        });
-                    }
-
+                    util.store('contacts', list);
 
                 } else {
                     reject(result);
                 }
-
             });
-
         });
 
+    },
+
+    getContactsUser: function(phoneNumbers) {
+        if (phoneNumbers.length) {
+            return Http.post("/userinfo/contacts", {
+                ids: phoneNumbers.join(',')
+
+            }).then(function(res) {
+                friends.getContacts().update(res.data, function(a, b) {
+                    return a.phoneNumber == b.account;
+                });
+            });
+        }
     },
 
     backup: function() {
@@ -152,11 +128,9 @@ var contact = Event.mixin({
                 Http.post('/contact_backup/backup', {
                     data: JSON.stringify(result.data)
                 });
-
             });
 
         });
-
     },
 
     acceptFriend: function(user_id) {
@@ -183,27 +157,10 @@ var contact = Event.mixin({
         });
     },
 
-    getCachedFriends: function() {
-        var cached = friends.getFriends();
-
-        if (cached.size() == 0) {
-            return this.friends();
-        } else {
-            return new Promise(function(resolve, reject) {
-
-                resolve({
-                    success: true,
-                    data: cached.getAll()
-                });
-            });
-        }
-
-    },
-
     friends: function() {
         return Http.post('/friends/getFriends').then(function(res) {
 
-            friends.getFriends().set(res.data);
+            friends.getFriends().update(util.map(res.data, ['avatars', 'friends_ext', 'user_id', 'user_name', 'account']), 'user_id', true);
 
             return res;
         });
@@ -213,6 +170,16 @@ var contact = Event.mixin({
         return Http.post('/friends/setFriendMemo', {
             friend_id: friend_id,
             memo: memo
+        }).then(function(res) {
+
+            friends.getFriends().update({
+                user_id: friend_id,
+                friends_ext: {
+                    memo: memo
+                }
+            }, 'user_id')
+
+            return res;
         });
     },
 
@@ -220,6 +187,15 @@ var contact = Event.mixin({
 
         return Http.post('/friends/getById', {
             friend_id: user_id
+
+        }).then(function(res) {
+
+            friends.getFriends().update($.extend(res.friend, res.data, {
+                friends_ext: res.ext
+
+            }), 'user_id');
+
+            return res;
         });
     },
 

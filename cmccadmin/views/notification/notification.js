@@ -96,7 +96,7 @@ module.exports = Page.extend({
                 align: 'center',
                 valign: 'center',
                 render: function(data) {
-                    this.append($('<a class="js_click" href="/notification/update/' + data.notify_id + '">[修改]</a>'));
+                    //this.append($('<a class="js_click" href="/notification/update/' + data.notify_id + '">[修改]</a>'));
                     this.append(' <a href="javascript:;" data-id="' + data.notify_id + '" class="js_grid_delete">[删除]</a>');
                 }
             }]

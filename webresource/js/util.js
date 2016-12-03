@@ -455,6 +455,33 @@ var util = {
         return result;
     },
 
+    remove: function(arr, key, val) {
+        var length = arr.length;
+        var keyType = typeof key;
+        var result = [];
+
+        if (keyType === 'string' && arguments.length == 3) {
+            for (var i = length - 1; i >= 0; i--) {
+                if (arr[i][key] == val)
+                    arr.splice(i, 1);
+            }
+
+        } else if (keyType === 'function') {
+            for (var i = length - 1; i >= 0; i--) {
+                if (key(arr[i], i))
+                    arr.splice(i, 1);
+            }
+
+        } else {
+            for (var i = length - 1; i >= 0; i--) {
+                if (compareWith(key, arr[i]))
+                    arr.splice(i, 1);
+            }
+        }
+
+        return result;
+    },
+
     pick: function(obj, iteratee) {
         var result = {},
             key;

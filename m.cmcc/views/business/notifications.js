@@ -27,7 +27,7 @@ module.exports = Activity.extend({
         });
 
         model.enterShop = function() {
-            bridge.openInApp('http://wap.fj.10086.cn/servicecb/touch/index.jsp');
+            bridge.openInApp("福建移动营业厅", 'http://wap.fj.10086.cn/servicecb/touch/index.jsp');
         }
 
         model.enterDetail = function() {
@@ -49,19 +49,6 @@ module.exports = Activity.extend({
                     res.data.forEach(function(item) {
                         var details = item.details = [];
                         var feature = JSON.parse(item.feature);
-
-                        feature = {
-                            "product_type_name": "省内包时段",
-                            "product_name": "积分兑换省内流量30天档",
-                            "dun_value": "0000000000100000",
-                            "product_remain": "0",
-                            "product_use": "9831",
-                            "product_total": "9831",
-                            "product_unit": "1",
-                            "product_over": "0",
-                            "product_over_unit": "1",
-                            "timestamp": "2016-11-21 16:57:05"
-                        };
 
                         if (feature.dun_type) {
                             // 1. 余额提醒

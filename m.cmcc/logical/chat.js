@@ -5,6 +5,7 @@ var Event = require('core/event');
 var Promise = require('promise');
 
 var messagesList = require('models/messagesList');
+var friends = require('models/friends');
 var contact = require('logical/contact');
 
 var MESSAGETYPE = {
@@ -71,7 +72,7 @@ var chat = Event.mixin({
 
     record: function(is_send, friend_id, msg) {
 
-        var records = messagesList._('list');
+        var records = messagesList.getList();
         var record = records.find('user_id', friend_id);
 
         var recordData = {
@@ -81,27 +82,31 @@ var chat = Event.mixin({
         };
 
         if (!record) {
-            contact.person(friend_id).then(function(res) {
-                recordData.user_name = res.data.user_name;
-                recordData.avatars = res.data.avatars;
-                if (!is_send) {
-                    records.unread = 1;
-                }
-                records.add(recordData);
-            });
+            if (!is_send) {
+                recordData.unread = 1;
+            }
+
+            friend = friends.getFriend(friend_id);
+
+            if (friend.get('name_for_show')) {
+                recordData.avatars = friend.get('avatars');
+                recordData.user_name = friend.get('name_for_show');
+
+            } else {
+                contact.friends();
+            }
+
+            records.add(recordData);
 
         } else {
-
             if (!is_send) {
-                records.unread = (records.unread || 0) + 1;
+                recordData.unread = (recordData.unread || 0) + 1;
             } else {
-                records.unread = 0;
+                recordData.unread = 0;
             }
             record.set(recordData);
         }
     },
-
-    getUnreadMessages: function() {},
 
     getMessages: function(friend_id, last_msg_id) {
 

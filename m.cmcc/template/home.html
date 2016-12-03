@@ -1,17 +1,17 @@
 @helper notify(id,name) {
 <div class="flex hm-icons-notify@(id) item bd_b" sn-tap="showNotify@(id)=!showNotify@(id)">
-    <i class="unread" sn-if="type@(id)data.unread">+{type@(id)data.unread}</i>
+    <i class="unread" sn-if="business.type@(id)data.unread">+{business.type@(id)data.unread}</i>
     <div class="flexitem pl_m">
         <div class="name fs_m">@(name)</div>
-        <div class="fs_s cl_999 to_e con">{type@(id)data.title||'暂无提醒'}</div>
+        <div class="fs_s cl_999 to_e con">{business.type@(id)data.title||'暂无提醒'}</div>
     </div>
     <div class="pl_m">
-        <p class="date fs_s cl_999">{type@(id)data.send_date}</p>
+        <p class="date fs_s cl_999">{business.type@(id)data.send_date}</p>
         <p class="hm-icons-drop ta_r {showNotify@(id)?'show':''}"></p>
     </div>
 </div>
 <ul class="pr_m bg_f2" sn-if="showNotify@(id)">
-    <li class="flex subitem bd_b" sn-repeat="item in type@(id)data.list" data-forward="/business/{item.business_id}">
+    <li class="flex subitem bd_b" sn-repeat="item in business.type@(id)data.list" data-forward="/business/{item.business_id}">
         <i class="unread" sn-if="item.unread">+{item.unread}</i>
         <img sn-src="{sl.thumbnail(item.business_pic)}" />
         <div class="flexitem pl_m">
@@ -29,7 +29,7 @@
     <header class="flex {headBg?'header_app':'header_trans'} gl_anim" sn-if="tab==1">
         <a href="javascript:;" sn-tap="this.menu()" class="hm-icons-person h_bar pl_m pr_m"></a>
         <div class="flex_0"></div>
-        <div class="hm-icons-shop h_bar pl_m pr_m" sn-tap="this.enterShop()"></div>
+        <div class="hm-icons-shop h_bar pl_m pr_m" data-forward="/business/service"></div>
     </header>
     <header class="flex" sn-if="tab==3">
         <a href="javascript:;" sn-tap="this.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
@@ -51,8 +51,12 @@
         </div>
 
         <div class="hm_idx__life">
-            @this.helpers.notify(2,'通信提醒') @this.helpers.notify(1,'生活提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.notify(4,'社交提醒')
+            @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.notify(4,'社交提醒')
         </div>
+    </div>
+
+    <div sn-if="tab==2" class="hm_idx main" ref="ent">
+        <iframe ref="iframe" frameborder="0" style="width:{window.innerWidth}px;height:{iframeHeight}px" />
     </div>
 
     <div sn-if="tab==3" class="hm_quan__main" ref="tab" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">

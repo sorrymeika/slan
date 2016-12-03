@@ -95,6 +95,8 @@ input.flexitem,input.flex_1,input.flex_0 { border: 0; height: 100%; background-c
 .ai_s { -webkit-box-align: start; align-items: flex-start; }
 .ai_c { -webkit-box-align: center; align-items: center; }
 .ai_b { -webkit-box-align: baseline; align-items: baseline; }
+.fd_c { -webkit-box-orient: vertical; flex-direction: column; }
+.fd_cr { -webkit-box-orient: vertical; -webkit-box-direction: reverse; flex-direction: column-reverse; }
 
 .of_h { overflow: hidden; }
 .of_v { overflow: visible; }

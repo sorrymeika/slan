@@ -226,10 +226,14 @@ exports.startWebServer = function(config) {
     });
 
     app.all('*.js', function(req, res, next) {
+        
         var filePath = req.url;
         var isRazorTpl = /\.(html|tpl|cshtml)\.js$/.test(filePath);
 
         fsc.readFirstExistentFile(_.map(config.projects, 'root').concat(config.path), isRazorTpl ? [filePath.replace(/\.js$/, '')] : [filePath, filePath + 'x'], function(err, text) {
+
+            console.log(filePath);
+
             if (err) {
                 next();
                 return;

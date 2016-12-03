@@ -1,7 +1,7 @@
 var $ = require('$');
 var model = require('core/model2');
 
-var Offline = model.ViewModel.extend({
+var Offline = model.Model.extend({
     el: '<div class="viewport offline" sn-transition-end="this._hide()">\
         <div class="offline_con">\
             <div class="ico"></div>\

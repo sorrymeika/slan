@@ -8,57 +8,54 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var contact = require('logical/contact');
+var friends = require('models/friends').getFriends();
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
-        var routeData = this.route.data;
         var friend_id = this.route.params.id;
+        var loader = this.loader = new Loader(this.$el);
+
+        var friend = friends.find('user_id', friend_id);
+
+        console.log(friend);
+
+        var memo = friend.get('friends_ext.memo');
 
         var model = this.model = new Model(this.$el, {
             title: '备注',
-            text: routeData.memo,
-            origin: routeData.memo
+            text: memo,
+            origin: memo
         });
 
-        model.save = function () {
+        model.save = function() {
+            loader.showLoading();
+
             var memo = this.get('text');
-            contact.setFriendMemo(friend_id, memo).then(function () {
+
+            contact.setFriendMemo(friend_id, memo).then(function() {
                 Toast.showToast("修改成功！");
-                self.setResult("friendMemoChange:" + friend_id, memo);
                 model.back();
 
-            }).catch(function (e) {
+            }).catch(function(e) {
                 Toast.showToast(e.message);
+
+            }).then(function() {
+                loader.hideLoading();
             });
         }
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
-
-        var loader = this.loader = new Loader(this.$el);
-
-        loader.showLoading();
-
-        Promise.all([this.waitLoad()]).then(function (results) {
-
-            self.bindScrollTo(model.refs.main);
-
-        }).catch(function (e) {
-            Toast.showToast(e.message);
-
-        }).then(function () {
-            loader.hideLoading();
-        });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

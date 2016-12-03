@@ -1,0 +1,20 @@
+@use "widget/tab" as tab; @helper notify(id) {
+<div class="pt_1">
+    <ul class="bs_service__list bd_t">
+        <li class="bs_service__item bd_br flex jc_c fd_c" sn-repeat="item in group.type@(id)data.list" data-forward="/business/{item.business_id}">
+            <i class="unread" sn-if="item.unread">+{item.unread}</i>
+            <img sn-src="{sl.thumbnail(item.business_pic)}" />
+            <div class="mt_s fs_m">{item.business_name}</div>
+        </li>
+    </ul>
+</div>
+}
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main bs_service" ref="main">
+    <div sn-require="widget/tab" sn-data="{{items:['生活提醒','通信提醒']}}">
+        @this.helpers.notify(2) @this.helpers.notify(1)
+    </div>
+</div>

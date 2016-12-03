@@ -21,9 +21,9 @@ var yunmi = Event.mixin({
         return Http.post("/user_yunmi/getYunmi");
     },
 
-    getUsersYunmi: function(ids) {
+    getUsersYunmi: function(user_ids) {
         return Http.post("/user_yunmi/getUsersYunmi", {
-            ids: ids
+            ids: user_ids
         });
     },
 

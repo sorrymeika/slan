@@ -36,7 +36,7 @@ define(function(require, exports, module) {
             openInApp: function(title, url) {
 
                 hybrid('openInApp', url == undefined ? {
-                    url: url
+                    url: title
                 } : {
                     title: title,
                     url: url
@@ -115,10 +115,16 @@ define(function(require, exports, module) {
             },
 
             contact: {
-                getContacts: function(fn) {
-                    hybrid('contact', {
-                        type: 'getContacts'
-                    }, fn);
+                //@options={ position: 0, size: 50, filter="phoneNumber='13323433332'" }
+                getContacts: function(options, fn) {
+                    if (arguments.length == 1) {
+                        fn = options, options = {};
+                    } else if (!options) {
+                        options = {};
+                    }
+                    options.type = "getContacts";
+
+                    hybrid('contact', options, fn);
                 },
 
                 setContacts: function(data, fn) {
@@ -328,6 +334,9 @@ define(function(require, exports, module) {
                                 }, {
                                     phoneNumber: '13900914293',
                                     contactName: 'asdf2'
+                                }, {
+                                    phoneNumber: '18755334433',
+                                    contactName: 'asdf哈'
                                 }, {
                                     phoneNumber: '112-13900914293',
                                     contactName: 'asdaaf2'

@@ -11,7 +11,9 @@ var popup = require('widget/popup');
 var yunMiRules = require('components/yunMiRules');
 var ym = require('logical/yunmi');
 var contact = require('logical/contact');
-var friendsModel = require('models/friends');
+
+var friends = require('models/friends');
+
 
 module.exports = Activity.extend({
 
@@ -229,54 +231,110 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        contact.getCombinedContacts().then(function(res) {
-            var friends = res;
-            var shakeResult;
+        var friendsCollection = friends.getFriends();
+        var size = Math.min(util.random(3, 6), friendsCollection.size());
+        var tmp = [];
+        var shakeResult = [];
 
-            if (friends.length <= 6) {
-                shakeResult = friends;
-            } else {
-                shakeResult = [];
-                for (var i = 6; i > 0; i--) {
-                    var index = util.random(friends.length - 1);
+        for (var i = friendsCollection.size() - 1; i >= 0; i--) {
+            tmp.push(i);
+        }
 
-                    shakeResult.push(friends.splice(index, 1)[0]);
-                }
-            }
+        for (var i = size; i > 0; i--) {
+            var index = util.random(tmp.length - 1);
+            index = tmp.splice(index, 1)[0];
 
-            var ids = util.map(util.exclude(shakeResult, 'user_id', undefined), 'user_id');
+            shakeResult.push(friendsCollection._(index).set({
+                isFriend: true
+            }));
+        }
 
-            if (!ids.length) {
-                model.set({
-                    shakeResult: shakeResult
-                });
-                return;
-            }
-
-            return ym.getUsersYunmi(ids.join(',')).then(function(res) {
-
-                if (res.data) {
-                    res.data.forEach(function(item) {
-                        var first = util.first(shakeResult, 'user_id', item.user_id);
-                        first.amount = item.amount;
-                        first.yunmi_id = item.yunmi_id;
-                    });
-                }
-
-                console.log(shakeResult);
-
-                model.set({
-                    shakeResult: shakeResult
-                });
-            });
-
-        }).catch(function(e) {
-            Toast.showToast(e.message);
-
-        }).then(function() {
-            loader.hideLoading();
+        model.set({
+            shakeResult: shakeResult
         });
 
+        shakeResult = model._('shakeResult');
+
+        var updateShakeYunmi = function(ids) {
+            if (ids.length) {
+
+                ym.getUsersYunmi(ids.join(',')).then(function(res) {
+
+                    shakeResult.update(res.data.map(function() {
+                        return {
+                            user_id: user_id,
+                            amount: amount,
+                            yunmi_id: yunmi_id
+                        }
+
+                    }), 'user_id');
+                }).catch(function(e) {
+                    Toast.showToast(e.message);
+
+                }).then(function() {
+                    loader.hideLoading();
+                });
+
+            } else {
+                loader.hideLoading();
+            }
+        }
+
+        var left = 6 - size;
+
+        if (left > 0) {
+
+            var randomContacts = function() {
+                var tmp = [];
+                var contactsCollection = friends.getContacts();
+                var phoneNumber = [];
+
+                for (var i = contactsCollection.size() - 1; i >= 0; i--) {
+                    tmp.push(i);
+                }
+
+                for (var i = left; i > 0 && tmp.length;) {
+                    var index = util.random(tmp.length - 1);
+                    index = tmp.splice(index, 1)[0];
+
+                    var contactMod = contactsCollection._(index);
+
+                    if (contactMod) {
+                        if (-1 == friendsCollection.indexOf('account', contactMod.get('phoneNumber'))) {
+
+                            phoneNumber.push(contactMod.get('phoneNumber'));
+                            shakeResult.add(contactMod);
+
+                            i--;
+                        }
+                    }
+                }
+
+                if (phoneNumber.length) {
+                    contact.getContactsUser(phoneNumber);
+                }
+                updateShakeYunmi(shakeResult.map('user_id'));
+            }
+
+            if (friends.getContacts().size() == 0) {
+                contact.contactList({
+                    size: 50
+
+                }).then(function() {
+
+                    randomContacts();
+
+                }, function() {
+                    updateShakeYunmi(shakeResult.map('user_id'));
+                });
+
+            } else {
+                randomContacts();
+            }
+
+        } else {
+            updateShakeYunmi(shakeResult.map('user_id'));
+        }
 
     }
 });

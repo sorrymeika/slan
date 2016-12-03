@@ -14,18 +14,18 @@
     </div>
     <ul class="mt_l bd_t fs_m bg_fff">
         <li class="bd_b lh_l pl_m gl_arrow" sn-tap="this.toMemo()">
-            备注：{ext.memo}
+            备注：{person.friends_ext.memo}
         </li>
     </ul>
 
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m flex">
         <p class="flexitem">好友留言信息</p>
-        <p class="mr_m cp_switch{person.enable_leave_msg?' cp_switch_on':''}" sn-tap="person.enable_leave_msg=!person.enable_leave_msg"></p>
+        <p class="mr_m cp_switch{person.friends_ext.enable_leave_msg?' cp_switch_on':''}" sn-tap="person.friends_ext.enable_leave_msg=!person.friends_ext.enable_leave_msg"></p>
     </div>
 
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m flex">
         <p class="flexitem">推送到生活首页</p>
-        <p class="mr_m cp_switch{person.enable_push?' cp_switch_on':''}" sn-tap="person.enable_push=!person.enable_push"></p>
+        <p class="mr_m cp_switch{person.friends_ext.enable_push?' cp_switch_on':''}" sn-tap="person.friends_ext.enable_push=!person.friends_ext.enable_push"></p>
     </div>
 
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m" sn-tap="this.clearHistory()">

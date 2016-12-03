@@ -44,7 +44,7 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.getCachedFriends(), this.waitLoad()]).then(function(results) {
+        Promise.all([contact.getFriends(), this.waitLoad()]).then(function(results) {
 
             var friendList = results[0].data;
             var selected = model.get('friends');

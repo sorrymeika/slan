@@ -7,16 +7,20 @@ var messagesList = model2.createModel({
         list: []
     },
 
-    getFriendLastMessage: function (friend_id) {
+    getList: function() {
+        return this._('list');
+    },
 
-        var records = this._('list');
+    getFriendLastMessage: function(friend_id) {
+
+        var records = this.getList();
         var record = records.find('user_id', friend_id);
 
         return record;
     }
 });
 
-messagesList.on('datachanged', function () {
+messagesList.observe(function() {
     util.store('messagesList', this.data);
 });
 

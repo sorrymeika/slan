@@ -78,6 +78,7 @@
         "/yunmi/select_user": "yunmi/select_user",
         "/yunmi/trade/{id:\\d+}": "yunmi/trade",
         "/business/{id:\\d+}": "business/notifications",
+        "/business/service": "business/service",
         "/hdh/index": "hdh/hdh_index",
         "/hdh/call": "hdh/hdh_call",
         "/hdh/subphone/{id:\\d+}": "hdh/hdh_subphone"

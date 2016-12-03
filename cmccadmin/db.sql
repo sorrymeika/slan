@@ -195,7 +195,7 @@ create table quan_msg_black (--朋友圈信息屏蔽
 
 create sequence quan_msg_black_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
-create table friends (--好友 --props=String user_name,String avatars,int is_send
+create table friends (--好友 --props=String user_name,String avatars,int is_send --children=friends_ext
     fid number(15) primary key,--自增id
     friend_id number(10),--好友id
     user_id number(10),--发起请求方

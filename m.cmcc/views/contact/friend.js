@@ -9,6 +9,7 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var contact = require('logical/contact');
+var friends = require('models/friends');
 
 
 module.exports = Activity.extend({
@@ -18,9 +19,14 @@ module.exports = Activity.extend({
         var type = this.route.query.type;
         var personId = this.route.params.id;
 
+        var firend = friends.getFriend(personId);
+
+        console.log(firend);
+
         var model = this.model = new Model(this.$el, {
             title: '详细资料',
-            personId: personId
+            personId: personId,
+            person: firend
         });
 
         model.back = function() {
@@ -54,19 +60,12 @@ module.exports = Activity.extend({
         }
 
         model.toMemo = function() {
-            self.forward('/contact/memo/' + personId, {
-                memo: this.get('ext.memo')
-            })
+            self.forward('/contact/memo/' + personId)
         }
 
         model.openPhoneCall = function() {
             bridge.system.openPhoneCall(this.get('person.account'));
         }
-
-        self.onResult("friendMemoChange:" + personId, function(e, memo) {
-            model.set('ext.memo', memo);
-        });
-
 
         var loader = this.loader = new Loader(this.$el);
 
@@ -74,11 +73,6 @@ module.exports = Activity.extend({
 
         Promise.all([contact.friend(personId), this.waitLoad()]).then(function(results) {
             var res = results[0];
-            model.set({
-                person: res.data,
-                ext: res.ext,
-                friend: res.friend
-            })
 
             self.bindScrollTo(model.refs.main);
 
