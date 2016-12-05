@@ -108,7 +108,7 @@ var rif = new XRegExp('^if\\s*\\(([^\\)]*)\\)\\s*{...}');
 var relse = new XRegExp('^\\s*(?:else\\s+if\\s*\\(([^\\)]*)\\)|else)\\s*{...}');
 var rcode = new XRegExp('{...}');
 
-var rdom = /<(\/{0,1}[a-zA-Z]+)(?:\s+[a-zA-Z1-9_-]+="[^"]*"|\s+[^\s]+)*?\s*(\/){0,1}\s*>/m;
+var rdom = /<\s*(\/{0,1}[a-zA-Z]+)(?:\s+[a-zA-Z1-9_-]+="[^"]*"|\s+[^\s]+)*?\s*(\/){0,1}\s*>/m;
 
 var isEmpty = function (c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';

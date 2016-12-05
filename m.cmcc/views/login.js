@@ -17,6 +17,8 @@ module.exports = Activity.extend({
     onCreate: function() {
         var self = this;
 
+        self.swipeRightBackAction = null;
+
         var model = this.model = new Model(this.$el, {
             smsTime: 0
         });
@@ -45,31 +47,31 @@ module.exports = Activity.extend({
 
             Loader.showLoading();
             /*
-                        new Http({
-                                    url: '/user/login',
-                                    params: auth.encryptParams({
-                                        account: phoneNo,
-                                        password: auth.md5(password),
-                                        token: "xxx"
-                                    })
-            
-                                }).request()
-                                    .then(function (res) {
-                                        auth.setAuthToken(res.data.tk);
-            
-                                        delete res.data.tk;
-            
-                                        auth.setUser(res.data);
-            
-                                        model.back();
-            
-                                    }).catch(function (e) {
-                                        Toast.showToast(res.message);
-            
-                                    }).then(function () {
-                                        Loader.hideLoading();
-                                    });
-            */
+             */
+            new Http({
+                    url: '/user/login',
+                    params: auth.encryptParams({
+                        account: phoneNo,
+                        password: auth.md5(password),
+                        token: "xxx"
+                    })
+
+                }).request()
+                .then(function(res) {
+                    auth.setAuthToken(res.data.tk);
+
+                    delete res.data.tk;
+
+                    auth.setUser(res.data);
+
+                    self.back('/');
+
+                }).catch(function(e) {
+                    Toast.showToast(e.message);
+
+                }).then(function() {
+                    Loader.hideLoading();
+                });
             bridge.cmcc.login(phoneNo, password, "sms", function(res) {
                 if (res.success) {
 
@@ -89,7 +91,7 @@ module.exports = Activity.extend({
 
                             auth.setUser(res.data);
 
-                            model.back();
+                            self.back('/');
 
                         }).catch(function(e) {
                             Toast.showToast(e.message);

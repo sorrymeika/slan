@@ -250,7 +250,7 @@ var Application = Component.extend(Object.assign(appProto, {
             }
 
             var hash = location.hash;
-            if (!that._currentActivity || that._currentActivity.path == "/") {
+            if (!that._currentActivity || that._currentActivity.path == "/" || that._currentActivity.path == options.loginPath) {
                 if (prepareExit) {
                     bridge.exit();
                 } else {

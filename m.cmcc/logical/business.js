@@ -55,7 +55,11 @@ var business = {
     },
 
     notificationsLoader: function(model, beforeRender) {
-        return Loader.pageLoader("/business/getNotifications", model, beforeRender);
+        return Loader.pageLoader({
+            url: "/business/getNotifications",
+            model: model,
+            beforeRender: beforeRender
+        });
     }
 }
 

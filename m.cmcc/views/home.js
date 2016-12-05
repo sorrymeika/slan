@@ -63,9 +63,17 @@ module.exports = Activity.extend({
             business: businessGroup
         });
 
-        model.openEnt = function() {
-            if (this.get('tab') != 2) {
+        model.getUserShowName = function(item) {
+            if (item.user_id == user.get('user_id')) return item.user_name || ('用户' + item.user_id);
+            
+            var friend = friends.getFriend(item.user_id);
+            return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
+        }
 
+        model.openEnt = function() {
+            bridge.ent.show('http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006');
+            /*
+            if (this.get('tab') != 2) {
                 this.set({
                     tab: 2
                 }).next(function() {
@@ -81,7 +89,22 @@ module.exports = Activity.extend({
                     }
                 });
             }
+            */
         };
+
+        $(window).on('ent_to_home', function() {
+            model.get('tab') != 1 && model.set({
+                tab: 1,
+                headBg: false
+            });
+            bridge.ent.hide();
+
+        }).on('ent_to_quan', function() {
+            model.get('tab') != 3 && model.set({
+                tab: 3
+            });
+            bridge.ent.hide();
+        });
 
         model.showQuanMenu = function() {
             $(this.refs.quanMenuMask).show();
@@ -116,7 +139,9 @@ module.exports = Activity.extend({
         }
 
         model.phoneCall = function() {
-            bridge.system.openPhoneCall('');
+            //bridge.system.openPhoneCall('');
+
+            self.forward('/hdh/call')
         }
 
         model.showYunMi = function() {
@@ -437,61 +462,14 @@ module.exports = Activity.extend({
                 Toast.showToast(e.message);
             });
         }
-        self.loadQuan(tab.refs.items[1]);
-    },
 
-    loadQuan: function($scroll) {
+        self.quanLoader = quan.createLoader({
+            model: model,
+            attribute: 'quanData',
+            scroll: tab.refs.items[1]
+        });
 
-        var self = this;
-        var model = this.model;
-        var quanLoader = self.quanLoader;
-
-        switch (quanLoader) {
-            case 1:
-                break;
-
-            case undefined:
-                self.quanLoader = 1;
-                quan.getAll().then(function(results) {
-                    self.quanLoader = results[0];
-
-                    self.quanLoader.autoLoadMore(function(res) {
-                        res.data.forEach(function(item) {
-                            if (item.imgs) {
-                                item.imgs = item.imgs.split(',');
-
-                            }
-                        });
-                        model.get("quanData").add(res.data);
-                    });
-
-                    results[1].data.forEach(function(item) {
-                        if (item.imgs) {
-                            item.imgs = item.imgs.split(',')
-                        }
-                    });
-
-                    model.set({
-                        quanData: results[1].data
-                    })
-
-                    console.log(model.data.quanData[0]);
-                });
-                break;
-
-            default:
-                quanLoader.reload().then(function(res) {
-                    res.data.forEach(function(item) {
-                        if (item.imgs) {
-                            item.imgs = item.imgs.split(',')
-                        }
-                    });
-                    model.set({
-                        quanData: res.data
-                    })
-                });
-                break;
-        }
+        self.quanLoader.request();
     },
 
     loadContacts: function() {
@@ -560,7 +538,7 @@ module.exports = Activity.extend({
 
             if (self.tab) {
                 self.loadPublicQuan();
-                self.quanLoader && self.loadQuan();
+                self.quanLoader && self.quanLoader.reload();
             }
         }
     },

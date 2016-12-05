@@ -233,7 +233,11 @@ var publicquan = Event.mixin({
 
     //@params={msg_id: msg_id, $scroll: $scroll}
     commentsLoader: function(params, model) {
-        return Loader.pageLoader('/pub_quan_comments/getPage', 'comments', model)
+        return Loader.pageLoader({
+                url: '/pub_quan_comments/getPage',
+                attribute: 'comments',
+                model: model
+            })
             .setParam(params);
     },
 

@@ -54,9 +54,9 @@
             sl.buildVersion = @(Date.now());
             sl.isInApp = util.isInApp = !!matchUA;
             sl.appVersion = matchUA ? matchUA[1] : '1.0.0';
-            sl.resources="@(resources)";
+            sl.resources = "@(resources)";
             sl.resource = function(src) {
-                if (src.indexOf('http://') == 0 || src.indexOf('https://') == 0 || src.indexOf("data:image") == 0) {
+                if (!src || src.indexOf('http://') == 0 || src.indexOf('https://') == 0 || src.indexOf("data:image") == 0) {
                     return src;
                 } else {
                     return sl.resources + src;
@@ -64,7 +64,7 @@
             };
             sl.thumbnail = function(src) {
                 src = this.resource(src);
-                if (src.indexOf("data:image")==0) return src;
+                if (!src || src.indexOf("data:image") == 0) return src;
                 var i = src.lastIndexOf('.');
                 var ext = src.substr(i);
 
@@ -76,11 +76,9 @@
             var routes = @(JSON.stringify(routes));
             var resourceMapping = @(JSON.stringify(resourceMapping));
 
-            @if(!debug && !useLocal) {
-                <text>entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, resourceMapping);</text>
+            @if(!debug && !useLocal) { <text> entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, resourceMapping); </text>
 
-            } else {
-                <text>entry.startApp(routes, resourceMapping);</text>
+            } else { <text> entry.startApp(routes, resourceMapping); </text>
             }
 
         });

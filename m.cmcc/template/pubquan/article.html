@@ -14,6 +14,7 @@
         </div>
         <div class="mt_l mb_l fs_m lh_xs of_h">
             <div sn-html="data.content"></div>
+            <img sn-src="{sl.resource(img)}" sn-repeat="img in data.imgs" class="dp_b mg_a mw_app" />
         </div>
         <div class="mt_xxl mb_l ta_c pq_article__action">
             <div class="icon-newslike dp_ib cir_xl" sn-tap="this.likePubQuanMsg()">
@@ -21,6 +22,7 @@
             </div>
             <div class="icon-newssee dp_ib cir_xl">
                 <p class="fs_s">{util.cnNum(data.see)||0}</p>
+                
             </div>
         </div>
     </div>

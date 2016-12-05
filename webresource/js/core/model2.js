@@ -214,6 +214,7 @@ function updateNode(viewModel, el) {
                     var currentElement = el;
 
                     while (nextElement) {
+
                         if (nextElement.nodeType === 3) {
                             nextElement = nextElement.nextSibling;
                             continue;
@@ -226,10 +227,13 @@ function updateNode(viewModel, el) {
                         switch (nextElement.snIfType) {
                             case 'sn-else':
                             case 'sn-else-if':
-                                currentElement = nextElement;
 
                                 if (nextElement.snIf) {
                                     nextElement.parentNode.removeChild(nextElement);
+                                    currentElement = nextElement.snIf;
+
+                                } else {
+                                    currentElement = nextElement;
                                 }
                                 break;
                             default:
@@ -1606,7 +1610,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                     el.className = val;
                     break;
                 default:
-                    el.setAttribute(attr, val);
+                    val === null ? el.removeAttribute(attr) : el.setAttribute(attr, val);
                     break;
             }
         }

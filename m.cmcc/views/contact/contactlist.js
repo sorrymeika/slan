@@ -11,17 +11,18 @@ var firstLetter = require('util/firstLetter');
 
 var contact = require('logical/contact');
 
+var friends = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '手机通讯录查询'
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
@@ -29,13 +30,16 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.contactList(), this.waitLoad()]).then(function (results) {
+        Promise.all([contact.contactList().then(function(res) {
+            return contact.getContactsUser(util.map(res.data, 'phoneNumber'));
 
-            var data = results[0].data;
+        }), this.waitLoad()]).then(function(results) {
+
+            var data = friends.getContacts().get();
 
             var groups = {};
 
-            data.forEach(function (item) {
+            data.forEach(function(item) {
                 var letter = firstLetter(item.contactName).charAt(0).toUpperCase();
 
                 if (!groups[letter]) {
@@ -45,7 +49,7 @@ module.exports = Activity.extend({
                 groups[letter].push(item);
             });
 
-            groups = Object.keys(groups).map(function (key) {
+            groups = Object.keys(groups).map(function(key) {
 
                 return {
                     letter: key,
@@ -59,19 +63,19 @@ module.exports = Activity.extend({
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

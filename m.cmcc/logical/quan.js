@@ -11,17 +11,19 @@ var auth = require('logical/auth');
 
 var quan = Event.mixin({
 
-    getAll: function($scroll) {
+    createLoader: function(options) {
 
-        var loader = new Loader({
-            url: '/quan_msgs/getAll',
-
-            $scroll: $scroll,
-
-            pageEnabled: true
-        });
-
-        return Promise.all([loader, loader.request()]);
+        return Loader.pageLoader(Object.assign({
+            url: '/quan_msgs/getPage',
+            pageEnabled: true,
+            beforeRender: function(res) {
+                res.data.forEach(function(item) {
+                    if (item.imgs) {
+                        item.imgs = item.imgs.split(',');
+                    }
+                });
+            }
+        }, options));
     },
 
     like: function(msg_id) {

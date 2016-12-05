@@ -34,6 +34,7 @@ var Loader = function(options) {
     options.showLoading != undefined && (this.isShowLoading = options.showLoading !== false && !!this.el);
 
     this.url && this.setUrl(this.url);
+
 }
 
 Loader.url = function(url) {
@@ -438,28 +439,29 @@ Loader.prototype.load = Loader.prototype.request;
 
 Loader.extend = _.extend;
 
-Loader.pageLoader = function(url, key, model, beforeRender) {
 
-    if (key instanceof require('core/model2').Model)
-        beforeRender = model, model = key, key = 'data';
+//@params={url, attribute, scroll, model, beforeRender}
+Loader.pageLoader = function(params) {
+    var model = params.model;
+    var attribute = params.attribute || 'data';
 
     return new Loader({
-        url: url,
-        $el: model.$el,
+        url: params.url,
+        $el: $(params.el || model.$el[0]),
 
-        $scroll: $(model.refs.main || model.$el[0]),
+        $scroll: $(params.scroll || model.refs.main || model.$el[0]),
 
         success: function(res) {
 
-            beforeRender && beforeRender(res);
+            params.beforeRender && params.beforeRender(res);
 
-            model.set(key, res.data);
+            model.set(attribute, res.data);
         },
 
         append: function(res) {
-            beforeRender && beforeRender(res);
+            params.beforeRender && params.beforeRender(res);
 
-            model._(key).add(res.data);
+            model._(attribute).add(res.data);
         }
     });
 }

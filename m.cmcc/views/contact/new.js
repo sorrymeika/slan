@@ -8,18 +8,19 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var contact = require('logical/contact');
+var friends = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '新的朋友'
         });
 
-        model.acceptFriend = function (personId, e) {
-            contact.acceptFriend(personId).then(function () {
+        model.acceptFriend = function(personId, e) {
+            contact.acceptFriend(personId).then(function() {
                 contact.trigger('acceptFriend', personId);
 
                 var person = model.getModel('newFriends').find("user_id", personId);
@@ -28,14 +29,19 @@ module.exports = Activity.extend({
                     status: 1
                 });
 
-            }).catch(function (e) {
+            }).catch(function(e) {
                 Toast.showToast(e.message);
             });
 
             return false;
         }
 
-        model.del = function (fid, e) {
+        model.getUserShowName = function(item) {
+            var friend = friends.getFriend(item.user_id);
+            return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
+        }
+
+        model.del = function(fid, e) {
 
             model.getModel('newFriends').remove("fid", fid);
 
@@ -44,12 +50,12 @@ module.exports = Activity.extend({
             return false;
         }
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
-        contact.on('addFriend', function () {
-            contact.newFriends().then(function (res) {
+        contact.on('addFriend', function() {
+            contact.newFriends().then(function(res) {
                 model.set({
                     newFriends: res.data
                 });
@@ -60,7 +66,7 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.newFriends(), this.waitLoad()]).then(function (results) {
+        Promise.all([contact.newFriends(), this.waitLoad()]).then(function(results) {
 
             model.set({
                 newFriends: results[0].data
@@ -68,20 +74,20 @@ module.exports = Activity.extend({
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             Toast.showToast(e.message);
 
-        }).then(function () {
+        }).then(function() {
             loader.hideLoading();
         });
 
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestory: function () {
+    onDestory: function() {
         this.model.destroy();
     }
 });

@@ -90,6 +90,21 @@ bridge.cmcc = {
     }
 };
 
+bridge.ent = {
+    show: function(url) {
+        bridge.exec('ent', {
+            type: 'show',
+            url: url
+        });
+    },
+
+    hide: function(params) {
+        bridge.exec('ent', {
+            type: 'hide'
+        });
+    }
+}
+
 function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
     Object.assign(routes, remoteRoutes || {});
@@ -124,7 +139,8 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
     seajs.use(['logical/auth'], function(auth) {
         window.Application = new App({
-            routes: routes
+            routes: routes,
+            loginPath: '/login'
 
         }).start(sl.isInApp ? 2000 : 0);
     });

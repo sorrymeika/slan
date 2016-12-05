@@ -256,9 +256,13 @@ module.exports = Activity.extend({
         shakeResult = model._('shakeResult');
 
         var updateShakeYunmi = function(ids) {
+            console.trace('updateShakeYunmi')
             if (ids.length) {
 
-                ym.getUsersYunmi(ids.join(',')).then(function(res) {
+                ym.getUsersYunmi(ids.filter(function(id) {
+                    return id;
+
+                }).join(',')).then(function(res) {
 
                     shakeResult.update(res.data.map(function() {
                         return {
@@ -287,7 +291,7 @@ module.exports = Activity.extend({
             var randomContacts = function() {
                 var tmp = [];
                 var contactsCollection = friends.getContacts();
-                var phoneNumber = [];
+                var phoneNumbers = [];
 
                 for (var i = contactsCollection.size() - 1; i >= 0; i--) {
                     tmp.push(i);
@@ -302,7 +306,7 @@ module.exports = Activity.extend({
                     if (contactMod) {
                         if (-1 == friendsCollection.indexOf('account', contactMod.get('phoneNumber'))) {
 
-                            phoneNumber.push(contactMod.get('phoneNumber'));
+                            phoneNumbers.push(contactMod.get('phoneNumber'));
                             shakeResult.add(contactMod);
 
                             i--;
@@ -310,10 +314,16 @@ module.exports = Activity.extend({
                     }
                 }
 
-                if (phoneNumber.length) {
-                    contact.getContactsUser(phoneNumber);
+                var psm = Promise.resolve();
+
+                if (phoneNumbers.length) {
+                    psm = psm.then(function() {
+                        return contact.getContactsUser(phoneNumbers);
+                    });
                 }
-                updateShakeYunmi(shakeResult.map('user_id'));
+                psm.then(function() {
+                    updateShakeYunmi(shakeResult.map('user_id'))
+                });
             }
 
             if (friends.getContacts().size() == 0) {

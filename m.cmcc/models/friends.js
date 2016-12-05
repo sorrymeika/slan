@@ -13,10 +13,11 @@ var friends = vm.createModel({
     },
 
     getFriend: function(user_id) {
-        var firend = this.getFriends().find('user_id', user_id);
+        var list = this.getFriends();
+        var firend = list.find('user_id', user_id);
 
         if (!firend) {
-            firend = friends.add({
+            firend = list.add({
                 user_id: user_id
             });
         }
@@ -32,8 +33,6 @@ friends.observe('friends', function(e) {
     var data = this.get('friends');
     var changed = [];
     var name_for_show;
-
-    console.log('friends')
 
     data.forEach(function(item) {
         name_for_show = (item.friends_ext ? (item.friends_ext.memo || item.user_name) : item.user_name) || ('用户' + item.user_id);

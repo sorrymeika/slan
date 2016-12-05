@@ -7,6 +7,9 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var userModel = require('models/user');
+
+
 module.exports = Activity.extend({
 
     onCreate: function() {
@@ -39,7 +42,13 @@ module.exports = Activity.extend({
                         this.hide();
 
                         userModel.set(null);
-                        Application.forward('/login')
+
+                        util.store('friends', null);
+                        util.store('business_model', null);
+                        util.store('messagesList', null);
+                        util.store('device_token', null);
+
+                        Application.back('/login');
                     }
                 })
             }

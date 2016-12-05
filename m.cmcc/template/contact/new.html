@@ -15,7 +15,7 @@
         <div class="ct_new__item flex bd_b" sn-repeat="item in newFriends" data-forward="/contact/{item.status==1?'friend':'person'}/{item.user_id}?type=new">
             <img onerror="this.src='images/default.jpg'" src="{sl.resource(item.avatars)}" alt="" class="sqr_s dp_b ml_m">
             <div class="flexitem ml_m">
-                <div class="fs_m">{item.user_name}</div>
+                <div class="fs_m">{this.getUserShowName(item)}</div>
                 <div class="fs_s">{item.msg}</div>
             </div>
             <span sn-if="item.is_send==1&&item.status==-1" class="cl_ccc fs_s">等待接受</span>

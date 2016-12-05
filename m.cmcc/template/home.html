@@ -140,7 +140,7 @@
                 <div class="flex_t pt_m pb_m">
                     <p class="avatars ml_m mr_m" data-forward="/contact/friend/{quan.user_id}"><img onerror="this.src='images/default.jpg'" src="{sl.thumbnail(quan.avatars)}" /></p>
                     <div class="bd flexitem lh_xxs">
-                        <p class="name cl_dark fs_m" data-forward="/contact/friend/{quan.user_id}">{quan.user_name}</p>
+                        <p class="name cl_dark fs_m" data-forward="/contact/friend/{quan.user_id}">{this.getUserShowName(quan)}</p>
                         <p class="con fs_m" sn-html="{quan.content}"></p>
                         <ul class="imgs clearfix mt_s">
                             <li class="img fl_l mr_m" sn-repeat="img,i in quan.imgs" sn-tap="this.showImages(quan.imgs,i)"><img sn-src="{sl.thumbnail(img)}" /></li>
@@ -152,8 +152,8 @@
                             <p class="icon-comment2 pr_m" sn-tap="this.commentQuanMsg(quan.msg_id)"><span class="va_m ml_s">评论</span></p>
                         </div>
                         <ul class="comment fs_s" sn-if="quan.quan_likes.length || quan.quan_comments.length">
-                            <li sn-if="quan.quan_likes.length" class="quan-like"><span class="va_m mr_m cl_dark" sn-repeat="item in quan.quan_likes">{item.user_name}</span></li>
-                            <li sn-repeat="item in quan.quan_comments"><a sn-tap="this.commentQuanMsg(quan.msg_id,item.user_id,item.user_name)" href="javascript:;"><i class="cl_dark">{item.user_name}</i>：<span>{item.content}</span></a></li>
+                            <li sn-if="quan.quan_likes.length" class="quan-like"><span class="va_m mr_m cl_dark" sn-repeat="item in quan.quan_likes">{this.getUserShowName(item)}</span></li>
+                            <li sn-repeat="item in quan.quan_comments"><a sn-tap="this.commentQuanMsg(quan.msg_id,item.user_id,this.getUserShowName(item))" href="javascript:;"><i class="cl_dark">{this.getUserShowName(item)}</i>：<span>{item.content}</span></a></li>
                         </ul>
                     </div>
                 </div>

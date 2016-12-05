@@ -9,6 +9,8 @@ var Loader = require('widget/loader');
 
 var friends = require('models/friends');
 
+var TEST_PHONE = /^(134|135|136|137|138|139|147|150|151|152|157|158|159|178|182|183|184|187|188)\d{8}$/;
+
 var contact = Event.mixin({
     newFriends: function() {
         return Http.post('/friends/getNewFriends');
@@ -33,7 +35,11 @@ var contact = Event.mixin({
     },
 
     pageLoaderForSearch: function(model) {
-        return Loader.pageLoader('/userinfo/search', 'searchResult', model);
+        return Loader.pageLoader({
+            url: '/userinfo/search',
+            attribute: 'searchResult',
+            model: model
+        });
     },
 
     person: function(user_id) {
@@ -80,12 +86,10 @@ var contact = Event.mixin({
 
                 if (result.success) {
                     var data = result.data;
-                    var ids = [];
                     var list = [];
 
                     data.forEach(function(item) {
-                        if (/^(134|135|136|137|138|139|147|150|151|152|157|158|159|178|182|183|184|187|188)\d{8}$/.test(item.phoneNumber)) {
-                            ids.push(item.phoneNumber);
+                        if (TEST_PHONE.test(item.phoneNumber)) {
                             list.push(item);
                         }
                     });
@@ -93,6 +97,7 @@ var contact = Event.mixin({
                     friends.getContacts().update(list, 'phoneNumber', true);
 
                     util.store('contacts', list);
+                    resolve(result);
 
                 } else {
                     reject(result);
@@ -105,7 +110,9 @@ var contact = Event.mixin({
     getContactsUser: function(phoneNumbers) {
         if (phoneNumbers.length) {
             return Http.post("/userinfo/contacts", {
-                ids: phoneNumbers.join(',')
+                ids: phoneNumbers.filter(function(item) {
+                    return !!item && TEST_PHONE.test(item);
+                }).join(',')
 
             }).then(function(res) {
                 friends.getContacts().update(res.data, function(a, b) {
