@@ -49,8 +49,7 @@
 <footer class="sp_buy__action uc_order__footer">
     <div class="total">
     </div>
-    <div class="btn js_pay" sn-if="{data.PUS_DESC=='待付款'}">立即支付</div>
-
+    <div class="btn js_pay" sn-if="{data.CNL_CLT_ID!=3&&data.PUS_DESC=='待付款'}">立即支付</div>
     <b class="btn" sn-if="{data.PUR_PAS_ID==2&&data.isShowShare}" data-forward="/news/order{data.PUR_ID}?from={url}">分享有惊喜</b>
     <b class="btn btn_dark" sn-if="{data.PUS_DESC=='待付款'||(data.PUR_PUS_ID==1&&(data.PUR_AMOUNT+data.PUR_EXP_IN_AMOUNT)==0&&data.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(data)">取消订单</b>
 </footer>

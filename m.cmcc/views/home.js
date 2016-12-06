@@ -63,12 +63,7 @@ module.exports = Activity.extend({
             business: businessGroup
         });
 
-        model.getUserShowName = function(item) {
-            if (item.user_id == user.get('user_id')) return item.user_name || ('用户' + item.user_id);
-            
-            var friend = friends.getFriend(item.user_id);
-            return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
-        }
+        model.getUserShowName = friends.getUserShowName;
 
         model.openEnt = function() {
             bridge.ent.show('http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006');
@@ -92,18 +87,25 @@ module.exports = Activity.extend({
             */
         };
 
+        function hideEnt(id) {
+            if (model.get('tab') != id) {
+                model.set({
+                    tab: id,
+                    headBg: false
+                });
+
+                setTimeout(function() {
+                    bridge.ent.hide();
+                }, 200);
+            } else
+                bridge.ent.hide();
+        }
+
         $(window).on('ent_to_home', function() {
-            model.get('tab') != 1 && model.set({
-                tab: 1,
-                headBg: false
-            });
-            bridge.ent.hide();
+            hideEnt(1)
 
         }).on('ent_to_quan', function() {
-            model.get('tab') != 3 && model.set({
-                tab: 3
-            });
-            bridge.ent.hide();
+            hideEnt(3)
         });
 
         model.showQuanMenu = function() {

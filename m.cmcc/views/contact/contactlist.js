@@ -25,43 +25,53 @@ module.exports = Activity.extend({
         model.back = function() {
             self.back(self.swipeRightBackAction)
         }
+        model.getUserShowName = friends.getUserShowName;
 
         var loader = this.loader = new Loader(this.$el);
 
         loader.showLoading();
 
-        Promise.all([contact.contactList().then(function(res) {
-            return contact.getContactsUser(util.map(res.data, 'phoneNumber'));
+        var today = util.formatDate(new Date(), 'yyyyMMdd');
+        var hasGetToday = util.store('hasGetContactListToday') == today;
 
-        }), this.waitLoad()]).then(function(results) {
+        Promise.all([hasGetToday ? null : contact.contactList(), this.waitLoad()]).then(function(results) {
+            util.store('hasGetContactListToday', today);
 
-            var data = friends.getContacts().get();
+            var contactList = friends.getContacts();
 
-            var groups = {};
+            Promise.resolve(contact.getContactsUser(util.map(util.filter(contactList.data, 'user_id', undefined), 'phoneNumber')))
+                .then(function() {
+                    var data = contactList.get();
+                    var groups = {};
 
-            data.forEach(function(item) {
-                var letter = firstLetter(item.contactName).charAt(0).toUpperCase();
+                    console.log(data);
 
-                if (!groups[letter]) {
-                    groups[letter] = [];
-                }
+                    data.forEach(function(item) {
+                        var letter = firstLetter(item.contactName).charAt(0).toUpperCase();
 
-                groups[letter].push(item);
-            });
+                        if (!groups[letter]) {
+                            groups[letter] = [];
+                        }
 
-            groups = Object.keys(groups).map(function(key) {
+                        groups[letter].push(item);
+                    });
 
-                return {
-                    letter: key,
-                    list: groups[key]
-                };
-            });
+                    groups = Object.keys(groups).map(function(key) {
 
-            model.set({
-                groups: groups
-            });
+                        return {
+                            letter: key,
+                            list: groups[key]
+                        };
+                    });
 
-            self.bindScrollTo(model.refs.main);
+                    model.set({
+                        groups: groups
+                    });
+
+                    self.bindScrollTo(model.refs.main);
+                });
+
+
 
         }).catch(function(e) {
             Toast.showToast(e.message);

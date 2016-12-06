@@ -1,4 +1,4 @@
-﻿var $ = require('$');
+var $ = require('$');
 var util = require('util');
 var model = require('core/model2');
 
@@ -12,12 +12,13 @@ util.style('.calendar.curr{z-index:5001;width:280px;}.calendar{height:22px;paddi
         .calendar-up,.calendar-down {cursor:pointer;}\
         .calendar-wrap {top:0;left:0;position:absolute;border:1px solid #cdcdcd;background:#fff;overflow:hidden;}\
         .calendar-bd {width:35px;text-align:center;float:left;}\
-        .calendar-bd i { display: block; height: ' + optionHeight + 'px;font-style:normal; cursor: default; }\
-        .calendar-con{height:200px;overflow:hidden;}\
+        .calendar-bd i { display: block; height: ' + optionHeight + 'px;font-style:normal; cursor: pointer; }\
+        .calendar-con i { cursor: move; }\
+        .calendar-con{height:200px;overflow:hidden;cursor:move;user-select:none;}\
         .calendar-bd i.curr { background: #ddd; }');
 
 var TimePicker = model.ViewModel.extend({
-    el: <div class="calendar{isShow?' curr':''}" >
+    el: (<div class="calendar{isShow?' curr':''}" >
         <div sn-click="this.show()">
             <span><em>{yyyy}</em></span> /
             <span><em>{util.pad(MM)}</em></span> /
@@ -28,42 +29,42 @@ var TimePicker = model.ViewModel.extend({
         </div>
         <div class="calendar-wrap" sn-display="{isShow}" style="display:none;">
             <div class="calendar-bd">
-                <div class="calendar-up" sn-click="yearIndex=(yearIndex>0?yearIndex-1:yearIndex)"><em class="calendar-icon"><em></em></em></div>
-                <div class="calendar-con"><div style="margin-top:-{parseInt(yearIndex*200)}px"><i sn-repeat="item in years" class="{yyyy==item?'curr':''}" sn-click="this.setYear(item)">{item}</i></div></div>
-                <div class="calendar-down" sn-click="yearIndex=years.length>(yearIndex+1)*10?yearIndex+1:yearIndex"><em class="calendar-icon"><em></em></em></div>
-                <i sn-click="this.today(),this.hide()">今天</i>
+                <div class="calendar-up" sn-click="yearTop=0"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-con" key="yearTop"><div style="margin-top:-{yearTop}px"><i sn-repeat="item in years" class="{yyyy==item?'curr':''}" sn-click="this.setYear(item)">{item}</i></div></div>
+                <div class="calendar-down" sn-click="yearTop=(years.length-10)*20"><em class="calendar-icon"><em></em></em></div>
+                <i sn-click="this.today()">今天</i>
             </div>
             <div class="calendar-bd">
-                <div class="calendar-up" sn-click="monthIndex=(monthIndex>0?monthIndex-1:monthIndex)"><em class="calendar-icon"><em></em></em></div>
-                <div class="calendar-con"><div style="margin-top:-{parseInt(monthIndex*200)}px"><i sn-repeat="item in months" class="{MM==item?'curr':''}" sn-click="this.setMonth(item)">{util.pad(item)}</i></div></div>
-                <div class="calendar-down" sn-click="monthIndex=months.length>(monthIndex+1)*10?monthIndex+1:monthIndex"><em class="calendar-icon"><em></em></em></div>
-                <i sn-click="this.now(),this.hide()">现在</i>
+                <div class="calendar-up" sn-click="monthTop=0"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-con" key="monthTop"><div style="margin-top:-{monthTop}px"><i sn-repeat="item in months" class="{MM==item?'curr':''}" sn-click="this.setMonth(item)">{util.pad(item)}</i></div></div>
+                <div class="calendar-down" sn-click="monthTop=(months.length-10)*20"><em class="calendar-icon"><em></em></em></div>
+                <i sn-click="this.now()">现在</i>
             </div>
             <div class="calendar-bd">
-                <div class="calendar-up" sn-click="dayIndex=(dayIndex>0?dayIndex-1:dayIndex)"><em class="calendar-icon"><em></em></em></div>
-                <div class="calendar-con"><div style="margin-top:-{parseInt(dayIndex*200)}px"><i sn-repeat="item in days" class="{dd==item?'curr':''}" sn-click="this.setDay(item)">{util.pad(item)}</i></div></div>
-                <div class="calendar-down" sn-click="dayIndex=days.length>(dayIndex+1)*10?dayIndex+1:dayIndex"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-up" sn-click="dayTop=0"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-con" key="dayTop"><div style="margin-top:-{dayTop}px"><i sn-repeat="item in days" class="{dd==item?'curr':''}" sn-click="this.setDay(item)">{util.pad(item)}</i></div></div>
+                <div class="calendar-down" sn-click="dayTop=(days.length-10)*20"><em class="calendar-icon"><em></em></em></div>
                 <i sn-click="this.clearInput()">清空</i>
             </div>
 
             <div class="calendar-bd">
-                <div class="calendar-up" sn-click="hourIndex=(hourIndex>0?hourIndex-1:hourIndex)"><em class="calendar-icon"><em></em></em></div>
-                <div class="calendar-con"><div style="margin-top:-{parseInt(hourIndex*200)}px"><i sn-repeat="item in hours" class="{hh==item?'curr':''}" sn-click="this.setHours(item)">{util.pad(item)}</i></div></div>
-                <div class="calendar-down" sn-click="hourIndex=years.length>(hourIndex+1)*10?hourIndex+1:hourIndex"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-up" sn-click="hourTop=0"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-con" key="hourTop"><div style="margin-top:-{hourTop}px"><i sn-repeat="item in hours" class="{hh==item?'curr':''}" sn-click="this.setHours(item)">{util.pad(item)}</i></div></div>
+                <div class="calendar-down" sn-click="hourTop=(hours.length-10)*20"><em class="calendar-icon"><em></em></em></div>
             </div>
             <div class="calendar-bd">
-                <div class="calendar-up" sn-click="minuteIndex=(minuteIndex>0?minuteIndex-1:minuteIndex)"><em class="calendar-icon"><em></em></em></div>
-                <div class="calendar-con"><div style="margin-top:-{parseInt(minuteIndex*200)}px"><i sn-repeat="item in minutes" class="{mm==item?'curr':''}" sn-click="this.setMinutes(item)">{util.pad(item)}</i></div></div>
-                <div class="calendar-down" sn-click="minuteIndex=months.length>(minuteIndex+1)*10?minuteIndex+1:minuteIndex"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-up" sn-click="minutesTop=0"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-con" key="minutesTop"><div style="margin-top:-{minutesTop}px"><i sn-repeat="item in minutes" class="{mm==item?'curr':''}" sn-click="this.setMinutes(item)">{util.pad(item)}</i></div></div>
+                <div class="calendar-down" sn-click="minutesTop=(minutes.length-10)*20"><em class="calendar-icon"><em></em></em></div>
             </div>
             <div class="calendar-bd">
-                <div class="calendar-up" sn-click="secondIndex=(secondIndex>0?secondIndex-1:secondIndex)"><em class="calendar-icon"><em></em></em></div>
-                <div class="calendar-con"><div style="margin-top:-{parseInt(secondIndex*200)}px"><i sn-repeat="item in seconds" class="{ss==item?'curr':''}" sn-click="this.setSeconds(item)">{util.pad(item)}</i></div></div>
-                <div class="calendar-down" sn-click="secondIndex=days.length>(secondIndex+1)*10?secondIndex+1:secondIndex"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-up" sn-click="secondTop=0"><em class="calendar-icon"><em></em></em></div>
+                <div class="calendar-con" key="secondTop"><div style="margin-top:-{secondTop}px"><i sn-repeat="item in seconds" class="{ss==item?'curr':''}" sn-click="this.setSeconds(item)">{util.pad(item)}</i></div></div>
+                <div class="calendar-down" sn-click="secondTop=(seconds.length-10)*20"><em class="calendar-icon"><em></em></em></div>
                 <i class="js_hide">确定</i>
             </div>
         </div>
-    </div>,
+    </div>),
 
     constructor: function ($input, options) {
         var now = new Date();
@@ -106,12 +107,6 @@ var TimePicker = model.ViewModel.extend({
             hh: '--',
             mm: '--',
             ss: '--',
-            yearIndex: 0,
-            monthIndex: 0,
-            dayIndex: 0,
-            hourIndex: 0,
-            minuteIndex: 0,
-            secondIndex: 0,
 
             years: years,
             months: months,
@@ -121,6 +116,37 @@ var TimePicker = model.ViewModel.extend({
         });
 
         this.$el.insertBefore($input);
+
+        var dragStart = false;
+        var startY;
+        var con;
+        var topKey;
+        var startMarginTop;
+        var moved;
+        this.$el.find('.calendar-wrap').on('mousedown', '.calendar-con', function (e) {
+            startY = e.clientY;
+            con = $(e.currentTarget).children('div');
+            topKey = $(e.currentTarget).attr('key');
+            startMarginTop = self.get(topKey);
+
+            dragStart = true;
+            moved = false;
+
+        }).on('mousemove', '.calendar-con', function (e) {
+            if (dragStart) {
+                var dy = e.clientY - startY;
+                moved = true;
+
+                self.set(topKey, Math.max(0, startMarginTop - dy));
+            }
+
+        }).on('click', function (e) {
+            dragStart = false;
+            if (moved) {
+                moved = false;
+                return false;
+            }
+        });
     },
 
     setYear: function (e, year) {
@@ -131,8 +157,10 @@ var TimePicker = model.ViewModel.extend({
         }
         this.set({
             yyyy: year,
-            yearIndex: parseInt(this.data.years.indexOf(year) / 10)
+            yearTop: (this.data.years.indexOf(year) - 4) * optionHeight
         });
+
+        console.log(1);
 
         return this._syncDays()._update(update);
     },
@@ -147,7 +175,7 @@ var TimePicker = model.ViewModel.extend({
 
         this.set({
             MM: month,
-            monthIndex: parseInt(index / 10),
+            monthTop: (index - 4) * optionHeight
         });
 
         return this._syncDays()._update(update);
@@ -162,7 +190,7 @@ var TimePicker = model.ViewModel.extend({
 
         return this.set({
             dd: day,
-            dayIndex: parseInt(this.data.days.indexOf(day) / 10),
+            dayTop: (this.data.days.indexOf(day) - 4) * optionHeight
         })._update(update);
     },
 
@@ -175,7 +203,7 @@ var TimePicker = model.ViewModel.extend({
 
         return this.set({
             hh: num,
-            hourIndex: parseInt(this.data.hours.indexOf(num) / 10),
+            hourTop: (this.data.hours.indexOf(num) - 4) * optionHeight
         })._update(update);
     },
 
@@ -188,7 +216,7 @@ var TimePicker = model.ViewModel.extend({
 
         return this.set({
             mm: num,
-            minuteIndex: parseInt(this.data.minutes.indexOf(num) / 10),
+            minutesTop: (this.data.minutes.indexOf(num) - 4) * optionHeight
         })._update(update);
     },
 
@@ -201,7 +229,7 @@ var TimePicker = model.ViewModel.extend({
 
         return this.set({
             ss: num,
-            secondIndex: parseInt(this.data.seconds.indexOf(num) / 10),
+            secondTop: (this.data.seconds.indexOf(num) - 4) * optionHeight
         })._update(update);
     },
 

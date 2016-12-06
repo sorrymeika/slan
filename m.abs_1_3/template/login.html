@@ -6,7 +6,8 @@
     <div class="login_form">
         <h1 class="login_hd">注册/登录</h1>
         <ul class="form">
-            <li class="form_mobile"><input placeholder="请输入您的手机号码" sn-model="mobile" type="tel" /></li>
+            <li class="form_mobile"><input ref="mobile" placeholder="请输入您的手机号码" sn-model="mobile" type="tel" /></li>
+            <li><input placeholder="请输入图形验证码" sn-model="captchaCode" type="text" /><img style="width: 80px;" class="dp_b" sn-src="{{captcha+(rnd||Date.now())}}" sn-tap="rnd=Date.now()" /></li>
             <li><input placeholder="请输入短信验证码" sn-model="smsCode" type="tel" /><b class="js_valid btn_middle" html="{{valid}}"></b></li>
             <li><input placeholder="请输入好友的邀请码" sn-model="invitedCode" type="text" /></li>
         </ul>

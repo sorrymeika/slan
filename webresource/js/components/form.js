@@ -16,6 +16,7 @@ var FormComponentKeys = ["buttons", "useIFrame", "contentType", "xhrFields", "me
 
 var form = new FormComponent({
     url: '',
+    enctype: 'multipart/form-data',//application/x-www-form-urlencoded
     fields: [{
         label: '时间选择',
         field: 'time',
@@ -92,7 +93,13 @@ var FormComponent = function(options) {
                     validator[field.field] = valid;
                 }
 
-                if (field.type == 'select' && field.options && !Array.isArray(field.options)) {
+                if (field.type == "file") {
+                    if (!this.hasFile) {
+                        this.hasFile = true;
+                        options.enctype = "multipart/form-data";
+                    }
+
+                } else if (field.type == 'select' && field.options && !Array.isArray(field.options)) {
 
                     //@options = { url: 'xxx', params: { parentId: 'parentId'=>this.model.get('parentId') }, data:[{}], text: 'key of data'||'text', value: 'key of data'||'value' }
                     var fieldOptions = field.options;
@@ -133,6 +140,7 @@ var FormComponent = function(options) {
     this.$el = $(template);
 
     this.el = this.$el[0];
+    this.form = this.el;
 
     var model = this.model = new vm.Model(this.$el, {
         fields: items,
@@ -225,8 +233,10 @@ FormComponent.prototype = {
     template: form,
     method: 'post',
     url: null,
-    enctype: null,
+    enctype: "application/x-www-form-urlencoded",
     buttons: null,
+
+    hasFile: false,
 
     useIFrame: false,
 
@@ -251,6 +261,8 @@ FormComponent.prototype = {
         }
         this.model.getModel("data").reset();
 
+        this.form.reset();
+
         return this;
     },
 
@@ -268,7 +280,7 @@ FormComponent.prototype = {
 
         if (res.success) {
 
-            if (this.useIFrame || this.$el.has('[type="file"]').length) {
+            if (this.useIFrame || this.hasFile && !window.FormData) {
                 guid++;
                 var target = "_submit_iframe" + guid;
                 var resultText;
@@ -303,13 +315,20 @@ FormComponent.prototype = {
                 this.$el.attr("target", target).submit();
 
             } else {
+                var processData = true;
+                var data = this.contentType == "application/json" ?
+                    JSON.stringify(this.model.data.data) : window.FormData ?
+                    (processData = false, this.contentType = false, new FormData(this.form)) :
+                    this.$el.serialize();
+
                 $.ajax({
                     url: this.url,
                     type: 'POST',
                     dataType: 'json',
                     xhrFields: this.xhrFields,
-                    contentType: this.contentType ? this.contentType : undefined,
-                    data: this.contentType == "application/json" ? JSON.stringify(this.model.data.data) : this.$el.serialize(),
+                    contentType: this.contentType ? this.contentType : false,
+                    data: data,
+                    processData: processData,
                     success: function(res) {
                         if (res.success) {
                             success.call(self, res);

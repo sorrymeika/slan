@@ -61,7 +61,7 @@ function isDiffObject(a, b) {
     return false;
 }
 
-function compareWith(a, b) {
+function overlapped(a, b) {
     var typeA = toString.call(a);
 
     switch (typeA) {
@@ -154,7 +154,7 @@ var util = {
 
     isDiffObject: isDiffObject,
 
-    compareWith: compareWith,
+    overlapped: overlapped,
 
     equal: function(a, b) {
         return !isDiffObject(a, b);
@@ -321,7 +321,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (compareWith(key, arr[i])) return i;
+                if (overlapped(key, arr[i])) return i;
             }
         }
 
@@ -344,7 +344,7 @@ var util = {
 
         } else {
             for (var i = arr.length - 1; i >= 0; i--) {
-                if (compareWith(key, arr[i])) return i;
+                if (overlapped(key, arr[i])) return i;
             }
         }
 
@@ -394,7 +394,7 @@ var util = {
             }
         } else {
             for (var i = 0, len = arr.length; i < len; i++) {
-                if (compareWith(key, arr[i])) return arr[i];
+                if (overlapped(key, arr[i])) return arr[i];
             }
         }
 
@@ -420,7 +420,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (!compareWith(key, arr[i]))
+                if (!overlapped(key, arr[i]))
                     result.push(arr[i]);
             }
         }
@@ -447,7 +447,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (compareWith(key, arr[i]))
+                if (overlapped(key, arr[i]))
                     result.push(arr[i]);
             }
         }
@@ -474,7 +474,7 @@ var util = {
 
         } else {
             for (var i = length - 1; i >= 0; i--) {
-                if (compareWith(key, arr[i]))
+                if (overlapped(key, arr[i]))
                     arr.splice(i, 1);
             }
         }

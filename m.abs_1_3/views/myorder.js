@@ -51,6 +51,7 @@ define(function(require, exports, module) {
 
                     var key = 'data' + (index || '');
 
+
                     var loader = loaders[index] = new Loader({
                         url: "/api/order/getListByType",
                         $el: self.$el,
@@ -82,9 +83,10 @@ define(function(require, exports, module) {
                 }
 
                 tab.on('tabChange', function(e, index) {
-                    createLoader(index)
+                    createLoader(index);
 
                 }).next(function() {
+                    state == 0 && createLoader(0);
                     tab.tab(state);
                 });
 

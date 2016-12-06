@@ -22,7 +22,7 @@
                     <p class="fs_l">
                         {item.contactName}
                     </p>
-                    <p class="fs_s" sn-if="item.user_id">和生活昵称：{item.user_name}</p>
+                    <p class="fs_s" sn-if="item.user_id">和生活昵称：{this.getUserShowName(item)}</p>
                 </div>
                 <button class="btn_xs" sn-if="item.user_id&&!item.isFriend" data-forward="/contact/person/{item.user_id}">添加</button>
                 <button class="btn_xs" sn-if="!item.user_id">邀请</button>

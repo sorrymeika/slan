@@ -26,9 +26,9 @@
             <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span></div>
             <div class="flex pb_m">
                 <p class="flexitem"></p>
-                <button class="btn_s mr_s cl_000 bg_ddd" sn-if="item.PUS_DESC!='待付款'&&item.PUS_DESC!='已取消'" sn-tap="this.openOrder(item)">查看详情</button>
+                <button class="btn_s mr_s cl_000 bg_ddd" sn-if="(item.CNL_CLT_ID==3||item.PUS_DESC!='待付款')&&item.PUS_DESC!='已取消'" sn-tap="this.openOrder(item)">查看详情</button>
                 <button class="btn_s mr_s" sn-if="{isShowShare&&item.PUR_PAS_ID==2&&item.isShowShare}" data-forward="/news/order{item.PUR_ID}?from={url}">分享有惊喜</button>
-                <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'}" sn-tap="this.openOrder(item)">立即付款</button>
+                <button class="btn_s dp_b mr_s" sn-if="{item.CNL_CLT_ID!=3&&item.PUS_DESC=='待付款'}" sn-tap="this.openOrder(item)">立即付款</button>
                 <button class="btn_s dp_b mr_s" sn-if="{item.PUS_DESC=='待付款'||(item.PUR_PUS_ID==1&&(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)==0&&item.PUR_PAS_ID==2)}" sn-tap="false" sn-click="this.cancelOrder(item)">取消订单</button>
             </div>
         </li>

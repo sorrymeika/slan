@@ -14,7 +14,7 @@ var compressCss = function (res) {
 var compressor = UglifyJS.Compressor({
     sequences: true,  // join consecutive statemets with the “comma operator”
     properties: true,  // optimize property access: a["foo"] → a.foo
-    dead_code: true,  // discard unreachable code
+    drop_console: true,
     drop_debugger: true,  // discard “debugger” statements
     unsafe: false, // some unsafe optimizations (see below)
     conditionals: true,  // optimize if-s and conditional expressions
@@ -30,7 +30,10 @@ var compressor = UglifyJS.Compressor({
     cascade: true,  // try to cascade `right` into `left` in sequences
     side_effects: true,  // drop side-effect-free statements
     warnings: false,  // warn about potentially dangerous optimizations/code
-    global_defs: {}
+    dead_code: true,  // discard unreachable code
+    global_defs: {
+        ENV: "prod"
+    }
 });
 
 var rcmd = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|(?:^|\b|\uFEFF)(module\.exports\s*=|exports\.[a-z0-9A-Z\._]+\s*=)/mg;

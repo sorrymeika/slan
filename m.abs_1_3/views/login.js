@@ -8,7 +8,7 @@ var userModel = require("models/user");
 
 module.exports = Activity.extend({
     events: {
-        'tap .js_login:not(.disabled)': function () {
+        'tap .js_login:not(.disabled)': function() {
             var mobile = this.model.get('mobile');
             var smsCode = this.model.get('smsCode');
 
@@ -31,22 +31,28 @@ module.exports = Activity.extend({
 
             }).load();
         },
-        'tap .js_valid:not(.disabled)': function (e) {
+        'tap .js_valid:not(.disabled)': function(e) {
             var mobile = this.model.get('mobile');
             if (!mobile || !util.validateMobile(mobile)) {
                 sl.tip('请输入正确的手机');
                 return;
             }
 
+            if (!this.model.data.captchaCode) {
+                sl.tip('请输入图片验证码');
+                return;
+            }
+
             this.$valid.addClass('disabled');
             this.valid.setParam({
-                mobile: this.model.data.mobile
+                captcha: this.model.data.captchaCode,
+                mobile: mobile
             });
             this.valid.load();
         }
     },
 
-    validTimeout: function () {
+    validTimeout: function() {
         var self = this;
         var sec = localStorage.getItem('valid_time');
 
@@ -57,7 +63,7 @@ module.exports = Activity.extend({
 
             self.$valid.addClass('disabled');
 
-            setTimeout(function () {
+            setTimeout(function() {
                 if (sec <= 0) {
                     self.$valid.removeClass('disabled');
                     self.model.set('valid', '获取验证码');
@@ -72,7 +78,7 @@ module.exports = Activity.extend({
         }
     },
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
         var $main = this.$('.main');
 
@@ -83,8 +89,17 @@ module.exports = Activity.extend({
         this.model = new model.ViewModel(this.$el, {
             title: '快速登录 / 注册',
             valid: '获取验证码',
-            back: this.swipeRightBackAction
+            back: this.swipeRightBackAction,
+            captcha: Loading.prototype.baseUri + '/captcha/1.jpg?v='
         });
+
+        this.listenTo($(this.model.refs.mobile), 'blur', function() {
+            var mobile = this.model.get('mobile');
+            if (mobile && mobile.length == 11)
+                this.model.set({
+                    captcha: Loading.prototype.baseUri + '/captcha/' + mobile + '.jpg?v='
+                })
+        })
 
         this.loading = new Loading({
             url: '/api/user/login',
@@ -92,7 +107,7 @@ module.exports = Activity.extend({
             check: false,
             checkData: false,
             $el: this.$el,
-            success: function (res) {
+            success: function(res) {
                 if (!res.success)
                     sl.tip(res.msg);
                 else {
@@ -102,12 +117,12 @@ module.exports = Activity.extend({
                     var backUrl = self.route.query.success || self.swipeRightBackAction;
 
                     self.back(backUrl == '/' ? backUrl + '?tab=0' : backUrl);
-                    setTimeout(function () {
+                    setTimeout(function() {
                         self.setResult("Login");
                     }, 0);
                 }
             },
-            error: function (res) {
+            error: function(res) {
                 sl.tip(res.msg);
             }
         });
@@ -121,18 +136,25 @@ module.exports = Activity.extend({
             check: false,
             checkData: false,
             $el: this.$el,
-            success: function (res) {
+            success: function(res) {
                 if (!res.success) {
                     sl.tip(res.msg)
+                    self.$valid.removeClass('disabled');
+                    self.model.set({
+                        rnd: Date.now()
+                    })
                 } else {
                     localStorage.setItem('valid_time', Date.now() + 60000);
 
                     self.validTimeout();
                 }
             },
-            error: function (res) {
+            error: function(res) {
                 sl.tip(res.msg);
                 self.$valid.removeClass('disabled');
+                self.model.set({
+                    rnd: Date.now()
+                })
                 this.hideLoading();
             }
         });
@@ -141,7 +163,7 @@ module.exports = Activity.extend({
         self.validTimeout();
     },
 
-    onShow: function () {
+    onShow: function() {
         if (this.swipeRightBackAction == '/') {
             this.swipeRightBackAction = this.swipeRightBackAction + '?tab=0';
 
@@ -151,6 +173,5 @@ module.exports = Activity.extend({
         }
     },
 
-    onDestory: function () {
-    }
+    onDestory: function() {}
 });

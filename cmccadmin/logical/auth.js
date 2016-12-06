@@ -14,7 +14,7 @@ Y9SWbWtJmH6pjEYS5QIDAQAB";
 
 var _request = Http.prototype._request;
 
-var getSign = function () {
+var getSign = function() {
     var admin = auth.getAdmin();
     var _tk = auth.getAuthToken();
 
@@ -31,16 +31,13 @@ var getSign = function () {
 if (typeof FormData != "undefined") {
     var _formDataAppend = FormData.prototype.append;
 
-    FormData.prototype.append = function (k, v) {
+    FormData.prototype.append = function(k, v) {
 
         var sign = getSign();
 
-        if (sign && (!this.has('_tk') || !this.has('_sign'))) {
-            var self = this;
-
-            Object.keys(sign).forEach(function (key) {
-                _formDataAppend.call(self, key, sign[key]);
-            });
+        if (sign) {
+            this.set('_tk', sign._tk);
+            this.set('_sign', sign._sign);
         }
         _formDataAppend.call(this, k, v);
     }
@@ -49,20 +46,24 @@ if (typeof FormData != "undefined") {
 if (typeof HTMLFormElement != "undefined") {
     var _formElementSubmit = HTMLFormElement.prototype.submit;
 
-    HTMLFormElement.prototype.submit = function (e) {
+    HTMLFormElement.prototype.submit = function(e) {
         var sign = getSign();
         if (sign) {
             var $el = $(this);
             if ($el.find('[name="_tk"]').length == 0) {
                 $el.prepend($('<input type="hidden" name="_tk" />').val(sign._tk));
                 $el.prepend($('<input type="hidden" name="_sign" />').val(sign._sign));
+
+            } else {
+                $el.find('[name="_tk"]').val(sign._tk);
+                $el.find('[name="_sign"]').val(sign._sign);
             }
         }
         _formElementSubmit.call(this, e);
     }
 }
 
-Http.prototype._request = function (resolve, reject) {
+Http.prototype._request = function(resolve, reject) {
     var sign = getSign();
 
     sign && this.setParam(sign);
@@ -70,16 +71,15 @@ Http.prototype._request = function (resolve, reject) {
     _request.call(this, resolve, reject);
 }
 
-Http.prototype.error = function (err) {
-}
+Http.prototype.error = function(err) {}
 
-Http.prototype.success = function (res) {
+Http.prototype.success = function(res) {
     console.log(res);
 }
 
 var _submit = Form.prototype.submit;
 
-Form.prototype.submit = function (success, error) {
+Form.prototype.submit = function(success, error) {
 
     var sign = getSign();
     if (sign && this.$el.find('[name="_tk"]').length == 0) {
@@ -103,25 +103,25 @@ vm.Global.set(util.store('admin'));
 
 var auth = {
 
-    clearAuth: function () {
+    clearAuth: function() {
 
         localStorage.removeItem('__tk');
         localStorage.removeItem('admin');
     },
 
-    setAuthToken: function (tk) {
+    setAuthToken: function(tk) {
         localStorage.setItem('__tk', aes.decrypt(this.getAESKey(), tk));
     },
 
-    getAuthToken: function () {
+    getAuthToken: function() {
         return localStorage.getItem('__tk');
     },
 
-    getAdmin: function () {
+    getAdmin: function() {
         return util.store('admin');
     },
 
-    setAdmin: function (admin) {
+    setAdmin: function(admin) {
 
         console.log(admin);
 
@@ -130,7 +130,7 @@ var auth = {
         util.store('admin', admin);
     },
 
-    getAESKey: function () {
+    getAESKey: function() {
         if (!_atk) {
             _atk = aes.genKey();
         }
@@ -139,7 +139,7 @@ var auth = {
 
     md5: md5.md5,
 
-    encryptParams: function (params) {
+    encryptParams: function(params) {
         var result = {};
 
         if (typeof params !== 'string') {

@@ -2,6 +2,7 @@ var vm = require('core/model2');
 var util = require('util');
 var $ = require('$');
 var messagesList = require('./messagesList');
+var user = require('../models/user');
 
 var friends = vm.createModel({
     defaultData: {
@@ -26,6 +27,13 @@ var friends = vm.createModel({
 
     getContacts: function() {
         return this._('contacts');
+    },
+
+    getUserShowName: function(item) {
+        if (item.user_id == user.get('user_id')) return item.user_name || ('用户' + item.user_id);
+
+        var friend = friends.getFriend(item.user_id);
+        return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
     }
 });
 

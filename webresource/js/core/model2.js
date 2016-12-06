@@ -82,7 +82,8 @@ function valueCode(str, variables) {
     for (var i = 0; i < result.length; i++) {
         code += (i ? '&&' : '') + result[i] + '!==null&&' + result[i] + '!==undefined';
     }
-    return '((' + code + ')?typeof ' + str + '==="function"?' + str + '():' + str + ':"")';
+    //typeof ' + str + '==="function"?' + str + '():
+    return '((' + code + ')?' + str + ':"")';
 }
 
 function eachElement(el, fn) {
@@ -157,7 +158,7 @@ function updateRequireView(viewModel, el) {
 
     if (el.snRequireInstance) {
         instance = el.snRequireInstance;
-        if (data && util.isDiffObject(data, instance._originData)) {
+        if (data && !util.equal(data, instance._originData)) {
             instance._originData = data;
             instance.set(data);
         }
@@ -662,9 +663,13 @@ var ModelProto = {
             value = attrs[attr];
 
             if (origin !== value) {
-                if (origin === undefined && (value instanceof Model || value instanceof Collection)) {
+                if (value instanceof Model || value instanceof Collection) {
                     model[attr] = value;
                     data[attr] = value.data;
+
+                    if (origin instanceof Model || origin instanceof Collection) {
+                        unlinkModels(self, origin);
+                    }
 
                     linkModels(self, value, model.key ? model.key + '.' + attr : attr);
 
