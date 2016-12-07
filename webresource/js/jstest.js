@@ -24,12 +24,12 @@ function testcase(descripe, fn) {
     console.log('%c ' + failures + ' tests failed %c ' + passed + ' tests passed [' + descripe + '] ', failures > 0 ? 'background-color:#c00;color:#fff' : 'color:#999', 'color:green');
 }
 
-testcase("test util.pathJoin", function () {
-    eql(util.combinePath("abc/dd", "../"), "abc");
-    eql(util.combinePath("/abc/dd", "aa"), "/abc/dd/aa");
-    eql(util.combinePath("/abc/dd", "./../aa"), "/abc/aa");
-    eql(util.combinePath("/abc/dd", "../../aa"), "/aa");
-    eql(util.combinePath("/abc/dd/a.js", "./aa"), "/abc/dd/a.js/aa");
+testcase("test util.joinPath", function () {
+    eql(util.joinPath("abc/dd", "../"), "abc");
+    eql(util.joinPath("/abc/dd", "aa"), "/abc/dd/aa");
+    eql(util.joinPath("/abc/dd", "./../aa"), "/abc/aa");
+    eql(util.joinPath("/abc/dd", "../../aa"), "/aa");
+    eql(util.joinPath("/abc/dd/a.js", "./aa"), "/abc/dd/a.js/aa");
 });
 
 

@@ -1,5 +1,5 @@
 var Http = require('core/http');
-var md5 = require('util/md5');
+var md5 = require('utils/md5');
 
 var title = 'aaa';
 var content = 'bbb';

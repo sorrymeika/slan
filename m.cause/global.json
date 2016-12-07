@@ -50,7 +50,7 @@
         "extend/matchMedia": "../webresource/m/js/extend/matchMedia",
         "extend/ortchange": "../webresource/m/js/extend/ortchange",
         "util": "../webresource/js/util",
-        "util/md5": "../webresource/js/util/md5",
+        "utils/md5": "../webresource/js/utils/md5",
         "bridge": "../webresource/m/js/bridge",
         "graphics/cubicBezier": "../webresource/js/graphics/cubicBezier",
         "graphics/matrix2d": "../webresource/js/graphics/matrix2d",

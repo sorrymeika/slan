@@ -7,7 +7,7 @@ define(function (require, exports, module) {
     var model = require('../core/model');
     var animation = require('animation');
     var userModel = require("models/user");
-    var md5 = require("util/md5").md5;
+    var md5 = require("utils/md5").md5;
 
     return Activity.extend({
         events: {

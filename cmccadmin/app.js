@@ -17,7 +17,7 @@ var Util = require('util');
 var util = require('../core/util');
 _.extend(Util, util);
 
-var combinePath = util.combinePath;
+var joinPath = util.joinPath;
 var formatJs = Tools.formatJs;
 
 function trimPath(path) {
@@ -41,8 +41,8 @@ function combineRouters(config) {
                 router = _.extend({}, router);
             }
             _.extend(router, {
-                controller: combinePath("views", router.controller),
-                template: combinePath("template", router.template)
+                controller: joinPath("views", router.controller),
+                template: joinPath("template", router.template)
             });
 
             router.root = project.root;
@@ -198,14 +198,14 @@ exports.startWebServer = function (config) {
                     fileList = _.keys(fileList);
                 }
                 fileList.forEach(function (file) {
-                    requires.push(combinePath(project.root, file));
+                    requires.push(joinPath(project.root, file));
                 });
             }
         }
 
         for (var key in project.css) {
             project.css[key] && project.css[key].forEach(function (file) {
-                requires.push(combinePath(project.root, file));
+                requires.push(joinPath(project.root, file));
             });
         }
 
@@ -363,7 +363,7 @@ if (args.build) {
 
             for (var key in project.js) {
 
-                requires.push(combinePath(project.root, key));
+                requires.push(joinPath(project.root, key));
 
                 if (project.js[key]) {
                     //打包项目引用js                
@@ -379,14 +379,14 @@ if (args.build) {
                         Promise.all(fileList.map(function (file, i) {
                             var isRazorTpl = /\.(html|tpl|cshtml)$/.test(file);
 
-                            excludes.push(path.relative(baseDir, combinePath(project.root, "./" + file)));
+                            excludes.push(path.relative(baseDir, joinPath(project.root, "./" + file)));
 
                             return new Promise(function (resolve) {
                                 fsc.readFirstExistentFile([project.root], isRazorTpl ? [file] : [file + '.js', file + '.jsx'], function (err, text, fileName) {
 
                                     if (isRazorTpl) text = razor.web(text);
                                     text = formatJs(text);
-                                    text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
+                                    text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : joinPath(project.root, file), text));
 
                                     resolve(text);
                                 });
@@ -403,7 +403,7 @@ if (args.build) {
 
             for (var key in project.css) {
 
-                requires.push(combinePath(project.root, key));
+                requires.push(joinPath(project.root, key));
 
                 if (project.css[key] && project.css[key].length) {
 
@@ -461,8 +461,8 @@ if (args.build) {
                         template = router.template;
                     }
 
-                    controller = combinePath(project.root, 'views', controller);
-                    template = combinePath(project.root, 'template', template);
+                    controller = joinPath(project.root, 'views', controller);
+                    template = joinPath(project.root, 'template', template);
 
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);

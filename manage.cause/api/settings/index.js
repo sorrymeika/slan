@@ -1,6 +1,6 @@
 ﻿var express = require('express');
 var redis = require('../data/redis');
-var md5 = require('../../../util/md5');
+var md5 = require('../../../utils/md5');
 
 var app = express.Router();
 

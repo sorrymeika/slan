@@ -7,7 +7,7 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
-var firstLetter = require('util/firstLetter');
+var firstLetter = require('utils/firstLetter');
 
 var contact = require('logical/contact');
 

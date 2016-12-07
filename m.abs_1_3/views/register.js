@@ -6,7 +6,7 @@
     var Loading = require('../widget/loader');
     var model = require('../core/model');
     var animation = require('animation');
-    var md5 = require('util/md5');
+    var md5 = require('utils/md5');
 
     return Activity.extend({
         events: {

@@ -10,7 +10,7 @@ var Util = {
         return ++guid;
     },
 
-    combinePath: function () {
+    joinPath: function () {
         var args = [].slice.apply(arguments);
         var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^\:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
         var flag = true;

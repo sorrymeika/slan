@@ -58,10 +58,10 @@
             "cryptojs/cipher-core": "../webresource/js/cryptojs/cipher-core",
             "cryptojs/evpkdf": "../webresource/js/cryptojs/evpkdf",
             "cryptojs/aes": "../webresource/js/cryptojs/aes",
-            "util/md5": "../webresource/js/util/md5",
-            "util/base64": "../webresource/js/util/base64",
-            "util/aes": "../webresource/js/util/aes",
-            "util/rsa": "../webresource/js/util/rsa"
+            "utils/md5": "../webresource/js/utils/md5",
+            "utils/base64": "../webresource/js/utils/base64",
+            "utils/aes": "../webresource/js/utils/aes",
+            "utils/rsa": "../webresource/js/utils/rsa"
         }
     },
     "framework": {

@@ -50,8 +50,8 @@ Route.prototype.append = function(options) {
         this.routes.push({
             regex: new RegExp(regex, 'i'),
             parts: parts,
-            template: util.combinePath(root, option.template),
-            view: util.combinePath(root, option.controller),
+            template: util.joinPath(root, option.template),
+            view: util.joinPath(root, option.controller),
             api: option.api,
             root: root
         });
@@ -93,7 +93,7 @@ Route.prototype.match = function(url) {
                 hash: '#' + hash,
                 root: route.root,
                 template: route.template,
-                package: sl.isDebug ? false : util.combinePath(route.root, route.group || 'controller'),
+                package: sl.isDebug ? false : util.joinPath(route.root, route.group || 'controller'),
                 view: route.view,
                 params: {},
                 search: search,

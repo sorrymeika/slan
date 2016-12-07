@@ -2,7 +2,7 @@
 var Validator = require('../../../core/validator');
 var userModel = require('../models/user');
 var causedb = require('../data/causedb');
-var md5 = require('../../../util/md5').md5;
+var md5 = require('../../../utils/md5').md5;
 
 module.exports = function(req, res) {
     var valid = new Validator();

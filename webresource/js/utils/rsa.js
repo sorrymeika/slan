@@ -1,4 +1,4 @@
-﻿var Base64 = require('util/base64');
+﻿var Base64 = require('utils/base64');
 
 // Copyright (c) 2005  Tom Wu
 // All Rights Reserved.

@@ -7,7 +7,7 @@ app.get('/captcha', function(req, res) {
     var token = req.query.token;
 
     if (token) {
-        userModel.captcha[token] = require("../../../util/captcha")(req, res);
+        userModel.captcha[token] = require("../../../utils/captcha")(req, res);
 
     } else {
         res.send('');

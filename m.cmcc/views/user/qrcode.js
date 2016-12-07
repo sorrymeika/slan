@@ -8,7 +8,7 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 var user = require('models/user');
 
-var qrcode = require('util/qrcode');
+var qrcode = require('utils/qrcode');
 
 module.exports = Activity.extend({
 

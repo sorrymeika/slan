@@ -69,7 +69,7 @@ Validator.prototype.password = function(value, emptyText) {
         emptyText: emptyText
     });
 
-    result && (result = require("../util/md5").md5(result));
+    result && (result = require("../utils/md5").md5(result));
     return result;
 }
 

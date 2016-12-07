@@ -17,7 +17,7 @@ var Util = require('util');
 var util = require('../core/util');
 _.extend(Util, util);
 
-var combinePath = util.combinePath;
+var joinPath = util.joinPath;
 var formatJs = Tools.formatJs;
 
 function trimPath(path) {
@@ -41,8 +41,8 @@ function combineRouters(config) {
                 router = _.extend({}, router);
             }
             _.extend(router, {
-                controller: combinePath("views", router.controller),
-                template: combinePath("template", router.template)
+                controller: joinPath("views", router.controller),
+                template: joinPath("template", router.template)
             });
 
             router.root = project.root;
@@ -132,14 +132,14 @@ exports.startWebServer = function (config) {
                     })
                 }
                 fileList.forEach(function (file) {
-                    requires.push(combinePath(project.root, file));
+                    requires.push(joinPath(project.root, file));
                 });
             }
         }
 
         for (var key in project.css) {
             project.css[key] && project.css[key].forEach(function (file) {
-                requires.push(combinePath(project.root, file));
+                requires.push(joinPath(project.root, file));
             });
         }
 
@@ -282,7 +282,7 @@ if (args.build) {
             var requires = [];
 
             for (var key in project.js) {
-                requires.push(combinePath(project.root, key));
+                requires.push(joinPath(project.root, key));
 
                 if (project.js[key]) { 
                     //打包项目引用js                
@@ -302,7 +302,7 @@ if (args.build) {
 
                                 if (isRazorTpl) text = razor.web(text);
                                 text = formatJs(text);
-                                text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : combinePath(project.root, file), text));
+                                text = Tools.compressJs(Tools.replaceDefine(ids ? ids[i] : joinPath(project.root, file), text));
 
                                 filePromise.next(i, err, text);
                             });
@@ -317,7 +317,7 @@ if (args.build) {
             }
 
             for (var key in project.css) {
-                requires.push(combinePath(project.root, key));
+                requires.push(joinPath(project.root, key));
 
                 if (project.css[key] && project.css[key].length) { 
                     //打包项目引用css
@@ -366,8 +366,8 @@ if (args.build) {
                         template = router.template;
                     }
 
-                    controller = combinePath(project.root, 'views', controller);
-                    template = combinePath(project.root, 'template', template);
+                    controller = joinPath(project.root, 'views', controller);
+                    template = joinPath(project.root, 'template', template);
 
                     var controllerPath = path.join(baseDir, controller);
                     var templatePath = path.join(baseDir, template);
