@@ -226,7 +226,7 @@ exports.startWebServer = function(config) {
     });
 
     app.all('*.js', function(req, res, next) {
-        
+
         var filePath = req.url;
         var isRazorTpl = /\.(html|tpl|cshtml)\.js$/.test(filePath);
 
@@ -381,9 +381,16 @@ if (args.build) {
             for (var key in project.js) {
                 var combinedJs = joinPath(project.root, key);
                 var resourceMapping = config.resourceMapping[combinedJs] = [];
+                var jsMap = project.js[key];
+                var tmp;
+
+                if (typeof jsMap == 'string') {
+                    (tmp = {})[key] = jsMap;
+                    jsMap = tmp;
+                }
 
                 //打包项目引用js
-                pachJs(key, project.js[key], resourceMapping);
+                pachJs(key, jsMap, resourceMapping);
             }
 
             var packCss = function(key, fileList) {

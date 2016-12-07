@@ -152,7 +152,7 @@ module.exports = Activity.extend({
                 title: '云米规则',
                 content: yunMiRules.rule2,
                 btn: '关闭',
-                action: function() {}
+                action: function() { }
             })
         }
 

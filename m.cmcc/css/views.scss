@@ -36,7 +36,8 @@
 .hm_idx__life .subitem img { width: 30px; height: 30px; display: block; border-radius: 50%; overflow: hidden; }
 .hm_idx__life .con { max-width: 180px; }
 
-.hm_idx__life .item i,.hm_idx__life .subitem i { position: absolute; left: 53px; top: 6px; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }
+.hm_idx__life .item i,.hm_idx__life .subitem i { position: absolute; left: 33px; top: 8px; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }
+.hm_idx__life .subitem i { left: 52px; top: 6px; }
 
 .hm_idx__to_mask { background: rgba(0,0,0,.5); z-index: 1000; }
 .hm-timeout { position: absolute; z-index: 1001; }
@@ -371,3 +372,9 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .bs_service__item { width: .8rem; height: .8rem; float: left; text-align: center; position: relative; }
 .bs_service__item img { width: .3rem; height: .3rem; }
 .bs_service__item .unread { position: absolute; top: .08rem; right: .18rem; position: absolute; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }
+
+.bs_jubao__con { margin: 0 -10px; background: url(../images/jubao_repeat.png) repeat-x; background-size: auto 100%; height: 40px; }
+.bs_jubao__info .note { font-size: 12px; color: #bbb; }
+.bs_jubao__info .days { padding-top: 6px; font-size: 16px; color: #e55c20; }
+.bs_jubao__info .rate { padding-top: 0; }
+.bs_jubao__info .rate em { font-size: 22px; color: #e55c20; }

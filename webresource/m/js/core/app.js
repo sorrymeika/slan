@@ -342,7 +342,13 @@ var Application = Component.extend(Object.assign(appProto, {
 
             activity.then(delay)
                 .then(function(err, res, done) {
-                    activity.$el.addClass('active');
+                    activity.$el.css({
+                        opacity: 0
+                    }).addClass('active').animate({
+                        opacity: 1
+
+                    }, 'ease-out', 400);
+
                     activity.trigger('Appear').trigger('Show');
 
                     that.trigger('Start');

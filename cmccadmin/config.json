@@ -38,8 +38,8 @@
         "/business/update/{id:\\d+}": "/business/update_business",
         "/business/add": "/business/add_business",
 
-
         "/notification/index": "/notification/notification",
-        "/notification/add": "/notification/add_notification"
+        "/notification/add": "/notification/add_notification",
+        "/notification/easy/{id:\\d+}": "/notification/add_notifyeasy"
     }
 }

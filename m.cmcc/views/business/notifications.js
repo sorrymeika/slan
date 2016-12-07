@@ -21,9 +21,12 @@ module.exports = Activity.extend({
         var business_id = this.business_id = this.route.params.id;
         var dataModel = businessModel._('list').find('business_id', business_id);
 
+        console.log(dataModel);
+
         var model = this.model = new Model(this.$el, {
             business_id: business_id,
-            title: dataModel.get('business_name')
+            title: dataModel.get('business_name'),
+            business: dataModel
         });
 
         model.enterShop = function() {
@@ -45,6 +48,7 @@ module.exports = Activity.extend({
         var loader = this.loader = business.notificationsLoader(model, function(res) {
 
             switch (business_id) {
+                //移动业务
                 case '100001':
                     res.data.forEach(function(item) {
                         var details = item.details = [];
@@ -83,15 +87,15 @@ module.exports = Activity.extend({
                                 text: is_nofee ? '您的手机已欠费' : '您的话费剩余已不多',
                                 value: '-'
                             }, {
-                                text: '手机号码',
-                                value: user.get('account')
-                            }, {
-                                text: !is_nofee ? '话费剩余' : '话费超出',
-                                value: parseInt(!is_nofee ? feature.useble_balance : feature.this_month_owing) / 1000
-                            }, {
-                                text: '点击详情立即续费',
-                                value: '-'
-                            })
+                                    text: '手机号码',
+                                    value: user.get('account')
+                                }, {
+                                    text: !is_nofee ? '话费剩余' : '话费超出',
+                                    value: parseInt(!is_nofee ? feature.useble_balance : feature.this_month_owing) / 1000
+                                }, {
+                                    text: '点击详情立即续费',
+                                    value: '-'
+                                })
 
                         } else {
                             var is_nofee = feature.product_remain == 0;
@@ -113,18 +117,28 @@ module.exports = Activity.extend({
                                 text: is_nofee ? '您的套餐内流量已用完' : '您的套餐内流量剩余已不多',
                                 value: '-'
                             }, {
-                                text: '本月已用',
-                                value: product_use
-                            }, {
-                                text: !is_nofee ? '本月剩余' : '本月超出',
-                                value: left
-                            }, {
-                                text: '点击详情立即续费',
-                                value: '-'
-                            })
+                                    text: '本月已用',
+                                    value: product_use
+                                }, {
+                                    text: !is_nofee ? '本月剩余' : '本月超出',
+                                    value: left
+                                }, {
+                                    text: '点击详情立即续费',
+                                    value: '-'
+                                })
                         }
 
                         console.log(feature);
+                    });
+                    break;
+
+                //娱乐
+                case '100022':
+                    break;
+                //娱乐
+                case '100026':
+                    res.data.forEach(function(item) {
+                        item.feature = JSON.parse(item.feature);
                     });
                     break;
             }

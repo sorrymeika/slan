@@ -53,6 +53,12 @@ module.exports = Page.extend({
                 field: "linkurl",
                 type: "text"
             }, {
+                label: "图片地址",
+                field: "image",
+                type: "text",
+                emptyAble: false,
+                emptyText: "图片不可为空"
+            }, {
                 label: "类型",
                 field: "type",
                 type: "number",
@@ -100,5 +106,5 @@ module.exports = Page.extend({
         form.$el.appendTo(model.refs.main);
 
     },
-    onShow: function() {}
+    onShow: function() { }
 });

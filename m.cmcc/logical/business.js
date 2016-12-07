@@ -19,6 +19,7 @@ var business = {
             util.store('last_read_time', res.serverTime);
 
             var list = businessModel._('list');
+            
             list.update(res.data, 'business_id');
 
             if (res.unreadNotifications) {

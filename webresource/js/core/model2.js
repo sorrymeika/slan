@@ -70,7 +70,7 @@ function valueCode(str, variables) {
     var code = '';
     var gb = '$data';
 
-    if (!alias || alias in Filters || GlobalVariables.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || testRegExp(rvalue, str)) {
+    if (!alias || alias in Filters || GlobalVariables.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(str)) {
         return str;
     }
 
@@ -349,7 +349,6 @@ function unlinkModels(model, value) {
                 break;
             }
         }
-
     }
 }
 
@@ -657,6 +656,8 @@ var ModelProto = {
         }
 
         var hasChange = false;
+        var valueType;
+        var changes = [];
 
         for (var attr in attrs) {
             origin = model[attr];
@@ -696,8 +697,9 @@ var ModelProto = {
                     if (!hasChange && origin.changed) hasChange = true;
 
                 } else {
+                    valueType = value === null || value === undefined ? null : toString.call(value);
 
-                    switch (toString.call(value)) {
+                    switch (valueType) {
                         case '[object Object]':
                             value = new Model(this, attr, value);
                             model[attr] = value;
@@ -712,7 +714,7 @@ var ModelProto = {
 
                         default:
                             data[attr] = model[attr] = value;
-                            root.trigger("change:" + (this.key ? this.key + "." + attr : attr), value);
+                            changes.push(this.key ? this.key + "." + attr : attr, value);
                             break;
                     }
 
@@ -721,7 +723,13 @@ var ModelProto = {
             }
         }
 
-        hasChange && this._changedAndUpdateViewNextTick();
+        if (hasChange) {
+            this._changedAndUpdateViewNextTick();
+
+            for (var i = 0, length = changes.length; i < length; i += 2) {
+                root.trigger("change:" + changes[i], changes[i + 1]);
+            }
+        }
 
         return self;
     },
@@ -885,6 +893,8 @@ Collection.prototype = {
 
     //@updateType=undefined:collection中存在既覆盖，不存在既添加|true:根据arr更新，不在arr中的项将被删除|false:只更新collection中存在的
     update: function(arr, primaryKey, updateType) {
+        if (!arr) return this;
+
         var fn;
         var length = this.models.length;
 
@@ -902,27 +912,25 @@ Collection.prototype = {
         var item;
         var arrItem;
         var exists;
-        var appends = [];
 
         if (!Array.isArray(arr)) arr = [arr];
         else arr = [].concat(arr);
+
+        var n = arr.length;
 
         for (var i = length - 1; i >= 0; i--) {
             item = this.data[i];
             exists = false;
 
-            for (var j = 0, n = arr.length; j < n; j++) {
+            for (var j = 0; j < n; j++) {
                 arrItem = arr[j];
 
-                if (arrItem != undefined) {
+                if (arrItem !== undefined) {
                     if (fn.call(this, item, arrItem)) {
                         this.models[i].set(arrItem);
                         arr[j] = undefined;
                         exists = true;
                         break;
-                    }
-                    if (i == 0 && updateType !== false) {
-                        appends.push(arrItem);
                     }
                 }
             }
@@ -932,9 +940,19 @@ Collection.prototype = {
             }
         }
 
-        if (appends.length) {
-            this.add(appends);
+        if (updateType !== false) {
+            var appends = [];
+            for (var i = 0, n = arr.length; i < n; i++) {
+                if (arr[i] !== undefined) {
+                    appends.push(arr[i]);
+                }
+            }
+
+            if (appends.length) {
+                this.add(appends);
+            }
         }
+
         return this;
     },
 
@@ -1798,30 +1816,33 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
     updateViewNextTick: function() {
         if (!this._nextTick) {
-            this._nextTick = requestAnimationFrame(this.updateView);
+            this._nextTick = this._updatingView ? 1 : requestAnimationFrame(this.updateView);
         }
     },
 
     updateView: function() {
-        this._nextTick = null;
+        this._updatingView = true;
         this.trigger('datachanged');
         this.viewWillUpdate && this.viewWillUpdate();
-
-        if (this._nextTick) return;
 
         console.time('updateView');
 
         var self = this;
 
-        this.refs = {};
+        do {
+            this._nextTick = null;
+            this.refs = {};
 
-        eachElement(this.$el, function(el) {
-            if (el.snViewModel && el.snViewModel != self || self._nextTick) return false;
+            eachElement(this.$el, function(el) {
+                if (el.snViewModel && el.snViewModel != self || self._nextTick) return false;
 
-            return updateNode(self, el);
-        });
+                return updateNode(self, el);
+            });
+
+        } while (this._nextTick);
 
         console.timeEnd('updateView');
+        this._updatingView = false;
 
         this.viewDidUpdate && this.viewDidUpdate();
         this.trigger('viewDidUpdate');
@@ -1994,8 +2015,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             .prependTo(parentNode);
     },
 
-    next: function(callback) {
-        return this.one('viewDidUpdate', callback);
+    next: function(cb) {
+        return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
     },
 
     destory: function() {

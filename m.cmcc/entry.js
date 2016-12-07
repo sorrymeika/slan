@@ -142,7 +142,7 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
             routes: routes,
             loginPath: '/login'
 
-        }).start(sl.isInApp ? 2000 : 0);
+        }).start(sl.isInApp ? 0 : 0);
     });
 }
 

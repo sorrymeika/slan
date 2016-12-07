@@ -16,10 +16,6 @@ if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
 else if (ie) osVersion = ie[1].split('.');
 
-var pad = function(num, n) {
-    var a = '0000000000000000' + num;
-    return a.substr(a.length - (n || 2));
-};
 
 function equals(a, b, identity) {
     if (a == b) return true;
@@ -508,7 +504,10 @@ var util = {
         return result;
     },
 
-    pad: pad,
+    pad: function(num, n) {
+        var a = '0000000000000000' + num;
+        return a.substr(a.length - (n || 2));
+    },
 
     formatMoney: function(number) {
         return (number + '').replace(/(\d{3})+(\.|$)/, function(match, a) {
@@ -518,7 +517,7 @@ var util = {
         }).replace(/^,/, '');
     },
 
-    deepValue: function(data, names) {
+    value: function(data, names) {
         if (typeof names === 'string')
             names = names.split('.');
 
@@ -537,6 +536,7 @@ var util = {
     },
 
     timeLeft: function(timestamp) {
+        var pad = this.pad;
         var days = Math.floor(timestamp / (1000 * 60 * 60 * 24));
         timestamp = timestamp % (1000 * 60 * 60 * 24);
 
@@ -557,7 +557,7 @@ var util = {
 
     //yyyy-MM-dd HH:mm:ss
     parseDate: function(date) {
-        date = date.split(/\s+|\:|\-|年|月|日/).map(function(time) {
+        date = date.split(/\s+|\:|\-|年|月|日|\//).map(function(time) {
             return parseInt(time);
         });
 
@@ -574,6 +574,7 @@ var util = {
         } else if (!(d instanceof Date)) {
             return '';
         }
+        var pad = util.pad;
 
         if (f === 'minutes') {
             var now = new Date();
@@ -750,9 +751,5 @@ var util = {
 };
 
 util.filter = util.find;
-
-
-var path = {
-}
 
 module.exports = util;

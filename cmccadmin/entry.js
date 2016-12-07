@@ -4,7 +4,7 @@ var Navigation = require('core/navigation');
 
 function startApp(routes, resourceMapping) {
 
-    seajs.on('fetch', function(emitData) {
+    seajs.on('fetch', function (emitData) {
 
         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
@@ -19,7 +19,7 @@ function startApp(routes, resourceMapping) {
         }
     });
 
-    seajs.use(['common/menu', 'logical/auth'], function(Menu, auth) {
+    seajs.use(['common/menu', 'logical/auth'], function (Menu, auth) {
 
         var app = new Navigation({
             routes: routes
@@ -67,12 +67,18 @@ function startApp(routes, resourceMapping) {
                     title: '添加云米时段',
                     url: '/user_yunmi/add'
                 }]
-            },{
+            }, {
                 title: '提醒业务管理',
                 url: '/business/index',
                 children: [{
                     title: '通知管理',
                     url: '/notification/index'
+                }, {
+                    title: '推送娱乐提醒',
+                    url: '/notification/easy/100022'
+                }, {
+                    title: '推送和聚宝提醒',
+                    url: '/notification/easy/100026'
                 }]
             }]
         });

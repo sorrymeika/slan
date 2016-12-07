@@ -386,6 +386,8 @@ create table business (--第三方业务
 create sequence business_seq minvalue 1 maxvalue 9999999999 start with 100001 increment by 1;
 
 insert into business (business_id,business_name,secret_key,type) values (100001,'移动官微','4411d2e0eddc54cb19ef568443257efb',1);
+insert into business (business_id,business_name,secret_key,type) values (100022,'娱乐','4411d2e0eddc54cb19ef568443257efb',3);
+insert into business (business_id,business_name,secret_key,type) values (100026,'和聚宝','4411d2e0eddc54cb19ef568443257efb',2);
 
 create table notification (--消息提醒
     notify_id number(12) primary key,--自增ID
