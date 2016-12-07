@@ -11,7 +11,6 @@ var ArrayProto = Array.prototype,
     nativeKeys = Object.keys
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
-var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 
 if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
@@ -63,28 +62,28 @@ function equals(a, b, identity) {
     return true;
 }
 
-function overlapped(a, b) {
-    var typeA = toString.call(a);
+function overlaps(parent, obj) {
+    var typeA = toString.call(obj);
 
     switch (typeA) {
         case '[object Object]':
-            var keysA = Object.keys(a);
+            var keys = Object.keys(obj);
 
-            for (var i = keysA.length; i >= 0; i--) {
-                var key = keysA[i];
+            for (var i = keys.length; i >= 0; i--) {
+                var key = keys[i];
 
-                if (a[key] != b[key]) return false;
+                if (obj[key] != parent[key]) return false;
             }
             break;
 
         case '[object Array]':
-            for (var i = a.length; i >= 0; i--) {
-                if (b.indexOf(a[i]) == -1) return false;
+            for (var i = obj.length; i >= 0; i--) {
+                if (parent.indexOf(obj[i]) == -1) return false;
             }
             break;
 
         default:
-            return a == b;
+            return obj == parent;
     }
     return true;
 }
@@ -93,10 +92,12 @@ var util = {
 
     isInApp: /SLApp/.test(ua),
     ios: !!ios,
+    iOS: !!ios,
     ie: !!ie,
     android: isAndroid,
     osVersion: osVersion ? parseFloat(osVersion[0] + '.' + osVersion[1]) : 0,
     isInWechat: /micromessenger/i.test(ua),
+
     combinePath: function() {
         var args = [].slice.apply(arguments);
         var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^\:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
@@ -111,12 +112,13 @@ var util = {
         }
         return result.replace(/\/$/, '');
     },
+
     guid: function() {
         return ++guid;
     },
 
     randomString: function(len) {
-        var chars = CHARS,
+        var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(''),
             uuid = '',
             rnd = 0,
             r;
@@ -154,7 +156,7 @@ var util = {
         return true;
     },
 
-    overlapped: overlapped,
+    overlaps: overlaps,
 
     equals: equals,
 
@@ -326,7 +328,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (overlapped(key, arr[i])) return i;
+                if (overlaps(arr[i], key)) return i;
             }
         }
 
@@ -349,7 +351,7 @@ var util = {
 
         } else {
             for (var i = arr.length - 1; i >= 0; i--) {
-                if (overlapped(key, arr[i])) return i;
+                if (overlaps(arr[i], key)) return i;
             }
         }
 
@@ -399,7 +401,7 @@ var util = {
             }
         } else {
             for (var i = 0, len = arr.length; i < len; i++) {
-                if (overlapped(key, arr[i])) return arr[i];
+                if (overlaps(arr[i], key)) return arr[i];
             }
         }
 
@@ -425,7 +427,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (!overlapped(key, arr[i]))
+                if (!overlaps(arr[i], key))
                     result.push(arr[i]);
             }
         }
@@ -452,7 +454,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (overlapped(key, arr[i]))
+                if (overlaps(arr[i], key))
                     result.push(arr[i]);
             }
         }
@@ -479,7 +481,7 @@ var util = {
 
         } else {
             for (var i = length - 1; i >= 0; i--) {
-                if (overlapped(key, arr[i]))
+                if (overlaps(arr[i], key))
                     arr.splice(i, 1);
             }
         }
@@ -741,11 +743,17 @@ var util = {
     validateEmail: function(email) {
         return /^[-_a-zA-Z0-9\.]+@([-_a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,3}$/.test(email)
     },
+
     validateMobile: function(str) {
         return /^1[0-9]{10}$/.test(str)
     }
 };
 
 util.filter = util.find;
+
+
+
+var path = {
+}
 
 module.exports = util;

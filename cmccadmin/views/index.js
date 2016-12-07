@@ -8,6 +8,8 @@ var Grid = require('components/grid');
 
 var auth = require('logical/auth');
 
+var jstest = require('jstest');
+
 return Page.extend({
     events: {},
 
@@ -142,7 +144,8 @@ return Page.extend({
                         namespaceCode.indexOf(d) == -1 &&
                             namespaceCode.push(d);
 
-                        privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")\nprivate Date " + name + ";\n";
+                        //@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")\n
+                        privateCode += "private Date " + name + ";\n";
 
                         if (item.search) {
                             d = 'import org.springframework.format.annotation.DateTimeFormat;';

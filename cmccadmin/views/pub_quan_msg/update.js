@@ -13,7 +13,7 @@ var popup = require('widget/popup')
 module.exports = Page.extend({
 
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
@@ -73,30 +73,31 @@ module.exports = Page.extend({
             }],
             buttons: [{
                 value: '修改',
-                click: function() {
-                    this.submit(function() {
+                click: function () {
+                    this.submit(function () {
                         Toast.showToast('修改成功');
                         self.setResult('pub_quan_msgchange');
                         history.back();
 
-                    }, function(e) {
+                    }, function (e) {
                         Toast.showToast(e.message);
                     });
                 }
             }, {
                 value: '取消',
-                click: function() {
-                    history.back();
+                click: function () {
+                    location.hash = '/pub_quan_msg/index/' + (self.route.params.id || 0);
+
                 }
             }]
         });
         Http.post('/pub_quan_msg/getById', {
             msg_id: this.route.params.id
-        }).then(function(res) {
+        }).then(function (res) {
             form.set(res.data);
         });
         form.$el.appendTo(model.refs.main);
 
     },
-    onShow: function() {}
+    onShow: function () { }
 });

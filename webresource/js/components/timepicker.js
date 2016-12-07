@@ -242,17 +242,12 @@ var TimePicker = model.ViewModel.extend({
         if (!time) {
             return this.clearInput();
         }
-        var val = this.$input.val();
-
-        if (val == time) return;
-
-        if (typeof time == 'number' || (typeof time == 'string' && /^\d+$/.test(time) && (time = parseInt(time)))) {
+        if (time == this.$input.val()) return;
+        if (typeof time == 'number' || (typeof time == 'string' && /^\d+$/.test(time))) {
             time = new Date(time);
         } else if (typeof time == 'string') {
             time = Date.parse(time);
         }
-
-        if (+time == val) return;
 
         return this.setYear(time.getFullYear(), false)
             .setMonth(time.getMonth() + 1, false)
@@ -278,18 +273,18 @@ var TimePicker = model.ViewModel.extend({
     _update: function (isUpdate) {
         if (isUpdate !== false) {
             var data = this.data;
-            var time = Date.parse(data.yyyy != '----'
-                ? (data.yyyy + '-' + data.MM + '-' + data.dd).replace(/--/g, '1') + ' ' + (data.hh + ':' + data.mm + ':' + data.ss).replace(/--/g, '00')
-                : '');
+            var time = data.yyyy != '----'
+                ? (data.yyyy + '/' + data.MM + '/' + data.dd).replace(/--/g, '1') + ' ' + (data.hh + ':' + data.mm + ':' + data.ss).replace(/--/g, '00')
+                : '';
 
-            if (+time != this.$input.val())
+            if (time != this.$input.val())
                 this.$input.val(time).trigger('onTimeChange').trigger('change');
         }
         return this;
     },
 
     getTime: function () {
-        return +new Date(parseInt(this.$input.val())) || 0;
+        return Date.parse(this.$input.val().replace(/-/g, '/')) || 0;
     },
 
     show: function () {

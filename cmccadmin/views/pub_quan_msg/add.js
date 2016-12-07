@@ -100,7 +100,8 @@ module.exports = Page.extend({
             }, {
                 value: '取消',
                 click: function () {
-                    history.back();
+
+                    location.hash = '/pub_quan_msg/index/' + (self.route.params.quan_id || 0);
                 }
             }]
         });
