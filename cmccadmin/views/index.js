@@ -142,15 +142,15 @@ return Page.extend({
                         namespaceCode.indexOf(d) == -1 &&
                             namespaceCode.push(d);
 
-                        privateCode += "private Date " + name + ";\n";
+                        privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")\nprivate Date " + name + ";\n";
 
                         if (item.search) {
                             d = 'import org.springframework.format.annotation.DateTimeFormat;';
                             namespaceCode.indexOf(d) == -1 &&
                                 namespaceCode.push(d);
 
-                            privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date start_" + name + ";\n";
-                            privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\nprivate Date end_" + name + ";\n";
+                            privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")\nprivate Date start_" + name + ";\n";
+                            privateCode += "@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")\nprivate Date end_" + name + ";\n";
                         }
                         break;
                 }
@@ -175,6 +175,8 @@ return Page.extend({
 
                 return 'public void set' + toUpper(v) + "(" + type + " " + v + "){ this." + v + " = " + v + "; }\n";
             });
+
+            result = result.replace(/\@DateTimeFormat\(pattern\s*\=\s*\"yyyy-MM-dd HH\:mm\:ss"\)(?=\s*public)/mg, '');
 
             return result;
         }
@@ -560,8 +562,8 @@ return Page.extend({
 
                         if (hasSort) {
                             firstXml += "select * from (select " + columnsList.map(function(item) {
-                                    return item.name;
-                                }).join(",") + " from " + tableName + where + orderByXml + ") a " +
+                                return item.name;
+                            }).join(",") + " from " + tableName + where + orderByXml + ") a " +
                                 tableName +
                                 ' where ROWNUM=1</select>';
 
@@ -994,59 +996,59 @@ return Page.extend({
                             url: '/" + tableName + "/add',\n\
                             fields: [" + formList.map(function(item) {
 
-                            if (item.name == primaryKey.name) return '';
+                                if (item.name == primaryKey.name) return '';
 
-                            var res = '{\n\
+                                var res = '{\n\
                                     label: "' + (item.memo || item.name) + '",\n\
                                     field: "' + item.field + '",\n\
                                     type:';
 
-                            if (item.formType) {
-                                res += '"' + item.formType + '"';
+                                if (item.formType) {
+                                    res += '"' + item.formType + '"';
 
-                            } else {
-                                switch (item.type) {
-                                    case "varchar":
-                                        res += '"text"';
-                                        break;
-                                    case "file":
-                                        res += '"file"';
-                                        break;
-                                    case "clob":
-                                        res += '"richTextBox"';
-                                        break;
-                                    case "date":
-                                        res += '"timePicker"';
-                                        break;
-                                    case "number":
-                                        res += '"number",\n\
+                                } else {
+                                    switch (item.type) {
+                                        case "varchar":
+                                            res += '"text"';
+                                            break;
+                                        case "file":
+                                            res += '"file"';
+                                            break;
+                                        case "clob":
+                                            res += '"richTextBox"';
+                                            break;
+                                        case "date":
+                                            res += '"timePicker"';
+                                            break;
+                                        case "number":
+                                            res += '"number",\n\
                                         regex: /^\\d+$/,\n\
                                         regexText: "格式错误"';
-                                        break;
+                                            break;
+                                    }
                                 }
-                            }
 
-                            if (item.route) {
-                                res += ',\nvalue: this.route.params.' + item.route;
-                            } else if (item.query) {
-                                res += ',\nvalue: this.route.query.' + item.query;
-                            } else if (item.value) {
-                                res += ',\nvalue: "' + item.value + '"';
-                            }
+                                if (item.route) {
+                                    res += ',\nvalue: this.route.params.' + item.route;
+                                } else if (item.query) {
+                                    res += ',\nvalue: this.route.query.' + item.query;
+                                } else if (item.value) {
+                                    res += ',\nvalue: "' + item.value + '"';
+                                }
 
-                            if (!item.emptyAble)
-                                res += ',\nemptyAble:false,\n\
+                                if (!item.emptyAble)
+                                    res += ',\nemptyAble:false,\n\
                                         emptyText: "' + (item.memo || item.name) + '不可为空"\n';
 
-                            if (item.options) {
-                                res += ',\noptions: ' + JSON.stringify(item.options);
-                            }
+                                if (item.options) {
+                                    res += ',\noptions: ' + JSON.stringify(item.options);
+                                }
 
-                            res += '},';
+                                res += '},';
 
-                            return res;
+                                return res;
 
-                        }).join(' ').replace(/\,$/, '') + "],\n\
+                            }).join(' ').replace(/\,$/, '') + "],\n\
                         buttons: [{\n\
                             value:'添加',\n\
                             click: function(){\n\
@@ -1087,61 +1089,61 @@ return Page.extend({
                             url: '/" + tableName + "/update',\n\
                             fields: [" + formList.map(function(item) {
 
-                            var res = '{\n\
+                                var res = '{\n\
                                     label: "' + (item.memo || item.name) + '",\n\
                                     field: "' + item.field + '",\n\
                                     type:';
 
-                            if (item.name == primaryKey.name) {
-                                res += '"hidden",\n\
+                                if (item.name == primaryKey.name) {
+                                    res += '"hidden",\n\
                                     value: this.route.params.' + (item.route || "id");
 
-                            } else {
-                                if (item.formType) {
-                                    res += '"' + item.formType + '"';
-
                                 } else {
-                                    switch (item.type) {
-                                        case "varchar":
-                                            res += '"text"';
-                                            break;
-                                        case "file":
-                                            res += '"file"';
-                                            break;
-                                        case "clob":
-                                            res += '"richTextBox"';
-                                            break;
-                                        case "date":
-                                            res += '"timePicker"';
-                                            break;
-                                        case "number":
-                                            res += '"number",\n\
+                                    if (item.formType) {
+                                        res += '"' + item.formType + '"';
+
+                                    } else {
+                                        switch (item.type) {
+                                            case "varchar":
+                                                res += '"text"';
+                                                break;
+                                            case "file":
+                                                res += '"file"';
+                                                break;
+                                            case "clob":
+                                                res += '"richTextBox"';
+                                                break;
+                                            case "date":
+                                                res += '"timePicker"';
+                                                break;
+                                            case "number":
+                                                res += '"number",\n\
                                         regex: /^\\d+$/,\n\
                                         regexText: "格式错误"';
-                                            break;
+                                                break;
+                                        }
+                                    }
+
+                                    if (item.route) {
+                                        res += ',\nvalue: this.route.params.' + item.route;
+                                    } else if (item.query) {
+                                        res += ',\nvalue: this.route.query.' + item.query;
                                     }
                                 }
 
-                                if (item.route) {
-                                    res += ',\nvalue: this.route.params.' + item.route;
-                                } else if (item.query) {
-                                    res += ',\nvalue: this.route.query.' + item.query;
+                                if (item.options) {
+                                    res += ',\noptions: ' + JSON.stringify(item.options);
                                 }
-                            }
 
-                            if (item.options) {
-                                res += ',\noptions: ' + JSON.stringify(item.options);
-                            }
-
-                            if (item.emptyAble !== true && item.type != 'file')
-                                res += ',\nemptyAble:false,\n\
+                                if (item.emptyAble !== true && item.type != 'file')
+                                    res += ',\nemptyAble:false,\n\
                                         emptyText: "' + (item.memo || item.name) + '不可为空"\n';
 
-                            res += '},';
+                                res += '},';
 
-                            return res;
+                                return res;
 
-                        }).join(' ').replace(/\,$/, '') + "],\n\
+                            }).join(' ').replace(/\,$/, '') + "],\n\
                         buttons: [{\n\
                             value:'修改',\n\
                             click: function(){\n\
@@ -1187,79 +1189,79 @@ return Page.extend({
                                 },\n\
                                 data: {\n\
                                     " + formList.map(function(item) {
-                            if (!item.search) {
-                                return null;
-                            }
-
-                            var searchType;
-                            var res;
-
-                            if (item.type == "date") {
-                                searchType = "calendar";
-
-                            } else if (item.formType) {
-                                searchType = item.formType;
-                            }
-
-                            function getCode(name, memo, options) {
-                                var code = name + ": {\n";
-                                if (options) {
-                                    code += 'options:' + JSON.stringify(options) + ",\n";
+                                if (!item.search) {
+                                    return null;
                                 }
 
-                                if (item.route) {
-                                    code += 'value: this.route.params.' + item.route + ",\n";
-                                    code += 'type: "hidden",\n';
-                                    memo = '';
-                                } else if (item.query) {
-                                    code += 'value: this.route.query.' + item.query + ",\n";
-                                    code += 'type: "hidden",\n';
-                                    memo = '';
+                                var searchType;
+                                var res;
 
-                                } else if (searchType) {
-                                    code += 'type:"' + searchType + '",\n';
+                                if (item.type == "date") {
+                                    searchType = "calendar";
+
+                                } else if (item.formType) {
+                                    searchType = item.formType;
                                 }
-                                code += "label: '" + memo + "'";
-                                code += '\n}';
 
-                                return code;
-                            }
+                                function getCode(name, memo, options) {
+                                    var code = name + ": {\n";
+                                    if (options) {
+                                        code += 'options:' + JSON.stringify(options) + ",\n";
+                                    }
 
-                            if (searchType == "calendar") {
-                                res = getCode("start_" + item.name, (item.memo || item.name) + " 从", item.options);
-                                res += "," + getCode("end_" + item.name, "到");
+                                    if (item.route) {
+                                        code += 'value: this.route.params.' + item.route + ",\n";
+                                        code += 'type: "hidden",\n';
+                                        memo = '';
+                                    } else if (item.query) {
+                                        code += 'value: this.route.query.' + item.query + ",\n";
+                                        code += 'type: "hidden",\n';
+                                        memo = '';
 
-                            } else {
-                                res = getCode(item.name, item.memo || item.name, item.options);
-                            }
+                                    } else if (searchType) {
+                                        code += 'type:"' + searchType + '",\n';
+                                    }
+                                    code += "label: '" + memo + "'";
+                                    code += '\n}';
 
-                            return res;
+                                    return code;
+                                }
 
-                        }).filter(function(item) {
-                            return item != null;
-                        }).join(',\n') + "\
+                                if (searchType == "calendar") {
+                                    res = getCode("start_" + item.name, (item.memo || item.name) + " 从", item.options);
+                                    res += "," + getCode("end_" + item.name, "到");
+
+                                } else {
+                                    res = getCode(item.name, item.memo || item.name, item.options);
+                                }
+
+                                return res;
+
+                            }).filter(function(item) {
+                                return item != null;
+                            }).join(',\n') + "\
                                 }\n\
                             },\n\
                             onSelectRow: function () {},\n\
                             columns: [" + columnsList.map(function(item) {
-                            if (item.grid === false || item.type == "clob" || item.type == "file") {
-                                return null;
-                            }
-                            var res = '{\n\
+                                if (item.grid === false || item.type == "clob" || item.type == "file") {
+                                    return null;
+                                }
+                                var res = '{\n\
                                     text: \"' + (item.memo || item.name) + '\",\n\
                                     bind: \"' + item.name + '\",\n';
 
-                            if (item.type == "date") {
-                                res += "format: util.formatDate,\n";
-                            }
-                            res += 'width: ' + (item.gridWidth || (item.type == 'number' ? 5 : 10)) + '\n\
+                                if (item.type == "date") {
+                                    res += "format: util.formatDate,\n";
+                                }
+                                res += 'width: ' + (item.gridWidth || (item.type == 'number' ? 5 : 10)) + '\n\
                                 }';
-                            return res;
+                                return res;
 
-                        }).filter(function(item) {
-                            return item != null;
+                            }).filter(function(item) {
+                                return item != null;
 
-                        }).join(',') + ", {\n\
+                            }).join(',') + ", {\n\
                                 text: \"操作\",\n\
                                 width: 10,\n\
                                 align: 'center',\n\
@@ -1349,5 +1351,5 @@ return Page.extend({
         form.$el.appendTo(this.$el);
     },
 
-    onShow: function() {}
+    onShow: function() { }
 });

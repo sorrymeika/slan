@@ -22,11 +22,13 @@ var pad = function(num, n) {
     return a.substr(a.length - (n || 2));
 };
 
-function isDiffObject(a, b) {
+function equals(a, b, identity) {
+    if (a == b) return true;
+
     var typeA = toString.call(a);
     var typeB = toString.call(b);
 
-    if (typeA != typeB) return true;
+    if (identity ? typeA !== typeB : typeA != typeB) return false;
 
     switch (typeA) {
         case '[object Object]':
@@ -34,13 +36,13 @@ function isDiffObject(a, b) {
             var keysB = Object.keys(b);
 
             if (keysA.length != keysB.length) {
-                return true;
+                return false;
             }
 
             for (var i = keysA.length; i >= 0; i--) {
                 var key = keysA[i];
 
-                if (isDiffObject(a[key], b[key])) return true;
+                if (!equals(a[key], b[key], identity)) return false;
             }
             break;
 
@@ -50,15 +52,15 @@ function isDiffObject(a, b) {
             }
 
             for (var i = a.length; i >= 0; i--) {
-                if (isDiffObject(a[i], b[i])) return true;
+                if (!equals(a[i], b[i], identity)) return false;
             }
             break;
 
         default:
-            if (a != b) return true;
+            if (identity ? a !== b : a != b) return false;
     }
 
-    return false;
+    return true;
 }
 
 function overlapped(a, b) {
@@ -152,12 +154,12 @@ var util = {
         return true;
     },
 
-    isDiffObject: isDiffObject,
-
     overlapped: overlapped,
 
-    equal: function(a, b) {
-        return !isDiffObject(a, b);
+    equals: equals,
+
+    identify: function(a, b) {
+        return equals(a, b, true);
     },
 
     keys: function(obj) {
@@ -209,6 +211,9 @@ var util = {
         this.$log.html(msg + '<br>' + this.$log.html());
     },
 
+    //@query='day,sum(amount)'
+    //@data=[{ day:333,amout:22 },{ day:333,amout:22 }]
+    //@return=[{key:{ day: 333 },sum: 44, group: [...]}]
     groupBy: function(query, data) {
         var results = [];
         var keys = [];
@@ -240,7 +245,7 @@ var util = {
 
             for (var i = 0, n = results.length; i < n; i++) {
 
-                if (!isDiffObject(results[i].key, key)) {
+                if (equals(results[i].key, key)) {
                     group = results[i];
                     break;
                 }
@@ -663,17 +668,17 @@ var util = {
     template: function(str, data) {
         var tmpl = 'var __p=[];var $data=obj||{};with($data){__p.push(\'' +
             str.replace(/\\/g, '\\\\')
-            .replace(/'/g, '\\\'')
-            .replace(/<%=([\s\S]+?)%>/g, function(match, code) {
-                return '\',' + code.replace(/\\'/, '\'') + ',\'';
-            })
-            .replace(/<%([\s\S]+?)%>/g, function(match, code) {
-                return '\');' + code.replace(/\\'/, '\'')
-                    .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
-            })
-            .replace(/\r/g, '\\r')
-            .replace(/\n/g, '\\n')
-            .replace(/\t/g, '\\t') +
+                .replace(/'/g, '\\\'')
+                .replace(/<%=([\s\S]+?)%>/g, function(match, code) {
+                    return '\',' + code.replace(/\\'/, '\'') + ',\'';
+                })
+                .replace(/<%([\s\S]+?)%>/g, function(match, code) {
+                    return '\');' + code.replace(/\\'/, '\'')
+                        .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
+                })
+                .replace(/\r/g, '\\r')
+                .replace(/\n/g, '\\n')
+                .replace(/\t/g, '\\t') +
             '\');}return __p.join("");',
 
             func = new Function('obj', tmpl);
@@ -724,7 +729,7 @@ var util = {
         else
             this.cookie(key, JSON.stringify(value));
     },
-    noop: function() {},
+    noop: function() { },
 
     circlePoint: function(x0, y0, r, a) {
         return {

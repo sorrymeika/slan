@@ -6,7 +6,7 @@
     <div class="ym_idx__bg cl_fff ta_c bd_b">
         <div class="flex">
             <dl class="flex_0">
-                <dt class="pt_m_rem">当前余额</dt>
+                <dt class="pt_m_rem">云米总额</dt>
                 <dd class="pt_l_rem fs_xl fw_b">{amount||0}</dd>
             </dl>
             <dl class="flex_0" sn-tap="this.receiveYunmi()">
@@ -20,7 +20,7 @@
                 <dd class="pt_l_rem fs_xl fw_b">{today_get_amount||0}</dd>
             </dl>
         </div>
-        <div class="ta_c fs_s pt_m_rem pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
+        <div class="ta_c fs_s pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
     </div>
     <ul class="ym_idx__tab flex ta_c fs_m bd_b bg_fff">
         <li class="flex_0 br_a {tab==0?'curr':''}" sn-tap="tab=0">摇云米</li>

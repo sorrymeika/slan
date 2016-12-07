@@ -21,11 +21,11 @@ var TimePicker = model.ViewModel.extend({
     el: (<div class="calendar{isShow?' curr':''}" >
         <div sn-click="this.show()">
             <span><em>{yyyy}</em></span> /
-            <span><em>{util.pad(MM)}</em></span> /
-            <span><em>{util.pad(dd)}</em></span>
-            <span><em>{util.pad(hh)}</em></span>&nbsp;:
-            <span><em>{util.pad(mm)}</em></span>&nbsp;:
-            <span><em>{util.pad(ss)}</em></span>
+            <span><em>{MM}</em></span> /
+            <span><em>{dd}</em></span>
+            <span><em>{hh}</em></span>&nbsp;:
+            <span><em>{mm}</em></span>&nbsp;:
+            <span><em>{ss}</em></span>
         </div>
         <div class="calendar-wrap" sn-display="{isShow}" style="display:none;">
             <div class="calendar-bd">
@@ -149,14 +149,9 @@ var TimePicker = model.ViewModel.extend({
         });
     },
 
-    setYear: function (e, year) {
-        var update;
-        if (typeof e === 'number') {
-            update = year;
-            year = e;
-        }
+    setYear: function (year, update) {
         this.set({
-            yyyy: year,
+            yyyy: util.pad(year, 4),
             yearTop: (this.data.years.indexOf(year) - 4) * optionHeight
         });
 
@@ -165,70 +160,44 @@ var TimePicker = model.ViewModel.extend({
         return this._syncDays()._update(update);
     },
 
-    setMonth: function (e, month) {
-        var update;
-        if (typeof e === 'number') {
-            update = month;
-            month = e;
-        }
+    setMonth: function (month, update) {
         var index = this.data.months.indexOf(month);
 
         this.set({
-            MM: month,
+            MM: util.pad(month),
             monthTop: (index - 4) * optionHeight
         });
 
         return this._syncDays()._update(update);
     },
 
-    setDay: function (e, day) {
-        var update
-        if (typeof e === 'number') {
-            update = day;
-            day = e;
-        }
+    setDay: function (day, update) {
 
         return this.set({
-            dd: day,
+            dd: util.pad(day),
             dayTop: (this.data.days.indexOf(day) - 4) * optionHeight
         })._update(update);
     },
 
-    setHours: function (e, num) {
-        var update
-        if (typeof e === 'number') {
-            update = num;
-            num = e;
-        }
+    setHours: function (num, update) {
 
         return this.set({
-            hh: num,
+            hh: util.pad(num),
             hourTop: (this.data.hours.indexOf(num) - 4) * optionHeight
         })._update(update);
     },
 
-    setMinutes: function (e, num) {
-        var update
-        if (typeof e === 'number') {
-            update = num;
-            num = e;
-        }
-
+    setMinutes: function (num, update) {
         return this.set({
-            mm: num,
+            mm: util.pad(num),
             minutesTop: (this.data.minutes.indexOf(num) - 4) * optionHeight
         })._update(update);
     },
 
-    setSeconds: function (e, num) {
-        var update
-        if (typeof e === 'number') {
-            update = num;
-            num = e;
-        }
+    setSeconds: function (num, update) {
 
         return this.set({
-            ss: num,
+            ss: util.pad(num),
             secondTop: (this.data.seconds.indexOf(num) - 4) * optionHeight
         })._update(update);
     },
@@ -236,7 +205,7 @@ var TimePicker = model.ViewModel.extend({
     _syncDays: function () {
 
         var days = [];
-        var index = this.data.months.indexOf(this.data.MM);
+        var index = this.data.months.indexOf(parseInt(this.data.MM));
         var year = parseInt(this.data.yyyy) || 0;
         if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
             this.aDays[1] = 29;
@@ -273,12 +242,17 @@ var TimePicker = model.ViewModel.extend({
         if (!time) {
             return this.clearInput();
         }
-        if (time == this.$input.val()) return;
-        if (typeof time == 'number' || (typeof time == 'string' && /^\d+$/.test(time))) {
+        var val = this.$input.val();
+
+        if (val == time) return;
+
+        if (typeof time == 'number' || (typeof time == 'string' && /^\d+$/.test(time) && (time = parseInt(time)))) {
             time = new Date(time);
         } else if (typeof time == 'string') {
             time = Date.parse(time);
         }
+
+        if (+time == val) return;
 
         return this.setYear(time.getFullYear(), false)
             .setMonth(time.getMonth() + 1, false)
@@ -304,18 +278,18 @@ var TimePicker = model.ViewModel.extend({
     _update: function (isUpdate) {
         if (isUpdate !== false) {
             var data = this.data;
-            var time = data.yyyy != '----'
-                ? (data.yyyy + '/' + data.MM + '/' + data.dd).replace(/--/g, '1') + ' ' + (data.hh + ':' + data.mm + ':' + data.ss).replace(/--/g, '00')
-                : '';
+            var time = Date.parse(data.yyyy != '----'
+                ? (data.yyyy + '-' + data.MM + '-' + data.dd).replace(/--/g, '1') + ' ' + (data.hh + ':' + data.mm + ':' + data.ss).replace(/--/g, '00')
+                : '');
 
-            if (time != this.$input.val())
+            if (+time != this.$input.val())
                 this.$input.val(time).trigger('onTimeChange').trigger('change');
         }
         return this;
     },
 
     getTime: function () {
-        return Date.parse(this.$input.val().replace(/-/g, '/')) || 0;
+        return +new Date(parseInt(this.$input.val())) || 0;
     },
 
     show: function () {

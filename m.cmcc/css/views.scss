@@ -1,5 +1,7 @@
 @import "global.scss";
 
+.cp_switch:after { background-color: $color; }
+
 //登录注册
 .uc_login.main { top: 0px; }
 .uc_login__bg:before { content: ''; display: block; background: url(../images/login_bg.png) no-repeat; height: 2.14rem; background-size: 100% auto; }
@@ -30,11 +32,11 @@
 .hm_idx__life { padding-top: 1px; margin-bottom: 20px; }
 .hm_idx__life .item { background: #fff; border-top: 2px solid #f2f2f2; padding: 8px 10px; margin-top: 10px; position: relative; }
 .hm_idx__life .item .show:before { -webkit-transform: rotate(180deg); transform: rotate(180deg); }
-.hm_idx__life .subitem { padding: 6px 10px; position: relative; }
-.hm_idx__life .subitem img { width: 30px; height: 30px; display: block; }
+.hm_idx__life .subitem { padding: 6px 10px 6px 30px; position: relative; }
+.hm_idx__life .subitem img { width: 30px; height: 30px; display: block; border-radius: 50%; overflow: hidden; }
 .hm_idx__life .con { max-width: 180px; }
 
-.hm_idx__life .item i,.hm_idx__life .subitem i { position: absolute; left: 34px; top: 8px; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }
+.hm_idx__life .item i,.hm_idx__life .subitem i { position: absolute; left: 53px; top: 6px; display: block; width: 14px; height: 14px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 8px; line-height: 16px; text-align: center; }
 
 .hm_idx__to_mask { background: rgba(0,0,0,.5); z-index: 1000; }
 .hm-timeout { position: absolute; z-index: 1001; }
@@ -73,6 +75,8 @@
 .hm_quan__main .cp_tab { top: 44px; }
 .hm_quan__main .cp_tab__item { background-color: #f8f8f8; }
 .has_status_bar .hm_quan__main .cp_tab { top: 64px; }
+
+.hm_quan ~ .refreshing { margin-top: -60px; margin-bottom: 60px }
 
 .hm_pubquan, .hm_quan { margin-bottom: 58px; width: 100%; position: relative; }
 .hm_pubquan { padding-top: 15px; }
@@ -273,7 +277,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .lf_notice__tab_title.curr { background-color: $color; color: #fff; border-top-right-radius: 6px; border-top-left-radius: 6px; }
 
 //云米 - 首页
-.ym_idx__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: 1.15rem; background-size: 100% auto; padding-bottom: 1px; }
+.ym_idx__bg { background: url(../images/ym-bg.png) no-repeat; width: 100%; height: 1.14rem; background-size: 100% auto; padding-bottom: 1px; }
 .ym-arrow-rem { padding-top: .45rem; }
 .ym_idx__tab { padding: 8px 0; }
 .ym_idx__tab > li { height: 28px; line-height: 28px; }

@@ -158,7 +158,7 @@ function updateRequireView(viewModel, el) {
 
     if (el.snRequireInstance) {
         instance = el.snRequireInstance;
-        if (data && !util.equal(data, instance._originData)) {
+        if (data && !util.equals(data, instance._originData)) {
             instance._originData = data;
             instance.set(data);
         }
@@ -362,29 +362,29 @@ function genFunction(expression) {
 
     var content = filterCode + 'try{return \'' +
         expression
-        .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
-        .replace(rmatch, function(match, exp) {
-            return '\'+(' +
-                exp.replace(/\\\\/g, '\\')
-                .replace(/\\'/g, '\'')
-                .replace(rvar, function(match, prefix, name) {
-                    if (!name) {
-                        if (match.indexOf('var ') == 0) {
-                            return match.replace(/var\s+([^\=]+)\=/, function(match, $0) {
-                                variables = (variables || []).concat($0.split(','));
-                                return $0 + '=';
-                            });
-                        }
-                        return match;
-                    }
+            .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
+            .replace(rmatch, function(match, exp) {
+                return '\'+(' +
+                    exp.replace(/\\\\/g, '\\')
+                        .replace(/\\'/g, '\'')
+                        .replace(rvar, function(match, prefix, name) {
+                            if (!name) {
+                                if (match.indexOf('var ') == 0) {
+                                    return match.replace(/var\s+([^\=]+)\=/, function(match, $0) {
+                                        variables = (variables || []).concat($0.split(','));
+                                        return $0 + '=';
+                                    });
+                                }
+                                return match;
+                            }
 
-                    if (name.indexOf("$global.") == 0) {
-                        isGlobal = true;
-                    }
-                    return prefix + valueCode(name, variables);
-                }) +
-                ')+\'';
-        }) +
+                            if (name.indexOf("$global.") == 0) {
+                                isGlobal = true;
+                            }
+                            return prefix + valueCode(name, variables);
+                        }) +
+                    ')+\'';
+            }) +
         '\';}catch(e){console.error(e);return \'\';}';
 
     content = content.replace('return \'\'+', 'return ').replace(/\+\'\'/g, '')
@@ -1398,12 +1398,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                                 var content = val.replace(rfunc, function(match, $1, $2) {
 
-                                        if (/^(Math\.|encodeURIComponent\(|parseInt\()/.test($1)) {
-                                            return match;
-                                        }
-                                        return $1 + $2 + ($2 ? ',e)' : 'e)');
+                                    if (/^(Math\.|encodeURIComponent\(|parseInt\()/.test($1)) {
+                                        return match;
+                                    }
+                                    return $1 + $2 + ($2 ? ',e)' : 'e)');
 
-                                    })
+                                })
                                     /*.replace(rset, function (match, $1, $2) {
                                                                         //test
                                                                         return match;
@@ -1583,7 +1583,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 case 'checked':
                 case 'selected':
                 case 'disabled':
-                    (el[attr] = !!val) ? el.setAttribute(attr, attr): el.removeAttribute(attr);
+                    (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
                     break;
                 case 'src':
                     el.src = val;

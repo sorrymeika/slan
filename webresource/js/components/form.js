@@ -212,7 +212,7 @@ var FormComponent = function(options) {
         var plugin = this.plugins[i];
         var $hidden = this.$el.find('[name="' + plugin.field + '"]');
 
-        var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $hidden, plugin) : new(FormComponent.require(plugin.type))($hidden, plugin);
+        var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $hidden, plugin) : new (FormComponent.require(plugin.type))($hidden, plugin);
 
         var value = model.data.data[plugin.field];
 
@@ -318,8 +318,8 @@ FormComponent.prototype = {
                 var processData = true;
                 var data = this.contentType == "application/json" ?
                     JSON.stringify(this.model.data.data) : window.FormData ?
-                    (processData = false, this.contentType = false, new FormData(this.form)) :
-                    this.$el.serialize();
+                        (processData = false, this.contentType = false, new FormData(this.form)) :
+                        this.$el.serialize();
 
                 $.ajax({
                     url: this.url,
@@ -400,6 +400,7 @@ var RichTextBox = function($input, options) {
             editorOptions.imageUrl = options.imageUrl || Base.UMEditorImageUrl;
 
             var editor = UM.getEditor(self.id, editorOptions);
+            editor.textarea = $input[0];
 
             editor.addListener('blur', function() {
                 var content = editor.getContent();
