@@ -32,6 +32,11 @@
             "UMEditorImagePath": "http://10.46.110.222/upload/",
             "UMEditorImageUrl": "http://10.46.110.222/manage/admin/uploadfile"
         },
+        "prod": {
+            "api": "http://bmsh.wxcs.cn/manage",
+            "UMEditorImagePath": "http://bmsh.wxcs.cn/upload/",
+            "UMEditorImageUrl": "http://bmsh.wxcs.cn/manage/admin/uploadfile"
+        },
         "uat": {
             "api": "http://10.46.110.85/manage",
             "UMEditorImagePath": "http://10.46.110.85/upload/",

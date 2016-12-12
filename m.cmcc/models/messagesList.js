@@ -7,11 +7,11 @@ var messagesList = model2.createModel({
         list: []
     },
 
-    getList: function() {
+    getList: function () {
         return this._('list');
     },
 
-    getFriendLastMessage: function(friend_id) {
+    getFriendLastMessage: function (friend_id) {
 
         var records = this.getList();
         var record = records.find('user_id', friend_id);
@@ -20,7 +20,8 @@ var messagesList = model2.createModel({
     }
 });
 
-messagesList.observe(function() {
+messagesList.observe(function () {
+
     util.store('messagesList', this.data);
 });
 

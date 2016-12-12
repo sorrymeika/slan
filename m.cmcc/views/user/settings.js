@@ -8,6 +8,7 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var userModel = require('models/user');
+var auth = require('logical/auth');
 
 
 module.exports = Activity.extend({
@@ -43,7 +44,10 @@ module.exports = Activity.extend({
 
                         userModel.set(null);
 
+                        auth.clearAuth();
+
                         util.store('friends', null);
+                        util.store('user', null);
                         util.store('business_model', null);
                         util.store('messagesList', null);
                         util.store('device_token', null);

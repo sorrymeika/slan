@@ -1,1 +1,10 @@
-<div class="main" ref="main"><h1>{title}</h1></div>
+<div class="main" ref="main">
+    <h1>{title}</h1>
+    <div class="flex">
+        <p>类型：</p>
+        <p><select ref="type" value="{currentType.value}" sn-change="this.changeType()">
+                <option value="{item.value}" sn-repeat="item in types">{item.text}</option>
+            </select>
+        </p>
+    </div>
+</div>

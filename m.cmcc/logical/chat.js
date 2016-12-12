@@ -9,6 +9,7 @@ var friends = require('models/friends');
 var contact = require('logical/contact');
 
 var MESSAGETYPE = {
+    NOTIFICATION: -1,
     TEXT: 1,
     IMAGE: 2,
     SEND_YUNMI: 3,
@@ -21,13 +22,13 @@ var _gid = 1;
 
 function keep() {
     Http.post("/messages/keep").then(function(res) {
-
         var messages = res.data;
 
         if (messages && messages.length) {
-            messages.forEach(function(msg) {
 
-                console.log(msg);
+            var hasNewNotification = false;
+
+            messages.forEach(function(msg) {
 
                 switch (msg.type) {
                     case MESSAGETYPE.TEXT:
@@ -35,11 +36,21 @@ function keep() {
                         chat.record(false, msg.from_id, msg);
                         chat.trigger('message:' + msg.from_id, msg);
                         break;
+                    case MESSAGETYPE.NOTIFICATION:
+                        hasNewNotification = true;
+                        break;
                 }
             });
+
+            if (hasNewNotification) {
+                chat.trigger('NEW_NOTIFICATIONS_COMING');
+            }
         }
 
-        setTimeout(keep, 1000)
+        setTimeout(keep, 1000);
+
+    }).catch(function() {
+        setTimeout(keep, 10000);
     });
 }
 keep();
@@ -85,7 +96,6 @@ var chat = Event.mixin({
             if (!is_send) {
                 recordData.unread = 1;
             }
-
             friend = friends.getFriend(friend_id);
 
             if (friend.get('name_for_show')) {

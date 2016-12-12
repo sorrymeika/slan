@@ -2,6 +2,7 @@
 
 http://wxcs.ie1e.com/api/notification/receive
 
+
 移动官微
 appid=100001
 secret_key=4411d2e0eddc54cb19ef568443257efb
@@ -35,7 +36,7 @@ ContentType: application/json
 
 {
     "appid": "appid推送业务的id",
-    "sign": "md5(appid+","+title+","+content+","+request_seq+","+msisdn+","+request_time+","+notify_type+","+new JSONObject(feature).toString()+","+secret_key)",
+    "sign": "md5(appid+","+title+","+content+","+request_seq+","+msisdn+","+request_time+","+notify_type+","+JSONObject.valueToString(feature)+","+secret_key)",
     "title": "系统通知中心显示标题",
     "content": "系统通知中心显示内容",
     "icon_url": "系统通知中心图片链接(可选)",

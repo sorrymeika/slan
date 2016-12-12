@@ -90,16 +90,17 @@ bridge.cmcc = {
     }
 };
 
-bridge.ent = {
-    show: function(url) {
-        bridge.exec('ent', {
+bridge.tab = {
+    show: function(url, tab) {
+        bridge.exec('tab', {
             type: 'show',
-            url: url
+            url: url,
+            tab: tab
         });
     },
 
     hide: function(params) {
-        bridge.exec('ent', {
+        bridge.exec('tab', {
             type: 'hide'
         });
     }

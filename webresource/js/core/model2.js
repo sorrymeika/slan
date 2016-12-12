@@ -10,7 +10,7 @@ util.style('.sn-display { opacity: 1; -webkit-transition: opacity 300ms ease-out
 var toString = {}.toString;
 var LINKEDCHANGE = 'linkedchange';
 
-var ModelEvents = {
+var EVENTS = {
     tap: 'tap',
     'long-tap': 'longTap',
     'transition-end': $.fx.transitionEnd,
@@ -25,7 +25,7 @@ var ModelEvents = {
     focus: 'focus',
     blur: 'blur'
 };
-var GlobalVariables = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURIComponent', "sl", 'window', 'document'];
+var GLOBAL_VARIABLES = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURIComponent', "sl", 'window', 'document'];
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
@@ -51,7 +51,7 @@ var Filters = {
     util: util
 };
 
-var filterCode = (function() {
+var FILTERS_VARS = (function() {
     var res = '';
     for (var key in Filters) {
         res += 'var ' + key + '=$data.' + key + ';';
@@ -70,7 +70,7 @@ function valueCode(str, variables) {
     var code = '';
     var gb = '$data';
 
-    if (!alias || alias in Filters || GlobalVariables.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(str)) {
+    if (!alias || alias in Filters || GLOBAL_VARIABLES.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(str)) {
         return str;
     }
 
@@ -359,10 +359,11 @@ function genFunction(expression) {
     var variables;
     var isGlobal = false;
 
-    var content = filterCode + 'try{return \'' +
+    var content = FILTERS_VARS + 'try{return \'' +
         expression
             .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
             .replace(rmatch, function(match, exp) {
+
                 return '\'+(' +
                     exp.replace(/\\\\/g, '\\')
                         .replace(/\\'/g, '\'')
@@ -1287,10 +1288,11 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     observe: function(key, fn) {
         if (arguments.length == 1) {
             fn = key;
-            key = null;
+            key = '';
         } else {
             key = ':' + key;
         }
+
         return this.on('datachanged' + key, fn);
     },
 
@@ -1403,7 +1405,7 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
 
                         attr = attr.replace(/^sn-/, '');
 
-                        var evt = ModelEvents[attr];
+                        var evt = EVENTS[attr];
 
                         if (evt) {
                             el.removeAttribute(origAttr);
@@ -1851,11 +1853,12 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
     bind: function(el) {
 
         var self = this;
-        var $el = $(el).on('input change', '[' + this.snModelKey + ']', function(e) {
+        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function(e) {
             var target = e.currentTarget;
 
             switch (e.type) {
                 case 'change':
+                case 'blur':
                     switch (target.tagName) {
                         case 'TEXTAREA':
                             return;
@@ -1924,8 +1927,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
             }
         });
 
-        for (var key in ModelEvents) {
-            var eventName = ModelEvents[key];
+        for (var key in EVENTS) {
+            var eventName = EVENTS[key];
             var attr = '[sn-' + self.cid + eventName + ']';
 
             $el.on(eventName, attr, this._handleEvent)
@@ -2025,8 +2028,8 @@ ViewModel.prototype = Object.assign(Object.create(ModelProto), {
                 this.snViewModel = null;
             });
 
-        for (var key in ModelEvents) {
-            var eventName = ModelEvents[key];
+        for (var key in EVENTS) {
+            var eventName = EVENTS[key];
             var attr = '[sn-' + this.cid + eventName + ']';
 
             this.$el.off(eventName, attr, this._handleEvent);
@@ -2087,7 +2090,6 @@ Global.updateView = (function() {
 }).bind(Global);
 
 
-exports.Filters = Filters;
 exports.ViewModel = exports.Model = ViewModel;
 exports.Global = Global;
 exports.Collection = Collection;

@@ -60,7 +60,8 @@
             "models/user": "./models/user",
             "models/friends": "./models/friends",
             "models/business": "./models/business",
-            "models/messagesList": "./models/messagesList"
+            "models/messagesList": "./models/messagesList",
+            "models/appconfig": "./models/appconfig"
         }
     },
     "framework": {
@@ -110,6 +111,10 @@
         "production": {
             "api": "http://10.46.110.222/api",
             "resources": "http://10.46.110.222/upload/"
+        },
+        "prod": {
+            "api": "http://bmsh.wxcs.cn/api",
+            "resources": "http://bmsh.wxcs.cn/upload/"
         },
         "uat": {
             "api": "http://10.46.110.85/api",

@@ -40,6 +40,7 @@
 
         "/notification/index": "/notification/notification",
         "/notification/add": "/notification/add_notification",
+        "/notification/easy/{id:\\d+}/{type:-*\\d+}": "/notification/add_notifyeasy",
         "/notification/easy/{id:\\d+}": "/notification/add_notifyeasy"
     }
 }

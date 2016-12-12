@@ -109,6 +109,8 @@
             var index = util.indexOf(this.data, key, val);
 
             index != -1 && this.index(index);
+
+            return this;
         }
     };
 
@@ -157,7 +159,6 @@
             that.add(item);
         });
 
-
         this.$el.on($.fx.transitionEnd, function (e) {
 
             if (e.target == this) {
@@ -166,7 +167,6 @@
                     that.$el.hide();
                     that.$container.hide();
                 } else {
-                    console.log('end')
                     that.each(function () {
                         this.touch.maxY = Math.max(this.scroller.offsetHeight - this.el.clientHeight, 0);
                         this.touch.scrollTo(0, this._index * this.itemHeight);
@@ -191,14 +191,25 @@
         eq: function (i) {
             return this.selectors[i];
         },
+
+        data: function () {
+            var result = [];
+            $.each(this.selectors, function (i, sel) {
+                result.push(sel.selectedData);
+            });
+            return result;
+        },
+
         each: function (fn) {
             $.each(this.selectors, fn);
         },
+
         add: function (options) {
             var sel = new SelectorItem(options);
             this.selectors.push(sel);
             this.$selector.append(sel.$el);
         },
+
         hide: function () {
             var that = this;
 
@@ -214,6 +225,7 @@
 
             return that;
         },
+
         show: function () {
             var that = this;
 

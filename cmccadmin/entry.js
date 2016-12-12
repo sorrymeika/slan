@@ -1,6 +1,7 @@
 var $ = require('$');
 var Base = require('core/base');
 var Navigation = require('core/navigation');
+var util = require('util');
 
 function startApp(routes, resourceMapping) {
 
@@ -26,7 +27,9 @@ function startApp(routes, resourceMapping) {
 
         }).start();
 
-        var menu = new Menu({
+        var MENU_DATA = 'MENU_DATA';
+
+        var menu = new Menu($.extend(true, {
             data: [{
                 title: '首页',
                 url: '/'
@@ -74,14 +77,41 @@ function startApp(routes, resourceMapping) {
                     title: '通知管理',
                     url: '/notification/index'
                 }, {
+                    title: '推送移动营业厅',
+                    url: '/notification/easy/100001'
+                }, {
+                    title: '推送12580求职',
+                    url: '/notification/easy/100002'
+                }, {
+                    title: '推送12580商城',
+                    url: '/notification/easy/100003'
+                }, {
                     title: '推送娱乐提醒',
                     url: '/notification/easy/100022'
                 }, {
                     title: '推送和聚宝提醒',
                     url: '/notification/easy/100026'
+                }, {
+                    title: '推送水费提醒',
+                    url: '/notification/easy/100004'
+                }, {
+                    title: '推送电费提醒',
+                    url: '/notification/easy/100005'
                 }]
             }]
-        });
+
+        }, util.store(MENU_DATA)));
+
+        menu.on('datachanged', function () {
+            util.store(MENU_DATA, {
+                currentUrl: this.data.currentUrl,
+                data: this.data.data.map(function (item) {
+                    return {
+                        open: item.open
+                    }
+                })
+            });
+        })
 
         menu.$el.appendTo(app.$el);
     })

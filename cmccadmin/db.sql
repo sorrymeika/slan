@@ -271,6 +271,7 @@ create sequence contacts_backup_seq minvalue 1 maxvalue 999999999999 start with 
 create table user_yunmi (--云米时段
     yunmi_id number(12) primary key,--时段ID
     user_id number(10),--用户ID
+    account varchar(20),--用户ID
     amount number(10,2),--云米数量
     start_date date,--时段开始时间 --sort=true --search=true
     end_date date,--时段结束时间 --sort=true --search=true
@@ -301,6 +302,7 @@ create sequence yunmi_trade_seq minvalue 1 maxvalue 999999999999 start with 1 in
 
 create table user_ext (--用户扩展信息
     user_id number(12) primary key,--用户ID
+    read_sys_notify_date date,
     total_yunmi number(12,2),--云米总数
     invited_code number(11),--邀请码
     device_type number(2),--设备类型 --options=1:iOS,2:android --formType=select
@@ -385,6 +387,12 @@ create table business (--第三方业务
 ) tablespace cmccuser;
 create sequence business_seq minvalue 1 maxvalue 9999999999 start with 100001 increment by 1;
 
+insert into business (business_id,business_name,secret_key,type) values (100002,'求职','4411d2e0eddc54cb19ef568443257efb',2);
+insert into business (business_id,business_name,secret_key,type) values (100003,'商城','4411d2e0eddc54cb19ef568443257efb',2);
+
+insert into business (business_id,business_name,secret_key,type) values (100004,'水费','4411d2e0eddc54cb19ef568443257efb',2);
+insert into business (business_id,business_name,secret_key,type) values (100005,'电费','4411d2e0eddc54cb19ef568443257efb',2);
+
 insert into business (business_id,business_name,secret_key,type) values (100001,'移动官微','4411d2e0eddc54cb19ef568443257efb',1);
 insert into business (business_id,business_name,secret_key,type) values (100022,'娱乐','4411d2e0eddc54cb19ef568443257efb',3);
 insert into business (business_id,business_name,secret_key,type) values (100026,'和聚宝','4411d2e0eddc54cb19ef568443257efb',2);
@@ -405,13 +413,32 @@ create table notification (--消息提醒
 create sequence notification_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
+alter table user_ext add read_sys_notify_date date;
+alter table user_yunmi add account varchar(20);
+
+--update user_yunmi a set a.user_id=(select b.user_id from account b where b.account=a.account)  where (a.user_id=0 or a.user_id is null) and a.account!='' and a.account is not null
+
+
 -----------------------------
 --<<2016-11-22 up to date here
 -----------------------------
 
------------------------------
------------------------------
+insert into business (business_id,business_name,secret_key,type) values (100004,'水费','4411d2e0eddc54cb19ef568443257efb',2);
+insert into business (business_id,business_name,secret_key,type) values (100005,'电费','4411d2e0eddc54cb19ef568443257efb',2);
 
+create table user_business (
+    ubid number(12) primary key,
+    user_id number(12),
+    user_code varchar(40),
+    funcode varchar(10),
+    type varchar(10),
+    business_id number(10),
+    unitno varchar(20),
+    memo varchar(20)
+) tablespace cmccuser;
+create sequence user_business_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+-----------------------------
+-----------------------------
 
 
 create table user_open_history (--用户打开app历史记录
@@ -427,7 +454,6 @@ create sequence user_open_history_seq minvalue 1 maxvalue 999999999999 start wit
 
 
 
-
 create table call_black (--拨号黑名单
     black_id number(12) primary key,--黑名单ID
     user_id number(12),--用户ID
@@ -435,17 +461,6 @@ create table call_black (--拨号黑名单
 ) tablespace cmccuser;
 create sequence call_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
-
-
-
-
-create table notification_status (--消息提醒状态
-    read_id number(12) primary key,--自增ID
-    notify_id number(12),--消息ID
-    user_id number(12),--用户ID
-    status number(1)--状态 --options=1:已读,2:未读,3:删除 --formType=select
-) tablespace cmccuser;
-create sequence notification_status_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
 create table notification_tag (--消息提醒标签

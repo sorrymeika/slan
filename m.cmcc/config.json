@@ -67,8 +67,14 @@
         "/user/quan_privacy/{type:\\d+}": "user/quan_privacy",
         "/user/qa": "user/qa",
         "/user/about": "user/about",
+
         "/life/notice": "life/notice",
         "/life/search_notice": "life/search_notice",
+
+        "/life/bill/{id:\\d+}": "life/life_bill",
+        "/life/addbill/{id:\\d+}": "life/add_bill",
+        "/life/seebill/{id:\\d+}": "life/see_bill",
+
         "/yunmi": "yunmi/yunmi",
         "/yunmi/detail": "yunmi/yunmi_detail",
         "/yunmi/exchange": "yunmi/exchange_yunmi",

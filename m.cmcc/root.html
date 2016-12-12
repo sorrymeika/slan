@@ -76,13 +76,17 @@
             var routes = @(JSON.stringify(routes));
             var resourceMapping = @(JSON.stringify(resourceMapping));
 
-            @if(!debug && !useLocal) { <text> entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, resourceMapping); </text>
+            @if(!debug && !useLocal) {
+                <text> entry.startAppWithRemoteMapping("/api/settings/resourceMapping", routes, resourceMapping); </text>
 
             } else { <text> entry.startApp(routes, resourceMapping); </text>
             }
 
         });
     </script>
+    @if (debug) {
+        <script>seajs.use('test/testcase')</script>
+    }
 </body>
 
 </html>

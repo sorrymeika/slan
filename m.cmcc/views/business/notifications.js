@@ -13,6 +13,7 @@ var business = require('logical/business');
 var businessModel = require('models/business');
 
 var user = require('models/user');
+var appconfig = require('models/appconfig');
 
 module.exports = Activity.extend({
 
@@ -21,16 +22,44 @@ module.exports = Activity.extend({
         var business_id = this.business_id = this.route.params.id;
         var dataModel = businessModel._('list').find('business_id', business_id);
 
-        console.log(dataModel);
-
         var model = this.model = new Model(this.$el, {
             business_id: business_id,
             title: dataModel.get('business_name'),
             business: dataModel
         });
 
+        model.back = function() {
+            self.back(self.swipeRightBackAction)
+        }
+
         model.enterShop = function() {
             bridge.openInApp("福建移动营业厅", 'http://wap.fj.10086.cn/servicecb/touch/index.jsp');
+        }
+
+        model.enterHjb = function() {
+            bridge.openInApp("和聚宝", appconfig.get('hjbUrl'));
+        }
+
+        model.enterQz = function() {
+            bridge.openInApp("12580海西求职平台", appconfig.get('qzUrl'));
+        }
+
+        model.enterSc = function() {
+            self.back('/');
+
+            setTimeout(function() {
+                $(window).trigger('tabchange_to_3');
+
+            }, 400);
+        }
+
+        model.enterEnt = function() {
+            self.back('/');
+
+            setTimeout(function() {
+                $(window).trigger('tabchange_to_2');
+
+            }, 400);
         }
 
         model.enterDetail = function() {
@@ -41,8 +70,12 @@ module.exports = Activity.extend({
             }
         }
 
-        model.back = function() {
-            self.back(self.swipeRightBackAction)
+        model.enterWaterBill = function() {
+            self.forward('/life/bill/' + business_id);
+        }
+
+        model.enterElecBill = function() {
+            self.forward('/life/bill/' + business_id);
         }
 
         var loader = this.loader = business.notificationsLoader(model, function(res) {
@@ -51,6 +84,10 @@ module.exports = Activity.extend({
                 //移动业务
                 case '100001':
                     res.data.forEach(function(item) {
+                        if (item.type == -1) {
+                            return;
+                        }
+
                         var details = item.details = [];
                         var feature = JSON.parse(item.feature);
 
@@ -135,9 +172,11 @@ module.exports = Activity.extend({
                 //娱乐
                 case '100022':
                     break;
-                //娱乐
                 case '100026':
                     res.data.forEach(function(item) {
+                        if (item.type == -1) {
+                            return;
+                        }
                         item.feature = JSON.parse(item.feature);
                     });
                     break;
@@ -151,6 +190,15 @@ module.exports = Activity.extend({
         self.bindScrollTo(model.refs.main);
 
         this.waitLoad().then(function() {
+            businessModel.getNotifications().each(function(item) {
+                if (item.get('business_id') == business_id) {
+                    item.set({
+                        unread: 0,
+                        isRead: true
+                    });
+                }
+            });
+
             return loader.request();
 
         }).catch(function(e) {

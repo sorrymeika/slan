@@ -22,15 +22,19 @@ var messagesList = require('../models/messagesList');
 var user = require('../models/user');
 
 var friends = require('models/friends');
+var appconfig = require('models/appconfig');
 
 var userLogical = require('../logical/user');
 var ym = require('logical/yunmi');
 var auth = require('../logical/auth');
 var contact = require('../logical/contact');
 var business = require('../logical/business');
+var chat = require('../logical/chat');
 
 var businessModel = require('models/business');
 var businessGroup = businessModel.getGroups();
+
+//require('test_notification');
 
 module.exports = Activity.extend({
 
@@ -66,28 +70,15 @@ module.exports = Activity.extend({
         model.getUserShowName = friends.getUserShowName;
 
         model.openEnt = function() {
-            bridge.ent.show('http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006');
-            /*
-            if (this.get('tab') != 2) {
-                this.set({
-                    tab: 2
-                }).next(function() {
-                    this.set({
-                        iframeHeight: this.refs.ent.clientHeight
-                    })
-                    var iframe = this.refs.iframe;
-                    if (!iframe.src) {
-
-                        iframe.onload = function() {}
-                        self.bindScrollTo(model.refs.ent);
-                        iframe.src = 'http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006';
-                    }
-                });
-            }
-            */
+            bridge.tab.show('http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006', 2);
         };
 
-        function hideEnt(id) {
+        model.openShop = function() {
+            console.log(appconfig.get('shopUrl'));
+            bridge.tab.show(appconfig.get('shopUrl'), 3);
+        }
+
+        function hideTab(id) {
             if (model.get('tab') != id) {
                 model.set({
                     tab: id,
@@ -95,17 +86,23 @@ module.exports = Activity.extend({
                 });
 
                 setTimeout(function() {
-                    bridge.ent.hide();
+                    bridge.tab.hide();
                 }, 200);
             } else
-                bridge.ent.hide();
+                bridge.tab.hide();
         }
 
         $(window).on('ent_to_home', function() {
-            hideEnt(1)
+            hideTab(1)
 
         }).on('ent_to_quan', function() {
-            hideEnt(3)
+            hideTab(3)
+
+        }).on('tabchange_to_2', function() {
+            model.openEnt();
+
+        }).on('tabchange_to_3', function() {
+            model.openShop();
         });
 
         model.showQuanMenu = function() {
@@ -141,8 +138,6 @@ module.exports = Activity.extend({
         }
 
         model.phoneCall = function() {
-            //bridge.system.openPhoneCall('');
-
             self.forward('/hdh/call')
         }
 
@@ -157,7 +152,6 @@ module.exports = Activity.extend({
         }
 
         model.toContact = function() {
-
             this.set({
                 tab: 3
 
@@ -177,10 +171,6 @@ module.exports = Activity.extend({
 
             photoViewer.$el.show()[0].clientHeight;
             photoViewer.$el.addClass('gl_show');
-        }
-
-        model.enterShop = function() {
-
         }
 
         model.hideTimeout = function() {
@@ -238,6 +228,9 @@ module.exports = Activity.extend({
 
                 contact.friends();
 
+                chat.on('NEW_NOTIFICATIONS_COMING', function() {
+                    business.getAllBusinessAndUnread();
+                });
                 business.getAllBusinessAndUnread();
 
                 this.getYunmi();
@@ -349,16 +342,14 @@ module.exports = Activity.extend({
         });
     },
 
-    loadPublicQuan: function() {
+    loadPublicQuan: function(isShowLoading) {
 
         var loader = this.loader;
         var model = this.model;
         var self = this;
 
-        loader.showLoading();
+        isShowLoading && loader.showLoading();
 
-        //publicquan.recommend(),
-        //publicquan.myrecommend(),
         Promise.all([publicquan.recommend(), publicquan.myfollow()])
             .then(function(results) {
                 results.forEach(function(res, i) {
@@ -494,7 +485,7 @@ module.exports = Activity.extend({
                 model.set({
                     quanTab: tab
                 });
-                self.loadPublicQuan();
+                self.loadPublicQuan(true);
 
                 tab.onceTrue('tabChange', function(e, index) {
 
@@ -537,6 +528,13 @@ module.exports = Activity.extend({
 
         } else {
             seajs.use(['logical/chat']);
+
+            if (!self.loadShopUrl) {
+                business.getThirdUrl().then(function(res) {
+                    appconfig.set(res.data);
+                    self.loadShopUrl = true;
+                });
+            }
 
             if (self.tab) {
                 self.loadPublicQuan();

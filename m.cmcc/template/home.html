@@ -1,4 +1,4 @@
-@helper notify(id,name) {
+@helper business(id,name) {
 <div class="flex hm-icons-notify@(id) item bd_b" sn-tap="showNotify@(id)=!showNotify@(id)">
     <i class="unread" sn-if="business.type@(id)data.unread">+{business.type@(id)data.unread}</i>
     <div class="flexitem pl_m">
@@ -10,6 +10,7 @@
         <p class="hm-icons-drop ta_r {showNotify@(id)?'show':''}"></p>
     </div>
 </div>
+} @helper notify(id,name) { @this.business(id,name)
 <ul class="pr_m bg_f2" sn-if="showNotify@(id)">
     <li class="flex subitem bd_b" sn-repeat="item in business.type@(id)data.list" data-forward="/business/{item.business_id}">
         <i class="unread" sn-if="item.unread">+{item.unread}</i>
@@ -51,7 +52,20 @@
         </div>
 
         <div class="hm_idx__life">
-            @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.notify(4,'社交提醒')
+            @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.business(4,'社交提醒')
+            <ul class="pr_m bg_f2" sn-if="showNotify4">
+                <li class="flex subitem bd_b" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
+                    <i class="unread" sn-if="item.unread">+{item.unread}</i>
+                    <img onerror="this.src='images/default.jpg'" sn-src="{sl.thumbnail(item.avatars)}" />
+                    <div class="flexitem pl_m">
+                        <div class="name fs_m">{item.user_name}</div>
+                        <div class="fs_s cl_999 to_e con">{item.msg}</div>
+                    </div>
+                    <div class="pl_m">
+                        <p class="date fs_s cl_999">{item.date?util.formatDate(item.date,'yyyy/MM/dd'):''}</p>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 
@@ -179,7 +193,8 @@
                 </li>
             </ul>
             <ul class="bd_t mt_l pt_1 hm_contacts__messages" sn-if="messagesList.list.length">
-                <li class="flex h_bar bd_b bg_fff fs_m" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
+                <li class="flex h_bar bd_b bg_fff fs_m ps_r" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
+                    <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>
                     <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
                         <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
@@ -194,17 +209,20 @@
     <button class="quan-call" sn-if="tab==3&&quanTab.index==2" sn-tap="this.phoneCall()"></button>
 
     <footer class="footer bd_t">
-        <ul>
-            <li class="icon-home{tab==1?'_curr curr':''}" sn-tap="tab=1,headBg=false">
+        <div>
+            <button class="icon-home{tab==1?'_curr curr':''}" sn-tap="tab=1,headBg=false">
                 <span>生活</span>
-            </li>
-            <li class="icon-ent{tab==2?'_curr curr':''}" sn-tap="this.openEnt()">
+            </button>
+            <button class="icon-ent{tab==2?'_curr curr':''}" sn-tap="this.openEnt()">
                 <span>娱乐</span>
-            </li>
-            <li class="icon-quan{tab==3?'_curr curr':''}" sn-tap="tab=3">
+            </button>
+            <button class="icon-shop{tab==4?'_curr curr':''}" sn-tap="this.openShop()">
+                <span>商圈</span>
+            </button>
+            <button class="icon-quan{tab==3?'_curr curr':''}" sn-tap="tab=3">
                 <span>圈子</span>
-            </li>
-        </ul>
+            </button>
+        </div>
     </footer>
 </div>
 <div class="hm_quan__menu_mask" style="display:none" ref="quanMenuMask" sn-tap="this.hideQuanMenu()">

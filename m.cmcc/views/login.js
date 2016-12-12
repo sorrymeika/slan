@@ -46,17 +46,17 @@ module.exports = Activity.extend({
             }
 
             Loader.showLoading();
-            /*
-             */
-            new Http({
-                    url: '/user/login',
-                    params: auth.encryptParams({
-                        account: phoneNo,
-                        password: auth.md5(password),
-                        token: "xxx"
-                    })
 
-                }).request()
+            /*
+            new Http({
+                url: '/user/login',
+                params: auth.encryptParams({
+                    account: phoneNo,
+                    password: auth.md5(password),
+                    token: "xxx"
+                })
+
+            }).request()
                 .then(function(res) {
                     auth.setAuthToken(res.data.tk);
 
@@ -72,18 +72,21 @@ module.exports = Activity.extend({
                 }).then(function() {
                     Loader.hideLoading();
                 });
+         */
+
+
             bridge.cmcc.login(phoneNo, password, "sms", function(res) {
                 if (res.success) {
 
                     new Http({
-                            url: '/user/login',
-                            params: auth.encryptParams({
-                                account: phoneNo,
-                                password: auth.md5(password),
-                                token: res.token
-                            })
+                        url: '/user/login',
+                        params: auth.encryptParams({
+                            account: phoneNo,
+                            password: auth.md5(password),
+                            token: res.token
+                        })
 
-                        }).request()
+                    }).request()
                         .then(function(res) {
                             auth.setAuthToken(res.data.tk);
 

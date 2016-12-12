@@ -12,83 +12,141 @@ var popup = require('widget/popup')
 
 module.exports = Page.extend({
 
-
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
         var business_id = this.route.params.id;
+        var type = this.route.params.type;
         var data = ({
-            100022: {
-                title: '推送娱乐提醒',
-                feature: [],
+            100001: {
+                title: '移动营业厅',
                 types: [{
                     text: '图文链接',
-                    value: 1
+                    value: -1,
+                    feature: []
+                }]
+            },
+            100002: {
+                title: '12580求职',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
+            100003: {
+                title: '12580商城',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
+            100004: {
+                title: '水费',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
+            100005: {
+                title: '电费',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
+            100022: {
+                title: '推送娱乐提醒',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
                 }]
             },
             100026: {
                 title: '推送和聚宝提醒',
-                feature: [{
-                    label: "产品名称",
-                    field: "product_name",
-                    type: "text",
-                    emptyAble: false,
-                    emptyText: "不可为空"
-                }, {
-                    label: "募集期 从",
-                    field: "start_date",
-                    type: "timePicker",
-                    emptyAble: false,
-                    emptyText: "时间不可为空"
-                }, {
-                    label: "到",
-                    field: "end_date",
-                    type: "timePicker",
-                    emptyAble: false,
-                    emptyText: "时间不可为空"
-                }, {
-                    label: "期限（天）",
-                    field: "days",
-                    type: "number",
-                    regex: /^\d+$/,
-                    regexText: "格式错误",
-                    emptyAble: false,
-                    emptyText: "时间不可为空"
-                }, {
-                    label: "年化利率",
-                    field: "rate",
-                    type: "number",
-                    emptyAble: false,
-                    emptyText: "年化利率不可为空"
-                }, {
-                    label: "风险等级",
-                    field: "risk",
-                    type: "text",
-                    emptyAble: false,
-                    emptyText: "风险不可为空"
-                }, {
-                    label: "起息时间",
-                    field: "interest_start_date",
-                    type: "timePicker",
-                    emptyAble: false,
-                    emptyText: "时间不可为空"
-
-                }, {
-                    label: "结息时间",
-                    field: "interest_end_date",
-                    type: "timePicker",
-                    emptyAble: false,
-                    emptyText: "时间不可为空"
-                }],
                 types: [{
+                    text: '图文链接',
+                    value: -1
+                }, {
                     text: '理财产品',
-                    value: 1
+                    value: 1,
+                    feature: [{
+                        label: "产品名称",
+                        field: "product_name",
+                        type: "text",
+                        emptyAble: false,
+                        emptyText: "不可为空"
+                    }, {
+                        label: "募集期 从",
+                        field: "start_date",
+                        type: "timePicker",
+                        emptyAble: false,
+                        emptyText: "时间不可为空"
+                    }, {
+                        label: "到",
+                        field: "end_date",
+                        type: "timePicker",
+                        emptyAble: false,
+                        emptyText: "时间不可为空"
+                    }, {
+                        label: "期限（天）",
+                        field: "days",
+                        type: "number",
+                        regex: /^\d+$/,
+                        regexText: "格式错误",
+                        emptyAble: false,
+                        emptyText: "时间不可为空"
+                    }, {
+                        label: "年化利率",
+                        field: "rate",
+                        type: "number",
+                        emptyAble: false,
+                        emptyText: "年化利率不可为空"
+                    }, {
+                        label: "风险等级",
+                        field: "risk",
+                        type: "text",
+                        emptyAble: false,
+                        emptyText: "风险不可为空"
+                    }, {
+                        label: "起息时间",
+                        field: "interest_start_date",
+                        type: "timePicker",
+                        emptyAble: false,
+                        emptyText: "时间不可为空"
+
+                    }, {
+                        label: "结息时间",
+                        field: "interest_end_date",
+                        type: "timePicker",
+                        emptyAble: false,
+                        emptyText: "时间不可为空"
+                    }]
                 }]
             }
         })[business_id];
 
+        var currentType;
+
+        if (!type) {
+            currentType = data.types[0];
+        } else {
+            currentType = util.first(data.types, 'value', type);
+        }
+        var features = currentType.feature || [];
+
         var model = this.model = new Model(this.$el, {
-            title: data.title
+            title: data.title,
+            currentType: currentType,
+            types: data.types
         });
+
+        model.changeType = function() {
+            location.hash = '/notification/easy/' + business_id + '/' + this.refs.type.value
+        }
 
         var form = this.form = new Form({
             url: '/notification/add',
@@ -96,7 +154,7 @@ module.exports = Page.extend({
                 label: "用户手机号",
                 field: "mobile",
                 type: "text",
-                regex: /^\d+$/,
+                regex: /^-*\d+$/,
                 regexText: "格式错误",
                 emptyAble: false,
                 emptyText: "用户手机号不可为空"
@@ -115,7 +173,7 @@ module.exports = Page.extend({
             }, {
                 label: "提醒内容",
                 field: "content",
-                type: "text",
+                type: "textarea",
                 emptyAble: false,
                 emptyText: "提醒内容不可为空"
             }, {
@@ -129,12 +187,8 @@ module.exports = Page.extend({
             }, {
                 label: "类型",
                 field: "type",
-                type: "select",
-                regex: /^\d+$/,
-                regexText: "格式错误",
-                emptyAble: false,
-                emptyText: "类型不可为空",
-                options: data.types
+                type: "hidden",
+                value: currentType.value
             }, {
                 label: "业务编号",
                 field: "business_id",
@@ -145,14 +199,14 @@ module.exports = Page.extend({
                 field: "feature",
                 type: "hidden"
 
-            }].concat(data.feature),
+            }].concat(features),
 
             buttons: [{
                 value: '推送',
-                click: function () {
+                click: function() {
                     var feature = {};
 
-                    data.feature.forEach(function (item) {
+                    features.forEach(function(item) {
                         feature[item.field] = form.get(item.field);
                     });
 
@@ -162,26 +216,30 @@ module.exports = Page.extend({
 
                     console.log(feature);
 
-                    this.model.next(function () {
-                        form.submit(function () {
+                    this.model.next(function() {
+                        form.submit(function() {
                             Toast.showToast('添加成功');
                             form.reset();
                             history.back();
                             self.setResult('notificationchange');
-                        }, function (e) {
+                        }, function(e) {
                             Toast.showToast(e.message);
                         });
                     });
                 }
             }, {
                 value: '取消',
-                click: function () {
+                click: function() {
                     history.back();
                 }
             }]
         });
         form.$el.appendTo(model.refs.main);
-
     },
-    onShow: function () { }
+    onShow: function() {
+
+        this.model.next(function() {
+            this.refs.type.value = this.get('currentType.value');
+        })
+    }
 });

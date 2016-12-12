@@ -1,8 +1,9 @@
 var vm = require('core/model2');
 var auth = require('logical/auth');
 
-module.exports = vm.ViewModel.extend({
-    el: <div class="menu" display="{$global.adminId}" style="display:none">
+
+module.exports = vm.Model.extend({
+    el: (<div class="menu" display="{$global.adminId}" style="display:none">
         <div class="menu_hd">
             菜单
         </div>
@@ -17,7 +18,7 @@ module.exports = vm.ViewModel.extend({
                 </dd>
             </dl>
         </div>
-    </div>,
+    </div>),
 
     logout: function () {
         auth.clearAuth();
@@ -33,7 +34,6 @@ module.exports = vm.ViewModel.extend({
     },
 
     initialize: function () {
-
         var self = this;
 
         $(window).on('hashchange', function () {

@@ -1,0 +1,26 @@
+<header>
+    <div class="head_back" sn-tap="this.back()"></div>
+    <div class="head_title">{title}</div>
+</header>
+<div class="main fs_m" ref="main">
+    <div class="flex icon-{business_id==100004?'water2':'elec2'} pt_l pl_m pb_m bg_fff bd_b">
+        <p class="pl_s">{business_id==100004?'水费':'电费'}</p>
+    </div>
+    <div class="flex h_m bg_fff bd_b pl_m">
+        <p class="flexitem">家庭</p>
+        <div class="gl_arrow_s pr_xl fs_s fw_s">我家</div>
+    </div>
+    <div class="flex h_m bg_fff bd_b pl_m" sn-tap="this.selectUnit()">
+        <p class="flexitem">缴费单位</p>
+        <div class="gl_arrow_s pr_xl fs_s fw_s cl_999">{unit.name?unit.name:'选择缴费单位'}</div>
+    </div>
+    <div class="flex h_m bg_fff bd_b pl_m">
+        <p class="flex pr_xl">户号 </p>
+        <input class="flexitem pr_xl fs_s fw_s cl_999" sn-model="user_code" value="{user_code}" placeholder="查看纸质账单" />
+    </div>
+    <div class="mg_m fs_m mb_xxl" sn-if="!isModify"><span class="checkbox {agree?'checked':''}" sn-tap="agree=!agree"></span><span sn-tap="agree=!agree" class="va_m">同意<a href="/licence" class="cl_app">《自助缴费服务协议》</a></span></div>
+
+    <div class="pt_xxl pl_m pr_m">
+        <button class="btn_l fs_l br_4" sn-tap="this.save()">{isModify?'修改缴费账户':'新增缴费账户'}</button>
+    </div>
+</div>

@@ -21,7 +21,7 @@ sign = md5.md5(sign);
 
 new Http({
     contentType: 'json',
-    url: '/notification/receive',
+    url: 'http://wxcs.ie1e.com/api/notification/receive',
     params: {
         appid: appid,
         sign: sign,
@@ -33,4 +33,4 @@ new Http({
         "notify_type": notify_type,
         feature: feature
     }
-});
+}).request();
