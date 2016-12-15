@@ -3,7 +3,7 @@
     <ul class="bs_service__list bd_t">
         <li class="bs_service__item bd_br flex jc_c fd_c" sn-repeat="item in group.type@(id)data.list" data-forward="/business/{item.business_id}">
             <i class="unread" sn-if="item.unread">+{item.unread}</i>
-            <img sn-src="{sl.thumbnail(item.business_pic)}" />
+            <img sn-src="{sl.thumbnail(item.business_pic)}" class="cir_m" />
             <div class="mt_s fs_m">{item.business_name}</div>
         </li>
     </ul>

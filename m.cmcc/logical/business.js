@@ -1,9 +1,12 @@
 var util = require('util');
+var bridge = require('bridge');
 var model2 = require('core/model2');
 var Http = require('core/http');
 var Promise = require('promise');
 var businessModel = require('models/business');
 var Loader = require('widget/loader');
+
+var appconfig = require('models/appconfig');
 
 var business = {
     getThirdUrl: function () {
@@ -65,6 +68,10 @@ var business = {
         });
     },
 
+    getMail139: function () {
+        return Http.post('/business/getMail139');
+    },
+
     notificationsLoader: function (model, beforeRender) {
         return Loader.pageLoader({
             url: "/business/getNotifications",
@@ -112,5 +119,73 @@ var business = {
         });
     }
 }
+
+var redirect = {};
+
+redirect.jump = function (linkurl) {
+    if (linkurl) {
+        if (linkurl.indexOf('cmccfjapp://open.10086.cn') != -1) {
+            linkurl = linkurl.substr(linkurl.indexOf('?'));
+            var match = linkurl.match(/(?:\&|\?)url\=(.+?)(=\&|$)/);
+
+            if (!match) return;
+
+            linkurl = decodeURIComponent(match[1]);
+        }
+
+        if (/^(http\:|https\:)/.test(linkurl)) {
+            bridge.openInApp(linkurl);
+
+        } else if (linkurl.charAt(0) == '#' || linkurl.charAt(0) == '/') {
+            Application.forward(linkurl);
+
+        } else if (linkurl == 'hjb') {
+            this.enterHjb();
+
+        } else if (linkurl == 'qz') {
+            this.enterQz();
+
+        } else if (linkurl == '139') {
+            this.enterMail139();
+
+        } else if (linkurl == 'sc') {
+            this.enterSc();
+
+        } else {
+        }
+    }
+}
+
+redirect.enterShop = function () {
+    bridge.openInApp("福建移动营业厅", 'http://wap.fj.10086.cn/servicecb/touch/index.jsp');
+}
+
+redirect.enterHjb = function () {
+    bridge.openInApp("和聚宝", appconfig.get('hjbUrl'));
+}
+
+redirect.enterQz = function () {
+    bridge.openInApp("12580海西求职平台", appconfig.get('qzUrl'));
+}
+
+redirect.enterSc = function () {
+    Application.back('/');
+
+    setTimeout(function () {
+        $(window).trigger('tabchange_to_3');
+
+    }, 400);
+}
+
+redirect.enterEnt = function () {
+    Application.back('/');
+
+    setTimeout(function () {
+        $(window).trigger('tabchange_to_2');
+
+    }, 400);
+}
+
+business.redirect = redirect;
 
 module.exports = business;

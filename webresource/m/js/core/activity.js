@@ -10,55 +10,49 @@ var util = require('util'),
     indexOf = util.indexOf,
     getUrlPath = util.getPath;
 
+
+var STATUS = {
+    INIT: 0,
+    CREATED: 1,
+    SHOW: 2,
+    PAUSE: 3,
+    DESTORY: 4
+}
+
+function onDestroy(instance) {
+    if (instance._scrolls) instance._scrolls.destory();
+    instance.onDestroy && instance.onDestroy();
+    instance.application.remove(instance.url);
+}
+
+function onStatusChange(e) {
+
+    switch (e.type) {
+        case 'Show':
+            if (this.status == STATUS.PAUSE) {
+                this.trigger('Resume');
+            }
+            this.status = STATUS.SHOW;
+            break;
+
+        case 'Pause':
+            this.status = STATUS.PAUSE;
+            break;
+
+        case 'Destroy':
+            onDestroy(this);
+            this.status = STATUS.DESTORY;
+            break;
+    }
+}
+
 var Activity = Component.extend({
     el: '<div class="view"></div>',
 
     toggleAnim: 'def',
     defBackUrl: '/',
     autosetBackUrl: true,
-
-    _setReferrer: function (route) {
-        this.isForward = route.isForward;
-
-        if (route.isForward) {
-            var currActivity,
-                prevRoute = route,
-                prevActivity = this;
-
-            while ((currActivity = prevRoute.prevActivity) && (prevActivity = currActivity.route.prevActivity) && prevRoute) {
-                if (prevActivity == this) {
-                    currActivity.route.prevActivity = this.route.prevActivity;
-                    currActivity.referrer = currActivity.route.referrer = this.referrer;
-                    currActivity.referrerDir = currActivity.route.referrerDir = this.referrerDir;
-                    currActivity.swipeRightBackAction = this.swipeRightBackAction;
-                    break;
-                }
-                prevRoute = prevActivity.route;
-            }
-
-            this.referrer = route.referrer;
-            this.referrerDir = route.referrerDir;
-        }
-
-        if (this.autosetBackUrl) {
-            backUrl = route.query.from || this.referrer || this.defBackUrl;
-
-            getUrlPath(backUrl) != route.path.toLowerCase() && (this.swipeRightBackAction = backUrl);
-        }
-        return this;
-    },
-
-    _setRoute: function (route) {
-        this._query = $.extend({}, this.query);
-
-        this.route = route;
-        this.hash = route.hash;
-        this.url = route.url;
-        this.path = route.path;
-        this.query = route.query;
-
-        return this;
-    },
+    status: STATUS.INIT,
 
     initialize: function (options) {
         var self = this,
@@ -68,16 +62,14 @@ var Activity = Component.extend({
 
         self.application = options.application;
 
+        options.fuckMe(this);
+
         if (this.className) {
             this.className += ' view';
             this.$el.addClass('view');
         }
 
-        self._setReferrer(options.route)
-            ._setRoute(options.route)
-            .on('Show', self._statusChange)
-            .on('Pause', self._statusChange)
-            .on('Destroy', self._onDestroy);
+        self.on('Show Pause Destroy', onStatusChange);
 
         self.onAppear && self.on('Appear', self.onAppear);
         self.onShow && self.on('Show', self.onShow);
@@ -165,13 +157,6 @@ var Activity = Component.extend({
     //进入动画结束时触发
     onShow: null,
 
-    _statusChange: function (e) {
-        if (this.status == 'Pause') {
-            this.trigger('Resume');
-        }
-        this.status = e.type;
-    },
-
     //离开动画开始时触发
     onPause: null,
 
@@ -191,12 +176,6 @@ var Activity = Component.extend({
     setResult: function () {
         this.application.trigger.apply(this.application, arguments);
         return this;
-    },
-
-    _onDestroy: function () {
-        if (this._scrolls) this._scrolls.destory();
-        this.onDestroy && this.onDestroy();
-        this.application.remove(this.url);
     },
 
     compareUrl: function (url) {

@@ -9,7 +9,7 @@ var popup = require("widget/popup");
 var userModel = require('models/user');
 
 var Model = vm.Model;
-var Global = vm.Global;
+var Global = vm.global;
 
 var Cart = Model.extend({
 

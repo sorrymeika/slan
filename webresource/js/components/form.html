@@ -8,16 +8,16 @@
             @for (var i=0,len=fields.length;i < len;i++) {
                 var items=fields[i],
                     field;
-                <tr>
-                    @if (!items.length){
-                        items=[items];
-                    }
+                if (!items.length){
+                    items=[items];
+                }
+                <tr sn-if="@(items.map(function(item){ return 'fields.'+item.field+'.visible' }).join('&&'))">
                     @for (var j=0,length=items.length;j < length;j++){
                         field = items[j];
                         var attr = 'ref="'+field.field+'" style="' + (field.width ? "width:" + field.width+"px;" : '') + (field.height ? "height:" + field.height+"px;" : '') + '" name="' + field.field + '" sn-model="data.' + field.field + '" value="{data.' + field.field + '}"';
 
-                        <th @(field.vAlign?'style="vertical-align:'+field.vAlign+'"':'')>@field.label @if (field.emptyAble===false){<i>*</i>}</th>
-                        <td colspan="@(field.colSpan||1)">
+                        <th sn-style="{fields.@(field.field).vAlign?'vertical-align:'+field.vAlign:''}" sn-if="fields.@(field.field).visible">@field.label <i sn-if="fields.@(field.field).emptyAble===false">*</i></th>
+                        <td colspan="@(field.colSpan||1)" sn-if="fields.@(field.field).visible">
 
                         @if (field.type=='text'||!field.type){
                             <input class="@(field.className||'text')" type="text"@(attr)/>
@@ -47,7 +47,6 @@
                             <input type="@(field.type)" name="@(field.field)" sn-model="data.@(field.field)" checked="{data.@(field.field)||undefined}"/>
 
                         } else {
-                            $data.plugins.push(field);
                             <input type="hidden"@(attr) />
                             <text>@(field.html||'')</text>
                         }

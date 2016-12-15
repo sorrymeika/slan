@@ -1,7 +1,7 @@
 ﻿var $ = require('$');
 var form = require('./form.html');
 var util = require('util');
-var Validator = require('./validator');
+var Valid = require('./validator');
 var vm = require('core/model2');
 var Async = require('core/async');
 var Http = require('core/http');
@@ -66,7 +66,7 @@ var FormComponent = function(options) {
     this.plugins = [];
     this.compo = {};
 
-    var validator = {};
+    var valids = {};
     var fieldsOption = options.fields;
     var selectsOptions = [];
 
@@ -86,12 +86,15 @@ var FormComponent = function(options) {
                 var field = fields[j];
                 var valid = util.pick(field, valid_keys);
 
+                if (!field.type) field.type = 'text';
+                else field.type = field.type.toLowerCase();
+
                 items[field.field] = field;
                 data[field.field] = field.value;
 
-                if (!util.isEmptyObject(valid)) {
-                    validator[field.field] = valid;
-                }
+                if (field.visible === undefined) field.visible = true;
+
+                valids[field.field] = valid;
 
                 if (field.type == "file") {
                     if (!this.hasFile) {
@@ -124,6 +127,10 @@ var FormComponent = function(options) {
                             value: item[fieldOptions.value]
                         }
                     });
+
+                } else if (field.type in plugins) {
+
+                    this.plugins.push(field);
                 }
             }
         }
@@ -170,7 +177,6 @@ var FormComponent = function(options) {
                 selectOptions.paramsId = paramsId;
 
                 Http.post(selectOptions.url, params).then(function(res) {
-                    console.log(model.getModel('fields.' + selectOptions.field + ".options"))
 
                     model.set('fields.' + selectOptions.field + ".options", selectOptions.data.concat(res.data).map(function(item) {
                         return {
@@ -178,9 +184,6 @@ var FormComponent = function(options) {
                             value: item[selectOptions.value]
                         }
                     }));
-
-                    console.log(selectOptions.field);
-
 
                 });
             });
@@ -193,13 +196,24 @@ var FormComponent = function(options) {
         }
     }
 
-    this.valid = new Validator(validator, model.data.data);
+    this.valid = valids = new Valid(valids, model.data.data);
+
+    valids.each(function(key, option) {
+
+        Valid.KEYS.forEach(function(validKey) {
+
+            model.on('change:fields.' + key + '.' + validKey, function(e, v) {
+
+                option[validKey] = v;
+            });
+        })
+    });
 
     this.$el.on('blur', '[name]', $.proxy(this._validInput, this))
         .on('focus', '[name]', function(e) {
             var $target = $(e.currentTarget);
             var name = $target.attr('name');
-            var valid = validator[name];
+            var valid = valids.options[name];
 
             valid && valid.msg && model.set('result.' + name, {
                 success: -1,
@@ -208,25 +222,23 @@ var FormComponent = function(options) {
 
         });
 
-    for (var i = 0, len = this.plugins.length; i < len; i++) {
-        var plugin = this.plugins[i];
-        var $hidden = this.$el.find('[name="' + plugin.field + '"]');
+    model.next(function() {
+        self.plugins.forEach(function(plugin) {
 
-        var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $hidden, plugin) : new (FormComponent.require(plugin.type))($hidden, plugin);
+            if (!self.initPlugin(plugin)) {
 
-        var value = model.data.data[plugin.field];
-
-        if (value !== undefined && value !== null)
-            compo.val(value);
-
-        model.on('change:data.' + plugin.field, (function(compo, plugin) {
-
-            return function(e, value) {
-
-                compo.val(value);
+                model.onceTrue('change:fields.' + plugin.field + '.visible', function(e, val) {
+                    if (val) {
+                        model.next(function() {
+                            self.initPlugin(plugin);
+                        });
+                        return true;
+                    }
+                });
             }
-        })(compo, plugin))
-    }
+        });
+    });
+
 };
 
 FormComponent.prototype = {
@@ -239,6 +251,34 @@ FormComponent.prototype = {
     hasFile: false,
 
     useIFrame: false,
+
+    initPlugin: function(plugin) {
+
+        var $input = this.$el.find('[name="' + plugin.field + '"]');
+
+        if (!$input.length) {
+            return false;
+        }
+
+        var compo = this.compo[plugin.field] = plugin.render ? plugin.render.call(this, $input, plugin) : new (FormComponent.require(plugin.type))($input, plugin);
+
+        var value = this.get(plugin.field);
+
+        if (value !== undefined && value !== null)
+            compo.val(value);
+
+        this.model.on('change:data.' + plugin.field, function(e, value) {
+
+            compo.val(value);
+        });
+        return true;
+    },
+
+    setFields: function(key, val) {
+        this.model.getModel('fields').set(key, val);
+
+        return this;
+    },
 
     set: function(arg0, arg1, arg2) {
 
@@ -266,6 +306,36 @@ FormComponent.prototype = {
         return this;
     },
 
+    _validInput: function(e) {
+        var $target = $(e.currentTarget);
+        var name = $target.attr('name');
+        var res = this.valid.validate(name);
+
+        if (!this.model.data.result) this.model.set({
+            result: {}
+        });
+
+        this.model.set('result.' + name, res);
+    },
+
+
+    validate: function() {
+        var model = this.model;
+        var valids = this.valid;
+        var keys = [];
+
+        valids.each(function(key, option) {
+            if (model.get('fields.' + key + '.visible')) {
+                keys.push(key);
+            }
+        });
+
+        var res = valids.validate(keys);
+        this.model.set(res);
+
+        return res.success;
+    },
+
     submit: function(success, error) {
         var self = this;
 
@@ -276,9 +346,7 @@ FormComponent.prototype = {
             self.set(this.name, this.value);
         });
 
-        var res = this.validate();
-
-        if (res.success) {
+        if (this.validate()) {
 
             if (this.useIFrame || this.hasFile && !window.FormData) {
                 guid++;
@@ -344,24 +412,6 @@ FormComponent.prototype = {
         }
     },
 
-    validate: function() {
-        var res = this.valid.validate();
-        this.model.set(res);
-
-        return res;
-    },
-
-    _validInput: function(e) {
-        var $target = $(e.currentTarget);
-        var name = $target.attr('name');
-        var res = this.valid.validate(name);
-
-        if (!this.model.data.result) this.model.set({
-            result: {}
-        });
-
-        this.model.set('result.' + name, res);
-    },
 
     destory: function() {
         this.$el.on('off', '[name]', this._validInput);

@@ -5,7 +5,7 @@ var Event = require('core/event');
 var Promise = require('promise');
 
 var messagesList = require('models/messagesList');
-var friends = require('models/friends');
+var friendsModel = require('models/friends');
 var contact = require('logical/contact');
 
 var MESSAGETYPE = {
@@ -15,7 +15,9 @@ var MESSAGETYPE = {
     SEND_YUNMI: 3,
     GET_SEND_YUNMI: 4,
     YUNMI_REDBAG: 5,
-    GET_YUNMI_REDBAG: 6
+    GET_YUNMI_REDBAG: 6,
+    FRIEND_REQUEST_TO_ME: 7,
+    RECEIVE_MY_FRIEND_REQUEST: 8
 };
 
 var _gid = 1;
@@ -31,13 +33,13 @@ function keep() {
             messages.forEach(function(msg) {
 
                 switch (msg.type) {
-                    case MESSAGETYPE.TEXT:
-                    case MESSAGETYPE.IMAGE:
-                        chat.record(false, msg.from_id, msg);
-                        chat.trigger('message:' + msg.from_id, msg);
-                        break;
                     case MESSAGETYPE.NOTIFICATION:
                         hasNewNotification = true;
+                        break;
+
+                    default:
+                        chat.record(false, msg.from_id, msg);
+                        chat.trigger('message:' + msg.from_id, msg);
                         break;
                 }
             });
@@ -85,25 +87,58 @@ var chat = Event.mixin({
 
         var records = messagesList.getList();
         var record = records.find('user_id', friend_id);
+        var content;
+
+        switch (msg.type) {
+            case MESSAGETYPE.IMAGE:
+                content = '[图片]';
+                break;
+            case MESSAGETYPE.SEND_YUNMI:
+                content = '[转账]';
+                break;
+            case MESSAGETYPE.GET_SEND_YUNMI:
+                content = '[收钱]';
+                break;
+            case MESSAGETYPE.YUNMI_REDBAG:
+                content = '[云米红包]';
+                break;
+            case MESSAGETYPE.GET_YUNMI_REDBAG:
+                content = '[收红包]';
+                break;
+            case MESSAGETYPE.FRIEND_REQUEST_TO_ME:
+                content = '[好友申请]';
+                break;
+            default:
+                content = msg.content;
+                break;
+        }
 
         var recordData = {
             user_id: friend_id,
             date: Date.now(),
-            msg: msg.type == MESSAGETYPE.IMAGE ? '[图片]' : msg.type == MESSAGETYPE.SEND_YUNMI ? '[转账]' : msg.type == MESSAGETYPE.GET_SEND_YUNMI ? '[收钱]' : msg.type == MESSAGETYPE.YUNMI_REDBAG ? '[云米红包]' : msg.type == MESSAGETYPE.GET_YUNMI_REDBAG ? '[收红包]' : msg.content
+            msg: content,
+            type: msg.type
         };
 
         if (!record) {
             if (!is_send) {
                 recordData.unread = 1;
             }
-            friend = friends.getFriend(friend_id);
 
-            if (friend.get('name_for_show')) {
-                recordData.avatars = friend.get('avatars');
-                recordData.user_name = friend.get('name_for_show');
+            if (msg.type == MESSAGETYPE.FRIEND_REQUEST_TO_ME) {
+                recordData.avatars = msg.avatars;
+                recordData.user_name = msg.user_name;
 
             } else {
-                contact.friends();
+                friend = friendsModel.getFriend(friend_id);
+
+                if (friend.get('name_for_show')) {
+                    recordData.avatars = friend.get('avatars');
+                    recordData.user_name = friend.get('name_for_show');
+
+                } else {
+                    contact.friends();
+                }
             }
 
             records.add(recordData);

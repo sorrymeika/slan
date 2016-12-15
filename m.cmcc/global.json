@@ -54,7 +54,8 @@
             "logical/district": "./logical/district",
             "logical/yunmi": "./logical/yunmi",
             "logical/business": "./logical/business",
-            "logical/hdh": "./logical/hdh"
+            "logical/hdh": "./logical/hdh",
+            "logical/news": "./logical/news"
         },
         "models": {
             "models/user": "./models/user",
@@ -96,7 +97,6 @@
         "core/touch": "../webresource/m/js/core/touch",
         "widget/scrollview": "../webresource/m/js/widget/scrollview",
         "widget/scroll": "../webresource/m/js/widget/scroll",
-        "widget/tip": "../webresource/js/widget/tip",
         "widget/loader": "../webresource/m/js/widget/loader",
         "widget/selector": "../webresource/m/js/widget/selector",
         "widget/offline": "../webresource/m/js/widget/offline",

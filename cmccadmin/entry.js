@@ -1,7 +1,12 @@
 var $ = require('$');
 var Base = require('core/base');
 var Navigation = require('core/navigation');
+var Toast = require('widget/toast');
 var util = require('util');
+
+sl.tip = function (msg) {
+    Toast.showToast(msg);
+}
 
 function startApp(routes, resourceMapping) {
 
@@ -97,6 +102,16 @@ function startApp(routes, resourceMapping) {
                 }, {
                     title: '推送电费提醒',
                     url: '/notification/easy/100005'
+                }, {
+                    title: '139邮箱提醒',
+                    url: '/notification/easy/100043'
+                }]
+            }, {
+                title: '新闻/广告位管理',
+                url: '/news/index',
+                children: [{
+                    title: '分类管理',
+                    url: '/news_category/index'
                 }]
             }]
 

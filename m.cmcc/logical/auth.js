@@ -75,7 +75,7 @@ var auth = {
     },
 
     getUser: function () {
-        return util.store('user');
+        return userModel.get();
     },
 
     setUser: function (user) {

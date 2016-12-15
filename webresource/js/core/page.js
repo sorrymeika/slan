@@ -4,8 +4,6 @@ var $ = require('$'),
     Component = require('./component'),
     Async = require('./async');
 
-require('../widget/tip');
-
 var noop = util.noop,
     indexOf = util.indexOf,
     slice = Array.prototype.slice,
@@ -13,19 +11,6 @@ var noop = util.noop,
 
 var Page = Component.extend({
     el: '<div class="view"></div>',
-
-    _setReferrer: function () {
-    },
-
-    _setRoute: function (route) {
-        this.route = route;
-        this.hash = route.hash;
-        this.url = route.url;
-        this.path = route.path;
-        this.referrer = route.referrer;
-        this._query = this.query;
-        this.query = $.extend({}, route.query);
-    },
 
     _template: function (res, err, done) {
         var that = this,
@@ -70,7 +55,7 @@ var Page = Component.extend({
 
         that.async = async;
 
-        that._setRoute(options.route);
+        options.fuckMe(this);
 
         that.application = options.application;
 

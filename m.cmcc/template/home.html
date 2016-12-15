@@ -50,11 +50,12 @@
             </div>
             <a href="javascript:;" sn-tap="this.showYunMi()" class="hm_idx__ym_rule dock_bl cl_fff fs_s pd_s pl_m">云米规则</a>
         </div>
-
+        <div class="hm_idx__banner" ref="banner">
+        </div>
         <div class="hm_idx__life">
             @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.business(4,'社交提醒')
             <ul class="pr_m bg_f2" sn-if="showNotify4">
-                <li class="flex subitem bd_b" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
+                <li class="flex subitem bd_b" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="{item.type==7?'/contact/person/'+item.user_id:('/contact/chat/'+item.user_id)}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <img onerror="this.src='images/default.jpg'" sn-src="{sl.thumbnail(item.avatars)}" />
                     <div class="flexitem pl_m">

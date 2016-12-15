@@ -80,13 +80,12 @@ drop table pub_quan;
 create table pub_quan (--公众圈 --children=pub_quan_follow,pub_quan_msg --props=int user_id
     quan_id number(10) primary key,--圈编号 --deletion_key=true
     quan_name varchar(20),--圈名称 --unique=true --updateable=false --search=true
-    quan_pic varchar(100),--圈图片 --type=file --ext=png|jpeg|jpg|bmp
+    quan_pic varchar(100),--圈图片 --type=file --ext=png|jpeg|jpg|bmp|gif
     follow_num number(12),--关注人数
     summary varchar(2000),--简介 --type=clob --grid=false
     create_date DATE--添加日期 --updateable=false --search=true
 ) tablespace cmccuser;
 create sequence pub_quan_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
-
 
 
 drop table pub_quan_msg;
@@ -266,12 +265,10 @@ create table contacts_backup (--通讯录备份
 create sequence contacts_backup_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
-
-
 create table user_yunmi (--云米时段
     yunmi_id number(12) primary key,--时段ID
     user_id number(10),--用户ID
-    account varchar(20),--用户ID
+    account varchar(20),--用户手机 --search=true
     amount number(10,2),--云米数量
     start_date date,--时段开始时间 --sort=true --search=true
     end_date date,--时段结束时间 --sort=true --search=true
@@ -365,9 +362,6 @@ create sequence user_hdh_seq minvalue 1 maxvalue 999999999999 start with 1 incre
 create sequence hdh_nc_seq minvalue 1 maxvalue 999999999999 start with 240 increment by 1;
 
 
------------------------------
------------------------------
-
 create table quan_black (--圈子黑名单 --props=String user_name,String avatars
     black_id number(12) primary key,--黑名单ID
     user_id number(12),--用户ID
@@ -396,6 +390,7 @@ insert into business (business_id,business_name,secret_key,type) values (100005,
 insert into business (business_id,business_name,secret_key,type) values (100001,'移动官微','4411d2e0eddc54cb19ef568443257efb',1);
 insert into business (business_id,business_name,secret_key,type) values (100022,'娱乐','4411d2e0eddc54cb19ef568443257efb',3);
 insert into business (business_id,business_name,secret_key,type) values (100026,'和聚宝','4411d2e0eddc54cb19ef568443257efb',2);
+insert into business (business_id,business_name,secret_key,type) values (100043,'139邮箱','4411d2e0eddc54cb19ef568443257efb',1);
 
 create table notification (--消息提醒
     notify_id number(12) primary key,--自增ID
@@ -419,9 +414,6 @@ alter table user_yunmi add account varchar(20);
 --update user_yunmi a set a.user_id=(select b.user_id from account b where b.account=a.account)  where (a.user_id=0 or a.user_id is null) and a.account!='' and a.account is not null
 
 
------------------------------
---<<2016-11-22 up to date here
------------------------------
 
 insert into business (business_id,business_name,secret_key,type) values (100004,'水费','4411d2e0eddc54cb19ef568443257efb',2);
 insert into business (business_id,business_name,secret_key,type) values (100005,'电费','4411d2e0eddc54cb19ef568443257efb',2);
@@ -437,6 +429,38 @@ create table user_business (
     memo varchar(20)
 ) tablespace cmccuser;
 create sequence user_business_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+-----------------------------
+--<<2016-11-22 up to date here
+-----------------------------
+
+create table news (--新闻
+    news_id number(10) primary key,--自增ID
+    title varchar(200),--新闻标题 --search=true
+    summary varchar(400),--新闻摘要 
+    linkurl varchar(300),--跳转链接
+    image varchar(200),--图片 --type=file --ext=png|jpeg|jpg|bmp|gif
+    category_id number(5),--分类 --formType=select --options={ url: '/news_category/filter', params:{ type: 'type' }, text: 'category_name', value: 'category_id' } --search=true
+    /*
+    type number(6)--分类类型 --options=1:新闻,2:关于我们,3:广告位 --formType=select --search=true
+    */
+    news_type number(6),--配置类型 --options=1:文章,2:图文链接 --formType=select
+    content clob,--文章内容
+    add_date date--发布日期
+) tablespace cmccuser;
+create sequence news_seq minvalue 1 maxvalue 9999999999 start with 1 increment by 1;
+
+create table news_category (--新闻分类
+    category_id number(6) primary key,--分类ID
+    category_name varchar(100),--分类名称
+    type number(2),--类型 --options=1:新闻,2:关于我们,3:广告位 --formType=select --search=true
+    def_news_type number(6)--默认配置类型 --options=1:文章,2:图文链接 --formType=select
+) tablespace cmccuser;
+create sequence news_category_seq minvalue 1 maxvalue 999999 start with 10000 increment by 1;
+
+insert into news_category (category_id,category_name,type,def_news_type) values (1,'首页banner',3,2);
+
 -----------------------------
 -----------------------------
 
@@ -469,22 +493,3 @@ create table notification_tag (--消息提醒标签
 ) tablespace cmccuser;
 
 
-create table news (--新闻
-    news_id number(10) primary key,--自增ID
-    title varchar(200),--新闻标题
-    summary varchar(400),--新闻摘要
-    linkurl varchar(200),--跳转链接
-    image varchar(200),--图片
-    category_id number(5),--分类
-    content clob,--文章内容
-    add_date date--发布日期
-) tablespace cmccuser;
-create sequence news_seq minvalue 1 maxvalue 9999999999 start with 1 increment by 1;
-
-
-create table news_category (
-    category_id number(6) primary key,--分类ID
-    category_name number(10),--分类名称
-    type number(2)--类型 --options=1:新闻,2:关于我们,3:广告位 --formType=select
-) tablespace cmccuser;
-create sequence news_seq minvalue 1 maxvalue 999999 start with 10000 increment by 1;

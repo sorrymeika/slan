@@ -6,7 +6,7 @@ var user = vm.createModel({
     defaultData: util.store('user')
 });
 
-user.on('datachanged', function() {
+user.on('datachanged', function () {
 
     util.store('user', this.data);
 });

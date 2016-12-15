@@ -22,6 +22,26 @@ module.exports = Activity.extend({
             business_id: business_id
         });
 
+        var units = business_id == '100004' ? [{
+            name: '福州自来水有限公司',
+            value: '1020'
+        }, {
+            name: '泉州自来水有限公司',
+            value: '3326'
+        }, {
+            name: '石狮自来水有限公司',
+            value: '3329'
+        }, {
+            name: '晋江自来水有限公司',
+            value: '3330'
+        }] : business_id == '100005' ? [{
+            name: '福建省电力',
+            value: '1008'
+        }] : [{
+            name: '龙岩数字广电',
+            value: '5058'
+        }];
+
         model.back = function () {
             self.back(self.swipeRightBackAction)
         }
@@ -31,6 +51,16 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         Promise.all([business.queryBusiness(ubid), this.waitLoad()]).then(function (results) {
+            var res = results[0];
+            model.set({
+                account: res.account,
+                data: res.data,
+                unit: util.first(units, 'value', res.account.unitno).name
+            });
+
+            if (!res.result) {
+                Toast.showToast(res.message);
+            }
 
             self.bindScrollTo(model.refs.main);
 

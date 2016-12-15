@@ -97,7 +97,6 @@
         "core/touch": "../webresource/m/js/core/touch",
         "widget/scrollview": "../webresource/m/js/widget/scrollview",
         "widget/scroll": "../webresource/m/js/widget/scroll",
-        "widget/tip": "../webresource/js/widget/tip",
         "widget/popup": "../webresource/js/widget/popup",
         "widget/loader": "../webresource/m/js/widget/loader",
         "widget/offline": "../webresource/m/js/widget/offline",

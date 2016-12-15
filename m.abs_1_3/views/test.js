@@ -22,7 +22,7 @@ module.exports = Activity.extend({
 
         this.bindScrollTo($main);
 
-        model2.Global.set({
+        model2.global.set({
             title: 'sssss',
 
             list: [{
@@ -33,7 +33,7 @@ module.exports = Activity.extend({
         })
 
         setTimeout(function () {
-            model2.Global.set({
+            model2.global.set({
                 title: 'aaaa'
             });
 

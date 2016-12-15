@@ -96,28 +96,35 @@
                     reader.readAsDataURL(file);
                 }
             },
-            callback: function (editor, $w, url, state) {
+            callback: function (editor, $w, urls, state) {
 
                 if (state == "SUCCESS") {
-                    //显示图片计数+1
-                    Upload.showCount++;
-                    var $img = $("<img src='" + editor.options.imagePath + url + "' class='edui-image-pic' />"),
-                        $item = $("<div class='edui-image-item edui-image-upload-item'><div class='edui-image-close'></div></div>").append($img);
 
-                    if ($(".edui-image-upload2", $w).length < 1) {
-                        $(".edui-image-content", $w).append($item);
-
-                        Upload.render(".edui-image-content", 2)
-                            .config(".edui-image-upload2");
-                    } else {
-                        $(".edui-image-upload2", $w).before($item).show();
+                    if (!Array.isArray(urls)) {
+                        urls = [urls];
                     }
 
-                    $img.on("load", function () {
-                        Base.scale(this, 120);
-                        Base.close($(this));
-                        $(".edui-image-content", $w).focus();
-                    });
+                    urls.forEach(function (url) {
+                        //显示图片计数+1
+                        Upload.showCount++;
+                        var $img = $("<img src='" + editor.options.imagePath + url + "' class='edui-image-pic' />"),
+                            $item = $("<div class='edui-image-item edui-image-upload-item'><div class='edui-image-close'></div></div>").append($img);
+
+                        if ($(".edui-image-upload2", $w).length < 1) {
+                            $(".edui-image-content", $w).append($item);
+
+                            Upload.render(".edui-image-content", 2)
+                                .config(".edui-image-upload2");
+                        } else {
+                            $(".edui-image-upload2", $w).before($item).show();
+                        }
+
+                        $img.on("load", function () {
+                            Base.scale(this, 120);
+                            Base.close($(this));
+                            $(".edui-image-content", $w).focus();
+                        });
+                    })
 
                 } else {
                     currentDialog.showTip(state);
@@ -141,7 +148,7 @@
         uploadTpl: '<div class="edui-image-upload%%">' +
         '<span class="edui-image-icon"></span>' +
         '<form class="edui-image-form" method="post" enctype="multipart/form-data" target="up">' +
-        '<input style=\"filter: alpha(opacity=0);\" class="edui-image-file" type="file" hidefocus name="upfile" accept="image/gif,image/jpeg,image/png,image/jpg,image/bmp"/>' +
+        '<input style=\"filter: alpha(opacity=0);\" class="edui-image-file" multiple="multiple" type="file" hidefocus name="upfile" accept="image/gif,image/jpeg,image/png,image/jpg,image/bmp"/>' +
         '</form>' +
 
         '</div>',

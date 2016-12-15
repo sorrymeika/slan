@@ -242,7 +242,6 @@ var TimePicker = model.ViewModel.extend({
         if (!time) {
             return this.clearInput();
         }
-        if (time == this.$input.val()) return;
         if (typeof time == 'number' || (typeof time == 'string' && /^\d+$/.test(time))) {
             time = new Date(time);
         } else if (typeof time == 'string') {
@@ -271,6 +270,7 @@ var TimePicker = model.ViewModel.extend({
     },
 
     _update: function (isUpdate) {
+
         if (isUpdate !== false) {
             var data = this.data;
             var time = data.yyyy != '----'

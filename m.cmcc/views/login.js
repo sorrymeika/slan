@@ -13,8 +13,9 @@ var auth = require('logical/auth');
 var Http = require('core/http');
 
 module.exports = Activity.extend({
+    defBackUrl: null,
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         self.swipeRightBackAction = null;
@@ -23,11 +24,11 @@ module.exports = Activity.extend({
             smsTime: 0
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.login = function() {
+        model.login = function () {
             if (!this.get('agree')) {
                 Toast.showToast('请先同意《八闽生活用户使用协议》！');
                 return;
@@ -47,35 +48,7 @@ module.exports = Activity.extend({
 
             Loader.showLoading();
 
-            /*
-            new Http({
-                url: '/user/login',
-                params: auth.encryptParams({
-                    account: phoneNo,
-                    password: auth.md5(password),
-                    token: "xxx"
-                })
-
-            }).request()
-                .then(function(res) {
-                    auth.setAuthToken(res.data.tk);
-
-                    delete res.data.tk;
-
-                    auth.setUser(res.data);
-
-                    self.back('/');
-
-                }).catch(function(e) {
-                    Toast.showToast(e.message);
-
-                }).then(function() {
-                    Loader.hideLoading();
-                });
-         */
-
-
-            bridge.cmcc.login(phoneNo, password, "sms", function(res) {
+            bridge.cmcc.login(phoneNo, password, "sms", function (res) {
                 if (res.success) {
 
                     new Http({
@@ -87,7 +60,7 @@ module.exports = Activity.extend({
                         })
 
                     }).request()
-                        .then(function(res) {
+                        .then(function (res) {
                             auth.setAuthToken(res.data.tk);
 
                             delete res.data.tk;
@@ -96,10 +69,10 @@ module.exports = Activity.extend({
 
                             self.back('/');
 
-                        }).catch(function(e) {
+                        }).catch(function (e) {
                             Toast.showToast(e.message);
 
-                        }).then(function() {
+                        }).then(function () {
                             Loader.hideLoading();
                         });
 
@@ -110,7 +83,7 @@ module.exports = Activity.extend({
             });
         }
 
-        model.sendSms = function() {
+        model.sendSms = function () {
             if (this.data.smsTime > 0) return;
 
             var phoneNo = this.data.phoneNo;
@@ -124,7 +97,7 @@ module.exports = Activity.extend({
 
             this.leftTime = Date.now() + 60 * 1000;
 
-            this.timer = setInterval(function() {
+            this.timer = setInterval(function () {
 
                 var left = Math.round((model.leftTime - Date.now()) / 1000);
 
@@ -150,17 +123,17 @@ module.exports = Activity.extend({
 
         self.bindScrollTo(model.refs.main);
 
-        this.onResult('agree_licence', function() {
+        this.onResult('agree_licence', function () {
             model.set('agree', true);
         });
 
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestory: function() {
+    onDestory: function () {
         this.model.destroy();
     }
 });

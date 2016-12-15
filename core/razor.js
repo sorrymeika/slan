@@ -205,6 +205,12 @@ var parse = function (templateStr) {
 
                     str += "';" + code[1] + "__+='";
                     i += code.match.length;
+                } else if (c == '(') {
+                    m = /\(("(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\((?:\((\(.*?\)|.)*?\)|[^\)])*\)|[^)])+\)/.exec(codeStr);
+
+                    str += "'+" + m[0] + "+'";
+                    i += m[0].length;
+
                 } else {
                     var m = rcmd.exec(codeStr);
 

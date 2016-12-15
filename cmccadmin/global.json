@@ -101,7 +101,6 @@
         "components/page": "../webresource/js/components/page",
         "widget/toast": "../webresource/js/widget/toast",
         "widget/popup": "../webresource/js/widget/popup",
-        "widget/tip": "../webresource/js/widget/tip",
         "entry": "entry"
     }
 }

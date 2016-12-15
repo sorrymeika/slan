@@ -5,7 +5,7 @@ var Promise = require('promise');
 var extend = ['url', 'check', 'method', 'contentType', 'headers', 'dataType', 'xhrFields', 'beforeSend', 'success', 'error', 'complete'];
 
 //@options={url:'', params: {}, method:"POST", dataType:"json", headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }, xhrFields: { withCredentials: true }}
-var Http = function(options) {
+var Http = function (options) {
     $.extend(this, _.pick(options, extend));
 
     this.params = $.extend({}, this.params, options.params);
@@ -13,11 +13,11 @@ var Http = function(options) {
     this.setUrl(this.url);
 }
 
-Http.url = function(url) {
+Http.url = function (url) {
     return /^http\:\/\//.test(url) ? url : (this.prototype.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
 }
 
-Http.post = function(url, params) {
+Http.post = function (url, params) {
 
     return new Http({
         url: url,
@@ -26,7 +26,7 @@ Http.post = function(url, params) {
     }).request();
 }
 
-Http.get = function(url, params) {
+Http.get = function (url, params) {
 
     return new Http({
         url: url,
@@ -46,12 +46,12 @@ Http.prototype = {
     error: _.noop,
     success: _.noop,
 
-    check: function(res) {
+    check: function (res) {
         var flag = !!(res && res.success);
         return flag;
     },
 
-    createError: function(errorCode, errorMsg) {
+    createError: function (errorCode, errorMsg) {
         return {
             success: false,
             code: errorCode,
@@ -59,7 +59,7 @@ Http.prototype = {
         }
     },
 
-    setHeaders: function(key, val) {
+    setHeaders: function (key, val) {
         var attrs;
         if (!val)
             attrs = key
@@ -74,7 +74,7 @@ Http.prototype = {
         return this;
     },
 
-    setParam: function(key, val) {
+    setParam: function (key, val) {
         var attrs;
         if (!val)
             attrs = key
@@ -89,35 +89,35 @@ Http.prototype = {
         return this;
     },
 
-    getParam: function(key) {
+    getParam: function (key) {
         if (key) return this.params[key];
         return this.params;
     },
 
-    clearParams: function() {
+    clearParams: function () {
         this.params = {};
         return this;
     },
 
-    setUrl: function(url) {
+    setUrl: function (url) {
         this.url = /^http\:\/\//.test(url) ? url : (this.baseUri.replace(/\/$/, '') + '/' + url.replace(/^\//, ''));
         return this;
     },
 
-    request: function(resolve, reject) {
+    request: function (resolve, reject) {
         var self = this;
 
         if (typeof resolve === 'function') {
             return self.request().then(resolve, reject);
 
         } else
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
 
                 self._request(resolve, reject);
             });
     },
 
-    _request: function(resolve, reject) {
+    _request: function (resolve, reject) {
         var that = this;
 
         if (that.beforeSend && that.beforeSend() === false) return;
@@ -127,7 +127,7 @@ Http.prototype = {
 
         var postData = {};
 
-        Object.keys(that.params).forEach(function(key) {
+        Object.keys(that.params).forEach(function (key) {
             (that.params[key] !== undefined) && (postData[key] = that.params[key]);
         });
 
@@ -146,19 +146,22 @@ Http.prototype = {
             type: that.method,
             dataType: that.dataType,
             cache: false,
-            error: function(xhr) {
+            error: function (xhr) {
                 var err;
                 try {
                     err = JSON.parse(xhr.responseText);
-                } catch (e) {}
+                } catch (e) { }
 
                 !err && (err = that.createError(10001, '网络错误'));
+
+                that.complete(err);
 
                 that.error(err, xhr);
 
                 reject && reject(err, xhr);
             },
-            success: function(res, status, xhr) {
+            success: function (res, status, xhr) {
+                that.complete(res);
 
                 if (!that.check || that.check(res)) {
                     that.success(res, status, xhr);
@@ -173,16 +176,15 @@ Http.prototype = {
                 }
             },
 
-            complete: function() {
+            complete: function () {
                 that._xhr = null;
                 that.isLoading = false;
-                that.complete();
             }
         });
         return this;
     },
 
-    abort: function() {
+    abort: function () {
         if (this._xhr) {
             this._xhr.abort();
             this._xhr = null;

@@ -12,7 +12,7 @@ var business = require('logical/business');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var waterData = [{
@@ -29,42 +29,67 @@ module.exports = Activity.extend({
             elecData: elecData
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.modify = function(item) {
+        model.modify = function (item) {
             self.forward('/life/addbill/' + item.business_id + "?modify=true", {
                 data: item
             });
             return false;
         }
 
-        model.delete = function(item) {
+        model.more = function () {
+            popup.options({
+                options: [{
+                    text: '水费',
+                    click: function () {
+                        this.hide();
+
+                        self.forward('/life/addbill/100004');
+                    }
+                }, {
+                    text: '电费',
+                    click: function () {
+                        this.hide();
+
+                        self.forward('/life/addbill/100005');
+                    }
+                }, {
+                    text: '取消',
+                    click: function () {
+                        this.hide();
+                    }
+                }]
+            })
+        }
+
+        model.delete = function (item) {
             popup.confirm({
                 title: '温馨提醒',
                 content: '确定要删除该帐号吗',
                 confirmText: '确定删除',
-                confirmAction: function() {
+                confirmAction: function () {
                     if (loader.isLoading) return;
                     loader.showLoading();
 
                     var cf = this;
 
-                    business.deleteUserBusiness(item.ubid).then(function(res) {
+                    business.deleteUserBusiness(item.ubid).then(function (res) {
                         loadBusiness();
 
-                    }).catch(function(e) {
+                    }).catch(function (e) {
                         Toast.showToast(e.message);
 
-                    }).then(function() {
+                    }).then(function () {
                         loader.hideLoading();
 
                         cf.hide();
                     });
                 },
                 cancelText: '取消',
-                cancelAction: function() {
+                cancelAction: function () {
                 }
             });
             return false;
@@ -83,9 +108,9 @@ module.exports = Activity.extend({
                 business_id: 100005
             }];
 
-            Promise.all([business.getUserBusiness(0), self.waitLoad()]).then(function(results) {
+            Promise.all([business.getUserBusiness(0), self.waitLoad()]).then(function (results) {
 
-                results[0].data.forEach(function(item) {
+                results[0].data.forEach(function (item) {
                     switch (item.business_id) {
                         case 100004:
                             if (!waterData[0].ubid) {
@@ -109,10 +134,10 @@ module.exports = Activity.extend({
                     elecData: elecData
                 })
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
 
-            }).then(function() {
+            }).then(function () {
                 loader.hideLoading();
             });
         }
@@ -123,11 +148,11 @@ module.exports = Activity.extend({
         self.bindScrollTo(model.refs.main);
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestory: function() {
+    onDestory: function () {
         this.model.destroy();
     }
 });

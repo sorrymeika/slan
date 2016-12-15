@@ -12,7 +12,7 @@ var popup = require('widget/popup')
 
 module.exports = Page.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var business_id = this.route.params.id;
         var type = this.route.params.type;
@@ -51,6 +51,14 @@ module.exports = Page.extend({
             },
             100005: {
                 title: '电费',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
+            100043: {
+                title: '推送139邮箱提醒',
                 types: [{
                     text: '图文链接',
                     value: -1,
@@ -144,7 +152,7 @@ module.exports = Page.extend({
             types: data.types
         });
 
-        model.changeType = function() {
+        model.changeType = function () {
             location.hash = '/notification/easy/' + business_id + '/' + this.refs.type.value
         }
 
@@ -203,10 +211,10 @@ module.exports = Page.extend({
 
             buttons: [{
                 value: '推送',
-                click: function() {
+                click: function () {
                     var feature = {};
 
-                    features.forEach(function(item) {
+                    features.forEach(function (item) {
                         feature[item.field] = form.get(item.field);
                     });
 
@@ -216,29 +224,29 @@ module.exports = Page.extend({
 
                     console.log(feature);
 
-                    this.model.next(function() {
-                        form.submit(function() {
+                    this.model.next(function () {
+                        form.submit(function () {
                             Toast.showToast('添加成功');
                             form.reset();
                             history.back();
                             self.setResult('notificationchange');
-                        }, function(e) {
+                        }, function (e) {
                             Toast.showToast(e.message);
                         });
                     });
                 }
             }, {
                 value: '取消',
-                click: function() {
+                click: function () {
                     history.back();
                 }
             }]
         });
         form.$el.appendTo(model.refs.main);
     },
-    onShow: function() {
+    onShow: function () {
 
-        this.model.next(function() {
+        this.model.next(function () {
             this.refs.type.value = this.get('currentType.value');
         })
     }

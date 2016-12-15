@@ -29,6 +29,8 @@
 .hm_idx__head { position: relative; width: 100%; height: 1.54rem; overflow: hidden; background: url(../images/bg-life.png) no-repeat; background-size: 100%; padding-top: .28rem; }
 .hm_idx__head .hm-yunmi-rem { width: 0.99rem; height: 0.83rem; }
 .hm_idx__head .num { position: absolute; right: .08rem; top: .08rem; display: block; width: 20px; height: 20px; border-radius: 50%; background: #ff0000; color: #fff; font-size: 12px; line-height: 20px; }
+.hm_idx__banner { min-height: .58rem; margin-top: 10px; }
+.hm_idx__banner img { min-height: .58rem; display: block; max-height: .8rem; }
 .hm_idx__life { padding-top: 1px; margin-bottom: 20px; }
 .hm_idx__life .item { background: #fff; border-top: 2px solid #f2f2f2; padding: 8px 10px; margin-top: 10px; position: relative; }
 .hm_idx__life .item .show:before { -webkit-transform: rotate(180deg); transform: rotate(180deg); }
@@ -163,6 +165,8 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 .pq_publish__quan .btn_add { font-size: 14px; border: 1px solid #ccc; color: #999; background: #fff; height: 28px; padding: 0 14px; border-radius: 14px; }
 .pq_publish__img > img { width: 46px; height: 46px; margin-left: 10px; }
 .qn_publish__img > img { width: 46px; height: 46px; margin-left: 10px; }
+
+.pq_article__con img { max-width: 3rem; margin: 0 auto; }
 
 .pq_article__action { }
 .pq_article__action .cir_xl { border: 1px solid #ddd; padding-top: 10px; }

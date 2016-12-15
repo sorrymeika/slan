@@ -43,7 +43,7 @@ module.exports = Activity.extend({
                 })
             }
 
-            if (model.get('data.quan').is_follow)
+            if (model.get('follow.is_follow'))
                 popup.confirm({
                     content: '确定不关注该圈了吗？',
                     confirmAction: function() {
@@ -119,7 +119,7 @@ module.exports = Activity.extend({
             commentsLoader.reload();
         }
 
-        Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function() {}), this.waitLoad()]).then(function(results) {
+        Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function() { }), this.waitLoad()]).then(function(results) {
             var res = results[0];
             var data = res.data;
 

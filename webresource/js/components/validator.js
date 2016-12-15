@@ -29,12 +29,22 @@
         }
     };
 
+    exports.KEYS = Object.keys(Single.prototype);
+
+    exports.prototype.each = function (fn) {
+        var options = this.options;
+
+        for (var key in options) {
+            fn(key, options[key]);
+        }
+    };
+
     exports.prototype.set = function (data) {
         this.data = data;
     };
 
     exports.prototype.valid = function (single, value) {
-        
+
         if (!single) return { success: true };
         if ((value === '' || value == null) && (single.emptyAble === false || ($.isFunction(single.emptyAble) && !single.emptyAble())))
             return { success: false, msg: single.emptyText };
@@ -52,25 +62,37 @@
             return { success: true, msg: typeof single.success == 'function' ? single.success.call(this, value) : single.success };
     };
 
-    exports.prototype.validate = function (key) {
+    exports.prototype.validate = function (keys) {
         var attrs,
-            single;
+            single,
+            options = this.options,
+            data = this.data;
 
-        if (key) {
-            return this.valid(this.options[key], this.data[key]);
+        if (typeof keys == 'string') {
 
+            return this.valid(options[keys], data[keys]);
         } else {
-            var result = {
-                success: true,
-                result: {}
-            },
-            res;
 
-            for (var key in this.options) {
-                res = this.valid(this.options[key], this.data[key]);
+            var res,
+                key,
+                result = {
+                    success: true,
+                    result: {}
+                };
+
+            if (!Array.isArray(keys)) {
+                keys = Object.keys(options);
+            }
+
+            for (var i = 0, length = keys.length; i < length; i++) {
+                key = keys[i];
+
+                res = this.valid(options[key], data[key]);
                 result.result[key] = res;
+
                 if (result.success) result.success &= res.success;
             }
+
             return result;
         }
     }

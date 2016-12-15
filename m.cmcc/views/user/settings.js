@@ -42,6 +42,8 @@ module.exports = Activity.extend({
                     confirmAction: function() {
                         this.hide();
 
+                        self.setResult('LOGOUT');
+
                         userModel.set(null);
 
                         auth.clearAuth();

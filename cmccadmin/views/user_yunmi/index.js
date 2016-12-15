@@ -35,7 +35,10 @@ var grid = this.grid = new Grid({
                                 beforeSend: function () {
                                 },
                                 data: {
-                                    start_start_date: {
+                                    account: {
+label: '用户手机'
+},
+start_start_date: {
 type:"calendar",
 label: '时段开始时间 从'
 },end_start_date: {
@@ -59,6 +62,10 @@ width: 5
                                     text: "用户ID",
                                     bind: "user_id",
 width: 5
+                                },{
+                                    text: "用户手机",
+                                    bind: "account",
+width: 10
                                 },{
                                     text: "云米数量",
                                     bind: "amount",

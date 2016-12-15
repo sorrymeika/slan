@@ -41,6 +41,14 @@
         "/notification/index": "/notification/notification",
         "/notification/add": "/notification/add_notification",
         "/notification/easy/{id:\\d+}/{type:-*\\d+}": "/notification/add_notifyeasy",
-        "/notification/easy/{id:\\d+}": "/notification/add_notifyeasy"
+        "/notification/easy/{id:\\d+}": "/notification/add_notifyeasy",
+
+        "/news/index": "/news/news",
+        "/news/add": "/news/add_news",
+        "/news/update/{id:\\d+}": "/news/update_news",
+        "/news_category/index": "/news_category/news_category",
+        "/news_category/add": "/news_category/add_news_category",
+        "/news_category/update/{id:\\d+}": "/news_category/update_news_category"
+
     }
 }

@@ -6,7 +6,7 @@ var Loading = require('../widget/loader');
 var Slider = require('../widget/slider');
 var vm = require('core/model2');
 var Model = vm.Model;
-var Global = vm.Global;
+var Global = vm.global;
 var Scroll = require('../widget/scroll');
 var barcode = require('../utils/barcode');
 var animation = require('animation');
@@ -714,13 +714,13 @@ module.exports = Activity.extend({
         }
 
         setTimeout(function() {
-            self.guideSlider && self.guideSlider._adjustWidth();
+            self.guideSlider && self.guideSlider.adjustWidth();
 
         }, 0);
 
         if (self.model.data.tab == 0) {
             self.slider && setTimeout(function() {
-                self.slider._adjustWidth();
+                self.slider.adjustWidth();
             }, 400);
 
             self.scroll && self.scroll.get('.js_shop').imageLazyLoad();
