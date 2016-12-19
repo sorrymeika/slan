@@ -138,7 +138,7 @@ module.exports = Activity.extend({
         chat.readMessage(this.route.params.id);
     },
 
-    onDestory: function() {
+    onDestroy: function() {
         var personId = this.route.params.id;
         chat.off('sendresult:' + personId, this.sendResult)
             .off('message:' + personId, this.newMessage);

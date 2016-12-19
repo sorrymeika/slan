@@ -105,6 +105,9 @@ function startApp(routes, resourceMapping) {
                 }, {
                     title: '139邮箱提醒',
                     url: '/notification/easy/100043'
+                }, {
+                    title: '和多号',
+                    url: '/notification/easy/100046'
                 }]
             }, {
                 title: '新闻/广告位管理',

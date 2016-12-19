@@ -16,6 +16,8 @@ module.exports = Activity.extend({
             title: '标题'
         });
 
+        model.delegate = this;
+
         model.back = function () {
             self.back(self.swipeRightBackAction)
         }
@@ -41,7 +43,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

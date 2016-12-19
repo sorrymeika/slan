@@ -243,7 +243,7 @@
 
             return that;
         },
-        destory: function () {
+        destroy: function () {
             this.$el.off($.fx.transitionEnd);
             this.$click.off('click').off('tap');
             this.$mask.remove();

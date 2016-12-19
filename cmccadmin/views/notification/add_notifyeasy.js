@@ -65,6 +65,14 @@ module.exports = Page.extend({
                     feature: []
                 }]
             },
+            100046: {
+                title: '推送和多号',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
             100022: {
                 title: '推送娱乐提醒',
                 types: [{

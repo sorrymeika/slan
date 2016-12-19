@@ -432,7 +432,7 @@ Loader.prototype = {
         return this;
     },
 
-    destory: function () {
+    destroy: function () {
         this.abort();
         this.disableAutoRefreshing();
         this.$error && this.$error.off('tap', '.js_reload', this.reload);

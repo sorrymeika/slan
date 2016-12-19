@@ -32,8 +32,7 @@ function setActivityReferrer(activedInstance, route) {
 
     if (activedInstance.autosetBackUrl) {
         backUrl = route.query.from || activedInstance.referrer || activedInstance.defBackUrl;
-
-        getPath(backUrl) != route.path.toLowerCase() && (activedInstance.swipeRightBackAction = backUrl);
+        backUrl && getPath(backUrl) != route.path.toLowerCase() && (activedInstance.swipeRightBackAction = backUrl);
     }
 }
 
@@ -51,7 +50,6 @@ function fuckActivity(activity) {
     setActivityReferrer(activity, this.route);
     setActivityRoute(activity, this.route);
 }
-
 
 var ActivityManager = {
 

@@ -10,7 +10,7 @@ util.style('.calendar.curr{z-index:5001;width:280px;}.calendar{height:22px;paddi
         .calendar-icon em {display: inline-block;height: 0px;overflow: hidden;position: absolute;top: 0px;left: 0px;  border-top: 4px solid #000;border-right: 4px solid #fff;border-left: 4px solid #fff;}\
         .calendar-up .calendar-icon em {border-top: 4px solid #fff;border-bottom: 4px solid #000;}\
         .calendar-up,.calendar-down {cursor:pointer;}\
-        .calendar-wrap {top:0;left:0;position:absolute;border:1px solid #cdcdcd;background:#fff;overflow:hidden;}\
+        .calendar-wrap {top:-90px;left:0;position:absolute;border:1px solid #cdcdcd;background:#fff;overflow:hidden;}\
         .calendar-bd {width:35px;text-align:center;float:left;}\
         .calendar-bd i { display: block; height: ' + optionHeight + 'px;font-style:normal; cursor: pointer; }\
         .calendar-con i { cursor: move; }\
@@ -127,7 +127,7 @@ var TimePicker = model.ViewModel.extend({
             startY = e.clientY;
             con = $(e.currentTarget).children('div');
             topKey = $(e.currentTarget).attr('key');
-            startMarginTop = self.get(topKey);
+            startMarginTop = self.get(topKey) || 0;
 
             dragStart = true;
             moved = false;
@@ -137,8 +137,16 @@ var TimePicker = model.ViewModel.extend({
                 var dy = e.clientY - startY;
                 moved = true;
 
-                self.set(topKey, Math.max(0, startMarginTop - dy));
+                self.set(topKey, Math.min(e.currentTarget.firstElementChild.offsetHeight - 100, Math.max(0, startMarginTop - dy)));
             }
+
+        }).on('mousewheel', '.calendar-con', function (e) {
+            var deltaY = e.deltaY;
+            var key = $(e.currentTarget).attr('key');
+
+            self.set(key, Math.min(e.currentTarget.firstElementChild.offsetHeight - 100, Math.max(0, (self.get(key) || 0) + deltaY)));
+
+            return false;
 
         }).on('click', function (e) {
             dragStart = false;
@@ -154,8 +162,6 @@ var TimePicker = model.ViewModel.extend({
             yyyy: util.pad(year, 4),
             yearTop: (this.data.years.indexOf(year) - 4) * optionHeight
         });
-
-        console.log(1);
 
         return this._syncDays()._update(update);
     },
@@ -242,10 +248,11 @@ var TimePicker = model.ViewModel.extend({
         if (!time) {
             return this.clearInput();
         }
+
         if (typeof time == 'number' || (typeof time == 'string' && /^\d+$/.test(time))) {
             time = new Date(time);
         } else if (typeof time == 'string') {
-            time = Date.parse(time);
+            time = new Date(Date.parse(time));
         }
 
         return this.setYear(time.getFullYear(), false)

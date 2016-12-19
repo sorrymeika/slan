@@ -49,6 +49,66 @@ module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
+        var exists = function (i) {
+            console.log('exists', i);
+            return i <= 599 ? true : false;
+        }
+
+        var length = 1003;
+
+        var rangeStart = 1;
+        var rangeEnd = length - 2;
+        var cursor = parseInt((rangeEnd - rangeStart) / 2);
+        var result = 0;
+
+        while (true) {
+
+            if (!exists(cursor)) {
+
+                if (exists(--cursor)) {
+                    result = cursor + 1;
+                    break;
+
+                } else if (rangeStart == cursor) {
+                    result = cursor;
+                    break;
+                }
+                rangeEnd = cursor - 1;
+
+            } else {
+                if (!exists(++cursor)) {
+                    result = cursor;
+                    break;
+
+                } else if (cursor == rangeEnd) {
+                    result = cursor;
+                    break;
+                }
+
+                rangeStart = cursor + 1;
+            }
+
+            if (rangeEnd == rangeStart) {
+                console.log('match', rangeStart)
+                result = exists(rangeStart) ? rangeStart + 1 : rangeStart;
+                break;
+
+            } else if (rangeEnd < rangeStart) {
+                console.log('error', rangeStart, rangeEnd)
+                break;
+            }
+
+            cursor = rangeStart + parseInt((rangeEnd - rangeStart) / 2);
+            console.log("cursor:", rangeStart, rangeEnd, cursor)
+
+            if (cursor <= 0) {
+                console.log('error match')
+                break;
+            }
+        }
+
+        console.log(result, cursor);
+
 
         var photoViewer = this.photoViewer = new PhotoViewer();
 
@@ -75,6 +135,8 @@ module.exports = Activity.extend({
             recommendIndex: 0,
             business: businessGroup
         });
+
+        model.delegate = this;
 
         model.getUserShowName = friends.getUserShowName;
 
@@ -127,12 +189,11 @@ module.exports = Activity.extend({
                 self.forward(url);
             }
         }
-        model.scan = this.scan.bind(this);
-        model.menu = this.menu.bind(this);
         model.exitMenu = function (e) {
             if ($(e.target).hasClass('hm_home'))
                 self.exitMenu();
         }
+
         model.backup = function () {
             self.forward('/contact/backup');
             return false;
@@ -583,7 +644,7 @@ module.exports = Activity.extend({
         this.exitMenu();
     },
 
-    onDestory: function () {
-        this.model.destory();
+    onDestroy: function () {
+        this.model.destroy();
     }
 });

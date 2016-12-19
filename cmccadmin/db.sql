@@ -431,9 +431,6 @@ create table user_business (
 create sequence user_business_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
------------------------------
---<<2016-11-22 up to date here
------------------------------
 
 create table news (--新闻
     news_id number(10) primary key,--自增ID
@@ -461,6 +458,13 @@ create sequence news_category_seq minvalue 1 maxvalue 999999 start with 10000 in
 
 insert into news_category (category_id,category_name,type,def_news_type) values (1,'首页banner',3,2);
 
+
+-----------------------------
+--<<2016-12-16 up to date here
+-----------------------------
+
+insert into news_category (category_id,category_name,type,def_news_type) values (2,'服务大厅-生活提醒',3,2);
+insert into news_category (category_id,category_name,type,def_news_type) values (3,'服务大厅-通信提醒',3,2);
 -----------------------------
 -----------------------------
 

@@ -2,7 +2,7 @@
     <div class="head_back" sn-tap="this.back()"></div>
     <div class="head_title" sn-tap="desc=!desc">{title}</div>
 </header>
-<div class="main bs_notify{business_id==100001?' has_footer':''}" ref="main">
+<div class="main bs_notify{hasFooter?' has_footer':''}" ref="main">
     <div class="bs_notify__item" sn-repeat="item in data|orderBy:send_date {desc}" sn-tap="this.goToDetail(item)">
         <div class="con">
             <div sn-if="item.type==-1">
@@ -70,7 +70,7 @@
         </div>
     </div>
 </div>
-<footer class="bs_notify__footer pl_m pr_m" sn-if="[100001,100003,100002,100004,100005,100026,100022,100043].indexOf(parseInt(business_id))!=-1">
+<footer class="bs_notify__footer pl_m pr_m" sn-if="hasFooter">
     <button sn-if="business_id==100001" class="btn_l fs_l" sn-tap="this.enterShop()">进入福建移动营业厅</button>
     <button sn-else-if="business_id==100026" class="btn_l fs_l" sn-tap="this.enterHjb()">进入和聚宝</button>
     <button sn-else-if="business_id==100022" class="btn_l fs_l" sn-tap="this.enterEnt()">进入娱乐</button>

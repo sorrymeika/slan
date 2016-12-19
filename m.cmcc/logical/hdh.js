@@ -4,6 +4,9 @@ var Http = require('core/http');
 var Event = require('core/event');
 var Promise = require('promise');
 
+var hdhModel = require('models/hdh');
+
+
 var formatResult = function (res) {
     var matchCode;
     if (res.success) {
@@ -20,7 +23,7 @@ var formatResult = function (res) {
 var post = function (url, data) {
     return new Http({
         url: url,
-        data: data,
+        params: data,
         complete: function (res) {
             formatResult(res);
         }
@@ -30,7 +33,16 @@ var post = function (url, data) {
 var hdh = Event.mixin({
 
     getInfo: function () {
-        return post('/user_hdh/getInfo');
+        return post('/user_hdh/getInfo').then(function (res) {
+            hdhModel.getSubPhoneList()
+                .update(true, res.data.subphonelist, 'subphone');
+
+            return res;
+        });
+    },
+
+    subinfo: function () {
+
     },
 
     getPoolsub: function () {

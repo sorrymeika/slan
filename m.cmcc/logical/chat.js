@@ -2,6 +2,7 @@ var util = require('util');
 var vm = require('core/model2');
 var Http = require('core/http');
 var Event = require('core/event');
+var Toast = require('widget/toast');
 var Promise = require('promise');
 
 var messagesList = require('models/messagesList');
@@ -23,14 +24,14 @@ var MESSAGETYPE = {
 var _gid = 1;
 
 function keep() {
-    Http.post("/messages/keep").then(function(res) {
+    Http.post("/messages/keep").then(function (res) {
         var messages = res.data;
 
         if (messages && messages.length) {
 
             var hasNewNotification = false;
 
-            messages.forEach(function(msg) {
+            messages.forEach(function (msg) {
 
                 switch (msg.type) {
                     case MESSAGETYPE.NOTIFICATION:
@@ -51,8 +52,14 @@ function keep() {
 
         setTimeout(keep, 1000);
 
-    }).catch(function() {
-        setTimeout(keep, 10000);
+    }).catch(function (e) {
+        if (e.message == '无权限') {
+            Application.back('/login');
+
+            setTimeout(keep, 60000);
+        } else {
+            setTimeout(keep, 10000);
+        }
     });
 }
 keep();
@@ -60,16 +67,16 @@ keep();
 var chat = Event.mixin({
     MESSAGETYPE: MESSAGETYPE,
 
-    readMessage: function(friend_id) {
+    readMessage: function (friend_id) {
         var record = messagesList.getFriendLastMessage(friend_id);
         if (record) {
             record.set('unread', 0);
         }
     },
 
-    formatMessages: function(messages) {
+    formatMessages: function (messages) {
 
-        messages.forEach(function(msg) {
+        messages.forEach(function (msg) {
             switch (msg.type) {
                 case MESSAGETYPE.SEND_YUNMI:
                 case MESSAGETYPE.GET_SEND_YUNMI:
@@ -83,7 +90,7 @@ var chat = Event.mixin({
         return messages;
     },
 
-    record: function(is_send, friend_id, msg) {
+    record: function (is_send, friend_id, msg) {
 
         var records = messagesList.getList();
         var record = records.find('user_id', friend_id);
@@ -153,27 +160,27 @@ var chat = Event.mixin({
         }
     },
 
-    getMessages: function(friend_id, last_msg_id) {
+    getMessages: function (friend_id, last_msg_id) {
 
         return Http.post("/messages/getMessages", {
             friend_id: friend_id,
             last_msg_id: last_msg_id || 0,
             type: 0
 
-        }).then(function(res) {
+        }).then(function (res) {
 
-            res.data.sort(function(a, b) {
+            res.data.sort(function (a, b) {
                 return a.msg_id < b.msg_id ? -1 : a.msg_id > b.msg_id ? 1 : 0
             });
             return res;
         });
     },
 
-    getGid: function() {
+    getGid: function () {
         return ++_gid;
     },
 
-    send: function(params) {
+    send: function (params) {
         params = {
             to_id: params.to_id,
             content: params.content,
@@ -184,7 +191,7 @@ var chat = Event.mixin({
 
         this.record(true, params.to_id, params);
 
-        return Http.post("/messages/sendMessage", params).then(function(res) {
+        return Http.post("/messages/sendMessage", params).then(function (res) {
 
             params.msg_id = res.data;
             params.gid = gid;

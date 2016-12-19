@@ -173,5 +173,5 @@ module.exports = Activity.extend({
         }
     },
 
-    onDestory: function() {}
+    onDestroy: function() {}
 });

@@ -67,7 +67,7 @@
         onShow: function () {
         },
 
-        onDestory: function () {
+        onDestroy: function () {
         }
     });
 });

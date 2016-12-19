@@ -7,6 +7,9 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var hdh = require('logical/hdh');
+var hdhModel = require('models/hdh');
+
 module.exports = Activity.extend({
 
     onCreate: function() {
@@ -41,7 +44,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function() {
+    onDestroy: function() {
         this.model.destroy();
     }
 });

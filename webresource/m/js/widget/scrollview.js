@@ -65,9 +65,9 @@ ScrollView.prototype = {
         this.scrollTo(0, this.scroller.offsetHeight, duration);
     },
 
-    destory: function () {
+    destroy: function () {
 
-        this.touch.destory();
+        this.touch.destroy();
     }
 }
 

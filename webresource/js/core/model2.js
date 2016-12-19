@@ -25,7 +25,20 @@ var EVENTS = {
     focus: 'focus',
     blur: 'blur'
 };
-var GLOBAL_VARIABLES = ['this', '$', "JSON", 'Math', 'new', 'Date', 'encodeURIComponent', "sl", 'window', 'document'];
+var GLOBAL_VARIABLES = {
+    'new': true,
+    'this': true,
+    '$': true,
+    "sl": true,
+    'util': true,
+    "JSON": true,
+    'Math': true,
+    'Date': true,
+    'encodeURIComponent': true,
+    'decodeURIComponent': true,
+    'window': true,
+    'document': true
+};
 
 var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
@@ -40,10 +53,10 @@ var rSnAttr = /^sn-/;
 //   /(?:\((?:\(.*?\)|.)*?\)|.)/
 
 var Filters = {
-    contains: function (source, keywords) {
+    contains: function(source, keywords) {
         return source.indexOf(keywords) != -1;
     },
-    like: function (source, keywords) {
+    like: function(source, keywords) {
         source = source.toLowerCase();
         keywords = keywords.toLowerCase();
         return source.indexOf(keywords) != -1 || keywords.indexOf(source) != -1;
@@ -51,7 +64,7 @@ var Filters = {
     util: util
 };
 
-var FILTERS_VARS = (function () {
+var FILTERS_VARS = (function() {
     var res = '';
     for (var key in Filters) {
         res += 'var ' + key + '=$data.' + key + ';';
@@ -70,8 +83,11 @@ function valueCode(str, variables) {
     var code = '';
     var gb = '$data';
 
-    if (!alias || alias in Filters || GLOBAL_VARIABLES.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(str)) {
+    if (!alias || GLOBAL_VARIABLES[alias] || rvalue.test(str) || (variables && variables.indexOf(alias) != -1) || alias in Filters) {
         return str;
+
+    } else if (alias == 'delegate') {
+        return 'this.' + str;
     }
 
     str = gb + '.' + str;
@@ -137,7 +153,7 @@ function setRefs(viewModel, el) {
 
         if (!refs) {
 
-            viewModel.refs[refName] = el.snRepeatSource || closestElement(el, function (parentNode) {
+            viewModel.refs[refName] = el.snRepeatSource || closestElement(el, function(parentNode) {
                 return parentNode.snRepeatSource ? true : parentNode.snViewModel ? false : null;
 
             }) ? [ref] : ref;
@@ -257,7 +273,7 @@ function updateNode(viewModel, el) {
 }
 
 function cloneRepeatElement(source, snData) {
-    return cloneElement(source, function (node, clone) {
+    return cloneElement(source, function(node, clone) {
 
         clone.snData = snData;
         clone.snIsGlobal = node.snIsGlobal;
@@ -279,7 +295,7 @@ function cloneRepeatElement(source, snData) {
 
 function cloneElement(el, fn) {
 
-    eachElement(el, function (node) {
+    eachElement(el, function(node) {
         var clone = node.cloneNode(false);
         node._clone = clone;
 
@@ -321,7 +337,7 @@ function linkModels(model, value, key) {
         childModel: value,
         childRoot: value.root,
         model: model,
-        cb: function () {
+        cb: function() {
 
             root.updateViewNextTick();
         }
@@ -362,15 +378,15 @@ function genFunction(expression) {
     var content = FILTERS_VARS + 'try{return \'' +
         expression
             .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
-            .replace(rmatch, function (match, exp) {
+            .replace(rmatch, function(match, exp) {
 
                 return '\'+(' +
                     exp.replace(/\\\\/g, '\\')
                         .replace(/\\'/g, '\'')
-                        .replace(rvar, function (match, prefix, name) {
+                        .replace(rvar, function(match, prefix, name) {
                             if (!name) {
                                 if (match.indexOf('var ') == 0) {
-                                    return match.replace(/var\s+([^\=]+)\=/, function (match, $0) {
+                                    return match.replace(/var\s+([^\=]+)\=/, function(match, $0) {
                                         variables = (variables || []).concat($0.split(','));
                                         return $0 + '=';
                                     });
@@ -416,7 +432,46 @@ function syncParentData(model) {
 
 }
 
-var Model = function (parent, key, data) {
+function setModelByKeys(model, cover, keys, val) {
+    var lastKey = keys.pop();
+    var tmp;
+
+    for (var i = 0, len = keys.length; i < len; i++) {
+        key = keys[i];
+
+        if (!(model.model[key] instanceof Model)) {
+            tmp = model.model[key] = new Model(model, key, {});
+            model.data[key] = tmp.data;
+
+            model = tmp;
+
+        } else {
+            model = model.model[key];
+        }
+    }
+    return model.set(cover, lastKey, val);
+}
+
+function changedAndUpdateViewNextTick(model) {
+    if (model.changed) return;
+
+    model.changed = true;
+
+    if (model.parent instanceof Collection) {
+        changedAndUpdateViewNextTick(model.parent);
+    }
+
+    model.root.one('datachanged', function() {
+        model.changed = false;
+
+        model.key && model.root.trigger("datachanged:" + model.key);
+
+        model._linkedParents && model._linkedParents.length && model.root.trigger(LINKEDCHANGE + ":" + model.cid);
+
+    }).updateViewNextTick();
+}
+
+var Model = function(parent, key, data) {
 
     if (parent instanceof Model) {
         this.key = parent.key ? parent.key + '.' + key : key;
@@ -444,49 +499,61 @@ var Model = function (parent, key, data) {
 }
 
 
+var RE_QUERY = /(?:^|\.)([_a-zA-Z0-9]+)(\[(?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+\](?:\[[\+\-]?\d+\])?)?/g;
+var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-]?)(\d+)\])?(?:\.(.*))?/;
+
+
+// var a = util.query("attr^='somevalue'|c1=1,att2!=2")({
+//     attr: 'somevalue11'
+// });
+
+// console.log(a);
+
+// var a = "someattr.collection[attr^='somevalue',att2=2][1].aaa[333]";
+
+// var attr;
+// var query;
+
+// RE_QUERY.lastIndex = -1;
+// for (var m = RE_QUERY.exec(a); m; m = RE_QUERY.exec(a)) {
+//     attr = m[1];
+//     query = m[2];
+
+//     console.log(attr, query, a.substr(m.index + m[0].length))
+// }
+
+// console.log("[attr^='somevalue',att2=2][+1].aaa[333]".match(RE_COLL_QUERY));
+
+
 var ModelProto = {
-    _changedAndUpdateViewNextTick: function () {
-        if (this.changed) return;
 
-        var self = this;
-        this.changed = true;
+    //@key=someattr.collection[attr^='somevalue'|1=1,att2=2]
+    _: function(search) {
 
-        if (this.parent instanceof Collection) {
-            this.parent._changedAndUpdateViewNextTick();
-        }
+        var attr;
+        var query;
+        var result = this;
 
-        this.root.one('datachanged', function () {
-            self.changed = false;
+        RE_QUERY.lastIndex = -1;
+        for (var m = RE_QUERY.exec(search); m; m = RE_QUERY.exec(search)) {
+            attr = m[1];
+            query = m[2];
 
-            self.key && self.root.trigger("datachanged:" + self.key);
+            if (result instanceof Model)
+                result = result.model[attr];
 
-            self._linkedParents && self._linkedParents.length && self.root.trigger(LINKEDCHANGE + ":" + self.cid);
-
-        }).updateViewNextTick();
-    },
-
-    _setByKeys: function (cover, keys, val) {
-        var lastKey = keys.pop();
-        var model = this;
-        var tmp;
-
-        for (var i = 0, len = keys.length; i < len; i++) {
-            key = keys[i];
-
-            if (!(model.model[key] instanceof Model)) {
-                tmp = model.model[key] = new Model(model, key, {});
-                model.data[key] = tmp.data;
-
-                model = tmp;
-
-            } else {
-                model = model.model[key];
+            else if (result instanceof Collection) {
+                return result._(query + search.substr(m.index + m[0].length));
             }
+            else if (!result)
+                return null;
+            else
+                result = result[attr]
         }
-        return model.set(cover, lastKey, val);
+        return result;
     },
 
-    findByKey: function (key) {
+    findByKey: function(key) {
         if (this.key == key) return this;
 
         var models = this.model;
@@ -537,33 +604,7 @@ var ModelProto = {
         return null;
     },
 
-    getModel: function (key) {
-        if (typeof key == 'string' && key.indexOf('.') != -1) {
-            key = key.split('.');
-        }
-        if ($.isArray(key)) {
-            var model = this;
-            if (key[0] == 'this') {
-                for (var i = 1, len = key.length; i < len; i++) {
-                    if (!(model = model[key[i]]))
-                        return null;
-                }
-            } else {
-                for (var i = 0, len = key.length; i < len; i++) {
-                    if (model instanceof Model)
-                        model = model.model[key[i]];
-                    else if (model instanceof Collection)
-                        model = model.models[key[i]];
-                    else
-                        return null;
-                }
-            }
-            return model;
-        }
-        return key == 'this' ? this : key == '' ? this.data : this.model[key];
-    },
-
-    get: function (key) {
+    get: function(key) {
         if (typeof key === 'undefined')
             return this.data === null ? null : typeof data == 'object' ? $.extend(true, {}, this.data) : this.data;
 
@@ -592,7 +633,7 @@ var ModelProto = {
 
     //[cover,object]|[cover,key,val]|[key,va]|[object]
     //@cover=true|false 是否覆盖数据，[cover,key,val]时覆盖子model数据,[cover,object]时覆盖当前model数据
-    set: function (cover, key, val) {
+    set: function(cover, key, val) {
         var self = this,
             model,
             origin,
@@ -624,7 +665,7 @@ var ModelProto = {
 
                 syncParentData(this);
 
-                this._changedAndUpdateViewNextTick();
+                changedAndUpdateViewNextTick(this);
             }
             return this;
 
@@ -632,10 +673,10 @@ var ModelProto = {
             keys = isArrayKey ? key : key.split('.');
 
             if (keys.length > 1) {
-                model = this._setByKeys(cover, keys, val);
+                model = setModelByKeys(this, cover, keys, val);
 
                 if (model.changed) {
-                    this._changedAndUpdateViewNextTick();
+                    changedAndUpdateViewNextTick(this);
                 }
                 return this;
 
@@ -686,7 +727,7 @@ var ModelProto = {
                     if (!hasChange && origin.changed) hasChange = true;
 
                 } else if (origin instanceof Collection) {
-                    if (!$.isArray(value)) {
+                    if (!Array.isArray(value)) {
                         if (value == null) {
                             value = [];
                         } else {
@@ -727,7 +768,7 @@ var ModelProto = {
         }
 
         if (hasChange) {
-            this._changedAndUpdateViewNextTick();
+            changedAndUpdateViewNextTick(this);
 
             for (var i = 0, length = changes.length; i < length; i += 2) {
                 root.trigger("change:" + changes[i], changes[i + 1]);
@@ -737,7 +778,7 @@ var ModelProto = {
         return self;
     },
 
-    reset: function () {
+    reset: function() {
         var data = {};
         for (var attr in this.data) {
             data[attr] = null;
@@ -745,11 +786,11 @@ var ModelProto = {
         this.set(data);
     }
 }
-ModelProto._ = ModelProto.getModel;
+ModelProto.getModel = ModelProto._;
 
 Model.prototype = ModelProto;
 
-var Collection = function (parent, attr, data) {
+var Collection = function(parent, attr, data) {
     if ($.isArray(parent)) {
         data = parent;
         parent = null;
@@ -777,39 +818,105 @@ var Collection = function (parent, attr, data) {
 }
 
 Collection.prototype = {
-    _changedAndUpdateViewNextTick: ModelProto._changedAndUpdateViewNextTick,
 
-    size: function () {
+    size: function() {
         return this.data.length;
     },
 
-    map: function (fn) {
+    map: function(fn) {
         return util.map(this.getAll(), fn);
     },
 
-    indexOf: function (key, val) {
+    indexOf: function(key, val) {
         return util.indexOf(this.data, key, val);
     },
 
-    lastIndexOf: function (key, val) {
+    lastIndexOf: function(key, val) {
         return util.lastIndexOf(this.data, key, val);
     },
 
-    getAll: function () {
+    getAll: function() {
         return $.extend(true, [], this.data);
     },
 
-    get: function (i) {
+    get: function(i) {
         if (i == undefined) return this.getAll();
 
         return this.models[i].get();
     },
 
-    _: function (i) {
-        return this.models[i];
+    //@search= n /*第n个*/ | "[attr='val']"/*查询所有*/ | "[attr='val'][n]"/*查询并返回第n个*/ | 
+    // "[attr='val'][+]"/*一个都不存在则添加*/ | "[attr='val'][+n]"/*结果小于n个则添加*/ |
+    // "[attr='val'][-]"/*删除全部，并返回被删除的*/ | "[attr='val'][-n]"/*删除第n个，并返回被删除的*/
+    _: function(search) {
+
+        if (typeof search == 'number' || /^\d+$/.test(search))
+            return this.models[search];
+
+        var match = search.match(RE_COLL_QUERY);
+
+        var query = match[1];
+        var next = match[4];
+        var model;
+
+        if (/^\d+$/.test(query))
+            return (model = this.models[query]) ? (next ? model : model._(next)) : null;
+
+        var operation = match[2];
+        var index = match[3] ? parseInt(index) : operation == '+' ? 0 : undefined;
+
+        console.log(query, next);
+
+        var match = util.query(query);
+        var data = this.data;
+
+        if (operation == '-') {
+            var j = 0;
+            var results = [];
+            var from = index === undefined ? 0 : index;
+            var to = index === undefined ? data.length : index;
+
+            for (var i = 0, n = data.length; i < n; i++) {
+                if (match(data[i])) {
+
+                    if (j >= from && j <= to) {
+
+                        model = this.splice(i, 1)[0];
+
+                        results.push(next ? model : model._(next));
+                    }
+
+                    j++;
+                }
+            }
+            return results;
+
+        } else if (index === undefined) {
+            var results = [];
+            for (var i = 0, n = data.length; i < n; i++) {
+                if (match(data[i])) {
+
+                    results.push(next ? this.models[i] : this.models[i]._(next));
+                }
+            }
+            return results;
+
+        } else {
+
+            var j = 0;
+            for (var i = 0, n = data.length; i < n; i++) {
+                if (match(data[i])) {
+                    if (j === index) {
+                        return next ? this.models[i] : this.models[i]._(next);
+                    }
+                    j++;
+                }
+            }
+            return operation == '+' ? this.add({}) : null;
+        }
     },
 
-    set: function (data) {
+    set: function(data) {
 
         if (!data || data.length == 0) {
             this.clear();
@@ -825,7 +932,7 @@ Collection.prototype = {
             var hasChange = this.changed;
             var item;
 
-            this.each(function (model) {
+            this.each(function(model) {
                 item = data[i];
 
                 if (item instanceof Model) {
@@ -854,14 +961,14 @@ Collection.prototype = {
             this.add(i == 0 ? data : data.slice(i, data.length));
 
             if (!this.changed && hasChange) {
-                this._changedAndUpdateViewNextTick();
+                changedAndUpdateViewNextTick(this);
             }
         }
         return this;
     },
 
 
-    add: function (data) {
+    add: function(data) {
         var model;
         var isArray = Array.isArray(data);
 
@@ -889,25 +996,29 @@ Collection.prototype = {
                 results.push(model);
             }
 
-            this._changedAndUpdateViewNextTick();
+            changedAndUpdateViewNextTick(this);
         }
         return isArray ? results : results[0];
     },
 
     //@updateType=undefined:collection中存在既覆盖，不存在既添加|true:根据arr更新，不在arr中的项将被删除|false:只更新collection中存在的
-    update: function (arr, primaryKey, updateType) {
+    update: function(arr, primaryKey, updateType) {
+        if (typeof arr === 'boolean')
+            arr = [arr, primaryKey, updateType], updateType = arr[0], primaryKey = arr[2], arr = arr[1];
+
         if (!arr) return this;
 
         var fn;
         var length = this.models.length;
 
         if (!length) {
-            this.add(arr);
+            (updateType !== false) && this.add(arr);
+
             return this;
         }
 
         if (typeof primaryKey === 'string') {
-            fn = function (a, b) {
+            fn = function(a, b) {
                 return a[primaryKey] == b[primaryKey];
             }
         } else fn = primaryKey;
@@ -920,6 +1031,7 @@ Collection.prototype = {
         else arr = [].concat(arr);
 
         var n = arr.length;
+        var result;
 
         for (var i = length - 1; i >= 0; i--) {
             item = this.data[i];
@@ -929,8 +1041,8 @@ Collection.prototype = {
                 arrItem = arr[j];
 
                 if (arrItem !== undefined) {
-                    if (fn.call(this, item, arrItem)) {
-                        this.models[i].set(arrItem);
+                    if (result = fn.call(this, item, arrItem)) {
+                        this.models[i].set(typeof result == 'object' ? result : arrItem);
                         arr[j] = undefined;
                         exists = true;
                         break;
@@ -959,11 +1071,11 @@ Collection.prototype = {
         return this;
     },
 
-    unshift: function (data) {
+    unshift: function(data) {
         this.insert(0, data);
     },
 
-    insert: function (index, data) {
+    insert: function(index, data) {
 
         var model;
         var count;
@@ -987,17 +1099,17 @@ Collection.prototype = {
             this.data.splice(count, 0, model.data);
         }
 
-        this._changedAndUpdateViewNextTick();
+        changedAndUpdateViewNextTick(this);
     },
 
-    splice: function (start, count, data) {
+    splice: function(start, count, data) {
         if (!count) count = 1;
         var root = this.root;
         var spliced = this.models.splice(start, count);
         if (root._linkedModels) {
             var self = this;
 
-            spliced.forEach(function (model) {
+            spliced.forEach(function(model) {
                 model._linkedParents && unlinkModels(self, model);
             });
         }
@@ -1007,22 +1119,22 @@ Collection.prototype = {
         if (data)
             this.insert(start, data);
         else
-            this._changedAndUpdateViewNextTick();
+            changedAndUpdateViewNextTick(this);
 
         return spliced;
     },
 
     //@[key,val]|function(){return true|false;}|Model
-    remove: function (key, val) {
+    remove: function(key, val) {
         var fn;
 
         if (typeof key === 'string' && val !== undefined) {
-            fn = function (item) {
+            fn = function(item) {
                 return item[key] == val;
             }
 
         } else if (key instanceof Model) {
-            fn = function (item, i) {
+            fn = function(item, i) {
                 return this.models[i] == key;
             }
 
@@ -1035,17 +1147,17 @@ Collection.prototype = {
             }
         }
 
-        this._changedAndUpdateViewNextTick();
+        changedAndUpdateViewNextTick(this);
     },
 
-    clear: function () {
+    clear: function() {
         if (this.models.length == 0 && this.data.length) return;
         this.models.length = this.data.length = 0;
 
-        this._changedAndUpdateViewNextTick();
+        changedAndUpdateViewNextTick(this);
     },
 
-    each: function (start, end, fn) {
+    each: function(start, end, fn) {
 
         if (typeof start == 'function') fn = start, start = 0, end = this.models.length;
         else if (typeof end == 'function') fn = end, end = this.models.length;
@@ -1056,11 +1168,11 @@ Collection.prototype = {
         return this;
     },
 
-    find: function (key, val) {
+    find: function(key, val) {
         var fn;
 
         if (typeof key === 'string' && val !== undefined) {
-            fn = function (item) {
+            fn = function(item) {
                 return item[key] == val;
             }
         } else fn = key;
@@ -1073,11 +1185,11 @@ Collection.prototype = {
         return null;
     },
 
-    filter: function (key, val) {
+    filter: function(key, val) {
         var fn;
 
         if (typeof key === 'string' && val !== undefined) {
-            fn = function (item) {
+            fn = function(item) {
                 return item[key] == val;
             }
         } else fn = key;
@@ -1128,7 +1240,7 @@ function RepeatSource(viewModel, el, parent) {
         } else {
             self.orderBy = [];
 
-            orderByCode.split(/\s*,\s*/).forEach(function (sort) {
+            orderByCode.split(/\s*,\s*/).forEach(function(sort) {
                 sort = sort.split(' ');
                 var sortKey = sort[0];
                 var sortType = sort[1];
@@ -1189,11 +1301,11 @@ function RepeatSource(viewModel, el, parent) {
     this.collectionKey = collectionKey;
 }
 
-RepeatSource.isRepeatNode = function (node) {
+RepeatSource.isRepeatNode = function(node) {
     return node.nodeType == 1 && node.getAttribute('sn-repeat');
 }
 
-RepeatSource.prototype.appendChild = function (child) {
+RepeatSource.prototype.appendChild = function(child) {
     this.children.push(child);
 }
 
@@ -1233,7 +1345,7 @@ function ViewModel(el, data, children) {
 
 var ViewModelProto = {
 
-    getDataByElement: function (el, modelName) {
+    getDataByElement: function(el, modelName) {
         var attrs = modelName.split('.');
         var model;
 
@@ -1245,7 +1357,7 @@ var ViewModelProto = {
         return model.get(attrs);
     },
 
-    setDataByElement: function (el, modelName, value) {
+    setDataByElement: function(el, modelName, value) {
         var attrs = modelName.split('.');
         var model;
 
@@ -1260,7 +1372,7 @@ var ViewModelProto = {
     },
 
     //事件处理
-    _handleEvent: function (e) {
+    _handleEvent: function(e) {
         if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
             return;
         }
@@ -1287,7 +1399,7 @@ var ViewModelProto = {
 
     initialize: util.noop,
 
-    observe: function (key, fn) {
+    observe: function(key, fn) {
         if (arguments.length == 1) {
             fn = key;
             key = '';
@@ -1298,11 +1410,22 @@ var ViewModelProto = {
         return this.on('datachanged' + key, fn);
     },
 
-    executeFunction: function (functionId, data) {
+    removeObserve: function(key, fn) {
+        if (arguments.length == 1) {
+            fn = key;
+            key = '';
+        } else {
+            key = ':' + key;
+        }
+
+        return this.off('datachanged' + key, fn);
+    },
+
+    executeFunction: function(functionId, data) {
         return this.fns[functionId].call(this, data);
     },
 
-    createFunction: function (expression) {
+    createFunction: function(expression) {
         if (!expression) return null;
 
         expression = expression.replace(/^\s+|\s+$/g, '');
@@ -1333,7 +1456,7 @@ var ViewModelProto = {
         return ret;
     },
 
-    twoWayBinding: function (el) {
+    twoWayBinding: function(el) {
         var self = this;
 
         if (el.nodeType == 3) {
@@ -1418,7 +1541,7 @@ var ViewModelProto = {
 
                             if (testRegExp(rset, val) || testRegExp(rfunc, val)) {
 
-                                var content = val.replace(rfunc, function (match, $1, $2) {
+                                var content = val.replace(rfunc, function(match, $1, $2) {
 
                                     if (/^(Math\.|encodeURIComponent\(|parseInt\()/.test($1)) {
                                         return match;
@@ -1448,7 +1571,7 @@ var ViewModelProto = {
         }
     },
 
-    formatData: function (element, snData) {
+    formatData: function(element, snData) {
         var data = Object.assign({
             $global: this.$global.data,
             srcElement: element
@@ -1471,7 +1594,7 @@ var ViewModelProto = {
         return data
     },
 
-    updateNode: function (el, attribute) {
+    updateNode: function(el, attribute) {
         var self = this;
         var attrsBinding;
         var data = this.formatData(el, el.snData);
@@ -1539,7 +1662,7 @@ var ViewModelProto = {
                         } else if ($.isArray(val)) {
                             var firstChild = val[0];
                             if (firstChild && el.nextSibling != firstChild)
-                                val.forEach(function (item) {
+                                val.forEach(function(item) {
                                     $(item).insertAfter(el);
                                 });
                         }
@@ -1578,7 +1701,7 @@ var ViewModelProto = {
                     if (display == 'none') {
                         if (!$el.hasClass('sn-display-hide')) {
 
-                            var onHide = function () {
+                            var onHide = function() {
                                 if ($el.hasClass('sn-display-hide'))
                                     $el.hide();
                             }
@@ -1618,7 +1741,7 @@ var ViewModelProto = {
                         el.src = val;
 
                     } else {
-                        $(el).one('load error', function (e) {
+                        $(el).one('load error', function(e) {
                             $(this).animate({
                                 opacity: 1
                             }, 200);
@@ -1644,7 +1767,7 @@ var ViewModelProto = {
 
     },
 
-    updateRepeatElement: function (el) {
+    updateRepeatElement: function(el) {
 
         var self = this;
         var repeatSource = el.snRepeatSource;
@@ -1656,7 +1779,7 @@ var ViewModelProto = {
         var parentSnData = {};
 
         if (repeatSource.parent) {
-            closestElement(el, function (parentNode) {
+            closestElement(el, function(parentNode) {
                 if (parentNode.snRepeatSource == repeatSource.parent && parentNode.snData) {
                     Object.assign(parentSnData, parentNode.snData);
                     return true;
@@ -1680,7 +1803,7 @@ var ViewModelProto = {
                 model = this;
 
             } else {
-                closestElement(el, function (parentNode) {
+                closestElement(el, function(parentNode) {
                     if (parentNode.snRepeatSource == offsetParent) {
                         model = parentNode.snModel;
                         return true;
@@ -1709,7 +1832,7 @@ var ViewModelProto = {
         var elementsLength = elements.length;
         var elemContain = {};
 
-        collection.each(function (model) {
+        collection.each(function(model) {
             var elem;
             var elemIndex = -1;
             var snData;
@@ -1766,7 +1889,7 @@ var ViewModelProto = {
                 list.sort(this[orderBy]);
 
             } else {
-                orderBy = orderBy.map(function (item) {
+                orderBy = orderBy.map(function(item) {
                     if (typeof item === 'number') {
 
                         return self.executeFunction(item, self.formatData(parentSnData, el));
@@ -1775,7 +1898,7 @@ var ViewModelProto = {
                 });
 
 
-                list.sort(function (am, bm) {
+                list.sort(function(am, bm) {
                     var ret = 0;
                     var isDesc;
                     var sort;
@@ -1798,7 +1921,7 @@ var ViewModelProto = {
             }
         }
 
-        list.forEach(function (item, index) {
+        list.forEach(function(item, index) {
             var elem = item.el;
 
             insertElementAfter(cursorElem, elem);
@@ -1818,13 +1941,13 @@ var ViewModelProto = {
         return cursorElem;
     },
 
-    updateViewNextTick: function () {
+    updateViewNextTick: function() {
         if (!this._nextTick) {
             this._nextTick = this._updatingView ? 1 : requestAnimationFrame(this.updateView);
         }
     },
 
-    updateView: function () {
+    updateView: function() {
         this._updatingView = true;
         this.trigger('datachanged');
         this.viewWillUpdate && this.viewWillUpdate();
@@ -1837,7 +1960,7 @@ var ViewModelProto = {
             this._nextTick = null;
             this.refs = {};
 
-            eachElement(this.$el, function (el) {
+            eachElement(this.$el, function(el) {
                 if (el.snViewModel && el.snViewModel != self || self._nextTick) return false;
 
                 return updateNode(self, el);
@@ -1852,10 +1975,10 @@ var ViewModelProto = {
         this.trigger('viewDidUpdate');
     },
 
-    bind: function (el) {
+    bind: function(el) {
 
         var self = this;
-        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
+        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function(e) {
             var target = e.currentTarget;
 
             switch (e.type) {
@@ -1886,19 +2009,19 @@ var ViewModelProto = {
 
         self.$el = (self.$el || $()).add($el);
 
-        $el.each(function () {
+        $el.each(function() {
             this.snViewModel = self;
         })
 
         return this;
     },
 
-    _bindElement: function ($el) {
+    _bindElement: function($el) {
         var self = this;
 
         this._codes = [];
 
-        eachElement($el, function (node) {
+        eachElement($el, function(node) {
 
             if (node.snViewModel) return false;
 
@@ -1940,16 +2063,16 @@ var ViewModelProto = {
 
         var fns = new Function('return [' + this._codes.join(',') + ']')();
 
-        fns.forEach(function (fn) {
+        fns.forEach(function(fn) {
             self.fns.push(fn);
         });
     },
 
-    _bindNewNode: function (newNode) {
+    _bindNewNode: function(newNode) {
 
         newNode = $(newNode);
 
-        newNode.each(function () {
+        newNode.each(function() {
             if (this.snViewModel)
                 throw new Error("can not insert or append binded node!");
         });
@@ -1961,7 +2084,7 @@ var ViewModelProto = {
         return newNode;
     },
 
-    _checkOwnNode: function (node) {
+    _checkOwnNode: function(node) {
         if (typeof node == 'string') {
             node = this.$el.find(node);
 
@@ -1970,7 +2093,7 @@ var ViewModelProto = {
 
         } else {
 
-            this.$el.each(function () {
+            this.$el.each(function() {
                 if (!$.contains(this, node))
                     throw new Error('is not own node');
             });
@@ -1978,20 +2101,20 @@ var ViewModelProto = {
         return node;
     },
 
-    isOwnNode: function (node) {
+    isOwnNode: function(node) {
         if (typeof node == 'string') {
             return !this.$el.find(node).length;
 
         } else {
             var flag = true;
-            this.$el.each(function () {
+            this.$el.each(function() {
                 if (!$.contains(this, node)) return false;
             });
             return flag;
         }
     },
 
-    before: function (newNode, referenceNode) {
+    before: function(newNode, referenceNode) {
 
         referenceNode = this._checkOwnNode(referenceNode);
 
@@ -1999,34 +2122,34 @@ var ViewModelProto = {
             .insertBefore(referenceNode);
     },
 
-    after: function (newNode, referenceNode) {
+    after: function(newNode, referenceNode) {
         referenceNode = this._checkOwnNode(referenceNode);
 
         return this._bindNewNode(newNode)
             .insertAfter(referenceNode);
     },
 
-    append: function (newNode, parentNode) {
+    append: function(newNode, parentNode) {
         parentNode = this._checkOwnNode(parentNode);
 
         return this._bindNewNode(newNode)
             .appendTo(parentNode);
     },
 
-    prepend: function (newNode, parentNode) {
+    prepend: function(newNode, parentNode) {
         parentNode = this._checkOwnNode(parentNode);
 
         return this._bindNewNode(newNode)
             .prependTo(parentNode);
     },
 
-    next: function (cb) {
+    next: function(cb) {
         return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
     },
 
-    destory: function () {
+    destroy: function() {
         this.$el.off('input change blur', '[' + this.snModelKey + ']')
-            .each(function () {
+            .each(function() {
                 this.snViewModel = null;
             });
 
@@ -2069,12 +2192,12 @@ ViewModel.extend = util.extend;
 
 var globalVM = new ViewModel;
 
-globalVM.updateView = function () {
+globalVM.updateView = function() {
 
-    viewModelList.forEach(function (viewModel) {
+    viewModelList.forEach(function(viewModel) {
         var refs = {};
 
-        eachElement(viewModel.$el, function (el) {
+        eachElement(viewModel.$el, function(el) {
             if (el.snViewModel && el.snViewModel != viewModel) return false;
 
             if (el.snIsGlobal) {
@@ -2100,7 +2223,7 @@ exports.global = globalVM;
 
 exports.ViewModel = exports.Model = ViewModel;
 
-exports.createModel = function (props) {
+exports.createModel = function(props) {
     var model = Object.assign(new ViewModel, props);
 
     if (props && props.defaultData) model.set(props.defaultData);
@@ -2111,7 +2234,7 @@ exports.createModel = function (props) {
 
 exports.Collection = Collection;
 
-exports.createCollection = function (props) {
+exports.createCollection = function(props) {
     var model = Object.assign(new Collection, props);
 
     if (props && props.defaultData) model.set(props.defaultData);

@@ -289,7 +289,7 @@ function Scroll(el, options) {
 }
 
 Scroll.prototype = {
-    destory: function () {
+    destroy: function () {
         this.$el.off('touchstart', touchStart)
             .off('touchmove', touchMove)
             .off('touchend', touchEnd)
@@ -367,10 +367,10 @@ ScrollBindResult.prototype = {
         return this.items[i];
     },
 
-    destory: function () {
+    destroy: function () {
         this.items.forEach(function (item) {
 
-            item.destory();
+            item.destroy();
         });
     }
 }
@@ -451,21 +451,25 @@ exports.bind = function (selector, options) {
 
         if (util.isInApp)
             $el.on('focus', 'input:not(readonly),textarea:not(readonly)', function (e) {
-                var node = e.currentTarget,
-                    offsetTop = 0;
-                do {
-                    offsetTop += node.offsetTop;
-                    node = node.offsetParent;
-                }
-                while (node && el != node && !$.contains(node, el));
 
-                var y = offsetTop - (window.innerHeight / 4 - 60);
+                setTimeout(function () {
 
-                if (scrollView) {
-                    scrollView.scrollTo(scrollView.x, y)
-                } else {
-                    el._scrollTop = el.scrollTop = y;
-                }
+                    var node = e.currentTarget,
+                        offsetTop = 0;
+                    do {
+                        offsetTop += node.offsetTop;
+                        node = node.offsetParent;
+                    }
+                    while (node && el != node && !$.contains(node, el));
+
+                    var y = offsetTop - (window.innerHeight / 4 - 60);
+
+                    if (scrollView) {
+                        scrollView.scrollTo(scrollView.x, y)
+                    } else {
+                        el._scrollTop = el.scrollTop = y;
+                    }
+                }, 300);
             });
 
         if (options && options.refresh) {

@@ -28,18 +28,18 @@
 
 <div class="hm_home dock" ref="home" sn-tap="this.exitMenu()">
     <header class="flex {headBg?'header_app':'header_trans'} gl_anim" sn-if="tab==1">
-        <a href="javascript:;" sn-tap="this.menu()" class="hm-icons-person h_bar pl_m pr_m"></a>
+        <a href="javascript:;" sn-tap="delegate.menu()" class="hm-icons-person h_bar pl_m pr_m"></a>
         <div class="flex_0"></div>
         <div class="hm-icons-shop h_bar pl_m pr_m" data-forward="/business/service"></div>
     </header>
     <header class="flex" sn-if="tab==3">
-        <a href="javascript:;" sn-tap="this.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
+        <a href="javascript:;" sn-tap="delegate.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
         <div class="ml_m flexitem flex hm_quan__search" data-forward="{quanTab.index==0?'/pubquan/search':'/contact/search'}">
             <div class="icon-search sqr_s"></div>
             <p class="fs_m pt_1 dp_b cl_ccc">搜索{quanTab.index==0?'公众圈':quanTab.index==1?'朋友圈':'通讯录'}</p>
         </div>
         <div class="icon-more2 h_bar pl_m" sn-tap="this.showQuanMenu()"></div>
-        <div class="icon-scan h_bar pl_m pr_m" sn-tap="this.scan()"></div>
+        <div class="icon-scan h_bar pl_m pr_m" sn-tap="delegate.scan()"></div>
     </header>
     <div sn-if="tab==1" class="hm_idx main" ref="life">
         <div class="hm_idx__head">

@@ -31,11 +31,11 @@ ModelProto.getScrollView = function (el) {
     return this._scrolls.get(el);
 }
 
-var oldModelDestroy = ModelProto.destory;
-ModelProto.destory = function () {
+var oldModelDestroy = ModelProto.destroy;
+ModelProto.destroy = function () {
     oldModelDestroy.call(this);
 
-    if (this._scrolls) this._scrolls.destory();
+    if (this._scrolls) this._scrolls.destroy();
 }
 
 util.cnNum = function (num) {

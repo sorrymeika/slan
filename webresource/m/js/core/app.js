@@ -10,6 +10,7 @@ var Async = require('./async');
 var Touch = require('./touch');
 var Route = require('./route');
 var Activity = require('./activity');
+var Toast = require('../widget/toast');
 
 var noop = util.noop;
 var lastIndexOf = util.lastIndexOf;
@@ -55,14 +56,14 @@ function bindBackGesture(application) {
         momentum: false
     });
 
-    touch.on('beforestart', function(e) {
+    touch.on('beforestart', function (e) {
         this.x = 0;
 
         if (this._isInAnim) {
             this.stop();
         }
 
-    }).on('start', function() {
+    }).on('start', function () {
         var that = this,
             action,
             isForward,
@@ -97,12 +98,12 @@ function bindBackGesture(application) {
         }
 
         if (action) {
-            that.swiperAsync = new Async(function(done) {
+            that.swiperAsync = new Async(function (done) {
 
                 application.mask.show();
                 currentActivity._startExit();
 
-                application.get(action, function(activity) {
+                application.get(action, function (activity) {
                     that.needRemove = activity.el.parentNode === null;
                     adjustActivity(currentActivity, activity);
 
@@ -119,19 +120,19 @@ function bindBackGesture(application) {
             that.swiperAsync = null;
         }
 
-    }).on('move', function(e) {
+    }).on('move', function (e) {
         var that = this,
             deltaX = that.deltaX;
 
         if (!that.swiperAsync) return;
 
-        that.swiperAsync.await(function() {
+        that.swiperAsync.await(function () {
             that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
                 0 :
                 (Math.abs(deltaX) * 100 / that.width));
         });
 
-    }).on('stop', function() {
+    }).on('stop', function () {
         var that = this;
 
         that.isCancelSwipe = that.isMoveLeft !== that.isSwipeLeft || Math.abs(that.deltaX) <= 10;
@@ -140,13 +141,13 @@ function bindBackGesture(application) {
             application._currentActivity.trigger('Pause');
 
         if (that.swiperAsync) {
-            that.swiperAsync.await(function() {
+            that.swiperAsync.await(function () {
 
                 that._isInAnim = true;
 
-                application.queue.await(function(err, res, done) {
+                application.queue.await(function (err, res, done) {
 
-                    that.swiper.animate(200, that.isCancelSwipe ? 0 : 100, function() {
+                    that.swiper.animate(200, that.isCancelSwipe ? 0 : 100, function () {
                         var activity = that.swipeActivity,
                             currentActivity = application._currentActivity;
 
@@ -190,7 +191,7 @@ function bindBackGesture(application) {
 
 var Application = Component.extend(Object.assign(appProto, {
     events: {
-        'tap,click a[href]:not(.js-link-default)': function(e) {
+        'tap,click a[href]:not(.js-link-default)': function (e) {
             var that = this;
             var target = $(e.currentTarget);
             var href = target.attr('href');
@@ -215,20 +216,20 @@ var Application = Component.extend(Object.assign(appProto, {
 
             return false;
         },
-        'tap [data-back]': function(e) {
+        'tap [data-back]': function (e) {
             this.back($(e.currentTarget).attr('data-back'));
         },
-        'tap [data-forward]': function(e) {
+        'tap [data-forward]': function (e) {
             this.forward($(e.currentTarget).attr('data-forward'));
         },
-        'focus input': function(e) {
+        'focus input': function (e) {
             this.activeInput = e.target;
         }
     },
 
     el: '<div class="viewport"><div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div></div>',
 
-    initialize: function(options) {
+    initialize: function (options) {
         var that = this;
         //var preventEvents = 'tap click touchmove touchstart';
 
@@ -242,7 +243,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
         var prepareExit = false;
 
-        $(window).on('back', function() {
+        $(window).on('back', function () {
 
             if (that._backAction.length) {
                 that._backAction.pop()();
@@ -255,17 +256,17 @@ var Application = Component.extend(Object.assign(appProto, {
                     bridge.exit();
                 } else {
                     prepareExit = true;
-                    setTimeout(function() {
+                    setTimeout(function () {
                         prepareExit = false;
                     }, 2000);
-                    sl.tip("再按一次退出程序");
+                    Toast.showToast("再按一次退出程序");
                 }
 
             } else {
                 that.back(that._currentActivity.referrer || '/');
             }
 
-        }).on('urlchange', function(e, data) {
+        }).on('urlchange', function (e, data) {
 
             that.forward(data.url);
         });
@@ -275,11 +276,11 @@ var Application = Component.extend(Object.assign(appProto, {
         }
     },
 
-    addBackAction: function(fn) {
+    addBackAction: function (fn) {
         this._backAction.push(fn);
     },
 
-    removeBackAction: function(fn) {
+    removeBackAction: function (fn) {
 
         if (fn === undefined) {
             this._backAction.length = 0;
@@ -294,11 +295,11 @@ var Application = Component.extend(Object.assign(appProto, {
         }
     },
 
-    getCurrentActivity: function() {
+    getCurrentActivity: function () {
         return this._currentActivity;
     },
 
-    start: function(delay) {
+    start: function (delay) {
         var that = this;
         var $win = $(window);
         var $el = that.$el;
@@ -318,7 +319,7 @@ var Application = Component.extend(Object.assign(appProto, {
         that.historyAsync = Async.done();
 
         if (delay) {
-            setTimeout(function() {
+            setTimeout(function () {
                 $el.appendTo(document.body);
 
                 delay.doneSelf();
@@ -331,7 +332,7 @@ var Application = Component.extend(Object.assign(appProto, {
             $el.appendTo(document.body);
         }
 
-        that.get(that.hash, function(activity) {
+        that.get(that.hash, function (activity) {
 
             that.history.push(that.hash);
 
@@ -341,7 +342,7 @@ var Application = Component.extend(Object.assign(appProto, {
             activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
 
             activity.then(delay)
-                .then(function(err, res, done) {
+                .then(function (err, res, done) {
                     activity.$el.css({
                         opacity: 0
                     }).addClass('active').animate({
@@ -358,7 +359,7 @@ var Application = Component.extend(Object.assign(appProto, {
                     that.queue.doneSelf();
                 });
 
-            $win.on('hashchange', function() {
+            $win.on('hashchange', function () {
                 var hash = that.hash = Route.formatUrl(location.hash);
                 var hashIndex;
 
@@ -367,7 +368,7 @@ var Application = Component.extend(Object.assign(appProto, {
                     that.historyAsync.doneSelf();
 
                 } else {
-                    that.historyAsync.then(function() {
+                    that.historyAsync.then(function () {
 
                         hashIndex = lastIndexOf(that.history, hash);
                         if (hashIndex == -1) {
@@ -380,32 +381,41 @@ var Application = Component.extend(Object.assign(appProto, {
             });
         });
 
-        $win.one('load', function() {
+        $win.one('load', function () {
             if (!location.hash) location.hash = '/';
         });
 
         return this;
     },
 
-    _toggle: function(route, options, toggleFinish, queueDone) {
+    _toggle: function (route, options, toggleFinish, queueDone) {
 
         var that = this,
+            prevActivity,
             currentActivity = that._currentActivity,
             url = route.url,
             isForward = options.isForward,
             duration = options.duration === undefined ? 400 : options.duration;
 
-        that.navigate(url, isForward);
 
         if (currentActivity.path == route.path) {
+            that.navigate(url, 2);
+
             that.checkQueryString(currentActivity, route);
             queueDone();
             return;
         }
+        that.navigate(url, isForward);
 
         route.isForward = isForward;
 
-        if (isForward) {
+        if (isForward === 2) {
+            prevActivity = currentActivity.prevActivity;
+            route.prevActivity = prevActivity;
+            route.referrer = prevActivity ? prevActivity.url : null;
+            route.referrerDir = "Left";
+
+        } else if (isForward) {
             route.prevActivity = currentActivity;
             route.referrer = currentActivity.url;
             route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
@@ -413,7 +423,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
         currentActivity._startExit();
 
-        that.get(route, function(activity) {
+        that.get(route, function (activity) {
             that._currentActivity = activity;
 
             adjustActivity(currentActivity, activity);
@@ -422,14 +432,14 @@ var Application = Component.extend(Object.assign(appProto, {
 
             currentActivity.trigger('Pause');
 
-            activity.then(function() {
+            activity.then(function () {
                 activity.trigger('Appear');
 
                 var ease = 'cubic-bezier(.34,.86,.54,.99)';
                 var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
                 var anim;
                 var executedFinish = false;
-                var finish = function() {
+                var finish = function () {
                     if (executedFinish) return;
                     executedFinish = true;
 
@@ -471,16 +481,22 @@ var Application = Component.extend(Object.assign(appProto, {
     },
 
     //改变当前hash但不触发viewchange
-    navigate: function(url, isForward) {
+    //@isForward=2:location.replace,true:location.hash,false:history.go(-n)
+    navigate: function (url, isForward) {
         var that = this;
 
-        that.historyAsync.then(function() {
+        that.historyAsync.then(function () {
             var index,
                 hashChanged = !Route.compareUrl(url, location.hash);
 
             that.hashChanged = hashChanged;
 
-            if (isForward) {
+            if (isForward === 2) {
+                that.history[that.history.length - 1] = url;
+                hashChanged && (location.replace('#' + url));
+
+            } else if (isForward) {
+
                 that.history.push(url);
                 hashChanged && (location.hash = url);
 
@@ -490,12 +506,12 @@ var Application = Component.extend(Object.assign(appProto, {
                 if (index == -1) {
                     that.history.length = 0;
                     that.history.push(url);
-                    hashChanged && (location.hash = url);
+                    hashChanged && (location.replace('#' + url));
 
                 } else {
                     var go = index + 1 - that.history.length;
 
-                    hashChanged && go && setTimeout(function() {
+                    hashChanged && go && setTimeout(function () {
                         history.go(go);
                     }, 0);
                     that.history.length = index + 1;
@@ -506,14 +522,14 @@ var Application = Component.extend(Object.assign(appProto, {
 
     },
 
-    _navigate: function(url, isForward, duration, toggleAnim, data) {
+    _navigate: function (url, isForward, duration, toggleAnim, data) {
         var self = this;
         var route = this.route.match(url);
 
         if (route) {
             var queue = this.queue;
 
-            queue.await(function(err, res, queueDone) {
+            queue.await(function (err, res, queueDone) {
                 var options = {};
 
                 if (typeof duration == "string") data = toggleAnim, toggleAnim = duration, duration = 400;
@@ -530,7 +546,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 duration !== null && (options.duration = duration);
                 toggleAnim !== null && (options.toggleAnim = toggleAnim);
 
-                self._toggle(route, options, isForward ? null : function() {
+                self._toggle(route, options, isForward ? null : function () {
                     currentActivity.destroy();
                 }, queueDone);
 
@@ -543,21 +559,25 @@ var Application = Component.extend(Object.assign(appProto, {
     },
 
     //@arguments=[url,[[duration],[toggleAnim],[data]]]
-    forward: function(url, duration, toggleAnim, data) {
+    forward: function (url, duration, toggleAnim, data) {
         this._navigate(url, true, duration, toggleAnim, data);
     },
 
-    back: function(url, duration, toggleAnim, data) {
+    back: function (url, duration, toggleAnim, data) {
         this._navigate(url, false, duration, toggleAnim, data);
     },
 
-    createIFrame: function($container) {
+    replace: function (url, duration) {
+        this._navigate(url, 2, duration || 0);
+    },
+
+    createIFrame: function ($container) {
         var $iframe = $('<iframe width="' + window.innerWidth + 'px" frameborder="0" />').appendTo($container);
         var iframeWin = $iframe[0].contentWindow;
         var iframeDoc = iframeWin.document;
         var self = this;
 
-        $(iframeDoc.body).on('click', 'a[href]', function(e) {
+        $(iframeDoc.body).on('click', 'a[href]', function (e) {
             var target = $(e.currentTarget);
             var href = target.attr('href');
 
@@ -577,7 +597,7 @@ var Application = Component.extend(Object.assign(appProto, {
             $el: $iframe,
             window: iframeWin,
             document: iframeDoc,
-            html: function(content) {
+            html: function (content) {
 
                 iframeDoc.body.innerHTML = '<style>p{ padding:0;margin:0 0 10px 0; }img{width:100%;height:auto;display:block;}</style>' + content;
 
@@ -585,10 +605,10 @@ var Application = Component.extend(Object.assign(appProto, {
                     height: iframeDoc.documentElement.scrollHeight
                 });
 
-                [].forEach.call(iframeDoc.querySelectorAll('img'), function(img) {
+                [].forEach.call(iframeDoc.querySelectorAll('img'), function (img) {
                     img.style.width = "100%";
                     img.style.height = "auto";
-                    img.onload = function() {
+                    img.onload = function () {
                         $iframe.css({
                             height: iframeDoc.documentElement.scrollHeight
                         });

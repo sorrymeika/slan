@@ -118,7 +118,7 @@ module.exports = Activity.extend({
         })
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

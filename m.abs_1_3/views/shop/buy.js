@@ -300,6 +300,6 @@ define(function(require, exports, module) {
             self.cart.load();
         },
 
-        onDestory: function() {}
+        onDestroy: function() {}
     });
 });

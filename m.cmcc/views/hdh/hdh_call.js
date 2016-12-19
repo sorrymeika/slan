@@ -8,14 +8,17 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var hdh = require('logical/hdh');
+var hdhModel = require('models/hdh');
 
 module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
+        var subPhoneList = hdhModel.getSubPhoneList();
 
         var model = this.model = new Model(this.$el, {
-            title: '和多号'
+            title: '和多号',
+            subPhoneList: subPhoneList
         });
 
         model.back = function () {
@@ -73,7 +76,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

@@ -58,6 +58,7 @@
             "logical/news": "./logical/news"
         },
         "models": {
+            "models/news": "./models/news",
             "models/user": "./models/user",
             "models/friends": "./models/friends",
             "models/business": "./models/business",

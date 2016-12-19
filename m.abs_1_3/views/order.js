@@ -193,7 +193,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function() {
+    onDestroy: function() {
         self.timer && clearTimeout(self.timer);
     }
 });

@@ -66,6 +66,6 @@ module.exports = Activity.extend({
         }).load();
     },
 
-    onDestory: function () {
+    onDestroy: function () {
     }
 });

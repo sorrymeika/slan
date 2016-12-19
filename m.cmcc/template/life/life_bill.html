@@ -19,7 +19,7 @@
                 <a href="javascript:;" class="cl_app mr_m" sn-tap="this.modify(item)">修改</a>
             </div>
         </div>
-        <div class="flex h_l ml_m pl_m bd_b icon-elec" sn-repeat="item,i in elecData" data-forward="{item.ubid?'/life/seebill/'+item.ubid:('/life/addbill/'+item.business_id)}">
+        <div class="flex h_l ml_m pl_m bd_b icon-elec" sn-repeat="item,i in elecData" data-forward="{item.ubid?'/life/seebill/'+item.ubid+'?bid='+item.business_id:('/life/addbill/'+item.business_id)}">
             <div class="ml_m fs_m flexitem">
                 <p>电费</p>
                 <p class="cl_999 fs_s">{item.user_code}</p>

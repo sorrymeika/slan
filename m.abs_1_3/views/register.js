@@ -136,7 +136,7 @@
             var that = this;
         },
 
-        onDestory: function () {
+        onDestroy: function () {
         }
     });
 });

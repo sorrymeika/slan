@@ -29,7 +29,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function() {
+    onDestroy: function() {
         this.model.destroy();
     }
 });

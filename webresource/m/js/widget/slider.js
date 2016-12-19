@@ -309,10 +309,10 @@ $.extend(Slider.prototype, {
         return this.renderItem(this.itemTemplate(dataItem));
     },
 
-    destory: function () {
+    destroy: function () {
         $(window).off('ortchange', this.adjustWidth);
         self.$el.off('tap');
-        this.touch.destory();
+        this.touch.destroy();
     }
 })
 

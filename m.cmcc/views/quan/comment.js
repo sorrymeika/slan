@@ -55,7 +55,7 @@ module.exports = Activity.extend({
         this.model.refs.comment.focus();
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

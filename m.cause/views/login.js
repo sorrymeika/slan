@@ -66,7 +66,7 @@ define(function (require, exports, module) {
             var that = this;
         },
 
-        onDestory: function () {
+        onDestroy: function () {
         }
     });
 });

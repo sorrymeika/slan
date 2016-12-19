@@ -65,7 +65,7 @@ module.exports = Activity.extend({
         this.model.refs.search.focus();
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

@@ -119,6 +119,6 @@ module.exports = Activity.extend({
         bridge.statusBar("light");
     },
 
-    onDestory: function () {
+    onDestroy: function () {
     }
 });

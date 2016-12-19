@@ -25,13 +25,13 @@ module.exports = Activity.extend({
         var model = this.model = new Model(this.$el, {
             business_id: business_id,
             title: dataModel.get('business_name'),
-            business: dataModel
+            business: dataModel,
+            hasFooter: [100001, 100003, 100002, 100004, 100005, 100026, 100022, 100043].indexOf(parseInt(business_id)) != -1
         });
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
         }
-
 
         Object.assign(model, business.redirect);
 
@@ -202,7 +202,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

@@ -48,7 +48,7 @@ module.exports = Activity.extend({
         this.photoViewer.setImages(routeData.images);
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

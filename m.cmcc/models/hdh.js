@@ -2,13 +2,29 @@ var vm = require('core/model2');
 var util = require('util');
 var $ = require('$');
 
-var user = vm.createModel({
-    defaultData: util.store('cmcc_hdh')
+var HDH_MODEL_CACHE = 'HDH_MODEL_CACHE';
+
+var hdh = vm.createModel({
+    defaultData: util.store(HDH_MODEL_CACHE) || {
+        subPhoneList: []
+    },
+
+    getSubPhoneList: function () {
+        return this._('subPhoneList');
+    },
+
+    getSubInfo: function (subphone) {
+        var subPhoneList = this._('subPhoneList');
+        var first = subPhoneList.find('subphone', subphone);
+
+        if (first == null) {
+            return subPhoneList.add()
+        }
+    }
 });
 
-user.on('datachanged', function () {
-
-    util.store('cmcc_hdh', this.data);
+hdh.on('datachanged', function () {
+    util.store(HDH_MODEL_CACHE, this.data);
 });
 
-module.exports = user;
+module.exports = hdh;

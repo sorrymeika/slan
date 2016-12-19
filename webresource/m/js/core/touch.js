@@ -392,7 +392,7 @@ var Touch = Event.mixin(function (el, options) {
             this.trigger('stop');
         },
 
-        destory: function () {
+        destroy: function () {
             this.$el.off('touchstart', this._start)
                 .off('touchmove', this._move)
                 .off('touchend', this._end)

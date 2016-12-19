@@ -20,7 +20,8 @@ var STATUS = {
 }
 
 function onDestroy(instance) {
-    if (instance._scrolls) instance._scrolls.destory();
+    if (instance._scrolls) instance._scrolls.destroy();
+
     instance.onDestroy && instance.onDestroy();
     instance.application.remove(instance.url);
 }

@@ -75,6 +75,6 @@ module.exports = Activity.extend({
         self.user = util.store('user');
     },
 
-    onDestory: function() {
+    onDestroy: function() {
     }
 });

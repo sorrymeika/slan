@@ -54,7 +54,7 @@
             }
         },
 
-        onDestory: function () {
+        onDestroy: function () {
         }
     });
 });

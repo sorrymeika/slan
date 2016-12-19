@@ -51,6 +51,9 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         Promise.all([business.queryBusiness(ubid), this.waitLoad()]).then(function (results) {
+
+            console.log(units);
+            
             var res = results[0];
             model.set({
                 account: res.account,
@@ -76,7 +79,7 @@ module.exports = Activity.extend({
         var self = this;
     },
 
-    onDestory: function () {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

@@ -413,7 +413,7 @@ FormComponent.prototype = {
     },
 
 
-    destory: function() {
+    destroy: function() {
         this.$el.on('off', '[name]', this._validInput);
     }
 };

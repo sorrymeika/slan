@@ -123,10 +123,12 @@ var business = {
 var redirect = {};
 
 redirect.jump = function (linkurl) {
+    var match;
+
     if (linkurl) {
         if (linkurl.indexOf('cmccfjapp://open.10086.cn') != -1) {
             linkurl = linkurl.substr(linkurl.indexOf('?'));
-            var match = linkurl.match(/(?:\&|\?)url\=(.+?)(=\&|$)/);
+            match = linkurl.match(/(?:\&|\?)url\=(.+?)(=\&|$)/);
 
             if (!match) return;
 
@@ -151,7 +153,8 @@ redirect.jump = function (linkurl) {
         } else if (linkurl == 'sc') {
             this.enterSc();
 
-        } else {
+        } else if ((match = linkurl.match(/^b(\d+)$/))) {
+            Application.forward('/business/' + match[1]);
         }
     }
 }

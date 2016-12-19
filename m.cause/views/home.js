@@ -61,7 +61,7 @@ module.exports = Activity.extend({
     onPause: function () {
     },
 
-    onDestory: function () {
+    onDestroy: function () {
     },
 
     //消息图标抖一抖

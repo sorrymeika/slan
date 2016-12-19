@@ -82,6 +82,6 @@ return Page.extend({
         this.$el.before(this.menu.$el);
     },
 
-    onDestory: function () {
+    onDestroy: function () {
     }
 });

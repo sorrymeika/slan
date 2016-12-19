@@ -54,7 +54,7 @@ define(function (require, exports, module) {
             var self = this;
         },
 
-        onDestory: function () {
+        onDestroy: function () {
         }
     });
 });

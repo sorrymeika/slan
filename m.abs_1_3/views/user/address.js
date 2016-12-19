@@ -101,6 +101,6 @@ module.exports = Activity.extend({
         self.address.load();
     },
 
-    onDestory: function () {
+    onDestroy: function () {
     }
 });
