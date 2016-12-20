@@ -34,14 +34,28 @@ var hdh = Event.mixin({
 
     getInfo: function () {
         return post('/user_hdh/getInfo').then(function (res) {
-            hdhModel.getSubPhoneList()
+            var list = hdhModel.getSubPhoneList()
                 .update(true, res.data.subphonelist, 'subphone');
+
+            console.log(list);
+
+            console.log(list._('[alias=""].subphone'))
 
             return res;
         });
     },
 
-    subinfo: function () {
+    subinfo: function (subphone) {
+
+        return post('/user_hdh/subinfo', {
+            subphone: subphone
+
+        }).then(function (res) {
+
+            hdhModel.getSubInfo(subphone).set(res.data.subphoneinfo);
+
+            return res;
+        });
 
     },
 
@@ -60,7 +74,72 @@ var hdh = Event.mixin({
             subphone: subphone,
             smscode: smscode
         });
+    },
+
+    getAlias: function (subphones) {
+        return Http.post('/user_hdh/getAlias', {
+            subphones: subphones.join(',')
+
+        }).then(function (res) {
+
+            //hdhModel.getSubInfo(subphone).set('alias', alias);
+
+            return res;
+        });
+    },
+
+    setAlias: function (subphone, alias) {
+        return Http.post('/user_hdh/setAlias', {
+            subphone: subphone,
+            alias: alias
+
+        }).then(function (res) {
+
+            hdhModel.getSubInfo(subphone).set('alias', alias);
+
+            return res;
+        });
+    },
+
+    setPower: function (subphone, isOff) {
+        return post('/user_hdh/setPower', {
+            subphone: subphone,
+            isOff: isOff
+
+        }).then(function (res) {
+
+            hdh.subinfo();
+
+            return res;
+        });
+    },
+
+    interceptSms: function (subphone, isOff) {
+        return post('/user_hdh/interceptSms', {
+            subphone: subphone,
+            isOff: isOff
+
+        }).then(function (res) {
+
+            hdh.subinfo();
+
+            return res;
+        });
+    },
+
+    interceptCall: function (subphone, isOff) {
+        return post('/user_hdh/interceptCall', {
+            subphone: subphone,
+            isOff: isOff
+
+        }).then(function (res) {
+
+            hdh.subinfo();
+
+            return res;
+        });
     }
+
 });
 
 module.exports = hdh;

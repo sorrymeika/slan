@@ -27,7 +27,7 @@
 }
 
 <div class="hm_home dock" ref="home" sn-tap="this.exitMenu()">
-    <header class="flex {headBg?'header_app':'header_trans'} gl_anim" sn-if="tab==1">
+    <header class="flex {headBg?'header_app':'header_trans'} g_anim" sn-if="tab==1">
         <a href="javascript:;" sn-tap="delegate.menu()" class="hm-icons-person h_bar pl_m pr_m"></a>
         <div class="flex_0"></div>
         <div class="hm-icons-shop h_bar pl_m pr_m" data-forward="/business/service"></div>
@@ -247,7 +247,7 @@
 
 <div class="hm_idx__to_mask dock" style="display:none" ref="timeoutMask">
 </div>
-<div class="hm-timeout gl_center" ref="timeout" style="display:none">
+<div class="hm-timeout g_center" ref="timeout" style="display:none">
     <div class="close" sn-tap="this.hideTimeout()"></div>
     <div class="ft">还有{next.timeLeft}分钟后才能收获</div>
 </div>

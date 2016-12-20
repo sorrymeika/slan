@@ -113,14 +113,14 @@ module.exports = Activity.extend({
         var photoViewer = this.photoViewer = new PhotoViewer();
 
         photoViewer.$el.hide().appendTo('body')
-            .addClass('gl_beforeshow')
+            .addClass('g_beforeshow')
             .on($.fx.transitionEnd, function () {
-                if (!photoViewer.$el.hasClass('gl_show')) {
+                if (!photoViewer.$el.hasClass('g_show')) {
                     photoViewer.$el.hide();
                 }
             })
             .on('tap', function () {
-                photoViewer.$el.removeClass('gl_show');
+                photoViewer.$el.removeClass('g_show');
             });
 
         this.exitMenu = this.exitMenu.bind(this);
@@ -240,7 +240,7 @@ module.exports = Activity.extend({
             photoViewer.index(index);
 
             photoViewer.$el.show()[0].clientHeight;
-            photoViewer.$el.addClass('gl_show');
+            photoViewer.$el.addClass('g_show');
         }
 
         model.hideTimeout = function () {

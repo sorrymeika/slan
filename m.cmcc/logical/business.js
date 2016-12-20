@@ -5,6 +5,7 @@ var Http = require('core/http');
 var Promise = require('promise');
 var businessModel = require('models/business');
 var Loader = require('widget/loader');
+var Toast = require('widget/toast');
 
 var appconfig = require('models/appconfig');
 
@@ -169,6 +170,21 @@ redirect.enterHjb = function () {
 
 redirect.enterQz = function () {
     bridge.openInApp("12580海西求职平台", appconfig.get('qzUrl'));
+}
+
+var mail139Url;
+redirect.enterMail139 = function () {
+
+    if (mail139Url) {
+        bridge.openInApp('139邮箱', mail139Url);
+    } else
+        business.getMail139().then(function (res) {
+            mail139Url = res.data;
+            bridge.openInApp('139邮箱', mail139Url);
+
+        }).catch(function (e) {
+            Toast.showToast(e.message);
+        });
 }
 
 redirect.enterSc = function () {

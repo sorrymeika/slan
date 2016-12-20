@@ -17,7 +17,7 @@ else if (android) osVersion = android[2].split('.');
 else if (ie) osVersion = ie[1].split('.');
 
 
-var RE_QUERY_ATTR = /([_a-zA-Z0-9]+)(\^|\*|\=|\!|\$)?\=(\d+|null|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*")(,|\||&)?/g;
+var RE_QUERY_ATTR = /([_a-zA-Z0-9]+)(\^|\*|\=|\!|\$|\~)?\=(\d+|null|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|(?:.*?(?=[,\|&])))([,\|&])?/g;
 
 function matchObject(queryGroups, obj) {
 
@@ -44,13 +44,17 @@ function matchObject(queryGroups, obj) {
                         result = val != item.val;
                         break;
                     case '^':
-                        result = val && val.slice(0, item.val.length) == item.val;
+                        result = val && (val.slice(0, item.val.length) == item.val);
                         break;
                     case '$':
-                        result = val && val.endWith(item.val);
+                        result = val && (val.slice(-item.val.length) == item.val);
                         break;
                     case '*':
                         result = val && val.indexOf(item.val) != -1;
+                        break;
+                    case '~':
+                        result = item.val !== null && item.val !== undefined
+                            ? val && val.toLowerCase().indexOf(('' + item.val).toLowerCase()) != -1 : true;
                         break;
                     default:
                         result = val == item.val;
@@ -86,7 +90,7 @@ function compileQuery(query) {
     query.replace(RE_QUERY_ATTR, function (match, attr, op, val, lg) {
         //console.log(match, attr, op, val, lg);
 
-        if (val.charAt(0) == '\'' && val.charAt(val.length - 1) == '\'') {
+        if (val.charAt(0) == '\'' && val.slice(-1) == '\'') {
             val = val.slice(1, -1).replace(/\\\'/g, '\'');
         } else {
             val = JSON.parse(val);
@@ -152,8 +156,8 @@ function equals(a, b, identity) {
     return true;
 }
 
-function overlaps(parent, obj) {
-    var typeA = toString.call(obj);
+function contains(parent, obj) {
+    var typeA = toString.call(parent);
 
     switch (typeA) {
         case '[object Object]':
@@ -167,6 +171,8 @@ function overlaps(parent, obj) {
             break;
 
         case '[object Array]':
+            if (!Array.isArray(obj)) return parent.indexOf(obj[i]) != -1;
+
             for (var i = obj.length; i >= 0; i--) {
                 if (parent.indexOf(obj[i]) == -1) return false;
             }
@@ -246,7 +252,7 @@ var util = {
         return true;
     },
 
-    overlaps: overlaps,
+    contains: contains,
 
     equals: equals,
 
@@ -431,7 +437,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (overlaps(arr[i], key)) return i;
+                if (contains(arr[i], key)) return i;
             }
         }
 
@@ -454,7 +460,7 @@ var util = {
 
         } else {
             for (var i = arr.length - 1; i >= 0; i--) {
-                if (overlaps(arr[i], key)) return i;
+                if (contains(arr[i], key)) return i;
             }
         }
 
@@ -504,7 +510,7 @@ var util = {
             }
         } else {
             for (var i = 0, len = arr.length; i < len; i++) {
-                if (overlaps(arr[i], key)) return arr[i];
+                if (contains(arr[i], key)) return arr[i];
             }
         }
 
@@ -530,7 +536,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (!overlaps(arr[i], key))
+                if (!contains(arr[i], key))
                     result.push(arr[i]);
             }
         }
@@ -557,7 +563,7 @@ var util = {
 
         } else {
             for (var i = 0; i < length; i++) {
-                if (overlaps(arr[i], key))
+                if (contains(arr[i], key))
                     result.push(arr[i]);
             }
         }
@@ -584,7 +590,7 @@ var util = {
 
         } else {
             for (var i = length - 1; i >= 0; i--) {
-                if (overlaps(arr[i], key))
+                if (contains(arr[i], key))
                     arr.splice(i, 1);
             }
         }

@@ -348,7 +348,7 @@ create table user_hdh (--和多号
     user_id number(10),--用户编号
     subphone varchar(11),--副号
     alias varchar(20),--备注
-    type number(1),--类型 --options=1:虚拟副号码,2:实体副号码
+    type number(1),--类型 --options=1:虚拟副号码,2:实体副号码,3:默认虚拟副号,3:默认实体副号码
     sort number(2),--排序序号
     business_state number(1),--副号码业务状态 --options=1:正常,2:预开户,3:申请中,4:取消中
     state number(2),--副号码功能状态 --options=1:逻辑开机,2:逻辑关机和取消托管,3:限制语音呼入,4:限制短、彩信接收,5:限制语音呼入和短、彩信接收

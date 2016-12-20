@@ -167,20 +167,6 @@ module.exports = Activity.extend({
         });
         self.bindScrollTo(model.refs.main);
 
-        var mail139Url;
-        model.enterMail139 = function () {
-
-            business.getMail139().then(function (res) {
-                mail139Url = res.data;
-                bridge.openInApp('139邮箱', mail139Url);
-
-                //location.href = mail139Url;
-
-            }).catch(function (e) {
-                Toast.showToast(e.message);
-            });
-        }
-
         this.waitLoad().then(function () {
             businessModel.getNotifications().each(function (item) {
                 if (item.get('business_id') == business_id) {

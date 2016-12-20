@@ -282,16 +282,22 @@ Loader.prototype = {
 
         that.isShowLoading && that.showLoading();
 
+        window.onerror = function (a, b, c, d) {
+            alert([a, b, c, d]);
+        }
+
         that._xhr = $.ajax({
             url: that.url,
             headers: that.headers,
             xhrFields: that.xhrFields,
             data: that.params,
             type: that.method,
-            dataType: that.dataType,
+            dataType: 'json',
             cache: false,
-            error: function (xhr) {
+            error: function (xhr, a, b, c) {
                 that.isShowLoading && that.hideLoading();
+
+                alert([xhr, a, b, c]);
 
                 var err;
                 try {
@@ -309,6 +315,8 @@ Loader.prototype = {
             },
             success: function (res, status, xhr) {
                 that.isShowLoading && that.hideLoading();
+
+                alert(res);
 
                 that.complete(res);
 

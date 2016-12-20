@@ -88,6 +88,7 @@
         "/hdh/index": "hdh/hdh_index",
         "/hdh/call": "hdh/hdh_call",
         "/hdh/licence": "hdh/hdh_licence",
-        "/hdh/subphone/{id:\\d+}": "hdh/subphone"
+        "/hdh/subphone/{subphone:\\d+}": "hdh/subphone",
+        "/hdh/memo/{subphone:\\d+}": "hdh/hdh_memo"
     }
 }

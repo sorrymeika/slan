@@ -387,3 +387,7 @@ button.pq_item__header_btn { background: transparent; border: 1px solid #fff; bo
 
 //和多号
 .hdh_call__menu { right: 10px; }
+
+.hdh_keyboard { height: 264px; position: absolute; bottom: 0; right: 0; left: 0; z-index: 200; background: #fff; }
+.hdh_keyboard button:active { height: 44px; background: #f1f1f1; }
+.hdh_keyboard__ft button:active { height: auto; background: #fff; opacity: .6; }

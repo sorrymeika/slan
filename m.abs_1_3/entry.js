@@ -66,6 +66,7 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
     });
     seajs.on("error", function (errorData) {
         errorData.pause = true;
+            alert(errorData.uri);
 
         console.log("can not fetch:", errorData.uri);
 
@@ -96,6 +97,7 @@ function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {
         error: function () {
             Offline.getInstance().show(loadResourceMapping);
             console.log("cantload:" + remoteUrl);
+            alert(remoteUrl);
         },
         success: function (res) {
             Offline.getInstance().hide();

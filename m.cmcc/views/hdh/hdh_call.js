@@ -6,6 +6,7 @@ var Model = require('core/model2').Model;
 var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
+var bridge = require('bridge');
 
 var hdh = require('logical/hdh');
 var hdhModel = require('models/hdh');
@@ -18,7 +19,8 @@ module.exports = Activity.extend({
 
         var model = this.model = new Model(this.$el, {
             title: '和多号',
-            subPhoneList: subPhoneList
+            subPhoneList: subPhoneList,
+            number: ''
         });
 
         model.back = function () {
@@ -43,6 +45,21 @@ module.exports = Activity.extend({
         model.hideMenu = function (url, e) {
             $(this.refs.menuMask).hide();
             $(this.refs.menu).hide();
+        }
+
+        model.number = function (num) {
+            this.set({
+                number: this.get('number') + num
+            })
+        }
+
+        model.call = function () {
+            console.log(subPhoneList.length);
+            var number = this.get('number');
+
+            if (!number) return;
+
+            bridge.system.openPhoneCall((subPhoneList.length ? "125831" : '') + number);
         }
 
         var loader = this.loader = new Loader(this.$el);

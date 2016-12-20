@@ -14,12 +14,13 @@ var hdh = vm.createModel({
     },
 
     getSubInfo: function (subphone) {
-        var subPhoneList = this._('subPhoneList');
-        var first = subPhoneList.find('subphone', subphone);
+        var first = this._('subPhoneList[subphone="' + subphone + '"][+]', {
+            subphone: subphone
+        });
 
-        if (first == null) {
-            return subPhoneList.add()
-        }
+        console.log(first);
+
+        return first;
     }
 });
 

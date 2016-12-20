@@ -11,13 +11,13 @@ var popup = require('widget/popup');
 
 module.exports = Activity.extend({
     events: {
-        'tap .js_pay:not(.disabled)': function() {
+        'tap .js_pay:not(.disabled)': function () {
             var self = this;
             var order = this.model.get('data');
 
             self.orderApi.showLoading();
 
-            setTimeout(function() {
+            setTimeout(function () {
                 self.orderApi.hideLoading();
             }, 3000);
 
@@ -33,7 +33,7 @@ module.exports = Activity.extend({
                         spUrl: api.API.prototype.baseUri + '/AlipayApp/Pay',
                         orderCode: order.PUR_CODE
 
-                    }, function(res) {
+                    }, function (res) {
                         sl.tip(res.msg);
                         self.orderApi.hideLoading();
                     });
@@ -46,7 +46,7 @@ module.exports = Activity.extend({
                         orderCode: order.PUR_CODE,
                         orderName: 'ABS商品',
                         orderPrice: order.PUR_AMOUNT
-                    }, function(res) {
+                    }, function (res) {
                         sl.tip(res.msg);
                         self.orderApi.hideLoading();
                     });
@@ -58,7 +58,7 @@ module.exports = Activity.extend({
         }
     },
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var $main = self.$('.main');
 
@@ -74,31 +74,31 @@ module.exports = Activity.extend({
             payType: 1
         });
 
-        self.model.getQty = function(items) {
+        self.model.getQty = function (items) {
             var res = 0;
-            items.forEach(function(item) {
+            items.forEach(function (item) {
                 res += item.LPK_QTY
             })
 
             return res;
         }
 
-        self.model.getAmount = function() {
+        self.model.getAmount = function () {
             var amount = 0;
-            this.data.list && this.data.list.forEach(function(data) {
+            this.data.list && this.data.list.forEach(function (data) {
                 amount += data.PUR_AMOUNT + data.PUR_EXP_IN_AMOUNT;
             });
             return util.currency(amount, '￥');
         }
-        self.model.cancelOrder = function(order, e) {
+        self.model.cancelOrder = function (order, e) {
 
             popup.confirm({
                 title: '温馨提示',
                 content: '你确定取消订单吗？',
                 cancelText: '不取消',
-                cancelAction: function() {},
+                cancelAction: function () { },
                 confirmText: '确定取消',
-                confirmAction: function() {
+                confirmAction: function () {
                     this.hide();
 
                     self.cancelOrderApi.setParam({
@@ -119,7 +119,7 @@ module.exports = Activity.extend({
                 UserID: self.user.ID,
                 Auth: self.user.Auth
             },
-            success: function(res) {
+            success: function (res) {
                 console.log(res);
 
                 self.model.set({
@@ -139,9 +139,9 @@ module.exports = Activity.extend({
             $el: this.$el,
             check: false,
             checkData: false,
-            success: function(res) {
+            success: function (res) {
                 if (res.status != 2) {
-                    self.timer = setTimeout(function() {
+                    self.timer = setTimeout(function () {
                         self.checkStatus();
                     }, 2000);
 
@@ -158,7 +158,7 @@ module.exports = Activity.extend({
             params: {
                 pspcode: self.user.PSP_CODE
             },
-            success: function(res) {
+            success: function (res) {
                 if (res.success) {
                     sl.tip('订单已成功取消');
                     self.orderApi.reload();
@@ -168,7 +168,7 @@ module.exports = Activity.extend({
                         .setResult("OrderChange");
                 }
             },
-            error: function(res) {
+            error: function (res) {
                 sl.tip(res.msg);
             }
         });
@@ -178,7 +178,7 @@ module.exports = Activity.extend({
         }
     },
 
-    checkStatus: function() {
+    checkStatus: function () {
         var self = this;
 
         self.timer && clearTimeout(self.timer);
@@ -189,11 +189,11 @@ module.exports = Activity.extend({
         }).load();
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         self.timer && clearTimeout(self.timer);
     }
 });

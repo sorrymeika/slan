@@ -421,7 +421,7 @@ function syncParentData(model) {
     var parent = model.parent;
 
     if (parent instanceof Collection) {
-        var index = parent.models.indexOf(model);
+        var index = parent.indexOf(model);
         if (index != -1) {
             parent.data[index] = model.data;
         }
@@ -499,8 +499,8 @@ var Model = function(parent, key, data) {
 }
 
 
-var RE_QUERY = /(?:^|\.)([_a-zA-Z0-9]+)(\[(?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+\](?:\[[\+\-]?\d+\])?)?/g;
-var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-]?)(\d+)\])?(?:\.(.*))?/;
+var RE_QUERY = /(?:^|\.)([_a-zA-Z0-9]+)(\[(?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+\](?:\[[\+\-]?\d*\])?)?/g;
+var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-]?)(\d+)?\])?(?:\.(.*))?/;
 
 
 // var a = util.query("attr^='somevalue'|c1=1,att2!=2")({
@@ -528,7 +528,8 @@ var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-
 var ModelProto = {
 
     //@key=someattr.collection[attr^='somevalue'|1=1,att2=2]
-    _: function(search) {
+    // console.log(model._('c[id=222][0].options[text~="aa"&value="1"][0]'))
+    _: function(search, def) {
 
         var attr;
         var query;
@@ -539,18 +540,19 @@ var ModelProto = {
             attr = m[1];
             query = m[2];
 
-            if (result instanceof Model)
+            if (result instanceof Model) {
                 result = result.model[attr];
 
-            else if (result instanceof Collection) {
-                return result._(query + search.substr(m.index + m[0].length));
+                if (query && result instanceof Collection) {
+                    return result._(query + search.substr(m.index + m[0].length), def);
+                }
             }
             else if (!result)
-                return null;
+                return def === undefined ? null : def;
             else
                 result = result[attr]
         }
-        return result;
+        return !result && def !== undefined ? def : result;
     },
 
     findByKey: function(key) {
@@ -791,7 +793,7 @@ ModelProto.getModel = ModelProto._;
 Model.prototype = ModelProto;
 
 var Collection = function(parent, attr, data) {
-    if ($.isArray(parent)) {
+    if (Array.isArray(parent)) {
         data = parent;
         parent = null;
     }
@@ -801,8 +803,6 @@ var Collection = function(parent, attr, data) {
     if (!attr) {
         attr = "$list";
     }
-
-    this.models = [];
 
     this.parent = parent;
     this.key = parent.key ? (parent.key + "." + attr) : attr;
@@ -819,6 +819,8 @@ var Collection = function(parent, attr, data) {
 
 Collection.prototype = {
 
+    length: 0,
+
     size: function() {
         return this.data.length;
     },
@@ -828,11 +830,13 @@ Collection.prototype = {
     },
 
     indexOf: function(key, val) {
-        return util.indexOf(this.data, key, val);
+        return key instanceof Model ? Array.prototype.indexOf.call(this, key) :
+            util.indexOf(this.data, key, val);
     },
 
     lastIndexOf: function(key, val) {
-        return util.lastIndexOf(this.data, key, val);
+        return key instanceof Model ? Array.prototype.lastIndexOf.call(this, key) :
+            util.lastIndexOf(this.data, key, val);
     },
 
     getAll: function() {
@@ -842,16 +846,18 @@ Collection.prototype = {
     get: function(i) {
         if (i == undefined) return this.getAll();
 
-        return this.models[i].get();
+        return this[i].get();
     },
 
     //@search= n /*第n个*/ | "[attr='val']"/*查询所有*/ | "[attr='val'][n]"/*查询并返回第n个*/ | 
     // "[attr='val'][+]"/*一个都不存在则添加*/ | "[attr='val'][+n]"/*结果小于n个则添加*/ |
     // "[attr='val'][-]"/*删除全部，并返回被删除的*/ | "[attr='val'][-n]"/*删除第n个，并返回被删除的*/
-    _: function(search) {
+    _: function(search, def) {
+
+        console.log(search)
 
         if (typeof search == 'number' || /^\d+$/.test(search))
-            return this.models[search];
+            return this[search];
 
         var match = search.match(RE_COLL_QUERY);
 
@@ -860,16 +866,16 @@ Collection.prototype = {
         var model;
 
         if (/^\d+$/.test(query))
-            return (model = this.models[query]) ? (next ? model : model._(next)) : null;
+            return (model = this[query]) ? (next ? model : model._(next)) : null;
 
         var operation = match[2];
-        var index = match[3] ? parseInt(index) : operation == '+' ? 0 : undefined;
+        var index = match[3] ? parseInt(match[3]) : operation == '+' ? 0 : undefined;
 
-        console.log(query, next);
-
-        var match = util.query(query);
+        var test = util.query(query);
         var data = this.data;
 
+
+        //移除操作
         if (operation == '-') {
             var j = 0;
             var results = [];
@@ -877,13 +883,13 @@ Collection.prototype = {
             var to = index === undefined ? data.length : index;
 
             for (var i = 0, n = data.length; i < n; i++) {
-                if (match(data[i])) {
+                if (test(data[i])) {
 
                     if (j >= from && j <= to) {
 
                         model = this.splice(i, 1)[0];
 
-                        results.push(next ? model : model._(next));
+                        results.push(next ? model._(next) : model);
                     }
 
                     j++;
@@ -892,27 +898,30 @@ Collection.prototype = {
             return results;
 
         } else if (index === undefined) {
+
+            //根据条件查询
             var results = [];
             for (var i = 0, n = data.length; i < n; i++) {
-                if (match(data[i])) {
+                if (test(data[i])) {
 
-                    results.push(next ? this.models[i] : this.models[i]._(next));
+                    results.push(next ? this[i]._(next) : this[i]);
                 }
             }
             return results;
 
         } else {
 
+            //根据条件查询，并返回第n个结果
             var j = 0;
             for (var i = 0, n = data.length; i < n; i++) {
-                if (match(data[i])) {
+                if (test(data[i])) {
                     if (j === index) {
-                        return next ? this.models[i] : this.models[i]._(next);
+                        return next ? this[i]._(next) : this[i];
                     }
                     j++;
                 }
             }
-            return operation == '+' ? this.add({}) : null;
+            return operation == '+' ? this.add(def ? def : {}) : null;
         }
     },
 
@@ -922,7 +931,7 @@ Collection.prototype = {
             this.clear();
 
         } else {
-            var modelsLen = this.models.length;
+            var modelsLen = this.length;
 
             if (data.length < modelsLen) {
                 this.splice(data.length, modelsLen - data.length)
@@ -944,7 +953,7 @@ Collection.prototype = {
                         unlinkModels(this, model);
                         linkModels(this, item, this.key + '^child');
 
-                        this.models[i] = item;
+                        this[i] = item;
                         this.data[i] = item.data;
                     }
 
@@ -987,10 +996,10 @@ Collection.prototype = {
                     linkModels(this, dataItem, this.key + '^child');
                     model = dataItem;
                 } else {
-                    model = new Model(this, this.models.length, dataItem);
+                    model = new Model(this, this.length, dataItem);
                 }
 
-                this.models.push(model);
+                this[this.length++] = model;
                 this.data.push(model.data);
 
                 results.push(model);
@@ -1009,7 +1018,7 @@ Collection.prototype = {
         if (!arr) return this;
 
         var fn;
-        var length = this.models.length;
+        var length = this.length;
 
         if (!length) {
             (updateType !== false) && this.add(arr);
@@ -1042,7 +1051,7 @@ Collection.prototype = {
 
                 if (arrItem !== undefined) {
                     if (result = fn.call(this, item, arrItem)) {
-                        this.models[i].set(typeof result == 'object' ? result : arrItem);
+                        this[i].set(typeof result == 'object' ? result : arrItem);
                         arr[j] = undefined;
                         exists = true;
                         break;
@@ -1095,7 +1104,8 @@ Collection.prototype = {
                 model = new Model(this, count, dataItem);
             }
 
-            this.models.splice(count, 0, model);
+            Array.prototype.splice.call(this, count, 0, model)
+
             this.data.splice(count, 0, model.data);
         }
 
@@ -1105,7 +1115,7 @@ Collection.prototype = {
     splice: function(start, count, data) {
         if (!count) count = 1;
         var root = this.root;
-        var spliced = this.models.splice(start, count);
+        var spliced = Array.prototype.splice.call(this, start, count);
         if (root._linkedModels) {
             var self = this;
 
@@ -1135,14 +1145,14 @@ Collection.prototype = {
 
         } else if (key instanceof Model) {
             fn = function(item, i) {
-                return this.models[i] == key;
+                return this[i] == key;
             }
 
         } else fn = key;
 
-        for (var i = this.models.length - 1; i >= 0; i--) {
+        for (var i = this.length - 1; i >= 0; i--) {
             if (fn.call(this, this.data[i], i)) {
-                this.models.splice(i, 1);
+                Array.prototype.splice.call(this, i, 1);
                 this.data.splice(i, 1);
             }
         }
@@ -1151,19 +1161,22 @@ Collection.prototype = {
     },
 
     clear: function() {
-        if (this.models.length == 0 && this.data.length) return;
-        this.models.length = this.data.length = 0;
+        if (this.length == 0 && this.data.length) return;
+        for (var i = 0; i < this.length; i++) {
+            delete this[i];
+        }
+        this.length = this.data.length = 0;
 
         changedAndUpdateViewNextTick(this);
     },
 
     each: function(start, end, fn) {
 
-        if (typeof start == 'function') fn = start, start = 0, end = this.models.length;
-        else if (typeof end == 'function') fn = end, end = this.models.length;
+        if (typeof start == 'function') fn = start, start = 0, end = this.length;
+        else if (typeof end == 'function') fn = end, end = this.length;
 
         for (; start < end; start++) {
-            if (fn.call(this, this.models[start], start) === false) break;
+            if (fn.call(this, this[start], start) === false) break;
         }
         return this;
     },
@@ -1177,33 +1190,19 @@ Collection.prototype = {
             }
         } else fn = key;
 
-        for (var i = 0; i < this.models.length; i++) {
+        for (var i = 0; i < this.length; i++) {
             if (fn.call(this, this.data[i], i)) {
-                return this.models[i];
+                return this[i];
             }
         }
         return null;
     },
 
     filter: function(key, val) {
-        var fn;
-
-        if (typeof key === 'string' && val !== undefined) {
-            fn = function(item) {
-                return item[key] == val;
-            }
-        } else fn = key;
-
-        var result = [];
-
-        for (var i = 0; i < this.models.length; i++) {
-            if (fn.call(this, this.data[i], i)) {
-                result.push(this.models[i]);
-            }
-        }
-        return result;
+        return util.filter(this.data, key, val);
     }
 }
+
 
 function RepeatSource(viewModel, el, parent) {
     var self = this;
