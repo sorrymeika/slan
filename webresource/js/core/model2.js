@@ -514,7 +514,7 @@ var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-
 // var attr;
 // var query;
 
-// RE_QUERY.lastIndex = -1;
+// RE_QUERY.lastIndex = 0;
 // for (var m = RE_QUERY.exec(a); m; m = RE_QUERY.exec(a)) {
 //     attr = m[1];
 //     query = m[2];
@@ -535,7 +535,7 @@ var ModelProto = {
         var query;
         var result = this;
 
-        RE_QUERY.lastIndex = -1;
+        RE_QUERY.lastIndex = 0;
         for (var m = RE_QUERY.exec(search); m; m = RE_QUERY.exec(search)) {
             attr = m[1];
             query = m[2];
@@ -2189,9 +2189,9 @@ Event.mixin(ViewModel);
 ViewModel.extend = util.extend;
 
 
-var globalVM = new ViewModel;
+var global = new ViewModel;
 
-globalVM.updateView = function() {
+global.updateView = function() {
 
     viewModelList.forEach(function(viewModel) {
         var refs = {};
@@ -2212,13 +2212,13 @@ globalVM.updateView = function() {
         });
     });
 
-    globalVM._nextTick = null;
+    global._nextTick = null;
 };
 
-ViewModel.prototype.$global = globalVM;
+ViewModel.prototype.$global = global;
 
 
-exports.global = globalVM;
+exports.global = exports.Global = global;
 
 exports.ViewModel = exports.Model = ViewModel;
 

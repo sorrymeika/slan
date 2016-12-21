@@ -50,10 +50,10 @@
             "useLocal": true
         },
         "dev": {
-            "api": "http://${ip}:5559/proxy3",
-            "shopApi": "http://${ip}:5559/proxy",
-            "updateApi": "http://${ip}:5559/proxy2",
-            "useLocal": true
+            "api": "http://${ip}:5559/proxy3_",
+            "shopApi": "http://${ip}:5559/proxy_",
+            "updateApi": "http://${ip}:5559/proxy2_",
+            "useLocal": false
         }
     },
     "js": {
@@ -61,7 +61,7 @@
             "core/http": "../webresource/js/core/http",
             "components/confirm": "./components/confirm",
             "components/cart": "./components/cart",
-            "components/imagePicker": "./components/imagePicker"            
+            "components/imagePicker": "./components/imagePicker"
         },
         "widget/calendar": {
             "widget/calendar": "../webresource/m/js/widget/calendar"

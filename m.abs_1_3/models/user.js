@@ -3,7 +3,7 @@ var model = require('core/model2');
 var Event = require('core/event');
 var util = require('util');
 var $ = require('$');
-var State = model.global;
+var State = model.Global;
 
 var User = {
     get: function () {

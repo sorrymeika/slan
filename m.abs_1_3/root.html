@@ -42,6 +42,11 @@
     <script src="extend/ortchange.js"></script>
     <script src="anim/default.js"></script> }
     <script>
+
+        window.onerror=function(a,b,c,d) {
+            alert([a,b,c,d]);
+        };
+
         seajs.config({
             alias: {
                 "$": "zepto",

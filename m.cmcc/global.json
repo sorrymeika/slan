@@ -63,7 +63,8 @@
             "models/friends": "./models/friends",
             "models/business": "./models/business",
             "models/messagesList": "./models/messagesList",
-            "models/appconfig": "./models/appconfig"
+            "models/appconfig": "./models/appconfig",
+            "models/hdh": "./models/hdh"
         }
     },
     "framework": {

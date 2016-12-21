@@ -174,17 +174,16 @@ redirect.enterQz = function () {
 
 var mail139Url;
 redirect.enterMail139 = function () {
+    business.getMail139().then(function (res) {
+        mail139Url = res.data;
 
-    if (mail139Url) {
-        bridge.openInApp('139邮箱', mail139Url);
-    } else
-        business.getMail139().then(function (res) {
-            mail139Url = res.data;
+        setTimeout(function (params) {
             bridge.openInApp('139邮箱', mail139Url);
+        }, 300)
 
-        }).catch(function (e) {
-            Toast.showToast(e.message);
-        });
+    }).catch(function (e) {
+        Toast.showToast(e.message);
+    });
 }
 
 redirect.enterSc = function () {

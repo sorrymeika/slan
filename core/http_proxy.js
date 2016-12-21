@@ -21,10 +21,10 @@ module.exports = function (host, port, replace) {
         log(url, options);
 
         var req = http.request(options, function (res) {
-            log(1);
+            console.log(request.headers.origin);
 
             response.set(res.headers);
-            response.set('Access-Control-Allow-Credentials', true);
+            //response.set('Access-Control-Allow-Credentials', true);
             response.set('Access-Control-Allow-Origin', request.headers.origin);
 
             res.on('data', function (chunk) {

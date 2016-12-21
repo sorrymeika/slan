@@ -6,7 +6,7 @@ var Loading = require('../widget/loader');
 var Slider = require('../widget/slider');
 var vm = require('core/model2');
 var Model = vm.Model;
-var Global = vm.global;
+var Global = vm.Global;
 var Scroll = require('../widget/scroll');
 var barcode = require('../utils/barcode');
 var animation = require('animation');
@@ -22,10 +22,6 @@ var Album = require("widget/album");
 var Discovery = require('./discovery/discovery_index');
 
 var trimHash = require('core/route').formatUrl;
-
-window.onerror = function(e) {
-    //alert(e);
-}
 
 Global.set({
     msg_count: 0,
