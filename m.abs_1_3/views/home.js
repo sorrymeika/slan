@@ -30,12 +30,12 @@ Global.set({
 
 var cartQtyApi = new api.CartQtyAPI({
     checkData: false,
-    success: function(res) {
+    success: function (res) {
         Global.set({
             cartQty: res.data
         });
     },
-    error: function() {}
+    error: function () { }
 });
 
 var recordVersion = util.store('recordVersionTime');
@@ -44,14 +44,14 @@ if (!recordVersion || Date.now() - recordVersion > 24 * 60 * 60 * 1000) {
     util.store('recordVersionTime', Date.now());
 
     var historyRecord = new api.HistoryRecord({
-        success: function(res) {
+        success: function (res) {
             console.log(res);
         },
-        error: function() {}
+        error: function () { }
     });
     var user = userModel.get();
 
-    bridge.system.info(function(res) {
+    bridge.system.info(function (res) {
 
         historyRecord.setParam({
             pspid: user ? user.ID : 0,
@@ -66,24 +66,24 @@ if (!recordVersion || Date.now() - recordVersion > 24 * 60 * 60 * 1000) {
 
 module.exports = Activity.extend({
     events: {
-        'tap .home_tip_mask': function(e) {
+        'tap .home_tip_mask': function (e) {
             util.store('showTipStep', 2);
             this.model.set({
                 showTipStep: 2
             });
         },
 
-        'tap .open_msg': function(e) {
+        'tap .open_msg': function (e) {
             if ($(e.target).hasClass('open_msg')) {
                 $(e.target).removeClass('show');
             }
         },
 
-        'tap .js_offline .btn': function() {
+        'tap .js_offline .btn': function () {
             this.requestUser();
         },
 
-        'tap .guide1': function() {
+        'tap .guide1': function () {
             this.model.set({
                 showGuide: false
             })
@@ -92,7 +92,7 @@ module.exports = Activity.extend({
 
     className: 'home',
 
-    showDiscovery: function() {
+    showDiscovery: function () {
         if (!this.model.get('isLogin')) {
             this.forward('/login');
             return;
@@ -112,11 +112,11 @@ module.exports = Activity.extend({
         }
     },
 
-    showMap: function() {
+    showMap: function () {
         this.forward('/map')
     },
 
-    showCart: function() {
+    showCart: function () {
         var data = this.model.data;
 
         if (data.isLogin) {
@@ -146,13 +146,13 @@ module.exports = Activity.extend({
         }
     },
 
-    startMakeLog: function() {
+    startMakeLog: function () {
         var self = this;
 
-        var makeLog = function() {
+        var makeLog = function () {
             var hash = trimHash(location.hash);
 
-            bridge.system.info(function(res) {
+            bridge.system.info(function (res) {
                 var image = new Image();
                 var deviceversion = (util.ios ? "IOS" : "Android") + util.osVersion;
 
@@ -162,10 +162,10 @@ module.exports = Activity.extend({
         makeLog();
         $(window).on('hashchange', makeLog)
 
-        $('.viewport').on('touchstart', function(e) {
+        $('.viewport').on('touchstart', function (e) {
             var hash = trimHash(location.hash);
 
-            bridge.system.info(function(res) {
+            bridge.system.info(function (res) {
                 var image = new Image();
                 var deviceversion = (util.ios ? "IOS" : "Android") + util.osVersion;
 
@@ -174,7 +174,7 @@ module.exports = Activity.extend({
         });
     },
 
-    getOrderCount: function() {
+    getOrderCount: function () {
         var self = this;
         new Loading({
             url: '/api/order/getCounts',
@@ -183,7 +183,7 @@ module.exports = Activity.extend({
                 Auth: self.user.Auth
             }
 
-        }).request().then(function(res) {
+        }).request().then(function (res) {
 
             self.model.set({
                 order1num: res.data[0],
@@ -193,7 +193,7 @@ module.exports = Activity.extend({
         });
     },
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         self.user = userModel.get();
         self.$tabs = self.$('.hm_tab_con');
@@ -218,10 +218,10 @@ module.exports = Activity.extend({
             tab: 0,
             bottomTab: 0,
             chartType: 0,
-            open: function() {
+            open: function () {
                 bridge.openInApp(self.user.OpenUrl || 'http://m.abs.cn');
             },
-            openUrl: function(e, url) {
+            openUrl: function (e, url) {
                 bridge.openInApp(url || 'http://m.abs.cn');
             },
             searchHistory: util.store("searchHistory")
@@ -229,7 +229,7 @@ module.exports = Activity.extend({
 
 
 
-        this.model.showHome = function() {
+        this.model.showHome = function () {
             if (this.data.bottomTab != 0) {
                 this.set({
                     bottomTab: 0
@@ -241,7 +241,7 @@ module.exports = Activity.extend({
         this.model.showMap = this.showMap.bind(this);
         this.model.showCart = this.showCart.bind(this);
 
-        this.model.showMe = function() {
+        this.model.showMe = function () {
 
             if (this.data.isLogin) {
                 if (this.get('bottomTab') != 4) {
@@ -256,7 +256,7 @@ module.exports = Activity.extend({
             }
         };
 
-        model.showSearch = function(e) {
+        model.showSearch = function (e) {
             this.set({
                 isShowSearch: true
             });
@@ -268,7 +268,7 @@ module.exports = Activity.extend({
             e.stopPropagation();
         }
 
-        model.clearSearch = function() {
+        model.clearSearch = function () {
             util.store("searchHistory", null);
 
             this.set({
@@ -276,7 +276,7 @@ module.exports = Activity.extend({
             });
         }
 
-        model.hideSearch = function() {
+        model.hideSearch = function () {
             this.set({
                 isShowSearch: false
             });
@@ -287,7 +287,7 @@ module.exports = Activity.extend({
 
         self.hotSearchAPI = new api.HotSearchAPI({
             checkData: false,
-            success: function(res) {
+            success: function (res) {
 
                 self.model.set({
                     hotSearch: res.data
@@ -303,13 +303,13 @@ module.exports = Activity.extend({
                 version: sl.appVersion,
                 platform: util.ios ? 1 : 2
             },
-            success: function(res) {
+            success: function (res) {
 
                 if (res.success && res.data.AVS_UPDATE_URL) {
                     var confirm = new Confirm({
                         content: res.data.AVS_UPDATE_MSG,
                         alwaysOpen: res.data.AVS_FORCE_FLAG,
-                        confirm: function() {
+                        confirm: function () {
                             bridge.update(res.data.AVS_UPDATE_URL, res.data.AVS_VERSION);
                         }
                     });
@@ -317,13 +317,13 @@ module.exports = Activity.extend({
                     confirm.show();
                 }
             },
-            error: function() {}
+            error: function () { }
         });
-        update.request().catch(function() {});
+        update.request().catch(function () { });
 
         this.stewardQtyApi = new api.StewardQtyAPI({
             checkData: false,
-            success: function(res) {
+            success: function (res) {
                 self.user.StewardNum = res.data;
                 userModel.set(self.user);
                 model.set('user.StewardNum', res.data);
@@ -334,7 +334,7 @@ module.exports = Activity.extend({
             url: '/api/settings/ad_list?name=launch&type=base64',
             check: false,
             checkData: false,
-            success: function(res) {
+            success: function (res) {
                 if (res && res.data && res.data.length) {
                     localStorage.setItem('LAUNCH_IMAGE', res.data[0].Src);
                 }
@@ -344,7 +344,7 @@ module.exports = Activity.extend({
 
         self.shopApi = new api.ActivityAPI({
             $el: self.$('.hm_shop'),
-            success: function(res) {
+            success: function (res) {
 
                 model.set({
                     activity: res.data,
@@ -363,7 +363,7 @@ module.exports = Activity.extend({
                         itemTemplate: '<img data-src="<%=src%>" data-forward="<%=url%>?from=%2f" />'
                     });
 
-                model.one('viewDidUpdate', function() {
+                model.one('viewDidUpdate', function () {
                     self.bindScrollTo(self.$('.js_shop_scroll:not(.s_binded)').addClass('s_binded'), {
                         vScroll: false,
                         hScroll: true,
@@ -383,7 +383,7 @@ module.exports = Activity.extend({
             url: '/api/prod/newproductlist',
             checkData: false,
             check: false,
-            success: function(res) {
+            success: function (res) {
                 if (res.success) {
                     model.set({
                         newproducts: res.data
@@ -391,7 +391,7 @@ module.exports = Activity.extend({
                 }
 
             },
-            error: function() {
+            error: function () {
 
             }
         }).load();
@@ -402,15 +402,15 @@ module.exports = Activity.extend({
             hScroll: true
         });
 
-        model.showCategories = function() {
+        model.showCategories = function () {
             self.cpCategory.show();
         }
 
-        Category.request(function() {
+        Category.request(function () {
 
-            Category.list(function(res, navs) {
+            Category.list(function (res, navs) {
 
-                res = util.find(res, function(item) {
+                res = util.find(res, function (item) {
                     return item.children;
                 })
 
@@ -422,7 +422,7 @@ module.exports = Activity.extend({
                 var cpCategory = new CpCategory({
                     data: res,
                     isHome: true,
-                    goto: function(e, id) {
+                    goto: function (e, id) {
                         cpCategory.hide();
                         self.forward("/all?id=" + id);
                     }
@@ -438,7 +438,7 @@ module.exports = Activity.extend({
 
             util.store('IS_SHOW_GUIDE', 1);
 
-            model.set('showGuide', true).next(function() {
+            model.set('showGuide', true).next(function () {
                 self.guideSlider = new Slider({
                     container: self.$('.hm_guide'),
                     itemTemplate: '<img class="guide<%=id%>" src="http://appuser.abs.cn/dest1.2.0/images/guide<%=id%>.jpg" />',
@@ -447,7 +447,7 @@ module.exports = Activity.extend({
                     }, {
                         id: 1
                     }],
-                    onChange: function(index) {}
+                    onChange: function (index) { }
                 });
             });
         }
@@ -455,14 +455,14 @@ module.exports = Activity.extend({
         this.bindScrollTo(this.$('.main:not(.js_shop)'));
 
         this.scroll = this.bindScrollTo(this.$('.js_shop'), {
-            refresh: function(resolve, reject) {
-                self.shopApi.load(function() {
+            refresh: function (resolve, reject) {
+                self.shopApi.load(function () {
                     resolve();
                 });
             }
         });
 
-        self.$open_msg = this.$('.open_msg').on($.fx.transitionEnd, function(e) {
+        self.$open_msg = this.$('.open_msg').on($.fx.transitionEnd, function (e) {
             if (!self.$open_msg.hasClass('show')) {
                 self.$open_msg.hide();
             }
@@ -470,7 +470,7 @@ module.exports = Activity.extend({
         this.bindScrollTo(self.$open_msg.find('.msg_bd'));
 
         var $launchImgs = this.$('.launch img');
-        var $mask = this.$('.home_mask').on($.fx.transitionEnd, function(e) {
+        var $mask = this.$('.home_mask').on($.fx.transitionEnd, function (e) {
             if ($mask.hasClass('toggle')) {
                 $mask.removeClass('toggle');
 
@@ -480,13 +480,13 @@ module.exports = Activity.extend({
             }
         });
 
-        setTimeout(function() {
+        setTimeout(function () {
             $mask.addClass('toggle');
 
             setTimeout(arguments.callee, 3200)
         }, 3200);
 
-        self.onResult("Login", function() {
+        self.onResult("Login", function () {
             var user = self.user = userModel.get();
 
             self.model.set({
@@ -498,10 +498,10 @@ module.exports = Activity.extend({
             self.doWhenLogin();
             self.refreshCart();
 
-        }).onResult("UserChange", function() {
+        }).onResult("UserChange", function () {
             self.requestUser();
 
-        }).onResult("Logout", function() {
+        }).onResult("Logout", function () {
             self.user = null;
             userModel.set(null);
             model.set({
@@ -510,16 +510,16 @@ module.exports = Activity.extend({
             });
             self.$('.footer li:nth-child(1)').trigger('tap');
 
-        }).onResult('CartChange', function() {
+        }).onResult('CartChange', function () {
             self.refreshCart();
         });
 
-        setInterval(function() {
+        setInterval(function () {
             self.getUnreadMsg();
 
         }, 30000);
 
-        this.listenTo($(this.model.refs.search), 'keydown', function(e) {
+        this.listenTo($(this.model.refs.search), 'keydown', function (e) {
             if (e.keyCode == 13) {
                 self.forward('/discovery/list?s=' + encodeURIComponent(e.target.value) + '&from=/');
                 e.preventDefault();
@@ -527,7 +527,7 @@ module.exports = Activity.extend({
             }
         });
 
-        this.listenTo($(this.model.refs.searchText), 'keydown', function(e) {
+        this.listenTo($(this.model.refs.searchText), 'keydown', function (e) {
             if (e.keyCode == 13) {
 
                 model.search(e.target.value);
@@ -536,7 +536,7 @@ module.exports = Activity.extend({
             }
         });
 
-        model.search = function(item) {
+        model.search = function (item) {
             var searchHistory = util.store('searchHistory') || [];
             var index = searchHistory.indexOf(item);
 
@@ -555,7 +555,7 @@ module.exports = Activity.extend({
 
     },
 
-    refreshCart: function() {
+    refreshCart: function () {
         if (this.user.PSP_CODE) {
             if (this.cart)
                 this.cart.cartApi.load();
@@ -571,10 +571,10 @@ module.exports = Activity.extend({
         }
     },
 
-    requestUser: function() {
+    requestUser: function () {
         var self = this;
 
-        userModel.request(util.store('ivcode') || '0000').then(function(res) {
+        userModel.request(util.store('ivcode') || '0000').then(function (res) {
             res.data.ID = res.data.UserID;
 
 
@@ -601,7 +601,7 @@ module.exports = Activity.extend({
                 //util.store('ivcode', null);
             }
 
-            util.isInApp && bridge.getDeviceToken(function(token) {
+            util.isInApp && bridge.getDeviceToken(function (token) {
 
                 if (token) {
                     new api.API({
@@ -611,14 +611,14 @@ module.exports = Activity.extend({
                             IMEI: !token ? 'CAN_NOT_GET' : (typeof token == 'string' ? token : token.token)
                         },
                         url: '/api/user/deviceToken',
-                        success: function() {},
-                        error: function() {}
+                        success: function () { },
+                        error: function () { }
 
                     }).load();
                 }
             });
 
-        }, function(err) {
+        }, function (err) {
             console.log(err);
             if (err) {
                 if (err.error_code == 503) {
@@ -631,7 +631,7 @@ module.exports = Activity.extend({
         });
     },
 
-    showMessageDialog: function(message) {
+    showMessageDialog: function (message) {
         var self = this;
         self.model.set('showTipStep', 1);
         self.$open_msg.show();
@@ -643,7 +643,7 @@ module.exports = Activity.extend({
         });
     },
 
-    showEnergy: function() {
+    showEnergy: function () {
         if (!this.user) return;
 
         var self = this;
@@ -675,7 +675,7 @@ module.exports = Activity.extend({
         }
     },
 
-    getUnreadMsg: function() {
+    getUnreadMsg: function () {
         var self = this;
 
         if (self.user && self.user.Auth) {
@@ -683,7 +683,7 @@ module.exports = Activity.extend({
                 UserID: self.user.ID,
                 Auth: self.user.Auth
 
-            }, function(res) {
+            }, function (res) {
                 if (res.success) {
                     Global.set('msg_count', res.count)
                 }
@@ -692,7 +692,7 @@ module.exports = Activity.extend({
         }
     },
 
-    doWhenLogin: function() {
+    doWhenLogin: function () {
         var self = this;
 
         userModel.setParam({
@@ -701,7 +701,7 @@ module.exports = Activity.extend({
         self.requestUser();
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
 
         if (this.user) {
@@ -709,13 +709,13 @@ module.exports = Activity.extend({
             this.doWhenLogin();
         }
 
-        setTimeout(function() {
+        setTimeout(function () {
             self.guideSlider && self.guideSlider.adjustWidth();
 
         }, 0);
 
         if (self.model.data.tab == 0) {
-            self.slider && setTimeout(function() {
+            self.slider && setTimeout(function () {
                 self.slider.adjustWidth();
             }, 400);
 
@@ -723,9 +723,9 @@ module.exports = Activity.extend({
         }
     },
 
-    onPause: function() {},
+    onPause: function () { },
 
-    onQueryChange: function() {
+    onQueryChange: function () {
 
         if (this.query.tab === '0') {
             this.$('.footer li:nth-child(1)').trigger('tap');
@@ -735,5 +735,5 @@ module.exports = Activity.extend({
         });
     },
 
-    onDestroy: function() {}
+    onDestroy: function () { }
 });
