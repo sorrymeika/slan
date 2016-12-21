@@ -10,11 +10,11 @@ var Toast = require('widget/toast');
 var appconfig = require('models/appconfig');
 
 var business = {
-    getThirdUrl: function () {
+    getThirdUrl: function() {
         return Http.post('/business/getThirdUrl');
     },
 
-    getAllBusinessAndUnread: function () {
+    getAllBusinessAndUnread: function() {
         var last_read_time = util.store('last_read_time');
         if (!last_read_time) {
             last_read_time = util.formatDate(Date.now());
@@ -23,7 +23,7 @@ var business = {
         return Http.post('/business/getAllBusinessAndUnread', {
             lastReadDate: util.formatDate(last_read_time)
 
-        }).then(function (res) {
+        }).then(function(res) {
             util.store('last_read_time', res.serverTime);
 
             var list = businessModel._('list');
@@ -46,7 +46,7 @@ var business = {
 
                 var ids = [];
 
-                list.data.forEach(function (item) {
+                list.data.forEach(function(item) {
                     var first = util.first(unreadNotifications, 'business_id', item.business_id);
 
                     if (first) {
@@ -58,7 +58,7 @@ var business = {
                     Http.post('/business/getNotificationTitlesByIds', {
                         ids: ids.join(',')
 
-                    }).then(function (res) {
+                    }).then(function(res) {
 
                         list.update(util.map(res.data, ['business_id', 'title', 'content', 'send_date']), 'business_id');
                     })
@@ -69,11 +69,14 @@ var business = {
         });
     },
 
-    getMail139: function () {
+    getMail139: function() {
         return Http.post('/business/getMail139');
     },
 
-    notificationsLoader: function (model, beforeRender) {
+    getHjbUrl: function() {
+        return Http.post('/business/getHjbUrl');
+    },
+    notificationsLoader: function(model, beforeRender) {
         return Loader.pageLoader({
             url: "/business/getNotifications",
             model: model,
@@ -81,7 +84,7 @@ var business = {
         });
     },
 
-    addBill: function (business_id, unitno, user_code, memo) {
+    addBill: function(business_id, unitno, user_code, memo) {
         return Http.post("/user_business/add", {
             unitno: unitno,
             business_id: business_id,
@@ -92,7 +95,7 @@ var business = {
         });
     },
 
-    updateBill: function (id, business_id, unitno, user_code, memo) {
+    updateBill: function(id, business_id, unitno, user_code, memo) {
         return Http.post("/user_business/update", {
             ubid: id,
             unitno: unitno,
@@ -102,19 +105,19 @@ var business = {
         });
     },
 
-    deleteUserBusiness: function (ubid) {
+    deleteUserBusiness: function(ubid) {
         return Http.post("/user_business/deleteById", {
             ubid: ubid
         });
     },
 
-    getUserBusiness: function (business_id) {
+    getUserBusiness: function(business_id) {
         return Http.post("/user_business/getUserBusiness", {
             business_id: business_id
         });
     },
 
-    queryBusiness: function (ubid) {
+    queryBusiness: function(ubid) {
         return Http.post("/user_business/queryBusiness", {
             id: ubid
         });
@@ -123,7 +126,7 @@ var business = {
 
 var redirect = {};
 
-redirect.jump = function (linkurl) {
+redirect.jump = function(linkurl) {
     var match;
 
     if (linkurl) {
@@ -160,45 +163,51 @@ redirect.jump = function (linkurl) {
     }
 }
 
-redirect.enterShop = function () {
+redirect.enterShop = function() {
     bridge.openInApp("福建移动营业厅", 'http://wap.fj.10086.cn/servicecb/touch/index.jsp');
 }
 
-redirect.enterHjb = function () {
-    bridge.openInApp("和聚宝", appconfig.get('hjbUrl'));
-}
+redirect.enterHjb = function() {
+    business.getHjbUrl().then(function(res) {
 
-redirect.enterQz = function () {
-    bridge.openInApp("12580海西求职平台", appconfig.get('qzUrl'));
-}
+        bridge.openInApp("和聚宝", res.data);
 
-var mail139Url;
-redirect.enterMail139 = function () {
-    business.getMail139().then(function (res) {
-        mail139Url = res.data;
-
-        setTimeout(function (params) {
-            bridge.openInApp('139邮箱', mail139Url);
-        }, 300)
-
-    }).catch(function (e) {
+    }).catch(function(e) {
         Toast.showToast(e.message);
     });
 }
 
-redirect.enterSc = function () {
+redirect.enterQz = function() {
+    bridge.openInApp("12580海西求职平台", appconfig.get('qzUrl'));
+}
+
+var mail139Url;
+redirect.enterMail139 = function() {
+    business.getMail139().then(function(res) {
+        mail139Url = res.data;
+
+        setTimeout(function(params) {
+            bridge.openInApp('139邮箱', mail139Url);
+        }, 300)
+
+    }).catch(function(e) {
+        Toast.showToast(e.message);
+    });
+}
+
+redirect.enterSc = function() {
     Application.back('/');
 
-    setTimeout(function () {
+    setTimeout(function() {
         $(window).trigger('tabchange_to_3');
 
     }, 400);
 }
 
-redirect.enterEnt = function () {
+redirect.enterEnt = function() {
     Application.back('/');
 
-    setTimeout(function () {
+    setTimeout(function() {
         $(window).trigger('tabchange_to_2');
 
     }, 400);

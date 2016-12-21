@@ -577,7 +577,6 @@ module.exports = Activity.extend({
         userModel.request(util.store('ivcode') || '0000').then(function (res) {
             res.data.ID = res.data.UserID;
 
-
             userModel.set(res.data);
 
             var user = self.user = userModel.get();
@@ -619,7 +618,7 @@ module.exports = Activity.extend({
             });
 
         }, function (err) {
-            console.log(err);
+            alert(err);
             if (err) {
                 if (err.error_code == 503) {
                     userModel.set(null);
