@@ -777,6 +777,10 @@ var util = {
         return style;
     },
 
+    fixFloat: function (f) {
+        return Math.round((typeof f === 'number' ? f : parseFloat(f || 0)) * 100) / 100;
+    },
+
     currency: function (str, p) {
         return (p === undefined || p === null ? '￥' : p) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
     },

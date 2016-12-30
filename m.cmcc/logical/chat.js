@@ -52,9 +52,13 @@ function keep() {
 
         setTimeout(keep, 1000);
 
+        keepStatus = KEEP_STATUS.SUCCESS;
+
     }).catch(function (e) {
         if (e.message == '无权限') {
-            Application.back('/login');
+            if (keepStatus == KEEP_STATUS.SUCCESS) {
+                Application.back('/login');
+            }
 
             setTimeout(keep, 60000);
         } else {
@@ -64,8 +68,22 @@ function keep() {
 }
 keep();
 
+var KEEP_STATUS = {
+    LOGIN: 1,
+    ERROR: 2,
+    SUCCESS: 3
+}
+
+var keepStatus = KEEP_STATUS.SUCCESS;
+
 var chat = Event.mixin({
     MESSAGETYPE: MESSAGETYPE,
+
+    KEEP_STATUS: KEEP_STATUS,
+
+    setKeepStatus: function (status) {
+        keepStatus = status;
+    },
 
     readMessage: function (friend_id) {
         var record = messagesList.getFriendLastMessage(friend_id);

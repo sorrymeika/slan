@@ -9,37 +9,43 @@ var popup = require('widget/popup');
 
 var userModel = require('models/user');
 var auth = require('logical/auth');
+var user = require('logical/user');
 
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '系统设置'
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
         Object.assign(model, {
 
-            clearCache: function() {
+            clearCache: function () {
                 Toast.showToast('清除成功');
             },
 
-            update: function() {
-                popup.alert({
-                    content: '<p class="ta_c">已经是最新版本，无需更新</p>'
-                })
+            update: function () {
+
+                user.getLatestVersion().then(function (res) {
+                    if (!res || !res.data) {
+                        popup.alert({
+                            content: '<p class="ta_c">已经是最新版本，无需更新</p>'
+                        });
+                    }
+                });
             },
 
-            logout: function() {
+            logout: function () {
                 popup.confirm({
                     content: '<p class="ta_c">确定退出当前帐号吗</p>',
-                    confirmAction: function() {
+                    confirmAction: function () {
                         this.hide();
 
                         self.setResult('LOGOUT');
@@ -60,20 +66,20 @@ module.exports = Activity.extend({
             }
         });
 
-        Promise.all([this.waitLoad()]).then(function(results) {
+        Promise.all([this.waitLoad()]).then(function (results) {
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

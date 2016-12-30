@@ -6,19 +6,19 @@
     <div class="ym_detail__bg cl_fff">
         <dl class="pt_m">
             <dt class="pl_xxl fs_m">当前可用云米</dt>
-            <dd class="ta_c fs_xxl">{amount}</dd>
+            <dd class="ta_c fs_xxl">{util.fixFloat(amount)}</dd>
         </dl>
     </div>
     <div class="fs_m lh_m ta_c cl_666">&lt;{util.formatDate(new Date(),'yyyy年MM月')}&gt;</div>
-    <div class="lh_m bg_fff ym_detail__overview"><span>收入：</span><b>+{ym_get}</b>
-        <span>支出：</span><em>{ym_use}</em>
-        <span>结余：</span><i>{ym_get+ym_use}</i>
+    <div class="lh_m bg_fff ym_detail__overview"><span>收入：</span><b>+{util.fixFloat(ym_get)}</b>
+        <span>支出：</span><em>{util.fixFloat(ym_use)}</em>
+        <span>结余：</span><i>{util.fixFloat(ym_get+ym_use)}</i>
     </div>
 
     <div class="ym_detail__list bg_fff" sn-repeat="item in data">
         <div class="hd flex fs_s">
             <p class="flex_0">{item.key.day}</p>
-            <p>{item.sum.amount>0?'收':'支'}：{item.sum.amount}</p>
+            <p>{item.sum.amount>0?'收':'支'}：{util.fixFloat(item.sum.amount)}</p>
         </div>
         <dl class="bd_b" sn-repeat="detail in item.group">
             <dt class="flex fs_l pl_m pr_m  pt_m">
@@ -33,7 +33,7 @@
                     detail.trade_type==9?'新人任务':
                     detail.trade_type==10?'摇一摇':
                     detail.trade_type==11?'兑换流量':'未知类型'}</p>
-                <p>{detail.amount>=0?'+'+detail.amount:detail.amount}</p>
+                <p>{detail.amount>=0?'+'+util.fixFloat(detail.amount):util.fixFloat(detail.amount)}</p>
             </dt>
             <dd class="flex fs_m pl_m pr_m  pb_m cl_666">
                 <p class="flex_0">无备注</p>

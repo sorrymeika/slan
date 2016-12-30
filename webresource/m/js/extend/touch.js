@@ -1,4 +1,4 @@
-﻿(function($) {
+﻿(function ($) {
     var touch = {},
         touchTimeout, tapTimeout, swipeTimeout, longTapTimeout,
         longTapDelay = 750,
@@ -36,7 +36,7 @@
         return e.type == 'mouse' + type;
     }
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         var now, delta, deltaX = 0,
             deltaY = 0,
             firstTouch,
@@ -44,7 +44,7 @@
             forClick;
 
         $(document)
-            .on(events[0], function(e) {
+            .on(events[0], function (e) {
                 deltaX = deltaY = 0;
                 firstTouch = e.type == 'mousedown' ? e : e.touches[0]
                 if (e.touches && e.touches.length === 1 && touch.x2) {
@@ -65,7 +65,7 @@
                 touch.last = now
                 longTapTimeout = setTimeout(longTap, longTapDelay)
             })
-            .on(events[1], function(e) {
+            .on(events[1], function (e) {
 
                 if (e.type == 'mousemove' && !('last' in touch)) return
                 firstTouch = e.type == 'mousemove' ? e : e.touches[0]
@@ -76,7 +76,7 @@
                 deltaX += Math.abs(touch.x1 - touch.x2)
                 deltaY += Math.abs(touch.y1 - touch.y2)
             })
-            .on(events[2], function(e) {
+            .on(events[2], function (e) {
                 forClick = null;
                 var changedTouch = e.type == 'mouseup' ? e : e.changedTouches[0];
 
@@ -93,19 +93,30 @@
                 }
 
                 // swipe
-                if (deltaX > 30 || deltaY > 30)
+                if (deltaX > 30 || deltaY > 30) {
 
-                    swipeTimeout = setTimeout(function() {
-                    touch.el.trigger('swipe')
-                    touch.el.trigger('swipe' + (swipeDirection(touch.x1, touch.x2, touch.y1, touch.y2)))
-                    touch = {}
-                }, 0)
+                    swipeTimeout = setTimeout(function () {
+                        if (touch.el) {
+                            touch.el.trigger('swipe')
+                            touch.el.trigger('swipe' + (swipeDirection(touch.x1, touch.x2, touch.y1, touch.y2)))
+                            touch = {}
+                        }
+
+                    }, 0)
+                }
 
                 // normal tap
-                else if ('last' in touch)
-
-                // don't fire tap when delta position changed by more than 30 pixels,
-                // for instance when moving to a point and back to origin
+                else if ('last' in touch) {
+                    forClick = {
+                        pageX: changedTouch.pageX,
+                        pageY: changedTouch.pageY,
+                        event: null,
+                        target: e.target,
+                        timestamp: Date.now()
+                    };
+                    
+                    // don't fire tap when delta position changed by more than 30 pixels,
+                    // for instance when moving to a point and back to origin
                     if (deltaX < 30 && deltaY < 30 && !e.cancelTap && touch.el[0] === e.target) {
                         // delay by one tick so we can cancel the 'tap' event if 'scroll' fires
                         // ('tap' fires before 'scroll')
@@ -118,13 +129,7 @@
                         event.cancelTouch = cancelAll
                         touch.el.trigger(event)
 
-                        forClick = {
-                            pageX: changedTouch.pageX,
-                            pageY: changedTouch.pageY,
-                            event: event,
-                            target: e.target,
-                            timestamp: Date.now()
-                        };
+                        forClick.event = event;
 
                         event.isPropagationStopped() && e.stopPropagation();
                         event.isDefaultPrevented() && e.preventDefault();
@@ -137,7 +142,7 @@
 
                         // trigger single tap after 250ms of inactivity
                         else {
-                            touchTimeout = setTimeout(function() {
+                            touchTimeout = setTimeout(function () {
                                 touchTimeout = null
                                 if (touch.el) touch.el.trigger('singleTap')
                                 touch = {}
@@ -147,17 +152,19 @@
                     } else {
                         touch = {}
                     }
+                }
                 deltaX = deltaY = 0
 
             })
             // when the browser window loses focus,
             // for example when a modal dialog is shown,
             // cancel all ongoing events
-            .on(events[3], cancelAll).on('click', function(e) {
+            .on(events[3], cancelAll)
+            .on('click', function (e) {
 
                 if (forClick && e.target != forClick.target &&
                     (Date.now() - forClick.timestamp) <= 500 &&
-                    !forClick.event.isDefaultPrevented() && !forClick.event.isPropagationStopped() &&
+                    (forClick.event ? !forClick.event.isDefaultPrevented() && !forClick.event.isPropagationStopped() : true) &&
                     forClick.target == document.elementFromPoint(forClick.pageX, forClick.pageY)) {
 
                     $(e.target).trigger($.Event('tap'))
@@ -173,8 +180,8 @@
     ;
     ['swipe', 'swipeLeft', 'swipeRight', 'swipeUp', 'swipeDown',
         'doubleTap', 'tap', 'singleTap', 'longTap'
-    ].forEach(function(eventName) {
-        $.fn[eventName] = function(callback) {
+    ].forEach(function (eventName) {
+        $.fn[eventName] = function (callback) {
             return this.on(eventName, callback)
         }
     })

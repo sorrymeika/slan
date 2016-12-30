@@ -5,7 +5,7 @@ var Component = require('../core/component');
 var Http = require('../core/http');
 var Page = require('./page'),
     isIE6 = util.ie && util.osVersion == 6,
-    compareData = function(v1, v2, asc) {
+    compareData = function (v1, v2, asc) {
         var flag;
         if (typeof v1 == 'number') {
             flag = asc ? v1 - v2 : (v2 - v1);
@@ -14,21 +14,21 @@ var Page = require('./page'),
         }
         return flag;
     },
-    fold = isIE6 ? function($el) {
+    fold = isIE6 ? function ($el) {
         $el.css({
             height: 0,
             marginTop: -1
         })
-    } : function() {
+    } : function () {
         $el.hide();
     },
-    spread = isIE6 ? function($el, height) {
+    spread = isIE6 ? function ($el, height) {
         $el.css({
             height: height,
             marginTop: ''
         });
 
-    } : function() {
+    } : function () {
         el.show();
     },
     ajaxOptions = ['url', 'beforeSend', 'success', 'error', 'type'];
@@ -36,7 +36,7 @@ var Page = require('./page'),
 
 
 
-var Cell = Event.extend(function(row, options) {
+var Cell = Event.extend(function (row, options) {
     var self = this,
         settings = row.grid.options;
 
@@ -76,7 +76,7 @@ var Cell = Event.extend(function(row, options) {
 
                 row.$el.addClass("grid_tree_fold");
 
-                $.each(children, function(i, item) {
+                $.each(children, function (i, item) {
                     row.grid.append(item, row.treeDeep + 1, row.treeId);
                 });
 
@@ -107,12 +107,12 @@ var Cell = Event.extend(function(row, options) {
         self.$textbox = $textbox;
         self.$body.append($textbox);
 
-        self.on('change', function(e, a) {
+        self.on('change', function (e, a) {
             this.$textbox.val(a);
             this.validate();
         });
 
-        self.validate = function() {
+        self.validate = function () {
             var error = false;
 
             if (options.emptyAble === false && this.$textbox.val() == "")
@@ -142,52 +142,52 @@ var Cell = Event.extend(function(row, options) {
 
     row.$el.append(self.$el);
 }, {
-    el: '<li class="grid_cell"></li>',
+        el: '<li class="grid_cell"></li>',
 
-    $: function(a) {
-        return this.$el.find(a);
-    },
+        $: function (a) {
+            return this.$el.find(a);
+        },
 
-    append: function(el) {
-        this.$body.append(el);
-        return this;
-    },
+        append: function (el) {
+            this.$body.append(el);
+            return this;
+        },
 
-    html: function(val) {
-        if (typeof val === "undefined")
-            return this.$body.html();
+        html: function (val) {
+            if (typeof val === "undefined")
+                return this.$body.html();
 
-        this.$body.html(options.format ? options.format(val) : val);
-        return this;
-    },
+            this.$body.html(options.format ? options.format(val) : val);
+            return this;
+        },
 
-    val: function(val) {
-        if (typeof a == "undefined")
-            return this.value;
+        val: function (val) {
+            if (typeof a == "undefined")
+                return this.value;
 
-        if (typeof val == "string" && /^\/Date\(\d+\)\/$/.test(val)) {
-            val = util.formatDate(val);
+            if (typeof val == "string" && /^\/Date\(\d+\)\/$/.test(val)) {
+                val = util.formatDate(val);
+            }
+
+            this.value = val;
+
+            if (this.options.bind) row.data[this.options.bind] = val;
+
+            if (this.$textbox) {
+                this.$textbox.val(val);
+
+            } else if (this.options.render) {
+                options.render.call(self, row.data, row.grid._data);
+            } else {
+                this.html(val);
+            }
+
+            this.trigger('change', val);
+            return this;
         }
+    })
 
-        this.value = val;
-
-        if (this.options.bind) row.data[this.options.bind] = val;
-
-        if (this.$textbox) {
-            this.$textbox.val(val);
-
-        } else if (this.options.render) {
-            options.render.call(self, row.data, row.grid._data);
-        } else {
-            this.html(val);
-        }
-
-        this.trigger('change', val);
-        return this;
-    }
-})
-
-var Row = function(grid, options) {
+var Row = function (grid, options) {
     this.grid = grid;
 
     this.$el = $(this.el).css({
@@ -204,7 +204,7 @@ Row.prototype = {
     data: null,
     selected: false,
 
-    select: function() {
+    select: function () {
         if (this.selected) return;
 
         this.selected = true;
@@ -219,7 +219,7 @@ Row.prototype = {
         this.grid.trigger('SelectRow', this);
     },
 
-    cancelSelect: function() {
+    cancelSelect: function () {
         if (!this.selected) return;
         this.selected = false;
         this.$el.removeClass("grid_row_cur");
@@ -242,24 +242,24 @@ Row.prototype = {
         }
     },
 
-    cell: function(i, column) {
+    cell: function (i, column) {
         if (column === undefined) return this.cells[i];
 
         this.cells[i] = new Cell(this, column);
         return this;
     },
 
-    append: function(column) {
+    append: function (column) {
         this.cells.push(new Cell(this, column));
         return this;
     },
 
-    spread: function() {
+    spread: function () {
         this.$el.find('.grid_spread').removeClass('grid_spread').addClass("grid_fold");
         this.childContainer.removeClass('grid_child_non').addClass("grid_child_con");
     },
 
-    fold: function() {
+    fold: function () {
         this.$el.find('.grid_fold').removeClass('grid_fold').addClass("grid_spread");
         this.childContainer.removeClass('grid_child_con').addClass("grid_child_non");
     }
@@ -267,7 +267,7 @@ Row.prototype = {
 
 
 var Grid = Component.extend({
-    constructor: function(options) {
+    constructor: function (options) {
         var self = this;
 
         self.options = options = $.extend(true, {
@@ -334,7 +334,7 @@ var Grid = Component.extend({
 
         self.on('SelectRow', options.onSelectRow);
 
-        $.each(options.columns, function(i, option) {
+        $.each(options.columns, function (i, option) {
             options.columns[i] = $.extend({
                 text: "",
                 bind: "",
@@ -375,7 +375,7 @@ var Grid = Component.extend({
                 page: 1,
                 pageSize: self.options.pageSize,
                 total: 0,
-                onChange: function(page) {
+                onChange: function (page) {
                     self.ajaxSettings.data.page = page;
                     self.load();
                 }
@@ -383,7 +383,7 @@ var Grid = Component.extend({
     },
 
     events: {
-        'click .grid_header .sortable': function(e) {
+        'click .grid_header .sortable': function (e) {
             var self = this,
                 $target = $(e.currentTarget),
                 ajaxData = self.ajaxSettings.data,
@@ -407,11 +407,11 @@ var Grid = Component.extend({
                 ajaxData.page = 1;
                 self.load();
             } else {
-                self._data.sort(function(a, b) {
+                self._data.sort(function (a, b) {
                     return compareData(a[bind], b[bind], asc);
                 });
 
-                self.rows.sort(function(a, b) {
+                self.rows.sort(function (a, b) {
                     var flag = compareData(a.data[bind], b.data[bind], asc);
                     if (flag > 0) {
                         b.$el.insertBefore(a.$el);
@@ -424,17 +424,17 @@ var Grid = Component.extend({
             return false;
         },
 
-        'click .grid_header .grid_spread,.grid_fold': function(e) {
+        'click .grid_header .grid_spread,.grid_fold': function (e) {
             var $target = $(e.currentTarget);
 
             if ($target.hasClass("grid_spread")) {
                 $target.removeClass("grid_spread").addClass("grid_fold");
-                $.each(this.rows, function(i, row) {
+                $.each(this.rows, function (i, row) {
                     row.spread();
                 });
             } else {
                 $target.removeClass("grid_fold").addClass("grid_spread");
-                $.each(this.rows, function(i, row) {
+                $.each(this.rows, function (i, row) {
                     row.fold();
                 });
             }
@@ -442,7 +442,7 @@ var Grid = Component.extend({
             return false;
         },
 
-        'click .grid_body .grid_spread,.grid_fold': function(e) {
+        'click .grid_body .grid_spread,.grid_fold': function (e) {
             var $target = $(e.currentTarget);
 
             if ($target.hasClass("grid_spread")) {
@@ -454,7 +454,7 @@ var Grid = Component.extend({
             return false;
         },
 
-        'click .js_grid_selector': function(e) {
+        'click .js_grid_selector': function (e) {
             var $target = $(e.currentTarget);
 
             this.$el.find("input[name='__gs_" + this.cid + "']")
@@ -465,7 +465,7 @@ var Grid = Component.extend({
             var fn = this.checked ? "select" : "cancelSelect";
             this.selectedRows.length = 0;
             this.selectedRow = false;
-            $.each(this.rows, function(i, item) {
+            $.each(this.rows, function (i, item) {
                 item[fn]();
             });
 
@@ -482,7 +482,7 @@ var Grid = Component.extend({
             return false;
         },
 
-        'click .grid_row': function(e) {
+        'click .grid_row': function (e) {
             var row = this.rows[$(e.currentTarget).data('index')];
             if (this.options.multiselect) {
                 if (e.target.name != "__gs_" + this.cid)
@@ -496,7 +496,7 @@ var Grid = Component.extend({
 
         },
 
-        'click .grid_tree': function(e) {
+        'click .grid_tree': function (e) {
             var self = this,
                 $row = $(e.currentTarget).closest('.grid_row'),
                 treeid = $row.data('treeid'),
@@ -509,7 +509,7 @@ var Grid = Component.extend({
 
             } else {
                 $row.removeClass("grid_tree_spread").addClass("grid_tree_fold");
-                $show.each(function(i, item) {
+                $show.each(function (i, item) {
                     item = $(item);
 
                     if (self.$body.find('[data-treeid="' + item.data('treeid').replace(/_\d+$/, '') + '"]').hasClass('grid_tree_fold')) {
@@ -521,14 +521,14 @@ var Grid = Component.extend({
             return false;
         },
 
-        'blur .grid_cell_textbox': function(e) {
+        'blur .grid_cell_textbox': function (e) {
             var $target = $(e.currentTarget);
 
             this.cell($target.data('row'), $target.data('cell')).validate();
             return false;
         },
 
-        'click .grid_selector': function(e) {
+        'click .grid_selector': function (e) {
 
             if (this.options.multiselect) {
                 var target = e.currentTarget,
@@ -542,16 +542,16 @@ var Grid = Component.extend({
         'click .grid_search': 'search'
     },
 
-    cell: function(row, column) {
+    cell: function (row, column) {
         return this.rows[row].cells[column];
     },
 
     ajaxSettings: {},
 
     el: '<div class="grid_cont"><div class="grid"><div class="grid_border_r"><div class="grid_header_cont"><ol class="grid_header"></ol></div><div class="grid_body"></div></div></div></div>',
-    load: function() {},
+    load: function () { },
 
-    adjustWidth: function() {
+    adjustWidth: function () {
         var options = this.options,
             length = options.columns.length - 1,
             percent = 0,
@@ -561,7 +561,7 @@ var Grid = Component.extend({
             width,
             widths = [];
 
-        $.each(options.columns, function(i, column) {
+        $.each(options.columns, function (i, column) {
             column.width = parseInt(column.width);
             if (!column.hide) total += column.width;
         });
@@ -577,13 +577,13 @@ var Grid = Component.extend({
         this.columnWidths = widths;
     },
 
-    createHead: function() {
+    createHead: function () {
         var self = this,
             options = self.options,
             columnWidths = self.columnWidths,
             columnWidth;
 
-        $.each(options.columns, function(i, column) {
+        $.each(options.columns, function (i, column) {
             var columnWidth = typeof columnWidths[i] == "number" ? columnWidths[i] + '%' : columnWidths[i],
                 headCell = $("<li></li>"),
                 text;
@@ -622,13 +622,13 @@ var Grid = Component.extend({
         });
     },
 
-    msg: function(msg) {
+    msg: function (msg) {
         var height = this.$body[0].offsetHeight || 100;
 
         this.$body.html('<div style="border-bottom: 1px solid #cdcdcd;height:' + height + 'px;line-height:' + height + 'px;text-align:center">' + msg + '</div>');
     },
 
-    data: function(data) {
+    data: function (data) {
         var self = this;
 
         if (data === undefined) return self._data;
@@ -642,12 +642,12 @@ var Grid = Component.extend({
 
         self.$body.html("");
 
-        $.each(data, function(i, item) {
+        $.each(data, function (i, item) {
             self.append(item);
         });
     },
 
-    append: function(item, treeDeep, parentTreeId) {
+    append: function (item, treeDeep, parentTreeId) {
         var self = this,
             options = self.options,
             row = new Row(self, {
@@ -664,7 +664,7 @@ var Grid = Component.extend({
             row.childContainer = childContainer;
             row.children = [];
 
-            $.each(options.children, function(i, child) {
+            $.each(options.children, function (i, child) {
                 if (typeof child.render === "function") {
                     row.children.push(child.render(childContainer, item, row));
                 } else {
@@ -690,31 +690,34 @@ var Grid = Component.extend({
             });
         }
 
-        $.each(options.columns, function(i, column) {
+        $.each(options.columns, function (i, column) {
             row.append(column);
         });
 
         self.$body.append(row.$el);
     },
 
-    load: function() {
+    load: function () {
         var self = this,
             ajaxSettings = self.ajaxSettings,
             param = ajaxSettings.data;
 
-        self.msg("正在载入...");
-
         if (self.page)
             self.page.clear();
 
-        if (ajaxSettings.beforeSend) ajaxSettings.beforeSend.call(self, param);
+        if (ajaxSettings.beforeSend) {
+            if (false === ajaxSettings.beforeSend.call(self, param))
+                return self;
+        }
+
+        self.msg("正在载入...");
 
         new Http({
             url: ajaxSettings.url,
             method: ajaxSettings.type || 'POST',
             params: param,
 
-            success: function(res) {
+            success: function (res) {
                 if (res.success) {
                     self.data(res.data);
 
@@ -732,7 +735,7 @@ var Grid = Component.extend({
                 } else
                     self.msg(typeof res.message === 'string' ? res.message : JSON.stringify(res.message));
             },
-            error: function(e) {
+            error: function (e) {
                 if (ajaxSettings.error) ajaxSettings.error.call(self, e);
                 else self.msg(e.message)
             }
@@ -742,7 +745,7 @@ var Grid = Component.extend({
     },
 
     //@options=ajaxSettings
-    search: function(options) {
+    search: function (options) {
         var self = this,
             ajaxSettings = $.extend(true, {}, self.ajaxSettings, !options || options.target ? {} : options);
 
@@ -753,7 +756,7 @@ var Grid = Component.extend({
         if (self.options.pageEnabled) param.page = 1, param.pageSize = self.options.pageSize;
 
         if (self.controls)
-            $.each(self.controls, function(key, item) {
+            $.each(self.controls, function (key, item) {
                 var val = item.$el.val();
                 if (item.type == "calendar") {
                     if (val) {
@@ -772,7 +775,11 @@ var Grid = Component.extend({
         return self.load();
     },
 
-    setParam: function(key, val) {
+    getParam: function (key) {
+        return this.controls[key].$el.val();
+    },
+
+    setParam: function (key, val) {
 
         var attrs;
         if (!val)
@@ -788,7 +795,7 @@ var Grid = Component.extend({
         return this;
     },
 
-    createSearch: function() {
+    createSearch: function () {
         var self = this,
             options = this.options.search;
 
@@ -802,7 +809,7 @@ var Grid = Component.extend({
             data = options.data;
 
         if (data) {
-            $.each(data, function(key, item) {
+            $.each(data, function (key, item) {
                 if ($.isPlainObject(item)) {
                     controls[key] = item;
                     data[key] = "";
@@ -820,7 +827,7 @@ var Grid = Component.extend({
         var $search = $('<div class="search"></div>'),
             visible = false;
 
-        $.each(controls, function(key, option) {
+        $.each(controls, function (key, option) {
 
             option = $.extend({
                 label: '',
@@ -859,7 +866,7 @@ var Grid = Component.extend({
 
                 if (option.type == "calendar") {
                     input = $('<input name="' + name + '" class="' + option.className + '" type="text"/>');
-                    seajs.use(['components/datepicker'], function() {
+                    seajs.use(['components/datepicker'], function () {
                         input.datePicker($.extend({}, option.options, {
                             clickInput: true
                         }));
@@ -885,7 +892,7 @@ var Grid = Component.extend({
                             selectOptions.data = [sd];
                         }
 
-                        option.options = selectOptions.data.map(function(item) {
+                        option.options = selectOptions.data.map(function (item) {
                             return {
                                 text: item[selectOptions.text],
                                 value: item[selectOptions.value]
@@ -894,8 +901,8 @@ var Grid = Component.extend({
                     }
 
                     if (option.options)
-                        $.each(option.options, function(j, item) {
-                            input.each(function() {
+                        $.each(option.options, function (j, item) {
+                            input.each(function () {
                                 this.options.add(new Option(item.text, item.value));
                             });
                         });
@@ -922,7 +929,7 @@ var Grid = Component.extend({
         if (this.selectsOptions.length) {
             self.updateSelects();
 
-            this.$el.on('change', 'input,select', function() {
+            this.$el.on('change', 'input,select', function () {
                 self.updateSelects();
             });
         }
@@ -938,14 +945,14 @@ var Grid = Component.extend({
         self.$el.prepend($search);
     },
 
-    updateSelects: function() {
+    updateSelects: function () {
         var self = this;
 
-        this.selectsOptions.forEach(function(selectOptions) {
+        this.selectsOptions.forEach(function (selectOptions) {
             var params = {};
             var willReturn = false;
 
-            selectOptions.params && Object.keys(selectOptions.params).forEach(function(key) {
+            selectOptions.params && Object.keys(selectOptions.params).forEach(function (key) {
                 var field = selectOptions.params[key];
                 var value = self.controls[field].$el.val();
                 params[key] = value;
@@ -962,8 +969,8 @@ var Grid = Component.extend({
             selectOptions.paramsId = paramsId;
 
 
-            Http.post(selectOptions.url, params).then(function(res) {
-                var options = selectOptions.data.concat(res.data).map(function(item) {
+            Http.post(selectOptions.url, params).then(function (res) {
+                var options = selectOptions.data.concat(res.data).map(function (item) {
                     return {
                         text: item[selectOptions.text],
                         value: item[selectOptions.value]
@@ -973,7 +980,7 @@ var Grid = Component.extend({
                 var select = self.controls[selectOptions.field].$el[0];
                 select.options.length = 0;
 
-                $.each(options, function(j, item) {
+                $.each(options, function (j, item) {
                     select.options.add(new Option(item.text, item.value));
                 });
 

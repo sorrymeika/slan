@@ -618,7 +618,6 @@ module.exports = Activity.extend({
             });
 
         }, function (err) {
-            alert(err);
             if (err) {
                 if (err.error_code == 503) {
                     userModel.set(null);
@@ -709,13 +708,13 @@ module.exports = Activity.extend({
         }
 
         setTimeout(function () {
-            self.guideSlider && self.guideSlider.adjustWidth();
+            self.guideSlider && (self.guideSlider.adjustWidth ? self.guideSlider.adjustWidth() : self.guideSlider._adjustWidth());
 
         }, 0);
 
         if (self.model.data.tab == 0) {
             self.slider && setTimeout(function () {
-                self.slider.adjustWidth();
+                self.slider.adjustWidth ? self.slider.adjustWidth() : self.slider._adjustWidth();
             }, 400);
 
             self.scroll && self.scroll.get('.js_shop').imageLazyLoad();

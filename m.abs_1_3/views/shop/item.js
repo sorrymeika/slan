@@ -260,6 +260,7 @@ module.exports = Activity.extend({
                 console.log(res.data);
                 res.data.PSV_QTY = res.psvqty;
                 self.model.set({
+                    full_amount: res.full_amount,
                     data: res.data
                 });
 
@@ -358,6 +359,7 @@ module.exports = Activity.extend({
 
     onShow: function () {
         var self = this;
+        self.user = userModel.get();
 
         self.model.set({
             back: self.swipeRightBackAction

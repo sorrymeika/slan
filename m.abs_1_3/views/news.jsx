@@ -92,7 +92,7 @@ A：使用优惠券订单，如非质量问题，不支持退货退款。<br/>
                     </div>);
                 break;
             default:
-                title = "ABS家居";
+                title = this.route.query.title || "ABS家居";
                 
                 var $main=$(<div class="main"></div>).appendTo(self.$el);
                 

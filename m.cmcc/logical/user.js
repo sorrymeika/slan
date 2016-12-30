@@ -5,6 +5,7 @@ var Http = require('core/http');
 var userModel = require('models/user');
 var auth = require('logical/auth');
 var Loader = require('widget/loader');
+var popup = require('widget/popup');
 
 var FAVORITE_TYPE = {
     QUAN: 2,
@@ -13,6 +14,31 @@ var FAVORITE_TYPE = {
 
 var User = {
     FAVORITE_TYPE: FAVORITE_TYPE,
+
+    getLatestVersion: function () {
+        return Http.post('/user/getLatestVersion', {
+            device: util.android ? 'android' : 'iOS',
+            version: sl.appVersionCode
+
+        }).then(function (res) {
+
+            if (res && res.data) {
+
+                popup.confirm({
+                    content: res.data.content,
+                    confirmText: '立即升级',
+                    confirmAction: function () {
+                        this.hide();
+                        bridge.update(util.android ? sl.resource(res.data.android_url) : res.data.ios_url, res.data.version);
+                    }
+                });
+            }
+
+            return res;
+
+        }).catch(function (e) {
+        });
+    },
 
     set: function (type, value) {
         var params = {};

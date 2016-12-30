@@ -114,7 +114,7 @@ module.exports = Activity.extend({
             var data = this.get('current');
 
             if (!data) {
-                if (this.get('next')) {
+                if (this.get('next.yunmi_id')) {
                     $(model.refs.timeout).show();
                     $(model.refs.timeoutMask).show();
 
@@ -129,7 +129,7 @@ module.exports = Activity.extend({
             ym.receiveYunmi(data.yunmi_id).then(function (res) {
                 model.set({
                     current: null,
-                    today_amount: model.get('today_amount') + data.amount,
+                    today_get_amount: model.get('today_get_amount') + data.amount,
                     amount: model.get('amount') + data.amount
                 });
 
@@ -192,12 +192,14 @@ module.exports = Activity.extend({
                     var next = model.get('next');
                     var timeLeft = next.start_date - (Date.now() - next.timeFix);
 
-                    if (timeLeft == 0) {
+                    if (timeLeft <= 0) {
                         if (self.timer) {
                             clearInterval(self.timer);
                             self.timer = null;
                         }
                         self.getYunmi();
+                        model.hideTimeout();
+                        return;
                     }
 
                     timeLeft = util.timeLeft(timeLeft);
@@ -209,7 +211,7 @@ module.exports = Activity.extend({
 
             model.set({
                 amount: results[0].amount,
-                today_amount: results[0].today_amount,
+                today_get_amount: results[0].today_get_amount,
                 current: current,
                 next: next
             });
@@ -263,11 +265,11 @@ module.exports = Activity.extend({
 
                 }).join(',')).then(function (res) {
 
-                    shakeResult.update(res.data.map(function () {
+                    shakeResult.update(res.data.map(function (item) {
                         return {
-                            user_id: user_id,
-                            amount: amount,
-                            yunmi_id: yunmi_id
+                            user_id: item.user_id,
+                            amount: item.amount,
+                            yunmi_id: item.yunmi_id
                         }
 
                     }), 'user_id');

@@ -39,6 +39,10 @@ function startApp(routes, resourceMapping) {
                 title: '首页',
                 url: '/'
             }, {
+                title: 'app版本管理',
+                url: '/app_version/list'
+
+            }, {
                 title: '国家/省/市管理',
                 url: '/country/index',
                 children: [{
@@ -67,11 +71,19 @@ function startApp(routes, resourceMapping) {
                 children: []
             }, {
                 title: '用户管理',
-                url: '/userinfo/index'
-            }, {
-                title: '云米管理',
-                url: '/user_yunmi/index',
+                url: '/userinfo/index',
                 children: [{
+                    title: '白名单管理',
+                    url: '/promission/list',
+                }]
+            }, {
+
+                title: '导入云米查询',
+                url: '/user_yunmi/search',
+                children: [{
+                    title: '云米时段管理',
+                    url: '/user_yunmi/index',
+                }, {
                     title: '添加云米时段',
                     url: '/user_yunmi/add'
                 }]
@@ -108,6 +120,9 @@ function startApp(routes, resourceMapping) {
                 }, {
                     title: '和多号',
                     url: '/notification/easy/100046'
+                }, {
+                    title: '和留言',
+                    url: '/notification/easy/100045'
                 }]
             }, {
                 title: '新闻/广告位管理',

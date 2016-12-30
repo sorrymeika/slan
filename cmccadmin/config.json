@@ -32,6 +32,7 @@
         "/quan_msgs/index": "quan_msgs/index",
         "/login_history/index/{user_id:\\d+}": "/login_history/index",
         "/user_yunmi/index": "/user_yunmi/index",
+        "/user_yunmi/search": "/user_yunmi/search",
         "/user_yunmi/add": "/user_yunmi/add",
 
         "/business/index": "/business/business",
@@ -42,6 +43,13 @@
         "/notification/add": "/notification/add_notification",
         "/notification/easy/{id:\\d+}/{type:-*\\d+}": "/notification/add_notifyeasy",
         "/notification/easy/{id:\\d+}": "/notification/add_notifyeasy",
+
+        "/promission/list": "/promission_list/promission_list",
+        "/promission/add": "/promission_list/add_promission_list",
+
+        "/app_version/list": "/app_version/app_version",
+        "/app_version/add": "/app_version/add_app_version",
+        "/app_version/update/{version:.+}": "/app_version/update_app_version",
 
         "/news/index": "/news/news",
         "/news/add": "/news/add_news",

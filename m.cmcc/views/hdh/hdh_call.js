@@ -59,7 +59,7 @@ module.exports = Activity.extend({
 
             if (!number) return;
 
-            bridge.system.openPhoneCall((subPhoneList.length ? "125831" : '') + number);
+            bridge.system.openPhoneCall((subPhoneList.length ? "12583" + (subPhoneList.indexOf(number) + 1) : '') + number);
         }
 
         var loader = this.loader = new Loader(this.$el);

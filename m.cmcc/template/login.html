@@ -9,11 +9,10 @@
         </li>
         <li class="flex">
             <div class="icon-msg ml_s"></div>
-            <input class="flexitem ml_s" placeholder="请输入短信验证码" sn-model="password" type="text" />
+            <input class="flexitem ml_s" placeholder="请输入短信验证码" sn-model="password" type="password" />
             <button class="btn_s ml_s mr_s" sn-tap="this.sendSms()" disabled="{smsTime>0}">{smsTime<=0?'获取验证码':(smsTime+'秒后重发')}</button>
         </li>
     </ul>
-
     <div class="mg_m fs_m mb_xxl"><span class="checkbox {agree?'checked':''}" sn-tap="agree=!agree"></span><span sn-tap="agree=!agree" class="va_m">我已阅读并同意<a href="/licence" class="cl_app">《八闽生活用户使用协议》</a></span></div>
     <div class="mg_m"><button class="btn_xl" sn-tap="this.login()">立即登录</button></div>
 </div>

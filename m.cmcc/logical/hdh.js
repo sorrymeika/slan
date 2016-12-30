@@ -63,6 +63,12 @@ var hdh = Event.mixin({
         return post('/user_hdh/getPoolsub');
     },
 
+    bindsub: function (subphone) {
+        return post('/user_hdh/bindsub', {
+            subphone: subphone
+        });
+    },
+
     bindEntitySms: function (subphone) {
         return post('/user_hdh/bindEntitySms', {
             subphone: subphone

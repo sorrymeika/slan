@@ -266,6 +266,10 @@ define(function(require, exports, module) {
             },
             update: function(updateUrl, versionName, f) {
 
+                if (!updateUrl) {
+                    return;
+                }
+
                 if (isAndroid) {
                     hybrid('updateApp', {
                         downloadUrl: updateUrl,

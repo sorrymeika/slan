@@ -24,7 +24,7 @@
             </div>
         </div>
         <ul class="pd_sign top_bottom_border">
-            <li class="icon-has">满99包邮</li>
+            <li class="icon-has">满{full_amount||99}包邮</li>
             <li class="icon-has" sn-if="data.XPR_RTN_DAYS">{data.XPR_RTN_DAYS}天退换货保障</li>
         </ul>
         <div class="pd_select_plus" sn-if="{Package.PPG_ID}" data-forward="{isLogin?'/news/package'+Package.PPG_ID+'?from='+url:('/login?success='+url)}">

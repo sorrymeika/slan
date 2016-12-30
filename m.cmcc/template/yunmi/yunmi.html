@@ -7,7 +7,7 @@
         <div class="flex">
             <dl class="flex_0">
                 <dt class="pt_m_rem">云米总额</dt>
-                <dd class="pt_l_rem fs_xl fw_b">{amount||0}</dd>
+                <dd class="pt_l_rem fs_xl fw_b">{Math.round((amount||0)*100)/100}</dd>
             </dl>
             <dl class="flex_0" sn-tap="this.receiveYunmi()">
                 <dt class="ym-point-rem pt_s_rem">
@@ -17,7 +17,7 @@
             </dl>
             <dl class="flex_0">
                 <dt class="pt_m_rem">当日获得</dt>
-                <dd class="pt_l_rem fs_xl fw_b">{today_get_amount||0}</dd>
+                <dd class="pt_l_rem fs_xl fw_b">{Math.round((today_get_amount||0)*100)/100}</dd>
             </dl>
         </div>
         <div class="ta_c fs_s pb_m_rem" data-forward="/yunmi/detail">点击查看收支明细</div>
@@ -108,5 +108,5 @@
 </div>
 <div class="hm-timeout g_center" ref="timeout" style="display:none">
     <div class="close" sn-tap="this.hideTimeout()"></div>
-    <div class="ft">还有{next.timeLeft}分钟后才能收获</div>
+    <div class="ft">还有{next.timeLeft}秒后才能收获</div>
 </div>

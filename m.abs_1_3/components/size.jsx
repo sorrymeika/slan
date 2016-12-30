@@ -138,7 +138,7 @@ var Month = Model.extend({
 			}
 
 			self.cartAddAPI.setParam({
-				pspcode: self.user.PSP_CODE,
+				pspcode: user.PSP_CODE,
 				prd: item.PRD_ID,
 				qty: self.get('qty')
 
@@ -166,7 +166,7 @@ var Month = Model.extend({
 
 	initialize: function () {
 		var self = this;
-		self.user = util.store('user');
+		self.user = userModel.get();
 
 		this.bindScrollTo(self.refs.content);
 

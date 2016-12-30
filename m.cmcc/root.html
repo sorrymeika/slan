@@ -41,7 +41,6 @@
     <script src="anim/default.js"></script> }
     <script>
         window.onerror = function(a,b,c,d){
-            alert([a,b,c,d]);
         };
 
         seajs.config({
@@ -53,11 +52,12 @@
         });
 
         seajs.use(['entry', '$', 'util'], function(entry, $, util) {
-            var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)/);
+            var matchUA = navigator.userAgent.match(/SLApp ([0-9\.]+)\((\d+)\)/);
             sl.isDebug = @debug;
             sl.buildVersion = @(Date.now());
             sl.isInApp = util.isInApp = !!matchUA;
             sl.appVersion = matchUA ? matchUA[1] : '1.0.0';
+            sl.appVersionCode = matchUA ? matchUA[2] : '1';
             sl.resources = "@(resources)";
             sl.resource = function(src) {
                 if (!src || src.indexOf('http://') == 0 || src.indexOf('https://') == 0 || src.indexOf("data:image") == 0) {

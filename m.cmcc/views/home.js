@@ -48,12 +48,24 @@ module.exports = Activity.extend({
     },
 
     onCreate: function () {
+
+        // $.ajax({
+        //     type: 'POST',
+        //     url: "http://bmsh.wxcs.cn/manage/notification/receiveWeibo",
+        //     contentType: 'application/json',
+        //     data: JSON.stringify({ "operation_in": { "content": { "request": { "request_time": "20161229163841714", "request_seq": "329503856438", "msisdn": "15705958061", "notify_type": "2", "notify": { "home_city": "592", "dun_type": "2", "useble_balance": "1970", "special_balance": "990", "unuseble_balance": "0", "pre_month_owing": "0", "this_month_owing": "0", "lagging": "0", "defer_cycle": "2", "defer_limit_amout": "10000" } } } } })
+        // });
+
         var self = this;
         var exists = function (i) {
             console.log('exists', i);
             return i <= 599 ? true : false;
         }
+        setTimeout(function () {
+            userLogical.getLatestVersion();
+        }, 1000);
 
+        //二分法查找
         var length = 1003;
 
         var rangeStart = 1;
@@ -251,8 +263,8 @@ module.exports = Activity.extend({
         model.receiveYunmi = function () {
             var data = this.get('currentYunmi');
 
-            if (!data) {
-                if (this.get('next')) {
+            if (!data || !data.yunmi_id) {
+                if (this.get('next.yunmi_id')) {
                     $(model.refs.timeout).show();
                     $(model.refs.timeoutMask).show();
 
@@ -265,7 +277,7 @@ module.exports = Activity.extend({
             loader.showLoading();
 
             ym.receiveYunmi(data.yunmi_id).then(function (res) {
-                Toast.showToast("恭喜你领取" + data.amount + "云米");
+                Toast.showToast("恭喜你领取了" + data.amount + "云米");
                 model.set({
                     currentYunmi: null
                 });
@@ -366,12 +378,14 @@ module.exports = Activity.extend({
                     var next = model.get('next');
                     var timeLeft = next.start_date - (Date.now() - next.timeFix);
 
-                    if (timeLeft == 0) {
+                    if (timeLeft <= 0) {
                         if (self.timer) {
                             clearInterval(self.timer);
                             self.timer = null;
                         }
                         self.getYunmi();
+                        model.hideTimeout();
+                        return;
                     }
 
                     timeLeft = util.timeLeft(timeLeft);

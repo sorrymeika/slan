@@ -279,6 +279,9 @@ create table user_yunmi (--云米时段
 create sequence user_yunmi_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 
+--update user_yunmi set end_date=end_date+(1/24) where start_date=end_date;
+
+
 create table yunmi_trade (--云米交易明细
     trade_id number(12) primary key,--交易ID
     trade_no varchar(32),--交易码
@@ -315,7 +318,7 @@ create table user_ext (--用户扩展信息
 create table yunmi_redbag (--云米红包
     redbag_id number(12) primary key,--红包ID
     trade_id number(12),--交易ID
-    amount number(10),--红包云米数量
+    amount number(10,2),--红包云米数量
     user_id number(10),--发红包的用户
     type number(2),--红包类型 --options=1:普通红包,2:手气红包 --formType=select
     status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
@@ -336,7 +339,7 @@ create table yunmi_redbag_detail (--手气红包领取记录
     redbag_id number(12),--红包ID
     trade_id number(12),--交易ID
     status number(2),--红包状态 --options=1:已领取,2:未领取 --formType=select
-    amount number(10),--红包云米数量
+    amount number(10,2),--红包云米数量
     friend_id number(10)--领红包的好友ID
 ) tablespace cmccuser;
 create sequence yunmi_redbag_detail_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
@@ -348,7 +351,7 @@ create table user_hdh (--和多号
     user_id number(10),--用户编号
     subphone varchar(11),--副号
     alias varchar(20),--备注
-    type number(1),--类型 --options=1:虚拟副号码,2:实体副号码,3:默认虚拟副号,3:默认实体副号码
+    type number(1),--类型 --options=1:虚拟副号码,2:实体副号码,3:默认虚拟副号,4:默认实体副号码
     sort number(2),--排序序号
     business_state number(1),--副号码业务状态 --options=1:正常,2:预开户,3:申请中,4:取消中
     state number(2),--副号码功能状态 --options=1:逻辑开机,2:逻辑关机和取消托管,3:限制语音呼入,4:限制短、彩信接收,5:限制语音呼入和短、彩信接收
@@ -392,6 +395,12 @@ insert into business (business_id,business_name,secret_key,type) values (100022,
 insert into business (business_id,business_name,secret_key,type) values (100026,'和聚宝','4411d2e0eddc54cb19ef568443257efb',2);
 insert into business (business_id,business_name,secret_key,type) values (100043,'139邮箱','4411d2e0eddc54cb19ef568443257efb',1);
 
+insert into business (business_id,business_name,secret_key,type) values (100045,'和留言','4411d2e0eddc54cb19ef568443257efb',1);
+
+insert into business (business_id,business_name,secret_key,type) values (100004,'水费','4411d2e0eddc54cb19ef568443257efb',2);
+insert into business (business_id,business_name,secret_key,type) values (100005,'电费','4411d2e0eddc54cb19ef568443257efb',2);
+
+
 create table notification (--消息提醒
     notify_id number(12) primary key,--自增ID
     title varchar(140),--提醒标题
@@ -413,10 +422,6 @@ alter table user_yunmi add account varchar(20);
 
 --update user_yunmi a set a.user_id=(select b.user_id from account b where b.account=a.account)  where (a.user_id=0 or a.user_id is null) and a.account!='' and a.account is not null
 
-
-
-insert into business (business_id,business_name,secret_key,type) values (100004,'水费','4411d2e0eddc54cb19ef568443257efb',2);
-insert into business (business_id,business_name,secret_key,type) values (100005,'电费','4411d2e0eddc54cb19ef568443257efb',2);
 
 create table user_business (
     ubid number(12) primary key,
@@ -458,13 +463,38 @@ create sequence news_category_seq minvalue 1 maxvalue 999999 start with 10000 in
 
 insert into news_category (category_id,category_name,type,def_news_type) values (1,'首页banner',3,2);
 
+insert into news_category (category_id,category_name,type,def_news_type) values (2,'服务大厅-生活提醒',3,2);
+insert into news_category (category_id,category_name,type,def_news_type) values (3,'服务大厅-通信提醒',3,2);
+
+
+
+alter table yunmi_redbag_detail modify amount number(10,2);
+alter table yunmi_redbag modify amount number(10,2);
 
 -----------------------------
 --<<2016-12-16 up to date here
 -----------------------------
 
-insert into news_category (category_id,category_name,type,def_news_type) values (2,'服务大厅-生活提醒',3,2);
-insert into news_category (category_id,category_name,type,def_news_type) values (3,'服务大厅-通信提醒',3,2);
+
+create table promission_list (--黑白名单
+    promission_id number(8) primary key,--ID
+    account varchar(40),--账号
+    status number(2),--状态 --options=1:黑名单,2:白名单 --formType=select
+    type number(1)--类型 --options=1:完全匹配,2:正则匹配
+) tablespace cmccuser;
+
+create sequence promission_list_seq minvalue 1 maxvalue 99999999 start with 1 increment by 1;
+
+create table app_version (--app版本
+    version varchar(20) primary key,--版本号
+    ios_version number(6),--iOS版本id
+    ios_url varchar(300),--ios下载地址
+    android_version number(6),--android版本id
+    android_url varchar(300),--android下载地址 --type=file --ext=apk
+    content varchar(1000)--版本信息
+) tablespace cmccuser;
+
+
 -----------------------------
 -----------------------------
 
@@ -489,11 +519,5 @@ create table call_black (--拨号黑名单
 ) tablespace cmccuser;
 create sequence call_black_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
-
-
-create table notification_tag (--消息提醒标签
-    tag_id number(12) primary key,--标签ID
-    tag_name number(12)--标签名
-) tablespace cmccuser;
 
 

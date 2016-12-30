@@ -12,7 +12,7 @@ var chat = require('logical/chat');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
@@ -21,22 +21,22 @@ module.exports = Activity.extend({
             friends: []
         });
 
-        this.onResult('select_redbag_user', function(e, friends) {
+        this.onResult('select_redbag_user', function (e, friends) {
             model._('friends').set(friends);
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.selectFriends = function() {
+        model.selectFriends = function () {
             self.forward("/yunmi/select_user", {
                 type: 1,
                 friends: model._('friends')
             });
         }
 
-        model.sendRedbag = function() {
+        model.sendRedbag = function () {
             var memo = this.get('memo') || "恭喜发财，大吉大利！";
             var amount = this.get('send_amount');
             var qty = this.get('qty');
@@ -45,7 +45,7 @@ module.exports = Activity.extend({
             if (!amount) {
                 Toast.showToast("请填写云米金额");
                 return;
-            } else if (!/^\d+$/.test(amount)) {
+            } else if (!/^\d+(\.\d+)?$/.test(amount)) {
                 Toast.showToast("请填写正确的云米金额");
                 return;
             }
@@ -72,12 +72,12 @@ module.exports = Activity.extend({
                 quantity: qty,
                 amount: amount,
                 type: model.get('type'),
-                friends: friends.map(function(friend) {
+                friends: friends.map(function (friend) {
                     return friend.user_id;
                 }).join(',')
 
-            }).then(function(res) {
-                friends.forEach(function(friend) {
+            }).then(function (res) {
+                friends.forEach(function (friend) {
                     chat.record(true, friend.friend_id, {
                         type: chat.MESSAGETYPE.YUNMI_REDBAG,
                         content: memo
@@ -87,10 +87,10 @@ module.exports = Activity.extend({
                 self.setResult('refresh_yunmi');
                 model.back();
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
 
-            }).then(function() {
+            }).then(function () {
                 loader.hideLoading();
             });
         }
@@ -99,27 +99,27 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([ym.getTotalYunmi(), this.waitLoad()]).then(function(results) {
+        Promise.all([ym.getTotalYunmi(), this.waitLoad()]).then(function (results) {
             model.set({
                 amount: results[0].amount
             });
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
 
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     }
 });
