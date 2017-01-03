@@ -25,7 +25,8 @@
 
 <div class="hdh_keyboard" sn-if="isShowKeybord">
     <div class="input bd_t flex h_m pl_m">
-        <p class="fs_l"><span sn-if="!number" class="fs_m">请输入号码或拼音</span>{number}</p>
+        <p class="fs_l flexitem"><span sn-if="!number" class="fs_m">请输入号码或拼音</span>{number}</p>
+        <button class="hdh-del h_m w_m bg_0000" sn-tap="number=number.substr(0,number.length-1)"></button>
     </div>
     <div class="bd_t h_bar flex">
         <button class="bg_fff flexitem fs_xl" sn-click="this.number(1)">1</button>
