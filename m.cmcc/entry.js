@@ -1,5 +1,6 @@
 var $ = require('$');
 var sl = require('core/base');
+var Http = require('core/http');
 var util = require('util');
 var bridge = require('bridge');
 var Loader = require('widget/loader');
@@ -90,6 +91,43 @@ bridge.cmcc = {
             }, callback);
 
         else callback({ success: true, token: 'xxx' });
+    },
+
+    syncContact: function (syncMode, callback) {
+
+        if (sl.isInApp) {
+            seajs.use('models/user', function (user) {
+                bridge.exec('cmcc', {
+                    type: 'syncContact',
+                    phoneNo: user.get('account'),
+                    syncMode: syncMode
+
+                }, callback);
+            })
+        }
+        else callback({ success: true });
+    },
+
+    logout: function (callback) {
+        if (sl.isInApp) {
+            bridge.exec('cmcc', {
+                type: 'logout'
+
+            }, callback);
+        }
+        else
+            callback && callback({ success: true });
+    },
+
+    contactCount: function (callback) {
+        if (sl.isInApp) {
+            bridge.exec('cmcc', {
+                type: 'contactCount'
+
+            }, callback);
+        }
+        else
+            callback && callback({ success: true, netCount: 1, locCount: 1 });
     }
 };
 

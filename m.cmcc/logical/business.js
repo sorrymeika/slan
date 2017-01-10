@@ -156,8 +156,10 @@ redirect.jump = function (linkurl) {
         } else if (linkurl == 'qz') {
             this.enterQz();
 
-        } else if (linkurl == '139') {
-            this.enterMail139();
+        } else if (linkurl == '139' || linkurl.indexOf('139?') == 0) {
+            var m = linkurl.match(/mailId\=([^&]+)/);
+
+            this.enterMail139(m && m[1] ? decodeURIComponent(m[1]) : null);
 
         } else if (linkurl == 'sc') {
             this.enterSc();
@@ -199,10 +201,23 @@ redirect.enterQz = function () {
     bridge.openInApp("12580海西求职平台", appconfig.get('qzUrl'));
 }
 
+function stringToHex(str) {
+    var val = "";
+    for (var i = 0; i < str.length; i++) {
+        val += str.charCodeAt(i).toString(16);
+    }
+    return val;
+}
+
 var mail139Url;
-redirect.enterMail139 = function () {
+redirect.enterMail139 = function (mailId) {
+
     business.getMail139().then(function (res) {
         mail139Url = res.data;
+
+        if (mailId) {
+            mail139Url = mail139Url.replace('Flag=32', 'Flag=35') + "&Message=" + encodeURIComponent('mid=' + stringToHex(mailId));
+        }
 
         setTimeout(function (params) {
             bridge.openInApp('139邮箱', mail139Url);

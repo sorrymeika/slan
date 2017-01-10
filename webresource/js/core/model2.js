@@ -779,7 +779,7 @@ var ModelProto = {
                             break;
                     }
 
-                    if (!hasChange) hasChange = true;
+                    hasChange = true;
                 }
             }
         }

@@ -404,7 +404,7 @@ insert into business (business_id,business_name,secret_key,type) values (100005,
 create table notification (--消息提醒
     notify_id number(12) primary key,--自增ID
     title varchar(140),--提醒标题
-    order_id varchar(20),--关联流水id
+    order_id varchar(32),--关联流水id
     content varchar(200),--提醒内容
     linkurl varchar(400),--跳转链接
     user_id number(12),--用户ID
@@ -415,6 +415,9 @@ create table notification (--消息提醒
     send_date date--发送日期 --search=true
 ) tablespace cmccuser;
 create sequence notification_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+alter table notification modify order_id varchar(32);
+alter table notification modify content varchar(4000);
 
 
 alter table user_ext add read_sys_notify_date date;
@@ -462,6 +465,7 @@ create table news_category (--新闻分类
 create sequence news_category_seq minvalue 1 maxvalue 999999 start with 10000 increment by 1;
 
 insert into news_category (category_id,category_name,type,def_news_type) values (1,'首页banner',3,2);
+insert into news_category (category_id,category_name,type,def_news_type) values (4,'圈子banner',3,2);
 
 insert into news_category (category_id,category_name,type,def_news_type) values (2,'服务大厅-生活提醒',3,2);
 insert into news_category (category_id,category_name,type,def_news_type) values (3,'服务大厅-通信提醒',3,2);

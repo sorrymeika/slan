@@ -8,11 +8,13 @@ var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
 var contact = require('logical/contact');
+var bridge = require('bridge');
 
 module.exports = Activity.extend({
 
     onCreate: function () {
         var self = this;
+        var loader = this.loader = new Loader(this.$el);
 
         var model = this.model = new Model(this.$el, {
             title: '手机通讯录查询'
@@ -23,20 +25,48 @@ module.exports = Activity.extend({
         }
 
         model.backup = function () {
-            contact.backup().then(function () {
-                Toast.showToast("备份成功！");
+            loader.showLoading();
 
-            }).catch(function (e) {
-                Toast.showToast(e.message);
+            bridge.cmcc.syncContact(0, function (res) {
+                if (res.success) {
+                    Toast.showToast("备份成功！");
+                } else {
+                    Toast.showToast(res.message);
+
+                }
+                loader.hideLoading();
             });
         }
 
-        var loader = this.loader = new Loader(this.$el);
+        model.download = function () {
+            var confirm = popup.confirm({
+                content: '确定恢复？',
+                confirmAction: function () {
+                    loader.showLoading();
+                    bridge.cmcc.syncContact(1, function (res) {
+                        if (res.success) {
+                            Toast.showToast("恢复成功！");
+                        } else {
+                            Toast.showToast(res.message);
+                        }
+                        loader.hideLoading();
+                        confirm.hide();
+                    });
+                }
+            })
+
+        }
 
         loader.showLoading();
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        bridge.cmcc.contactCount(function (res) {
 
+            if (res.success) {
+                model.set(res);
+            }
+        })
+
+        Promise.all([this.waitLoad()]).then(function (results) {
 
             self.bindScrollTo(model.refs.main);
 

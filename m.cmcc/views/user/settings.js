@@ -1,6 +1,7 @@
 var $ = require('$');
 var util = require('util');
 var Activity = require('activity');
+var bridge = require('bridge');
 var Loader = require('widget/loader');
 var Model = require('core/model2').Model;
 var Promise = require('promise');
@@ -59,6 +60,8 @@ module.exports = Activity.extend({
                         util.store('business_model', null);
                         util.store('messagesList', null);
                         util.store('device_token', null);
+
+                        bridge.cmcc.logout();
 
                         Application.back('/login');
                     }

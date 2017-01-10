@@ -15,6 +15,10 @@ var news = {
         return this.getNewsByCategoryId(1);
     },
 
+    getQuanBanner: function () {
+        return this.getNewsByCategoryId(4);
+    },
+
     getNewsByCategoryId: function (categoryId) {
         return Http.post('/news/getNewsByCategoryId', {
             categoryId: categoryId

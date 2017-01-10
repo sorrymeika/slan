@@ -24,7 +24,8 @@ module.exports = Activity.extend({
         self.swipeRightBackAction = null;
 
         var model = this.model = new Model(this.$el, {
-            smsTime: 0
+            smsTime: 0,
+            agree: true
         });
 
         model.back = function () {

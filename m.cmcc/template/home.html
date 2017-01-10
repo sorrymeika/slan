@@ -76,22 +76,39 @@
 
     <div sn-if="tab==3" class="hm_quan__main" ref="tab" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">
         <div class="hm_pubquan">
-            <div class="bd_tb mb_l bg_fff" sn-if="false">
-                <div class="bd_b lh_s ml_l">我的推荐</div>
-                <div class="hm_pubquan__recommend">
-                    <div ref="recommend" class="con">
-                        <ul class="list" style="width:{recommendPublicQuan.length*95+15}px">
-                            <li sn-repeat="item in recommendPublicQuan" data-forward="/pubquan/{item.quan_id}">
-                                <img sn-src="{sl.resource(item.quan_pic)}" />
-                                <p class="name">{item.quan_name}</p>
-                            </li>
+            <div class="hm_pubquan__banner mb_l" ref="quanBanner">
+            </div>
+
+            <div class="bd_t mb_l bg_fff">
+                <div class="bd_b lh_m ml_m ta_c mr_m">我关注的</div>
+                <div class="ta_c bd_b lh_m fs_s cl_ccc" sn-if="!myfollowPublicQuan.length">暂未关注公众圈</div>
+                <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in myfollowPublicQuan">
+
+                    <div class="bd" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
+                        <div class="pb_s pl_m pt_m fs_m flex">
+                            <div class="to_e flexitem">{item.pub_quan_msg.title}</div>
+                            <p class="date fs_s mr_m cl_999">{util.formatDate(item.pub_quan_msg.add_date,"short")}</p>
+                        </div>
+                        <ul class="imgs clearfix">
+                            <li class="img fl_l pl_m" sn-repeat="img in item.pub_quan_msg.imgs"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
+                    </div>
+                    <div sn-if="item.pub_quan_msg" class="ft flex lh_s pl_m pb_m">
+                        <div class="flex flexitem" data-forward="/pubquan/{item.quan_id}">
+                            <p class="img cir_s mr_m">
+                                <img class="cir_s" sn-src="{sl.resource(item.quan_pic)}" />
+                            </p>
+                            <p class="name flexitem"><span class="br_2 bg_ccc cl_fff pr_s pl_s fs_m">{item.quan_name}</span></p>
+                        </div>
+                        <p class="icon-see mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.see)}</span></p>
+                        <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.likes)}</span></p>
+                        <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.comments)}</span></p>
                     </div>
                 </div>
             </div>
 
             <div class="bd_tb mb_l bg_fff">
-                <div class="bd_b lh_s ml_l">推荐圈子</div>
+                <div class="bd_b lh_m ml_m ta_c mr_m">我推荐的</div>
                 <div class="ta_c lh_m fs_s cl_ccc" sn-if="!recommendPubQuan.length">暂未推荐公众圈</div>
                 <div class="ps_r w_320">
                     <div class="w_m dock_tbl hm-arrow_lt icon_cm z_1 {recommendIndex==0?'disabled':''}" sn-tap="recommendIndex=Math.max(recommendIndex-1,0)">
@@ -119,31 +136,6 @@
                                 <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.comments)}</span></p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bd_t mb_l bg_fff">
-                <div class="bd_b lh_s ml_l">我关注的</div>
-                <div class="ta_c bd_b lh_m fs_s cl_ccc" sn-if="!myfollowPublicQuan.length">暂未关注公众圈</div>
-                <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in myfollowPublicQuan">
-                    <div class="hd clearfix" data-forward="/pubquan/{item.quan_id}">
-                        <p class="img">
-                            <img sn-src="{sl.resource(item.quan_pic)}" />
-                        </p>
-                        <p class="name">{item.quan_name}</p>
-                        <p class="date">{util.formatDate(item.pub_quan_msg.add_date,"MM-dd")}</p>
-                    </div>
-                    <div class="bd" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
-                        <div class="pb_s pl_m pt_m fs_m to_e">{item.pub_quan_msg.title}</div>
-                        <ul class="imgs clearfix">
-                            <li class="img fl_l pl_m" sn-repeat="img in item.pub_quan_msg.imgs"><img sn-src="{sl.thumbnail(img)}" /></li>
-                        </ul>
-                    </div>
-                    <div sn-if="item.pub_quan_msg" class="ft flex lh_s" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
-                        <p class="icon-see flexitem ml_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.see)}</span></p>
-                        <p class="icon-good mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.likes)}</span></p>
-                        <p class="icon-comment mr_m"><span class="ml_s va_m fs_s">{util.cnNum(item.pub_quan_msg.comments)}</span></p>
                     </div>
                 </div>
             </div>

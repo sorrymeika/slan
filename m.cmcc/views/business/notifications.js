@@ -26,7 +26,7 @@ module.exports = Activity.extend({
             business_id: business_id,
             title: dataModel.get('business_name'),
             business: dataModel,
-            hasFooter: [100001, 100003, 100002, 100004, 100005, 100026, 100022, 100043, 100045].indexOf(parseInt(business_id)) != -1
+            hasFooter: [100001, 100003, 100002, 100004, 100005, 100026, 100022, 100043, 100045, 100046].indexOf(parseInt(business_id)) != -1
         });
 
         model.back = function () {

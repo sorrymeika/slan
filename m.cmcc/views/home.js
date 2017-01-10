@@ -153,7 +153,7 @@ module.exports = Activity.extend({
         model.getUserShowName = friends.getUserShowName;
 
         model.openEnt = function () {
-            bridge.tab.show('http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006', 2);
+            bridge.tab.show('http://share.migu.cn/h5/api/h5/133/2848?channelCode=1380050700381&cpsChannelId=300000100002&cpsPackageChannelId=300000100002', 2);
         };
 
         model.openShop = function () {
@@ -459,14 +459,53 @@ module.exports = Activity.extend({
 
         isShowLoading && loader.showLoading();
 
+        if (!this.quanSlider) {
+            this.quanSlider = true;
+            var self = this;
+
+            news.getQuanBanner().then(function (res) {
+                self.quanSlider = new Slider({
+                    loop: true,
+                    container: self.model.refs.quanBanner,
+                    autoLoop: 3000,
+                    data: util.map(res.data, ['image', 'linkurl']) || [],
+                    dots: true,
+                    itemTemplate: '<a href="javascript:;" data-url="<%=linkurl%>"><img src="<%=sl.resource(image)%>" /></a>'
+                });
+                self.model.next(function () {
+                    self.quanSlider.adjustWidth();
+                })
+            });
+        }
+
         Promise.all([publicquan.recommend(), publicquan.myfollow()])
             .then(function (results) {
                 results.forEach(function (res, i) {
 
                     res.data.forEach(function (item) {
 
-                        if (item.pub_quan_msg && item.pub_quan_msg.imgs) {
-                            item.pub_quan_msg.imgs = item.pub_quan_msg.imgs.split(',')
+
+                        if (item.pub_quan_msg) {
+                            var imgs;
+
+                            if (item.pub_quan_msg.imgs) {
+                                imgs = item.pub_quan_msg.imgs.split(',')
+
+                            } else if (/<img\s+/.test(item.pub_quan_msg.content)) {
+                                imgs = [];
+
+                                item.pub_quan_msg.content.replace(/<img\s[^>]*?src=\"([^\"\>]+)\"/g, function (m, src) {
+                                    imgs.push(src);
+                                });
+
+                            } else {
+                                imgs = null;
+                            }
+
+                            if (imgs && imgs.length > 3) {
+                                imgs.length = 3;
+                            }
+                            item.pub_quan_msg.imgs = imgs;
                         }
                     });
 
