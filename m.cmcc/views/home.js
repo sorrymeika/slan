@@ -429,6 +429,8 @@ module.exports = Activity.extend({
     scan: function () {
         var self = this;
 
+        this.model.hideQuanMenu();
+
         bridge.qrcode.scan(function (res) {
             var code = res.code;
 
@@ -443,7 +445,7 @@ module.exports = Activity.extend({
                             self.forward('/contact/person/' + user_id);
                     });
 
-                } else if (code.indexOf('http://') == 0) {
+                } else if (code.indexOf('http://') == 0 || code.indexOf('https://') == 0) {
                     bridge.openInApp(code);
                 }
             }
@@ -508,6 +510,8 @@ module.exports = Activity.extend({
                             item.pub_quan_msg.imgs = imgs;
                         }
                     });
+
+                    console.log(res.data);
 
                     model.set(i == 0 ? "recommendPubQuan" : "myfollowPublicQuan", res.data);
                 });
