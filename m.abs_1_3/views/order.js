@@ -88,7 +88,7 @@ module.exports = Activity.extend({
             this.data.list && this.data.list.forEach(function (data) {
                 amount += data.PUR_AMOUNT + data.PUR_EXP_IN_AMOUNT;
             });
-            return util.currency(amount, '￥');
+            return util.rmb(amount);
         }
         self.model.cancelOrder = function (order, e) {
 

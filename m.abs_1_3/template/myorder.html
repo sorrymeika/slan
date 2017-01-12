@@ -17,13 +17,13 @@
                 <div class="con" sn-tap="this.openOrder(item)">
                     <b class="name">{ prd.PRD_NAME }</b>
                     <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
-                    <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</p>
+                    <p class="price">{util.rmb(prd.LPK_CHANNEL_PRICE)}</p>
                 </div>
                 <p class="ft">
                     <span class="qty">x{prd.LPK_QTY}</span>
                 </p>
             </div>
-            <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.currency(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT,'￥')}</span></div>
+            <div class="lh_s ta_r mr_m">合计：<span class="cl_app">{util.rmb(item.PUR_AMOUNT+item.PUR_EXP_IN_AMOUNT)}</span></div>
             <div class="flex pb_m">
                 <p class="flexitem"></p>
                 <button class="btn_s mr_s cl_000 bg_ddd" sn-if="(item.CNL_CLT_ID==3||item.PUS_DESC!='待付款')&&item.PUS_DESC!='已取消'" sn-tap="this.openOrder(item)">查看详情</button>

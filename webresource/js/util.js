@@ -115,27 +115,27 @@ function compileQuery(query) {
     } : function () { return true; };
 }
 
-function equals(a, b, identity) {
-    if (a == b) return true;
+function equals(a, b, identical) {
+    if (identical ? a === b : a == b) return true;
 
     var typeA = toString.call(a);
     var typeB = toString.call(b);
 
-    if (identity ? typeA !== typeB : typeA != typeB) return false;
+    if (typeA !== typeB) return false;
 
     switch (typeA) {
         case '[object Object]':
             var keysA = Object.keys(a);
-            var keysB = Object.keys(b);
 
-            if (keysA.length != keysB.length) {
+            if (keysA.length != Object.keys(b).length) {
                 return false;
             }
+            var key;
 
             for (var i = keysA.length; i >= 0; i--) {
-                var key = keysA[i];
+                key = keysA[i];
 
-                if (!equals(a[key], b[key], identity)) return false;
+                if (!equals(a[key], b[key], identical)) return false;
             }
             break;
 
@@ -145,12 +145,18 @@ function equals(a, b, identity) {
             }
 
             for (var i = a.length; i >= 0; i--) {
-                if (!equals(a[i], b[i], identity)) return false;
+                if (!equals(a[i], b[i], identical)) return false;
             }
             break;
 
+        case '[object Date]':
+            return +a == +b;
+
+        case '[object RegExp]':
+            return ('' + a) === ('' + b);
+
         default:
-            if (identity ? a !== b : a != b) return false;
+            if (identical ? a !== b : a != b) return false;
     }
 
     return true;
@@ -256,7 +262,7 @@ var util = {
 
     equals: equals,
 
-    identify: function (a, b) {
+    identifyWith: function (a, b) {
         return equals(a, b, true);
     },
 
@@ -781,8 +787,16 @@ var util = {
         return Math.round((typeof f === 'number' ? f : parseFloat(f || 0)) * 100) / 100;
     },
 
-    currency: function (str, p) {
-        return (p === undefined || p === null ? '￥' : p) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
+    currency: function (prefix, str) {
+        if (str == undefined) {
+            str = prefix;
+            prefix = null;
+        }
+        return (prefix === undefined || prefix === null ? '' : prefix) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
+    },
+
+    rmb: function (str) {
+        return currency('¥', str);
     },
 
     template: function (str, data) {

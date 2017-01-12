@@ -757,9 +757,6 @@ var ModelProto = {
                 } else {
                     valueType = value === null || value === undefined ? null : toString.call(value);
 
-                    if (attr == 'bbb' || attr == 'aaa')
-                        console.log(attr, valueType, value)
-
                     switch (valueType) {
                         case '[object Object]':
                             value = new Model(this, attr, value);

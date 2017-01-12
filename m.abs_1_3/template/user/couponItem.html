@@ -6,7 +6,7 @@
 <div class="main " ref="main">
     <div class="uc_couponitem">
         <div class="uc_couponitem__hd {data.VCA_VCT_ID == 4 ? 'l-free_white' : ''}">
-            <p class="price" sn-if="data.VCA_VCT_ID!=4">{util.currency(data.VCA_DEDUCT_AMOUNT,'')}</p>
+            <p class="price" sn-if="data.VCA_VCT_ID!=4">{util.currency(data.VCA_DEDUCT_AMOUNT)}</p>
             <p class="type">{data.VCA_VCT_ID==4?'免邮卡':data.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
         </div>
         <div class="uc_couponitem__bd">

@@ -486,22 +486,19 @@ module.exports = Activity.extend({
 
                     res.data.forEach(function (item) {
 
-
                         if (item.pub_quan_msg) {
                             var imgs;
 
                             if (item.pub_quan_msg.imgs) {
                                 imgs = item.pub_quan_msg.imgs.split(',')
+                            }
 
-                            } else if (/<img\s+/.test(item.pub_quan_msg.content)) {
+                            if ((!imgs || !imgs.length) && /<img\s+/.test(item.pub_quan_msg.content)) {
                                 imgs = [];
 
                                 item.pub_quan_msg.content.replace(/<img\s[^>]*?src=\"([^\"\>]+)\"/g, function (m, src) {
                                     imgs.push(src);
                                 });
-
-                            } else {
-                                imgs = null;
                             }
 
                             if (imgs && imgs.length > 3) {
@@ -511,11 +508,8 @@ module.exports = Activity.extend({
                         }
                     });
 
-                    console.log(res.data);
-
                     model.set(i == 0 ? "recommendPubQuan" : "myfollowPublicQuan", res.data);
                 });
-
             })
             .catch(function (e) {
 

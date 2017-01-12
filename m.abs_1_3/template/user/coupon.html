@@ -16,7 +16,7 @@
     <ul class="uc_coupon__list">
         <li sn-repeat="item in data" class="icon-couponline {(item.VCA_VCT_ID == 4 ? 'free' : '') + (item.IsOverdue ? ' dis' : '')}" sn-tap="this.detail(item)">
             <div class="hd {item.VCA_VCT_ID == 4 ? 'l-free' : ''}">
-                <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT,'')}</p>
+                <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT)}</p>
                 <p class="type" sn-if="item.VCA_VCT_ID!=4">{item.VCA_VCT_ID==4?'免邮卡':item.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
             </div>
             <div class="bd l-abs_card">

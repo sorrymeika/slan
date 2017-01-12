@@ -21,7 +21,7 @@
                 <li sn-repeat="item in data" class="icon-couponline {(item.VCA_VCT_ID == 4 ? 'free' : '') + (item.IsOverdue ? ' dis' : '')}" sn-tap="this.selectCoupon(item)">
                     <div class="{coupon.CSV_CODE.split(',').indexOf(item.CSV_CODE)!=-1?'radio checked':'radio'}"></div>
                     <div class="hd {item.VCA_VCT_ID == 4 ? 'l-free' : ''}">
-                        <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT,'')}</p>
+                        <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT)}</p>
                         <p class="type" sn-if="item.VCA_VCT_ID!=4">{item.VCA_VCT_ID==4?'免邮卡':item.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
                     </div>
                     <div class="bd l-abs_card">
@@ -39,7 +39,7 @@
         <ul class="uc_coupon__list">
             <li sn-repeat="item in cannotuse" class="icon-couponline {(item.VCA_VCT_ID == 4 ? 'free' : '') + ' dis'}">
                 <div class="hd {item.VCA_VCT_ID == 4 ? 'l-free' : ''}">
-                    <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT,'')}</p>
+                    <p class="price" sn-if="item.VCA_VCT_ID!=4">{util.currency(item.VCA_DEDUCT_AMOUNT)}</p>
                     <p class="type" sn-if="item.VCA_VCT_ID!=4">{item.VCA_VCT_ID==4?'免邮卡':item.VCA_VCT_ID==5?'现金券':'优惠券'}</p>
                 </div>
                 <div class="bd l-abs_card">
