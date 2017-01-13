@@ -26,6 +26,7 @@ var business = {
         }).then(function (res) {
             util.store('last_read_time', res.serverTime);
 
+            //业务列表
             var list = businessModel._('list');
 
             list.update(res.data, 'business_id', true);
@@ -44,24 +45,36 @@ var business = {
                 var notifications = businessModel._('notifications');
                 notifications.update(unreadNotifications, 'notify_id');
 
+                //将未读消息分配到所在业务
                 var ids = [];
+
+                //无消息的业务
+                var idsOfBusinessWithNoNotification = [];
 
                 list.data.forEach(function (item) {
                     var first = util.first(unreadNotifications, 'business_id', item.business_id);
 
                     if (first) {
                         ids.push(first.notify_id);
+
+                    } else if (!item.title) {
+                        idsOfBusinessWithNoNotification.push(item.business_id);
                     }
                 });
 
                 if (ids.length) {
-                    Http.post('/business/getNotificationTitlesByIds', {
+                    Http.post('/business/getNotificationByIds', {
                         ids: ids.join(',')
 
                     }).then(function (res) {
 
                         list.update(util.map(res.data, ['business_id', 'title', 'content', 'send_date']), 'business_id');
                     })
+                }
+
+                console.log(idsOfBusinessWithNoNotification);
+
+                if (idsOfBusinessWithNoNotification) {
                 }
             }
 

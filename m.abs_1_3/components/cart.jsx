@@ -143,6 +143,7 @@ var Cart = Model.extend({
 	},
 
 	viewWillUpdate: function () {
+
 		if (this.data.isEdit) {
 			var selectedCount = 0;
 
