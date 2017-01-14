@@ -84,7 +84,7 @@
                 <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in myfollowPublicQuan">
 
                     <div class="bd" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
-                        <div class="pb_s pl_m pt_m fs_m flex">
+                        <div class="pb_s pl_m pt_m fs_l flex">
                             <div class="to_e flexitem">{item.pub_quan_msg.title}</div>
                             <p class="date fs_s mr_m cl_999">{util.formatDate(item.pub_quan_msg.add_date,"short")}</p>
                         </div>
@@ -112,7 +112,7 @@
                 <div class="hm_pubquan__myfollow bd_b" sn-repeat="item in recommendPubQuan">
 
                     <div sn-if="item.pub_quan_msg" class="bd" data-forward="/pubquan/article/{item.pub_quan_msg.msg_id}">
-                        <div class="pb_s pl_m pt_m fs_m flex">
+                        <div class="pb_s pl_m pt_m fs_l flex">
                             <div class="to_e flexitem">{item.pub_quan_msg.title}</div>
                             <p class="date fs_s mr_m cl_999">{util.formatDate(item.pub_quan_msg.add_date,"short")}</p>
                         </div>
@@ -164,9 +164,9 @@
         </div>
 
         <div class="hm_contacts">
-            <ul class="bd_tb pt_1">
-                <li class="flex pl_m h_bar bg_fff bd_b" data-forward="/contact/new">
-                    <p class="icon-newfriend"><i>{friends.newFriendsCount}</i></p>
+            <ul class="bd_tb pt_1 hm_contacts__business_list">
+                <li class="flex pl_m h_bar bg_fff bd_b ps_r" data-forward="/contact/new">
+                    <p class="icon-newfriend "><i sn-if='friends.newFriendsCount' class="unread">{friends.newFriendsCount}</i></p>
                     <p class="ml_l">新的朋友</p>
                 </li>
                 <li class="flex pl_m h_bar bg_fff bd_b" data-forward="/contact/contactlist">
@@ -183,7 +183,7 @@
                 <li class="flex h_bar bd_b bg_fff fs_m ps_r" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>
-                    <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{item.user_name}</span>
+                    <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{this.getUserShowName(item)}</span>
                         <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
                     </p>
                     <p class="date h_bar mr_m pt_s fs_s">{util.formatDate(item.date,"short")}</p>
@@ -191,7 +191,7 @@
             </ul>
         </div>
     </div>
-    <button class="quan-publish" sn-if="tab==3&&quanTab.index==0" data-forward="/pubquan/publish"></button>
+    <!--<button class="quan-publish" sn-if="tab==3&&quanTab.index==0" data-forward="/pubquan/publish"></button>-->
 
     <button class="quan-call" sn-if="tab==3&&quanTab.index==2" sn-tap="this.phoneCall()"></button>
 

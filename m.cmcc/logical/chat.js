@@ -42,8 +42,7 @@ function keep() {
                     case MESSAGETYPE.RECEIVE_MY_FRIEND_REQUEST:
                     //接受申请提醒
                     case MESSAGETYPE.FRIEND_REQUEST_TO_ME:
-                    
-
+                        friendsModel.addNewFriendsCount();
 
                     default:
                         chat.record(false, msg.from_id, msg);
@@ -157,9 +156,17 @@ var chat = Event.mixin({
                 recordData.unread = 1;
             }
 
-            if (msg.type == MESSAGETYPE.FRIEND_REQUEST_TO_ME) {
-                recordData.avatars = msg.avatars;
-                recordData.user_name = msg.user_name;
+            if (msg.type == MESSAGETYPE.FRIEND_REQUEST_TO_ME || msg.type == MESSAGETYPE.RECEIVE_MY_FRIEND_REQUEST) {
+                if (msg.feature) {
+                    try {
+                        var feature = JSON.parse(msg.feature);
+
+                        recordData.avatars = feature.avatars;
+                        recordData.user_name = feature.user_name;
+                    } catch (e) {
+                        recordData.user_name = msg.feature;
+                    }
+                }
 
             } else {
                 friend = friendsModel.getFriend(friend_id);

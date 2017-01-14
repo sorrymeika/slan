@@ -34,7 +34,15 @@ var friends = vm.createModel({
         if (item.user_id == user.get('user_id')) return item.user_name || ('用户' + item.user_id);
 
         var friend = friends.getFriend(item.user_id);
+
         return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
+    },
+
+    addNewFriendsCount: function () {
+
+        return this.set({
+            newFriendsCount: this.data.newFriendsCount + 1
+        });
     }
 });
 

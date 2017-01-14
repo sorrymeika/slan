@@ -58,7 +58,7 @@ module.exports = Activity.extend({
         var groups = {};
         var data = model.data.friendList;
 
-        if (!data) return [];
+        if (!data || !data.length) return [];
 
         data.forEach(function (item) {
             var letter = firstLetter(item.user_name).charAt(0).toUpperCase();

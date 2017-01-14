@@ -1110,6 +1110,16 @@ Collection.prototype = {
         return this;
     },
 
+    updateBy: function(attr, val, data) {
+        var array = this.data;
+        for (var i = 0; i < array.length; i++) {
+            if (array[i][attr] === val) {
+                this[i].set(data);
+            }
+        }
+        return this;
+    },
+
     unshift: function(data) {
         this.insert(0, data);
     },
@@ -1191,7 +1201,7 @@ Collection.prototype = {
     },
 
     clear: function() {
-        if (this.length == 0 && this.data.length) return;
+        if (this.length == 0 && this.data.length == 0) return;
         for (var i = 0; i < this.length; i++) {
             delete this[i];
         }

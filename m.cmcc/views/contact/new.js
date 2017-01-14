@@ -12,37 +12,31 @@ var friends = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var model = this.model = new Model(this.$el, {
             title: '新的朋友'
         });
 
-        model.acceptFriend = function(personId, e) {
-            contact.acceptFriend(personId).then(function() {
+        model.acceptFriend = function (personId, e) {
+            contact.acceptFriend(personId).then(function () {
                 contact.trigger('acceptFriend', personId);
 
-                var person = model.getModel('newFriends').find("user_id", personId);
-
-                person.set({
+                model._('newFriends').updateBy("user_id", personId, {
                     status: 1
                 });
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             });
 
             return false;
         }
 
-        model.getUserShowName = function(item) {
-            var friend = friends.getFriend(item.user_id);
-            return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
-        }
+        model.getUserShowName = friends.getUserShowName;
 
-        model.del = function(fid, e) {
-
+        model.del = function (fid, e) {
             model.getModel('newFriends').remove("fid", fid);
 
             contact.hideItem(fid);
@@ -50,12 +44,12 @@ module.exports = Activity.extend({
             return false;
         }
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        contact.on('addFriend', function() {
-            contact.newFriends().then(function(res) {
+        contact.on('addFriend', function () {
+            contact.newFriends().then(function (res) {
                 model.set({
                     newFriends: res.data
                 });
@@ -66,28 +60,35 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.newFriends(), this.waitLoad()]).then(function(results) {
+        friends.set({
+            newFriendsCount: 0
+        });
+
+        Promise.all([contact.newFriends(), this.waitLoad()]).then(function (results) {
+            var data = results[0].data;
+
+            friends.getFriends().update(util.map(data, ['user_id', 'user_name']), 'user_id');
 
             model.set({
-                newFriends: results[0].data
-            })
+                newFriends: data
+            });
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
 
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     }
 });
