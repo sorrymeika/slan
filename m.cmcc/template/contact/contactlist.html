@@ -25,7 +25,7 @@
                     <p class="fs_s" sn-if="item.user_id">和生活昵称：{this.getUserShowName(item)}</p>
                 </div>
                 <button class="btn_xs" sn-if="item.user_id&&!item.isFriend" data-forward="/contact/person/{item.user_id}">添加</button>
-                <button class="btn_xs" sn-if="!item.user_id">邀请</button>
+                <button class="btn_xs" sn-if="!item.user_id" sn-tap="this.inviteFriend(item.phoneNumber)">邀请</button>
                 <span class="cl_app fs_m mr_m" sn-if="item.user_id&&item.isFriend" data-forward="/contact/friend/{item.user_id}">好友</span>
             </li>
         </ul>

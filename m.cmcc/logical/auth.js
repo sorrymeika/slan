@@ -62,16 +62,20 @@ var auth = {
     getSign: getSign,
 
     clearAuth: function () {
-        localStorage.removeItem('__wtk');
-        localStorage.removeItem('user');
+        util.store('__wtk', null);
+        util.store('user', null);
     },
 
     setAuthToken: function (tk) {
-        localStorage.setItem('__wtk', aes.decrypt(this.getAESKey(), tk));
+        util.store('__wtk', aes.decrypt(this.getAESKey(), tk));
     },
 
     getAuthToken: function () {
-        return localStorage.getItem('__wtk');
+        try {
+            return util.store('__wtk');
+        } catch (e) {
+            return localStorage.getItem('__wtk');
+        }
     },
 
     getUser: function () {

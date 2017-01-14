@@ -35,7 +35,7 @@
 .hm_idx__life .item { background: #fff; border-top: 2px solid #f2f2f2; padding: 8px 10px; margin-top: 10px; position: relative; }
 .hm_idx__life .item .show:before { -webkit-transform: rotate(180deg); transform: rotate(180deg); }
 .hm_idx__life .subitem { padding: 6px 10px 6px 30px; position: relative; }
-.hm_idx__life .subitem img { width: 30px; height: 30px; display: block; border-radius: 50%; overflow: hidden; }
+.hm_idx__life .subitem img { width: 30px; min-width: 30px; height: 30px; display: block; border-radius: 50%; overflow: hidden; }
 .hm_idx__life .con { max-width: 180px; }
 
 
@@ -84,7 +84,7 @@
 
 .hm_pubquan, .hm_quan { margin-bottom: 58px; width: 100%; position: relative; }
 
-.hm_pubquan__banner {min-height: .58rem; }
+.hm_pubquan__banner { min-height: .58rem; }
 .hm_pubquan__banner img { min-height: .58rem; display: block; max-height: .8rem; }
 
 .hm_pubquan__recommend { height: 70px; overflow: hidden; }

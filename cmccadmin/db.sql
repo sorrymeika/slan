@@ -198,7 +198,7 @@ create table friends (--好友 --props=String user_name,String avatars,int is_se
     fid number(15) primary key,--自增id
     friend_id number(10),--好友id
     user_id number(10),--发起请求方
-    status number(2),--状态 --options=-2:非好友,-1:未处理,0:拒绝,1:接受,2:删除,
+    status number(2),--状态 --options=-2:非好友,-1:未处理,0:拒绝,1:接受,2:删除,3:黑名单,4:多条同时接受
     add_date date,--添加时间 --search=true
     msg varchar(40),--验证消息
     show number(1)--显示在新好友中

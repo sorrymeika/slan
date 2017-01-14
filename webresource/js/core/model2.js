@@ -772,8 +772,8 @@ var ModelProto = {
                             break;
 
                         default:
+                            changes.push(this.key ? this.key + "." + attr : attr, value, data[attr]);
                             data[attr] = model[attr] = value;
-                            changes.push(this.key ? this.key + "." + attr : attr, value);
                             break;
                     }
 
@@ -785,8 +785,8 @@ var ModelProto = {
         if (hasChange) {
             changedAndUpdateViewNextTick(this);
 
-            for (var i = 0, length = changes.length; i < length; i += 2) {
-                root.trigger("change:" + changes[i], changes[i + 1]);
+            for (var i = 0, length = changes.length; i < length; i += 3) {
+                root.trigger("change:" + changes[i], changes[i + 1], changes[i + 2]);
             }
         }
 
@@ -1023,8 +1023,8 @@ Collection.prototype = {
         return isArray ? results : results[0];
     },
 
-    //已有项将被覆盖，不在arr中的项将被删除
-    replaceWith: function(arr, primaryKeyOrFunc) {
+    //已有项将被增量覆盖，不在arr中的项将被删除
+    updateTo: function(arr, primaryKeyOrFunc) {
         return this.update(arr, primaryKeyOrFunc, true);
     },
 
@@ -1043,7 +1043,9 @@ Collection.prototype = {
         if (typeof arr === 'boolean')
             arr = [arr, primaryKey, updateType], updateType = arr[0], primaryKey = arr[2], arr = arr[1];
 
-        if (!arr) return this;
+        if (!arr) {
+            return this;
+        }
 
         var fn;
         var length = this.length;

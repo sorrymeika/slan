@@ -410,7 +410,7 @@ var Application = Component.extend(Object.assign(appProto, {
         route.isForward = isForward;
 
         if (isForward === 2) {
-            prevActivity = currentActivity.prevActivity;
+            prevActivity = currentActivity.route.prevActivity;
             route.prevActivity = prevActivity;
             route.referrer = prevActivity ? prevActivity.url : null;
             route.referrerDir = "Left";
@@ -448,8 +448,6 @@ var Application = Component.extend(Object.assign(appProto, {
                     toggleFinish && toggleFinish.call(that, activity);
                     queueDone();
                 };
-
-                console.log(anims, duration);
 
                 for (var i = 0, n = anims.length; i < n; i++) {
                     anim = anims[i];
@@ -546,7 +544,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 duration !== null && (options.duration = duration);
                 toggleAnim !== null && (options.toggleAnim = toggleAnim);
 
-                self._toggle(route, options, isForward ? null : function () {
+                self._toggle(route, options, isForward && isForward != 2 ? null : function () {
                     currentActivity.destroy();
                 }, queueDone);
 

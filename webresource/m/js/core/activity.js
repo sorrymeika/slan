@@ -196,6 +196,10 @@ var Activity = Component.extend({
         this.application.back(url || this.swipeRightBackAction, duration, toggleAnim, data);
     },
 
+    replaceWith: function (url, duration) {
+        this.application.replace(url, duration);
+    },
+
     queryString: function (key, val) {
         var query = this.route.query;
 

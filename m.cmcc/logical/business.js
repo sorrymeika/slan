@@ -72,9 +72,15 @@ var business = {
                     })
                 }
 
-                console.log(idsOfBusinessWithNoNotification);
 
                 if (idsOfBusinessWithNoNotification) {
+                     Http.post('/business/getNotificatonsByBusinessIds', {
+                        ids: idsOfBusinessWithNoNotification.join(',')
+
+                    }).then(function (res) {
+
+                        list.update(util.map(res.data, ['business_id', 'title', 'content', 'send_date']), 'business_id');
+                    })
                 }
             }
 

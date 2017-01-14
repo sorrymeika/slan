@@ -38,6 +38,13 @@ function keep() {
                         hasNewNotification = true;
                         break;
 
+                    //好友申请提醒
+                    case MESSAGETYPE.RECEIVE_MY_FRIEND_REQUEST:
+                    //接受申请提醒
+                    case MESSAGETYPE.FRIEND_REQUEST_TO_ME:
+                    
+
+
                     default:
                         chat.record(false, msg.from_id, msg);
                         chat.trigger('message:' + msg.from_id, msg);

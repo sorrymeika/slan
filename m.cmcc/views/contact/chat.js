@@ -13,7 +13,7 @@ var friends = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var personId = this.route.params.id;
@@ -31,11 +31,11 @@ module.exports = Activity.extend({
         chat.on('sendresult' + personId, this.sendResult)
             .on('message:' + personId, this.newMessage);
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.send = function() {
+        model.send = function () {
             var content = this.data.content;
             if (!content) return;
 
@@ -56,7 +56,7 @@ module.exports = Activity.extend({
             model.set({
                 content: ''
 
-            }).next(function() {
+            }).next(function () {
                 self.scroll && self.scroll.scrollToEnd();
             });
             console.log("aftersend:", model.get('content'))
@@ -68,18 +68,23 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        model.refs.send.onsubmit = function() {
+        model.refs.send.onsubmit = function () {
             model.send();
         }
 
-        Promise.all([chat.getMessages(personId), this.waitLoad()]).then(function(results) {
+        Promise.all([chat.getMessages(personId), this.waitLoad()]).then(function (results) {
 
             var res = results[0];
+            if (!res.user) {
+                self.replaceWith('/contact/person/' + personId);
+                return;
+            }
+
             var messages = chat.formatMessages(res.data);
 
             var scroll = self.scroll = self.bindScrollTo(model.refs.main).eq(0);
 
-            var loadMore = function(e, options) {
+            var loadMore = function (e, options) {
                 if (scroll.scrollTop() == 0) {
 
                     var scrollBottom = options.scrollHeight - options.y;
@@ -89,7 +94,7 @@ module.exports = Activity.extend({
                         showMoreLoading: true,
                         moreMsg: '正在加载...'
                     });
-                    chat.getMessages(personId, model.get('messages')[0].msg_id).then(function(res) {
+                    chat.getMessages(personId, model.get('messages')[0].msg_id).then(function (res) {
                         if (!res.data || !res.data.length) {
                             scroll.$el.off('scrollStop', loadMore);
                             model.set({
@@ -99,7 +104,7 @@ module.exports = Activity.extend({
 
                         } else {
                             model._('messages').insert(0, chat.formatMessages(res.data));
-                            model.next(function() {
+                            model.next(function () {
                                 scroll.scrollTop(scroll.scrollHeight() - scrollBottom);
                             });
                         }
@@ -117,28 +122,28 @@ module.exports = Activity.extend({
                 user: user,
                 messages: messages
 
-            }).next(function() {
+            }).next(function () {
                 scroll.scrollToEnd();
             });
 
-            model.scrollToEnd = function() {
+            model.scrollToEnd = function () {
                 self.scroll.scrollToEnd();
             }
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
         chat.readMessage(this.route.params.id);
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         var personId = this.route.params.id;
         chat.off('sendresult:' + personId, this.sendResult)
             .off('message:' + personId, this.newMessage);
@@ -146,18 +151,18 @@ module.exports = Activity.extend({
         this.model.destroy();
     },
 
-    sendResult: function(e, msg) {
+    sendResult: function (e, msg) {
         this.model._('messages').find('gid', msg.gid).set({
             msg_id: msg_id
         });
     },
 
-    newMessage: function(e, msg) {
+    newMessage: function (e, msg) {
 
         console.log('recieve new message')
         var self = this;
         this.model._('messages').add(msg);
-        this.model.next(function() {
+        this.model.next(function () {
             self.scroll.scrollToEnd();
         });
 

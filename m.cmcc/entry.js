@@ -16,7 +16,7 @@ var Model = vm.Model;
 
 var ModelProto = Model.prototype;
 
-ModelProto.bindScrollTo = function (el, options) {
+ModelProto.bindScrollTo = function(el, options) {
     var sbr = Scroll.bind(el, options);
 
     if (!this._scrolls) {
@@ -28,18 +28,18 @@ ModelProto.bindScrollTo = function (el, options) {
     return sbr;
 }
 
-ModelProto.getScrollView = function (el) {
+ModelProto.getScrollView = function(el) {
     return this._scrolls.get(el);
 }
 
 var oldModelDestroy = ModelProto.destroy;
-ModelProto.destroy = function () {
+ModelProto.destroy = function() {
     oldModelDestroy.call(this);
 
     if (this._scrolls) this._scrolls.destroy();
 }
 
-util.cnNum = function (num) {
+util.cnNum = function(num) {
     if (num > 10000) {
         num = (num + '');
         return num.substr(0, num.length - 4) + "万";
@@ -56,7 +56,7 @@ util.cnNum = function (num) {
 bridge.cmcc = {
 
     //@bizType="register"|"resetPwd"|"smsLogin"
-    sendSms: function (phoneNo, bizType) {
+    sendSms: function(phoneNo, bizType) {
         if (!bizType) throw new Error('require bizType!!');
 
         bridge.exec('cmcc', {
@@ -66,7 +66,7 @@ bridge.cmcc = {
         });
     },
 
-    registerUser: function (phoneNo, password, validCode, callback) {
+    registerUser: function(phoneNo, password, validCode, callback) {
 
         bridge.exec('cmcc', {
             type: 'registerUser',
@@ -79,7 +79,7 @@ bridge.cmcc = {
     },
 
     //@loginType="sms"|"password"
-    login: function (phoneNo, password, loginType, callback) {
+    login: function(phoneNo, password, loginType, callback) {
 
         if (sl.isInApp)
             bridge.exec('cmcc', {
@@ -93,10 +93,10 @@ bridge.cmcc = {
         else callback({ success: true, token: 'xxx' });
     },
 
-    syncContact: function (syncMode, callback) {
+    syncContact: function(syncMode, callback) {
 
         if (sl.isInApp) {
-            seajs.use('models/user', function (user) {
+            seajs.use('models/user', function(user) {
                 bridge.exec('cmcc', {
                     type: 'syncContact',
                     phoneNo: user.get('account'),
@@ -108,7 +108,7 @@ bridge.cmcc = {
         else callback({ success: true });
     },
 
-    logout: function (callback) {
+    logout: function(callback) {
         if (sl.isInApp) {
             bridge.exec('cmcc', {
                 type: 'logout'
@@ -119,10 +119,11 @@ bridge.cmcc = {
             callback && callback({ success: true });
     },
 
-    contactCount: function (callback) {
+    contactCount: function(callback) {
         if (sl.isInApp) {
             bridge.exec('cmcc', {
-                type: 'contactCount'
+                type: 'contactCount',
+                phoneNo: user.get('account')
 
             }, callback);
         }
@@ -132,7 +133,7 @@ bridge.cmcc = {
 };
 
 bridge.tab = {
-    show: function (url, tab) {
+    show: function(url, tab) {
         bridge.exec('tab', {
             type: 'show',
             url: url,
@@ -140,7 +141,7 @@ bridge.tab = {
         });
     },
 
-    hide: function (params) {
+    hide: function(params) {
         bridge.exec('tab', {
             type: 'hide'
         });
@@ -151,7 +152,7 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
 
     Object.assign(routes, remoteRoutes || {});
 
-    seajs.on('fetch', function (emitData) {
+    seajs.on('fetch', function(emitData) {
 
         var id = emitData.uri.replace(seajs.data.base, '').replace(/\.js(\?.*){0,1}/, '');
 
@@ -168,18 +169,18 @@ function startApp(routes, resourceMapping, remoteRoutes, remoteMapping) {
             }
         }
     });
-    seajs.on("error", function (errorData) {
+    seajs.on("error", function(errorData) {
         errorData.pause = true;
 
         console.log("can not fetch:", errorData.uri);
 
-        Offline.getInstance().show(function () {
+        Offline.getInstance().show(function() {
             this.hide();
             seajs.request(errorData.uri, errorData.callback);
         });
     });
 
-    seajs.use(['logical/auth'], function (auth) {
+    seajs.use(['logical/auth'], function(auth) {
         window.Application = new App({
             routes: routes,
             loginPath: '/login'
@@ -201,11 +202,11 @@ function startAppWithRemoteMapping(remoteUrl, routes, resourceMapping) {
         timeout: 5000,
         checkData: false,
         $el: $('body'),
-        error: function () {
+        error: function() {
             Offline.getInstance().show(loadResourceMapping);
             console.log("cantload:" + remoteUrl);
         },
-        success: function (res) {
+        success: function(res) {
             Offline.getInstance().hide();
 
             startApp(routes, resourceMapping, res.routes, res.data);
