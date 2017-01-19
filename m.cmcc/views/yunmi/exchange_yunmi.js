@@ -7,6 +7,8 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var yunmiModel = require('models/yunmi');
+
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -14,8 +16,11 @@ module.exports = Activity.extend({
 
         var model = this.model = new Model(this.$el, {
             title: '云米兑换流量',
-            type: 1
+            type: 1,
+            yunmiData: yunmiModel
         });
+
+        model.delegate = this;
 
         model.back = function () {
             self.back(self.swipeRightBackAction)
@@ -39,6 +44,11 @@ module.exports = Activity.extend({
 
     onShow: function () {
         var self = this;
+    },
+    exchange: function () {
+        popup.alert({
+            content: '暂无法兑换'
+        })
     },
 
     onDestroy: function () {

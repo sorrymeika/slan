@@ -19,8 +19,6 @@ module.exports = Activity.extend({
 
         var friend = friends.find('user_id', friend_id);
 
-        console.log(friend);
-
         var memo = friend.get('friends_ext.memo');
 
         var model = this.model = new Model(this.$el, {

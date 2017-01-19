@@ -62,9 +62,24 @@ module.exports = Activity.extend({
 
             articles.forEach(function (item) {
 
+                var imgs;
+
                 if (item.imgs) {
-                    item.imgs = item.imgs.split(',')
+                    imgs = item.imgs.split(',')
                 }
+
+                if ((!imgs || !imgs.length) && /<img\s+/.test(item.content)) {
+                    imgs = [];
+
+                    item.content.replace(/<img\s[^>]*?src=\"([^\"\>]+)\"/g, function (m, src) {
+                        imgs.push(src);
+                    });
+                }
+
+                if (imgs && imgs.length > 3) {
+                    imgs.length = 3;
+                }
+                item.imgs = imgs;
             });
 
             model.set({

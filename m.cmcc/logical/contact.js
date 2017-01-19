@@ -79,7 +79,17 @@ var contact = Event.mixin({
         });
     },
 
-    contactList: function (options) {
+    getContactList: function (options, process) {
+        var self = this;
+
+        if (this.gettingContacts) {
+            return;
+        }
+        this.gettingContacts = true;
+
+        var contactList = friends.getContacts();
+        contactList.clear();
+
         return new Promise(function (resolve, reject) {
 
             bridge.contact.getContacts(options, function (result) {
@@ -89,21 +99,31 @@ var contact = Event.mixin({
                     var list = [];
 
                     data.forEach(function (item) {
-                        item.phoneNumber = item.phoneNumber.replace(/\s+/g, '');
+                        item.phoneNumber = item.phoneNumber.replace(/^\+86|[\s\-]+/g, '');
+
+                        TEST_PHONE.lastIndex = 0;
 
                         if (TEST_PHONE.test(item.phoneNumber)) {
                             list.push(item);
                         }
                     });
 
-                    friends.getContacts().updateTo(list, 'phoneNumber');
+                    contactList.add(list);
 
-                    util.store('contacts', list);
+                    process(list);
+                }
+
+            }, function (result) {
+
+                if (result.success) {
+
                     resolve(result);
 
                 } else {
                     reject(result);
                 }
+
+                self.gettingContacts = false;
             });
         });
 
@@ -111,6 +131,8 @@ var contact = Event.mixin({
 
     getContactsUser: function (phoneNumbers) {
         phoneNumbers = phoneNumbers.filter(function (item) {
+            TEST_PHONE.lastIndex = 0;
+
             return !!item && TEST_PHONE.test(item);
         });
 

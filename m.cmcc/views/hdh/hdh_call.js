@@ -20,7 +20,8 @@ module.exports = Activity.extend({
         var model = this.model = new Model(this.$el, {
             title: '和多号',
             subPhoneList: subPhoneList,
-            number: ''
+            number: '',
+            isShowKeybord: true
         });
 
         model.back = function () {
@@ -54,12 +55,13 @@ module.exports = Activity.extend({
         }
 
         model.call = function () {
-            console.log(subPhoneList.length);
             var number = this.get('number');
 
             if (!number) return;
 
-            bridge.system.openPhoneCall((subPhoneList.length ? "12583" + (subPhoneList.indexOf(number) + 1) : '') + number);
+            var id = hdhModel.getDefaultSubPhoneId();
+
+            bridge.system.phoneCall((subPhoneList.length ? "12583" + id : '') + number);
         }
 
         var loader = this.loader = new Loader(this.$el);

@@ -148,7 +148,9 @@ module.exports = Activity.extend({
             tab: 1,
             recommendIndex: 0,
             business: businessGroup,
-            friends: friends
+            friends: friends,
+            showNotify: -1,
+            isShowMessageList: true
         });
 
         model.delegate = this;

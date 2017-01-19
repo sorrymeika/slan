@@ -1,5 +1,5 @@
 @helper business(id,name) {
-<div class="flex hm-icons-notify@(id) item bd_b" sn-tap="showNotify@(id)=!showNotify@(id)">
+<div class="flex hm-icons-notify@(id) item bd_b" sn-tap="showNotify=(showNotify==@(id)?-1:@(id))">
     <i class="unread" sn-if="business.type@(id)data.unread">+{business.type@(id)data.unread}</i>
     <div class="flexitem pl_m">
         <div class="name fs_m">@(name)</div>
@@ -7,11 +7,11 @@
     </div>
     <div class="pl_m">
         <p class="date fs_s cl_999">{business.type@(id)data.send_date}</p>
-        <p class="hm-icons-drop ta_r {showNotify@(id)?'show':''}"></p>
+        <p class="hm-icons-drop ta_r {showNotify==@(id)?'show':''}"></p>
     </div>
 </div>
 } @helper notify(id,name) { @this.business(id,name)
-<ul class="pr_m bg_f2" sn-if="showNotify@(id)">
+<ul class="pr_m bg_f2" sn-if="showNotify==@(id)">
     <li class="flex subitem bd_b" sn-repeat="item in business.type@(id)data.list" data-forward="/business/{item.business_id}">
         <i class="unread" sn-if="item.unread">+{item.unread}</i>
         <img sn-src="{sl.thumbnail(item.business_pic)}" />
@@ -53,7 +53,7 @@
         </div>
         <div class="hm_idx__life">
             @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.business(4,'社交提醒')
-            <ul class="pr_m bg_f2" sn-if="showNotify4">
+            <ul class="pr_m bg_f2" sn-if="showNotify==4">
                 <li class="flex subitem bd_b" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="{item.type==7?'/contact/person/'+item.user_id:('/contact/chat/'+item.user_id)}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <img onerror="this.src='images/default.jpg'" sn-src="{sl.thumbnail(item.avatars)}" />
@@ -179,7 +179,12 @@
                     <p class="ml_l">我的好友</p>
                 </li>
             </ul>
-            <ul class="bd_t mt_l pt_1 hm_contacts__messages" sn-if="messagesList.list.length">
+            <div class="bd_tb mt_l pt_1 h_bar bg_fff flex pl_m" sn-tap="isShowMessageList=!isShowMessageList">
+                <p class="icon-contact2"></p>
+                <p class="flexitem ml_l fs_m">我的消息</p>
+                <p class="hm-icons-drop ta_r {isShowMessageList?'show':''} mr_m"></p>
+            </div>
+            <ul class="hm_contacts__messages" sn-if="isShowMessageList&&messagesList.list.length">
                 <li class="flex h_bar bd_b bg_fff fs_m ps_r" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>

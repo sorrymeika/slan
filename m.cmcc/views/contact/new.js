@@ -19,6 +19,8 @@ module.exports = Activity.extend({
             title: '新的朋友'
         });
 
+        friends.set({ newFriendsCount: 0 });
+
         model.acceptFriend = function (personId, e) {
             contact.acceptFriend(personId).then(function () {
                 contact.trigger('acceptFriend', personId);
@@ -26,6 +28,8 @@ module.exports = Activity.extend({
                 model._('newFriends').updateBy("user_id", personId, {
                     status: 1
                 });
+
+                self.forward('/contact/memo/' + personId)
 
             }).catch(function (e) {
                 Toast.showToast(e.message);

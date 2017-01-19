@@ -33,63 +33,56 @@ module.exports = Activity.extend({
 
         var loader = this.loader = new Loader(this.$el);
 
-        loader.showLoading();
+        var contactList = this.contactList = friends.getContacts();
 
-        var today = util.formatDate(new Date(), 'yyyyMMdd');
-        var hasGetToday = util.store('hasGetContactListToday') == today;
+        this.setGroups = this.setGroups.bind(this);
 
-        Promise.all([hasGetToday ? null : contact.contactList(), this.waitLoad()]).then(function (results) {
-            util.store('hasGetContactListToday', today);
+        friends.observe('contacts', this.setGroups);
 
-            var contactList = friends.getContacts();
-            var data = contactList.get();
-
-            console.log(data);
-
-            Promise.resolve(contact.getContactsUser(util.map(util.filter(data, 'user_id', undefined), 'phoneNumber')))
-                .then(function () {
-                    var groups = {};
-                    var data = contactList.get();
-
-                    data.forEach(function (item) {
-                        var letter = firstLetter(item.contactName).charAt(0).toUpperCase();
-
-                        if (!groups[letter]) {
-                            groups[letter] = [];
-                        }
-
-                        groups[letter].push(item);
-                    });
-
-                    groups = Object.keys(groups).map(function (key) {
-
-                        return {
-                            letter: key,
-                            list: groups[key]
-                        };
-                    });
-
-                    model.set({
-                        groups: groups
-                    });
-
-                    self.bindScrollTo(model.refs.main);
-                });
-
-
-        }).catch(function (e) {
-            Toast.showToast(e.message);
-
-        }).then(function () {
-            loader.hideLoading();
+        contact.getContactList({}, function (data) {
+            contact.getContactsUser(util.map(util.filter(data, 'user_id', undefined), 'phoneNumber'))
         });
+
+        self.bindScrollTo(model.refs.main);
     },
 
     onShow: function () {
         var self = this;
     },
 
+    setGroups: function () {
+        var groups = {};
+        var data = this.contactList.get();
+
+        data.forEach(function (item) {
+            var letter = firstLetter(item.contactName).charAt(0).toUpperCase();
+
+            if (!groups[letter]) {
+                groups[letter] = [];
+            }
+
+            groups[letter].push(item);
+        });
+
+        groups = Object.keys(groups).map(function (key) {
+
+            return {
+                letter: key,
+                list: groups[key]
+            };
+        });
+
+        groups.sort(function (a, b) {
+            return a.letter == b.letter ? 0 : a.letter > b.letter ? 1 : -1;
+        });
+
+        this.model.set({
+            groups: groups
+        });
+    },
+
     onDestroy: function () {
+        friends.removeObserve('contacts', this.setGroups);
         this.model.destroy();
     }
 });

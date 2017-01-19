@@ -59,7 +59,7 @@ function bindBackGesture(application) {
     touch.on('beforestart', function (e) {
         this.x = 0;
 
-        if (this._isInAnim) {
+        if (this._isInAnim || this.pointY < 80) {
             this.stop();
         }
 

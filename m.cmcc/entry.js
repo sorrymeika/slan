@@ -94,18 +94,19 @@ bridge.cmcc = {
     },
 
     syncContact: function(syncMode, callback) {
+        seajs.use('models/user', function(user) {
 
-        if (sl.isInApp) {
-            seajs.use('models/user', function(user) {
+            if (sl.isInApp) {
                 bridge.exec('cmcc', {
                     type: 'syncContact',
                     phoneNo: user.get('account'),
                     syncMode: syncMode
 
                 }, callback);
-            })
-        }
-        else callback({ success: true });
+            }
+            else callback({ success: true });
+        })
+
     },
 
     logout: function(callback) {
@@ -120,15 +121,17 @@ bridge.cmcc = {
     },
 
     contactCount: function(callback) {
-        if (sl.isInApp) {
-            bridge.exec('cmcc', {
-                type: 'contactCount',
-                phoneNo: user.get('account')
+        seajs.use('models/user', function(user) {
+            if (sl.isInApp) {
+                bridge.exec('cmcc', {
+                    type: 'contactCount',
+                    phoneNo: user.get('account')
 
-            }, callback);
-        }
-        else
-            callback && callback({ success: true, netCount: 1, locCount: 1 });
+                }, callback);
+            }
+            else
+                callback && callback({ success: true, netCount: 1, locCount: 1 });
+        });
     }
 };
 

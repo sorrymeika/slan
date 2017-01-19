@@ -12,29 +12,29 @@ var user = require('models/user');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var personId = this.route.params.friend_id;
 
         var model = this.model = new Model(this.$el, {
             title: '朋友验证',
-            msg: '我是' + user.get('user_name')
+            msg: '我是' + (user.get('user_name') || '')
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction);
         }
 
-        model.addFriend = function() {
+        model.addFriend = function () {
 
-            contact.addFriend(personId).then(function() {
+            contact.addFriend(personId).then(function () {
                 Toast.showToast('发送成功');
 
                 contact.trigger('addFriend');
 
                 model.back();
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             });
         }
@@ -43,24 +43,24 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([this.waitLoad()]).then(function(results) {
+        Promise.all([this.waitLoad()]).then(function (results) {
 
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

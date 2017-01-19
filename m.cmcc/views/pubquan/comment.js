@@ -26,6 +26,7 @@ module.exports = Activity.extend({
 
         if (routeData.user_id) {
             model.set({
+                comment_id: routeData.comment_id,
                 user_id: routeData.user_id,
                 user_name: routeData.user_name,
                 comment: '@' + routeData.user_name + ' '
@@ -39,7 +40,7 @@ module.exports = Activity.extend({
                 return;
             }
 
-            publicquan.sendComment(self.route.query.msg_id, content).then(function (res) {
+            publicquan.sendComment(self.route.query.msg_id, this.data.comment_id || 0, this.data.user_id || 0, content).then(function (res) {
                 Toast.showToast('发送成功');
                 model.back();
 

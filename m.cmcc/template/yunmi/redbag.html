@@ -25,7 +25,7 @@
     </div>
     <div class="ta_c pt_xxl flex jc_c">
         <p class="ym-point2"></p>
-        <p class="ym_redbag__point">{(parseFloat(send_amount)||0)*(parseFloat(qty)||0)}</p>
+        <p class="ym_redbag__point">{(parseFloat(send_amount)||0)*(type==1?parseFloat(qty)||0:1)}</p>
     </div>
     <div class="ml_m mr_m pt_xxl flex jc_c">
         <button class="btn_xl" sn-tap="this.sendRedbag()">塞钱进红包</button>

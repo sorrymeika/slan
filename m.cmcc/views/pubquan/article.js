@@ -9,10 +9,11 @@ var popup = require('widget/popup');
 
 var publicquan = require('logical/publicquan');
 var user = require('models/user');
+var friends = require('models/friends');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
 
         var articleId = this.route.params.id;
@@ -21,24 +22,24 @@ module.exports = Activity.extend({
             user: user
         });
 
-        model.fav = function() {
-            publicquan.fav(articleId).then(function() {
+        model.fav = function () {
+            publicquan.fav(articleId).then(function () {
                 Toast.showToast('收藏成功！')
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             })
         }
 
-        model.follow = function() {
-            var follow = function() {
-                publicquan.follow(model.get('quan.quan_id')).then(function(res) {
+        model.follow = function () {
+            var follow = function () {
+                publicquan.follow(model.get('quan.quan_id')).then(function (res) {
 
                     var is_follow = model.data.follow ? model.data.follow.is_follow : false;
 
                     model.set('follow.is_follow', !is_follow);
 
-                }).catch(function(e) {
+                }).catch(function (e) {
                     Toast.showToast(e.message);
                 })
             }
@@ -46,7 +47,7 @@ module.exports = Activity.extend({
             if (model.get('follow.is_follow'))
                 popup.confirm({
                     content: '确定不关注该圈了吗？',
-                    confirmAction: function() {
+                    confirmAction: function () {
                         follow()
                         this.hide();
                     }
@@ -57,8 +58,8 @@ module.exports = Activity.extend({
         this.onSendComment = this.onSendComment.bind(this);
         publicquan.on('sendComment:' + articleId, this.onSendComment);
 
-        model.delComment = function(comment_id) {
-            publicquan.delComment(comment_id).then(function(res) {
+        model.delComment = function (comment_id) {
+            publicquan.delComment(comment_id).then(function (res) {
                 Toast.showToast('删除成功');
 
                 var comments = model.getModel('comments');
@@ -67,33 +68,36 @@ module.exports = Activity.extend({
 
                 comments.remove('comment_id', comment_id);
 
-            }).catch(function(e) {
+            }).catch(function (e) {
 
                 Toast.showToast(e.message);
             });
         }
 
-        model.likePubQuanMsg = function() {
-            publicquan.likePubQuanMsg(articleId).then(function(res) {
+        model.getUserShowName = friends.getUserShowName;
+
+        model.likePubQuanMsg = function () {
+            publicquan.likePubQuanMsg(articleId).then(function (res) {
                 Toast.showToast('点赞成功');
 
                 model.getModel('data').set({
                     likes: res.data
                 })
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             });
         }
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.comment = function(user_id, user_name) {
+        model.comment = function (comment_id, user_id, user_name) {
             self.forward('/pubquan/comment?msg_id=' + articleId, user_name && user_id != user.data.user_id ? {
                 user_id: user_id,
-                user_name: user_name
+                user_name: user_name,
+                comment_id: comment_id
 
             } : undefined);
         }
@@ -108,18 +112,18 @@ module.exports = Activity.extend({
 
         }, model);
 
-        model.sortBy = function() {
+        model.sortBy = function () {
             var sort = commentsLoader.getParam('orderBy');
 
             commentsLoader.setParam('orderBy', sort == 'asc' ? 'desc' : 'asc')
                 .reload();
         }
 
-        model.reloadComments = function() {
+        model.reloadComments = function () {
             commentsLoader.reload();
         }
 
-        Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function() { }), this.waitLoad()]).then(function(results) {
+        Promise.all([publicquan.article(articleId), commentsLoader.request().catch(function () { }), this.waitLoad()]).then(function (results) {
             var res = results[0];
             var data = res.data;
 
@@ -144,35 +148,36 @@ module.exports = Activity.extend({
             publicquan.seeArticle(articleId);
 
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         publicquan.off('sendComment:' + this.route.params.id)
 
         this.model.destroy();
     },
 
-    onSendComment: function(e, data) {
+    onSendComment: function (e, data) {
         var model = this.model;
-        var comments = model._('comments');
+        var comments = model.collection('comments');
         data = $.extend(data, user.data);
 
-        if (!comments) {
-            model.set({
-                comments: [data]
-            })
-        } else {
+        if (!data.rel_id) {
             comments.unshift(data);
+
+        } else {
+            var item = comments.find('comment_id', data.rel_id);
+
+            item.collection('replys').unshift(data);
         }
     }
 });

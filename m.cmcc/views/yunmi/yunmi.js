@@ -10,6 +10,7 @@ var popup = require('widget/popup');
 
 var yunMiRules = require('components/yunMiRules');
 var ym = require('logical/yunmi');
+var yunmiModel = require('models/yunmi');
 var contact = require('logical/contact');
 
 var friends = require('models/friends');
@@ -21,7 +22,8 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '云米账户'
+            title: '云米账户',
+            yunmiData: yunmiModel
         });
 
         model.back = function () {
@@ -127,10 +129,13 @@ module.exports = Activity.extend({
             loader.showLoading();
 
             ym.receiveYunmi(data.yunmi_id).then(function (res) {
+                yunmiModel.set({
+                    amount: yunmiModel.get('amount') + data.amount
+                })
+
                 model.set({
                     current: null,
                     today_get_amount: model.get('today_get_amount') + data.amount,
-                    amount: model.get('amount') + data.amount
                 });
 
             }).catch(function (e) {
@@ -209,8 +214,11 @@ module.exports = Activity.extend({
                 }, 1000);
             }
 
+            yunmiModel.set({
+                amount: results[0].amount
+            })
+
             model.set({
-                amount: results[0].amount,
                 today_get_amount: results[0].today_get_amount,
                 current: current,
                 next: next
@@ -328,7 +336,7 @@ module.exports = Activity.extend({
             }
 
             if (friends.getContacts().size() == 0) {
-                contact.contactList({
+                contact.getContactList({
                     size: 50
 
                 }).then(function () {

@@ -13,6 +13,14 @@ var hdh = vm.createModel({
         return this._('subPhoneList');
     },
 
+    getDefaultSubPhoneId: function () {
+        return this._('subPhoneList').indexOf('isDefault', true) + 1;
+    },
+
+    getDefaultSubPhone: function () {
+        return this._('subPhoneList[isDefault=true][0]') || this._('subPhoneList[0]');
+    },
+
     getSubInfo: function (subphone) {
         var first = this._('subPhoneList[subphone="' + subphone + '"][+]', {
             subphone: subphone

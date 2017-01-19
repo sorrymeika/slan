@@ -60,8 +60,8 @@ var Touch = Event.mixin(function (el, options) {
             var self = this,
                 point = e.touches[0];
 
-            self.pointX = self.startPointX = self.sx = point.pageX;
-            self.pointY = self.startPointY = self.sy = point.pageY;
+            self.prevPointX = self.pointX = self.startPointX = self.sx = point.pageX;
+            self.prevPointY = self.pointY = self.startPointY = self.sy = point.pageY;
 
             self.isTouchStop = !!e.isHoldScroll;
             self.isTouchStart = false;
@@ -72,11 +72,11 @@ var Touch = Event.mixin(function (el, options) {
             self.startX = self.x;
             self.startY = self.y;
 
-            self.prevPointX = self.prevPointY = 0;
+            self.prevOfPrevPointX = self.prevOfPrevPointY = 0;
 
             self.isClickStopMomentum = self._stopMomentum();
 
-            self.timestamp = Date.now();
+            self.prevTimestamp = self.timestamp = Date.now();
 
             self.trigger(new Event('beforestart', {
                 currentTarget: e.currentTarget,
@@ -146,16 +146,21 @@ var Touch = Event.mixin(function (el, options) {
             self.isMoveLeft = self.pointX - point.pageX > 0 ? true : self.pointX == point.pageX ? self.isMoveLeft : false;
             self.isMoveTop = self.pointY - point.pageY > 0 ? true : self.pointY == point.pageY ? self.isMoveTop : false;
 
-            self.prevPointX = self.oldPointX;
-            self.prevPointY = self.oldPointY;
+            if (Date.now() - self.timestamp < 50) {
 
-            self.oldPointX = self.pointX;
-            self.oldPointY = self.pointY;
+                self.prevOfPrevPointX = self.prevPointX;
+                self.prevOfPrevPointY = self.prevPointY;
+            } else {
+                self.prevOfPrevPointX = self.prevOfPrevPointY = 0;
+            }
+            self.prevTimestamp = self.timestamp;
+            self.timestamp = Date.now();
+
+            self.prevPointX = self.pointX;
+            self.prevPointY = self.pointY;
 
             self.pointX = point.pageX;
             self.pointY = point.pageY;
-
-            self.timestamp = Date.now();
 
             self.trigger(new Event('move', {
                 currentTarget: e.currentTarget
@@ -222,23 +227,28 @@ var Touch = Event.mixin(function (el, options) {
 
             var cb = defaultCB;
 
-            if (Date.now() - self.timestamp < 50) {
-                changeX = point.pageX - (self.prevPointX || self.oldPointX);
-                changeY = point.pageY - (self.prevPointY || self.oldPointY);
+            var timeDelta = Date.now() - self.prevTimestamp;
 
-                var absX = Math.min(80, Math.max(20, Math.abs(changeX)));
-                var absY = Math.min(80, Math.max(20, Math.abs(changeY)));
+            if (timeDelta < 50) {
+                changeX = point.pageX - (self.prevOfPrevPointX || self.prevPointX);
+                changeY = point.pageY - (self.prevOfPrevPointY || self.prevPointY);
+
+                var changeTimes = timeDelta >= 5 && timeDelta <= 16 ? 20 / timeDelta : 1.2;
+
+                var absX = changeX <= 3 && changeX >= -3 ? 0 : Math.min(90, Math.max(40, Math.abs(changeX * changeTimes)));
+                var absY = changeY <= 3 && changeY >= -3 ? 0 : Math.min(90, Math.max(40, Math.abs(changeY * changeTimes)));
+
+                var absMax = Math.max(absX, absY);
 
                 changeX = (changeX < 0 ? -1 : 1) * absX;
                 changeY = (changeY < 0 ? -1 : 1) * absY;
 
+                cb = new CubicBezier(.05, absMax / 100, Math.min(.2, 1 - (absMax / 100)), .96);
 
-                cb = new CubicBezier(.05, absY / 100, Math.min(.2, 1 - (absY / 100)), .96);
+                distX = (changeX * Math.abs(changeX) / -3);
+                distY = (changeY * Math.abs(changeY) / -3);
 
-                distX = (changeX * Math.abs(changeX) / -4) * 1.3;
-                distY = (changeY * Math.abs(changeY) / -4) * 1.3;
-
-                duration = Math.max(Math.abs(changeX), Math.abs(changeY), 10) * 60;
+                duration = Math.max(Math.abs(changeX), Math.abs(changeY), 20) * 60;
             }
 
             if (self.options.divisorX) {

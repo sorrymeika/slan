@@ -12,7 +12,7 @@ var bridge = require('bridge');
 
 module.exports = Activity.extend({
 
-    onCreate: function () {
+    onCreate: function() {
         var self = this;
         var loader = this.loader = new Loader(this.$el);
 
@@ -20,14 +20,14 @@ module.exports = Activity.extend({
             title: '手机通讯录查询'
         });
 
-        model.back = function () {
+        model.back = function() {
             self.back(self.swipeRightBackAction)
         }
 
-        model.backup = function () {
+        model.backup = function() {
             loader.showLoading();
 
-            bridge.cmcc.syncContact(0, function (res) {
+            bridge.cmcc.syncContact(0, function(res) {
                 if (res.success) {
                     Toast.showToast("备份成功！");
                 } else {
@@ -38,12 +38,12 @@ module.exports = Activity.extend({
             });
         }
 
-        model.download = function () {
+        model.download = function() {
             var confirm = popup.confirm({
                 content: '确定恢复？',
-                confirmAction: function () {
+                confirmAction: function() {
                     loader.showLoading();
-                    bridge.cmcc.syncContact(1, function (res) {
+                    bridge.cmcc.syncContact(1, function(res) {
                         if (res.success) {
                             Toast.showToast("恢复成功！");
                         } else {
@@ -59,30 +59,20 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        bridge.cmcc.contactCount(function (res) {
+        bridge.cmcc.contactCount(function(res) {
 
             if (res.success) {
                 model.set(res);
             }
-        })
-
-        Promise.all([this.waitLoad()]).then(function (results) {
-
-            self.bindScrollTo(model.refs.main);
-
-        }).catch(function (e) {
-            Toast.showToast(e.message);
-
-        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function () {
+    onShow: function() {
         var self = this;
     },
 
-    onDestroy: function () {
+    onDestroy: function() {
         this.model.destroy();
     }
 });

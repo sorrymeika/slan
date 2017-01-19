@@ -6,7 +6,7 @@ var user = require('../models/user');
 
 var friends = vm.createModel({
     defaultData: {
-        contacts: util.store('contacts') || [],
+        contacts: [],
         friends: util.store('friends') || [],
         newFriendsCount: util.store('newFriendsCount') || 0
     },

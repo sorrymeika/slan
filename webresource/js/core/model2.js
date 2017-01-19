@@ -799,6 +799,15 @@ var ModelProto = {
             data[attr] = null;
         }
         this.set(data);
+    },
+
+    collection: function(key) {
+        var result = this._(key);
+
+        if (result == null) {
+            return this.set(key, [])._(key);
+        }
+        return result;
     }
 }
 ModelProto.getModel = ModelProto._;
@@ -865,9 +874,8 @@ Collection.prototype = {
     //@search= n /*第n个*/ | "[attr='val']"/*查询所有*/ | "[attr='val'][n]"/*查询并返回第n个*/ | 
     // "[attr='val'][+]"/*一个都不存在则添加*/ | "[attr='val'][+n]"/*结果小于n个则添加*/ |
     // "[attr='val'][-]"/*删除全部，并返回被删除的*/ | "[attr='val'][-n]"/*删除第n个，并返回被删除的*/
+    //@def=数据不存在时默认添加的数据
     _: function(search, def) {
-
-        console.log(search)
 
         if (typeof search == 'number' || /^\d+$/.test(search))
             return this[search];
@@ -1121,7 +1129,7 @@ Collection.prototype = {
     },
 
     unshift: function(data) {
-        this.insert(0, data);
+        return this.insert(0, data);
     },
 
     insert: function(index, data) {
@@ -1150,6 +1158,7 @@ Collection.prototype = {
         }
 
         changedAndUpdateViewNextTick(this);
+        return this;
     },
 
     splice: function(start, count, data) {
@@ -1198,6 +1207,8 @@ Collection.prototype = {
         }
 
         changedAndUpdateViewNextTick(this);
+
+        return this;
     },
 
     clear: function() {
@@ -1208,6 +1219,8 @@ Collection.prototype = {
         this.length = this.data.length = 0;
 
         changedAndUpdateViewNextTick(this);
+
+        return this;
     },
 
     each: function(start, end, fn) {

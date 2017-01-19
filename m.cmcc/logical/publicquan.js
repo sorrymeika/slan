@@ -78,7 +78,7 @@ if (!util.store('publicquan_messages')) {
 } else {
     var publicquan_messages = util.store('publicquan_messages');
 
-    publicquan_messages.sort(function(a, b) {
+    publicquan_messages.sort(function (a, b) {
         return a.date > b.date ? -1 : a.date == b.date ? 0 : 1
     });
 
@@ -108,11 +108,11 @@ if (!util.store('publicquan_comments')) {
 }
 
 var publicquan = Event.mixin({
-    recommend: function() {
+    recommend: function () {
         return Http.post('/pub_quan/getRecommends');
     },
 
-    search: function(keywords, page, pageSize) {
+    search: function (keywords, page, pageSize) {
         return Http.post('/pub_quan/getPage', {
             quan_name: keywords,
             page: page || 1,
@@ -120,11 +120,11 @@ var publicquan = Event.mixin({
         });
     },
 
-    myrecommend: function() {
+    myrecommend: function () {
         if (sl.isDev) {
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
 
-                setTimeout(function() {
+                setTimeout(function () {
                     var quan = util.store('publicquan')[0];
                     resolve({
                         success: true,
@@ -140,34 +140,34 @@ var publicquan = Event.mixin({
         return Http.post('/publicquan/myrecommend');
     },
 
-    myfollow: function() {
+    myfollow: function () {
         return Http.post('/pub_quan_follow/getPage', {
             page: 1,
             pageSize: 20
         });
     },
 
-    follow: function(quan_id) {
+    follow: function (quan_id) {
         return Http.post('/pub_quan_follow/update', {
             quan_id: quan_id
         });
     },
 
     //公众圈详情
-    item: function(quan_id) {
+    item: function (quan_id) {
         return Http.post('/pub_quan/getById', {
             quan_id: quan_id
         });
     },
 
-    fav: function(quan_id) {
+    fav: function (quan_id) {
         return Http.post('/user_fav/add', {
             rev_id: quan_id,
             fav_type: 1
         });
     },
 
-    newArticles: function(quan_id) {
+    newArticles: function (quan_id) {
         return Http.post('/pub_quan_msg/getPage', {
             quan_id: quan_id,
             page: 1,
@@ -175,26 +175,26 @@ var publicquan = Event.mixin({
         });
     },
 
-    seeArticle: function(msg_id) {
+    seeArticle: function (msg_id) {
         return Http.post('/pub_quan_msg/see', {
             msg_id: msg_id
         });
     },
 
-    likePubQuanMsg: function(msg_id) {
+    likePubQuanMsg: function (msg_id) {
         return Http.post('/pub_quan_likes/add', {
             msg_id: msg_id
         });
     },
 
-    article: function(msg_id) {
+    article: function (msg_id) {
 
         return Http.post('/pub_quan_msg/getById', {
             msg_id: msg_id
         });
     },
 
-    myArticles: function() {
+    myArticles: function () {
         return Http.post('/pub_quan_msg/getMine', {
             page: 1,
             pageSize: 20
@@ -202,7 +202,7 @@ var publicquan = Event.mixin({
     },
 
     //@params = {quan_ids:[], title:'', content:'', images:{}}
-    publish: function(params) {
+    publish: function (params) {
 
         if (!sl.isInApp) {
             return Http.post('/pub_quan_msg/add', {
@@ -212,7 +212,7 @@ var publicquan = Event.mixin({
             });
         }
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             var sign = auth.getSign();
 
             bridge.image.upload(Loader.url('/pub_quan_msg/add'), Object.assign({
@@ -220,7 +220,7 @@ var publicquan = Event.mixin({
                 content: params.content,
                 quan_ids: params.quan_ids.join(',')
 
-            }, sign), params.images, function(res) {
+            }, sign), params.images, function (res) {
                 if (res.success) {
                     resolve(res);
 
@@ -232,22 +232,26 @@ var publicquan = Event.mixin({
     },
 
     //@params={msg_id: msg_id, $scroll: $scroll}
-    commentsLoader: function(params, model) {
+    commentsLoader: function (params, model) {
         return Loader.pageLoader({
-                url: '/pub_quan_comments/getPage',
-                attribute: 'comments',
-                model: model
-            })
+            url: '/pub_quan_comments/getPage',
+            attribute: 'comments',
+            model: model
+        })
             .setParam(params);
     },
 
-    sendComment: function(msg_id, content) {
+    sendComment: function (msg_id, rel_id, at_user_id, content) {
         return Http.post('/pub_quan_comments/add', {
             msg_id: msg_id,
+            rel_id: rel_id,
+            at_user_id: at_user_id,
             content: content
-        }).then(function(res) {
+        }).then(function (res) {
 
             var data = {
+                rel_id: rel_id,
+                at_user_id: at_user_id,
                 comment_id: res.data,
                 msg_id: msg_id,
                 content: content,
@@ -260,7 +264,7 @@ var publicquan = Event.mixin({
         });
     },
 
-    delComment: function(comment_id) {
+    delComment: function (comment_id) {
         return Http.post('/pub_quan_comments/delete', {
             comment_id: comment_id
         });

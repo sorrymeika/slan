@@ -18,8 +18,6 @@ module.exports = Activity.extend({
         var list = hdhModel.getSubPhoneList(list);
         var info = hdhModel.getSubInfo(subphone);
 
-        console.log(this.route)
-
         var model = this.model = new Model(this.$el, {
             title: '副号配置',
             info: info,
@@ -53,6 +51,7 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         hdh.setPower(this.subphone, isOff).then(function () {
+            hdh.subinfo(subphone)
 
         }).catch(function (e) {
             Toast.showToast(e.message);
@@ -67,6 +66,7 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         hdh.interceptSms(this.subphone, isOff).then(function () {
+            hdh.subinfo(subphone)
 
         }).catch(function (e) {
             Toast.showToast(e.message);
@@ -82,6 +82,7 @@ module.exports = Activity.extend({
         loader.showLoading();
 
         hdh.interceptCall(this.subphone, isOff).then(function () {
+            hdh.subinfo(subphone)
 
         }).catch(function (e) {
             Toast.showToast(e.message);

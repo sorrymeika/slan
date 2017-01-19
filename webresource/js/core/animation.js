@@ -124,7 +124,7 @@ var run = function () {
             item = list._idlePrev,
             nextItem;
 
-        while (item != list) {
+        while (item && item != list) {
             nextItem = item._idlePrev;
             first = item.data;
 

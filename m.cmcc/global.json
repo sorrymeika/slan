@@ -60,6 +60,7 @@
         "models": {
             "models/news": "./models/news",
             "models/user": "./models/user",
+            "models/yunmi": "./models/yunmi",
             "models/friends": "./models/friends",
             "models/business": "./models/business",
             "models/messagesList": "./models/messagesList",

@@ -109,9 +109,14 @@ create table pub_quan_comments (--公众圈文章评论 --props=String user_name
     msg_id number(10),--文章编号 --route=msg_id --search=true
     add_date date,--评论时间 --search=true,
     user_id number(11),--用户编号 --search=true
+    rel_id number(10),--关联id
+    at_user_id number(11),--@用户编号
     content varchar(200)--评论内容
 ) tablespace cmccuser;
 create sequence pub_quan_comments_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
+
+alter table pub_quan_comments add rel_id number(10);
+alter table pub_quan_comments add at_user_id number(11);
 
 
 create table quan_msgs (--朋友圈 --listChildren=quan_comments,quan_likes --props=String user_name,String avatars
