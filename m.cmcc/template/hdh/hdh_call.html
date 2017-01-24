@@ -13,7 +13,7 @@
             <span class="va_m ml_s">新增副号</span>
         </li>
         <li class="pl_m icon-phone" sn-repeat="item,j in subPhoneList" sn-tap="this.setSubphone(item.subphone)">
-            <span class="va_m ml_s">{item.alias||('副号'+(j+1))}</span>
+            <span class="va_m ml_s">{item.alias||('副号'+item.order)}</span>
         </li>
     </ul>
 </div>

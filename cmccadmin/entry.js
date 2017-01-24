@@ -115,6 +115,9 @@ function startApp(routes, resourceMapping) {
                     title: '推送电费提醒',
                     url: '/notification/easy/100005'
                 }, {
+                    title: '联系人备份提醒',
+                    url: '/notification/easy/100044'
+                }, {
                     title: '139邮箱提醒',
                     url: '/notification/easy/100043'
                 }, {

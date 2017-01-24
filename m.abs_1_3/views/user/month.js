@@ -61,8 +61,8 @@ module.exports = Activity.extend({
                     if (color.indexOf(item.PRD_COLOR) == -1) {
                         color.push(item.PRD_COLOR);
                     }
-                    if (spec.indexOf(item.PRD_SPEC) == -1) {
-                        spec.push(item.PRD_SPEC);
+                    if (spec.indexOf(item.PRD_DISPLAY_SPEC) == -1) {
+                        spec.push(item.PRD_DISPLAY_SPEC);
                     }
                 }
 

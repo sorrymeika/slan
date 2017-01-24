@@ -7,9 +7,9 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
-var publicquan = require('logical/publicquan');
+var publicquan = require('../../logical/publicquan');
 var user = require('models/user');
-var friends = require('models/friends');
+var friends = require('../../models/friends');
 
 module.exports = Activity.extend({
 
@@ -23,12 +23,23 @@ module.exports = Activity.extend({
         });
 
         model.fav = function () {
-            publicquan.fav(articleId).then(function () {
-                Toast.showToast('收藏成功！')
+            var isFav = this.get('isFav');
+
+            console.log(isFav);
+
+            var pms = isFav ? publicquan.unfav(articleId) : publicquan.fav(articleId);
+
+            pms.then(function (res) {
+                Toast.showToast(!isFav ? '收藏成功' : '已取消收藏');
+
+                model.set({ isFav: !isFav })
+                    .model('data').set({
+                        likes: res.data
+                    });
 
             }).catch(function (e) {
                 Toast.showToast(e.message);
-            })
+            });
         }
 
         model.follow = function () {
@@ -62,9 +73,7 @@ module.exports = Activity.extend({
             publicquan.delComment(comment_id).then(function (res) {
                 Toast.showToast('删除成功');
 
-                var comments = model.getModel('comments');
-
-                console.log(comments);
+                var comments = model.model('comments');
 
                 comments.remove('comment_id', comment_id);
 
@@ -138,6 +147,7 @@ module.exports = Activity.extend({
             }
 
             model.set({
+                isFav: res.isFav,
                 data: data,
                 quan: res.quan,
                 follow: res.follow

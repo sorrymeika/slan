@@ -10,9 +10,10 @@
     <div class="fs_m pl_m mb_s">
         仅移动和生活APP支持赠云米功能
     </div>
-    <form class="flex bg_fff h_m bd_tb">
-        <input class="flexitem h_m fs_m pl_m" sn-model="mobile" type="tel" placeholder="请输入手机号" />
-    </form>
+    <div class="fs_m pl_l of_h">
+        <em class="ym__redbag__friends mr_m bg_app va_m" sn-if="friend.user_id">{friend.user_name}</em>
+        <a href="javascript:;" sn-tap="this.selectFriends()" class="cl_app td_u pb_l va_m">添加好友</a>
+    </div>
     <div class="fs_m pl_m mb_s pt_m">
         云米赠送数量
     </div>

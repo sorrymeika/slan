@@ -38,17 +38,17 @@
             <div class="flex pt_m con">
                 <img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" class="cir_s" />
                 <div class="flexitem ml_m">
-                    <p class="fs_m">{item.user_name}</p>
+                    <p class="fs_m">{this.getUserShowName(item)}</p>
                     <p class="fs_s cl_999">{util.formatDate(item.add_date)}</p>
                 </div>
-                <a sn-if="item.user_id!=user.user_id" class="icon-comment dp_b" href="javascript:;" sn-tap="this.comment(item.comment_id,item.user_id,item.user_name)"></a>
+                <a sn-if="item.user_id!=user.user_id" class="icon-comment dp_b" href="javascript:;" sn-tap="this.comment(item.comment_id,item.user_id,this.getUserShowName(item))"></a>
                 <a sn-if="item.user_id==user.user_id" sn-tap="this.delComment(item.comment_id)" class="icon-del2 dp_b" href="javascript:;"></a>
             </div>
             <div class="mt_s pb_m fs_m">
                 {item.content}
             </div>
             <ul class="fs_s pd_m bg_eee mr_m" sn-if="item.replys.length">
-                <li sn-repeat="reply in item.replys" class="h_xxs"><a sn-tap="this.comment(reply.comment_id,reply.user_id,this.getUserShowName(reply))" href="javascript:;" class="flex"><i class="cl_dark">{this.getUserShowName(item)}</i><em>：</em><span>{reply.content}</span></a></li>
+                <li sn-repeat="reply in item.replys" class="h_xxs"><a sn-tap="this.comment(item.comment_id,reply.user_id,this.getUserShowName(reply))" href="javascript:;" class="flex"><i class="cl_dark">{this.getUserShowName(reply)}</i><em>：</em><span>{reply.content}</span></a></li>
             </ul>
         </div>
     </div>
@@ -59,5 +59,5 @@
         <span class="fs_m cl_ccc dp_b">说几句话吧...</span>
     </div>
     <!--<div class="icon-comment3 sqr_l" data-forward="/pubquan/myarticles"></div>-->
-    <div class="icon-heart3 sqr_l" sn-tap="this.fav()"></div>
+    <div class="{isFav?'icon-heart2':'icon-heart3'} sqr_l" sn-tap="this.fav()"></div>
 </footer>

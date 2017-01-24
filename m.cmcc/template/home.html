@@ -11,8 +11,8 @@
     </div>
 </div>
 } @helper notify(id,name) { @this.business(id,name)
-<ul class="pr_m bg_f2" sn-if="showNotify==@(id)">
-    <li class="flex subitem bd_b" sn-repeat="item in business.type@(id)data.list" data-forward="/business/{item.business_id}">
+<ul class="pr_m hm_idx__notifi_bg" sn-if="showNotify==@(id)">
+    <li class="flex subitem ml_m {(i!=business.type@(id)data.list.length-1)&&'hm_idx__notifi_item'}" sn-repeat="item,i in business.type@(id)data.list" data-forward="/business/{item.business_id}">
         <i class="unread" sn-if="item.unread">+{item.unread}</i>
         <img sn-src="{sl.thumbnail(item.business_pic)}" />
         <div class="flexitem pl_m">
@@ -34,10 +34,10 @@
     </header>
     <header class="flex header_app" sn-if="tab==3">
         <a href="javascript:;" sn-tap="delegate.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
-        <div class="head_title cl_fff">圈子</div>
+        <div class="head_title cl_fff">圈 子</div>
         <div class="head_right">
             <div class="icon-search3 h_bar pl_m pr_s" data-forward="{quanTab.index==0?'/pubquan/search':'/contact/search'}"></div>
-            <div class="icon-plus h_bar pl_m pr_m" sn-tap="this.showQuanMenu()"></div>
+            <div class="icon-plus h_bar pl_m pr_l" sn-tap="this.showQuanMenu()"></div>
         </div>
     </header>
     <div sn-if="tab==1" class="hm_idx main" ref="life">
@@ -53,8 +53,8 @@
         </div>
         <div class="hm_idx__life">
             @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.business(4,'社交提醒')
-            <ul class="pr_m bg_f2" sn-if="showNotify==4">
-                <li class="flex subitem bd_b" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="{item.type==7?'/contact/person/'+item.user_id:('/contact/chat/'+item.user_id)}">
+            <ul class="pr_m hm_idx__notifi_bg" sn-if="showNotify==4">
+                <li class="flex subitem bd_b ml_m" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="{item.type==7?'/contact/person/'+item.user_id:('/contact/chat/'+item.user_id)}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <img onerror="this.src='images/default.jpg'" sn-src="{sl.thumbnail(item.avatars)}" />
                     <div class="flexitem pl_m">

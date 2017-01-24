@@ -8,105 +8,6 @@ var Event = require('core/event');
 var user = require('models/user');
 var auth = require('logical/auth');
 
-if (!util.store('publicquan')) {
-
-    util.store('publicquan', [{
-        quan_id: 1,
-        quan_name: '福建移动',
-        quan_pic: 'images/logo.png',
-        quan_m_pic: 'images/logo_m.png',
-        follow_num: 1,
-        is_follow: true,
-        summary: '中国移动通信集团公司，是中国规模最大的移动通信运营商。福建移动通信责任有限公司是……'
-    }, {
-        quan_id: 2,
-        quan_name: '和生活',
-        quan_pic: 'images/logo.png',
-        quan_m_pic: 'images/logo_m.png',
-        follow_num: 1,
-        is_follow: false,
-        summary: '和生活……'
-    }, {
-        quan_id: 3,
-        quan_name: '爱福建',
-        quan_pic: 'images/logo.png',
-        quan_m_pic: 'images/logo_m.png',
-        follow_num: 0,
-        is_follow: false,
-        summary: '爱福建……'
-
-    }])
-}
-
-
-if (!util.store('publicquan_messages')) {
-
-    util.store('publicquan_messages', [{
-        quan_id: 1,
-        msg_id: 10,
-        user_id: 0,
-        date: 1476101924277,
-        see: 4,
-        like: 2,
-        comment: 3,
-        title: '最新消息',
-        content: '圈子消息',
-        imgs: ['images/logo.png', 'images/logo.png']
-    }, {
-        quan_id: 1,
-        msg_id: 11,
-        user_id: 0,
-        date: 1477264843536,
-        see: 12,
-        like: 10,
-        comment: 2,
-        title: '快速调度您的资源',
-        content: '1、快速调度您的资源<br>计算、存储、网络资源秒级响应，用户可拥有畅快的云服务体验，同时提供弹性伸缩服务，可以对用户的资源进行动态的调整，无需用户操作，自动伸缩应变。<br>2、最大程度保障您的业务安全<br>引入SDN解决方案，为用户提供VPC服务，用户可以创建100%二层隔离的子网，搭建自己的私有云环境；同时提供多种安全服务产品，轻松帮助用户应对各种攻击、安全漏洞等问题，保证云服务的正常运行。',
-        imgs: ['images/logo.png', 'images/logo.png']
-    }, {
-        quan_id: 1,
-        msg_id: 11,
-        user_id: 30001,
-        date: 1477264843536,
-        see: 12,
-        like: 10,
-        comment: 2,
-        title: '我的帖子',
-        content: '我的最新帖子',
-        imgs: ['images/logo.png', 'images/logo.png']
-    }])
-} else {
-    var publicquan_messages = util.store('publicquan_messages');
-
-    publicquan_messages.sort(function (a, b) {
-        return a.date > b.date ? -1 : a.date == b.date ? 0 : 1
-    });
-
-    util.store('publicquan_messages', publicquan_messages)
-}
-
-if (!util.store('publicquan_comments')) {
-
-    util.store('publicquan_comments', [{
-        comment_id: 1,
-        msg_id: 10,
-        add_date: 1476101924277,
-        avatars: 'images/logo.png',
-        user_id: 10,
-        user_name: '小黑',
-        content: '休息下'
-
-    }, {
-        comment_id: 2,
-        msg_id: 11,
-        add_date: 1476101924277,
-        avatars: 'images/logo.png',
-        user_id: 10,
-        user_name: '小白',
-        content: '不行了'
-    }])
-}
-
 var publicquan = Event.mixin({
     recommend: function () {
         return Http.post('/pub_quan/getRecommends');
@@ -167,6 +68,13 @@ var publicquan = Event.mixin({
         });
     },
 
+    unfav: function (quan_id) {
+        return Http.post('/user_fav/delete', {
+            rev_id: quan_id,
+            fav_type: 1
+        });
+    },
+
     newArticles: function (quan_id) {
         return Http.post('/pub_quan_msg/getPage', {
             quan_id: quan_id,
@@ -183,6 +91,12 @@ var publicquan = Event.mixin({
 
     likePubQuanMsg: function (msg_id) {
         return Http.post('/pub_quan_likes/add', {
+            msg_id: msg_id
+        });
+    },
+
+    unlikePubQuanMsg: function (msg_id) {
+        return Http.post('/pub_quan_likes/delete', {
             msg_id: msg_id
         });
     },

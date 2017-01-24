@@ -385,7 +385,7 @@ var Cart = Model.extend({
 						<img sn-src="{item.ProductOBJ.WPP_LIST_PIC}" />
 						<div class="con">
 							<b class="name">{item.PRD_NAME}</b>
-							<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]}颜色：{item.PRD_COLOR}</p>
+							<p class="size">尺寸：{item.PRD_DISPLAY_SPEC}颜色：{item.PRD_COLOR}</p>
 							<p class="price">￥{Math.round(item.SPB_AMOUNT * 100) / 100}</p>
 						</div>
 						<div class="ft">
@@ -403,7 +403,7 @@ var Cart = Model.extend({
 							<input type="text" value="{item.SPB_QTY||1}" />
 							<span class="plus" sn-tap="this.changeQty(item,(parseInt(item.SPB_QTY)||1)+1)">+</span>
 						</p>
-						<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]}颜色：{item.PRD_COLOR}</p>
+						<p class="size">尺寸：{item.PRD_DISPLAY_SPEC}颜色：{item.PRD_COLOR}</p>
 					</div>
 					<div class="ft">
 						<p class="js_delete sp_cart__delete" data-id="{item.SPB_ID}" sn-tap="this.del()"></p>
@@ -423,7 +423,7 @@ var Cart = Model.extend({
 							<img sn-src="{item.PRD_PIC}" />
 							<div class="con">
 								<b class="name">{item.PRD_NAME}</b>
-								<p class="size">尺寸：{item.PRD_SPEC.split('|')[0]}颜色：{item.PRD_COLOR}</p>
+								<p class="size">尺寸：{item.PRD_DISPLAY_SPEC}颜色：{item.PRD_COLOR}</p>
 								<p class="price">￥{Math.round(item.PRD_MEMBER_PRICE * (item.SPB_QTY || 1) * 100) / 100}</p>
 							</div>
 							<div class="ft">

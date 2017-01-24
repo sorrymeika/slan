@@ -34,10 +34,7 @@ header:after { content: ''; display: block; -webkit-transform: scale(.5); width:
 
 header img { display: block; width: 33px; height: 33px; }
 
-.header_app { background-color: $color; color: #fff; }
-.header_app:after { content: none; }
-
-.head_title { color: $fontcolor; font-size: 16px; font-weight: 400; position: absolute; left: 0px; top: 0; right: 0; bottom: 0; }
+.head_title { color: $fontcolor; font-size: 16px; font-weight: 200; position: absolute; left: 0px; top: 0; right: 0; bottom: 0; }
 .head_left { position: absolute; left: 0px; top: 0; z-index: 10; text-align: center; display: -webkit-box; }
 .head_right { position: absolute; right: 0px; top: 0; text-align: center; display: -webkit-box; }
 .head_right button,.head_left button { display: block; height: 44px; padding: 0 10px; min-width: 44px; font-size: 14px; background-color: transparent; }
@@ -54,6 +51,9 @@ header img { display: block; width: 33px; height: 33px; }
 .header_trans .head_back:before { content: ""; @include arrow_left(#fff); top: -1px; }
 
 .has_status_bar header.header_trans { border-top-color: transparent; }
+
+.header_app { background-color: $color; color: #fff; }
+.header_app:after { content: none; }
 
 .main { background-color: #f3f3f3; top: 44px; }
 .refreshing { background: transparent; color: #333; }

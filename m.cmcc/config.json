@@ -82,6 +82,7 @@
         "/yunmi/send_yunmi": "yunmi/send_yunmi",
         "/yunmi/redbag": "yunmi/redbag",
         "/yunmi/select_user": "yunmi/select_user",
+        "/yunmi/select_single_user": "yunmi/select_single_user",
         "/yunmi/trade/{id:\\d+}": "yunmi/trade",
         "/business/{id:\\d+}": "business/notifications",
         "/business/service": "business/service",

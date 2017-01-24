@@ -48,10 +48,12 @@ module.exports = Activity.extend({
 
     setPower: function (isOff) {
         var loader = this.loader;
+        var subphone = this.subphone;
+
         loader.showLoading();
 
         hdh.setPower(this.subphone, isOff).then(function () {
-            hdh.subinfo(subphone)
+            //hdh.subinfo(subphone)
 
         }).catch(function (e) {
             Toast.showToast(e.message);
@@ -63,10 +65,12 @@ module.exports = Activity.extend({
 
     interceptSms: function (isOff) {
         var loader = this.loader;
+        var subphone = this.subphone;
+
         loader.showLoading();
 
         hdh.interceptSms(this.subphone, isOff).then(function () {
-            hdh.subinfo(subphone)
+            //hdh.subinfo(subphone)
 
         }).catch(function (e) {
             Toast.showToast(e.message);
@@ -79,10 +83,12 @@ module.exports = Activity.extend({
 
     interceptCall: function (isOff) {
         var loader = this.loader;
+        var subphone = this.subphone;
+
         loader.showLoading();
 
         hdh.interceptCall(this.subphone, isOff).then(function () {
-            hdh.subinfo(subphone)
+            //hdh.subinfo(subphone)
 
         }).catch(function (e) {
             Toast.showToast(e.message);

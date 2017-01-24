@@ -23,13 +23,28 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
+        this.onResult('select_single_user', function (e, friend) {
+            console.log(friend);
+
+            model.set({
+                friend: friend,
+                mobile: friend ? friend.account : null
+            });
+        });
+
+        model.selectFriends = function () {
+            self.forward("/yunmi/select_single_user", {
+                friend: model.get('friend')
+            });
+        }
+
         model.sendYunmi = function () {
             var memo = this.get('memo');
             var amount = this.get('send_amount');
             var mobile = this.get('mobile');
 
             if (!util.validateMobile(mobile)) {
-                Toast.showToast("请填写手机号");
+                Toast.showToast("请填写选择好友");
                 return;
             }
 

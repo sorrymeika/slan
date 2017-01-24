@@ -10,6 +10,7 @@ var bridge = require('bridge');
 
 var hdh = require('logical/hdh');
 var hdhModel = require('models/hdh');
+var user = require('models/user');
 
 module.exports = Activity.extend({
 
@@ -55,13 +56,40 @@ module.exports = Activity.extend({
         }
 
         model.call = function () {
+            console.log(subPhoneList.get())
+
+            var subPhones = [];
             var number = this.get('number');
+            var confirm;
 
-            if (!number) return;
+            subPhoneList.each(function (item, i) {
+                console.log(item);
 
-            var id = hdhModel.getDefaultSubPhoneId();
+                item = item.data;
 
-            bridge.system.phoneCall((subPhoneList.length ? "12583" + id : '') + number);
+                subPhones.push({
+                    text: '副号' + item.order + ":" + item.subphone + (item.state.charAt(0) == 1 ? "(关机)" : ''),
+                    click: function () {
+                        if (item.state.charAt(0) == 1)
+                            Toast.showToast('该副号已关机');
+                        else {
+                            bridge.system.phoneCall("12583" + item.order + number);
+                            confirm.hide();
+                        }
+                    }
+                })
+            })
+
+            confirm = popup.options({
+                options: [{
+                    text: '主号:' + user.get('account'),
+                    click: function () {
+                        bridge.system.phoneCall(number);
+                        confirm.hide();
+                    }
+
+                }].concat(subPhones)
+            })
         }
 
         var loader = this.loader = new Loader(this.$el);

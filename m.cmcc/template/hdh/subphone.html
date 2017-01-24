@@ -34,7 +34,7 @@
         <div class="flexitem pl_m">
             不接电话
         </div>
-        <div class="cp_switch{(info.state.charAt(0)==2||info.state.charAt(0)==4)?' cp_switch_on':''}" sn-tap="delegate.interceptSms(info.state.charAt(0)==2||info.state.charAt(0)==4)"></div>
+        <div class="cp_switch{(info.state.charAt(0)==2||info.state.charAt(0)==4)?' cp_switch_on':''}" sn-tap="delegate.interceptCall(info.state.charAt(0)==2||info.state.charAt(0)==4)"></div>
     </div>
     <div class="h_m fs_m pr_m pl_m pt_s">
         开启后，该副号所有来电将被拦截。
@@ -43,7 +43,7 @@
         <div class="flexitem pl_m">
             不收短信
         </div>
-        <div class="cp_switch{(info.state.charAt(0)==3||info.state.charAt(0)==4)?' cp_switch_on':''}" sn-tap="delegate.interceptCall(info.state.charAt(0)==3||info.state.charAt(0)==4)"></div>
+        <div class="cp_switch{(info.state.charAt(0)==3||info.state.charAt(0)==4)?' cp_switch_on':''}" sn-tap="delegate.interceptSms(info.state.charAt(0)==3||info.state.charAt(0)==4)"></div>
     </div>
     <div class="h_m fs_m pr_m pl_m pt_s">
         开启后，该副号所有短彩信将被拦截。

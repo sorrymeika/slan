@@ -8027,7 +8027,6 @@
         var sendAndInsertImage = function (file, editor) {
             //模拟数据
             var fd = new FormData();
-            alert(1);
             fd.append(editor.options.imageFieldName || 'upfile', file, file.name || ('blob.' + file.type.substr('image/'.length)));
             fd.append('type', 'ajax');
             var xhr = new XMLHttpRequest();

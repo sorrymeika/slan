@@ -57,6 +57,14 @@ module.exports = Page.extend({
                     feature: []
                 }]
             },
+            100044: {
+                title: '联系人备份提醒',
+                types: [{
+                    text: '图文链接',
+                    value: -1,
+                    feature: []
+                }]
+            },
             100043: {
                 title: '推送139邮箱提醒',
                 types: [{
