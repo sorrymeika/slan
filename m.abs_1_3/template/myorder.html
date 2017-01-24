@@ -16,7 +16,7 @@
                 <img sn-tap="this.openPrd(prd,item)" sn-src="{prd.WPP_LIST_PIC||'images/default.jpg'}" src="images/default.jpg" onerror="this.src='images/default.jpg'" />
                 <div class="con" sn-tap="this.openOrder(item)">
                     <b class="name">{ prd.PRD_NAME }</b>
-                    <p class="size">尺寸：{ prd.PRD_SPEC.split('|')[0]} 颜色：{ prd.PRD_COLOR }</p>
+                    <p class="size">尺寸：{ prd.PRD_DISPLAY_SPEC} 颜色：{ prd.PRD_COLOR }</p>
                     <p class="price">{util.currency(prd.LPK_CHANNEL_PRICE,'￥')}</p>
                 </div>
                 <p class="ft">

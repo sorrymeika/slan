@@ -120,7 +120,6 @@ var Month = model.ViewModel.extend({
 		for (var i = 0, len = item.PRD_Lis.length; i < len; i++) {
 			var prod = item.PRD_Lis[i];
 			
-			prod.PRD_SPEC=prod.PRD_DISPLAY_SPEC;
 			
 			if (color.indexOf(prod.PRD_COLOR) == -1) {
 				color.push(prod.PRD_COLOR);
@@ -129,8 +128,6 @@ var Month = model.ViewModel.extend({
 				spec.push(prod.PRD_DISPLAY_SPEC);
 			}
 		}
-		
-		product.PRD_SPEC=product.PRD_DISPLAY_SPEC;
 
 		self.size = new Size({
 			btn: '选择商品',
