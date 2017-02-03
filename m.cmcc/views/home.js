@@ -153,7 +153,7 @@ module.exports = Activity.extend({
         model.getUserShowName = friends.getUserShowName;
 
         model.openEnt = function () {
-            bridge.tab.show('http://m.miguvideo.com/mobiletv.jsp?channelid=100200140010006', 2);
+            bridge.tab.show('http://10.0.91.66:5560/test.html', 2);
         };
 
         model.openShop = function () {

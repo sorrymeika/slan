@@ -5,7 +5,8 @@
     "api": "http://${ip}:5560/proxy",
     "resources": "http://${ip}:5560/upload/",
     "proxy": {
-        "/proxy/*": "${ip}:10009"
+        "/proxy/*": "${ip}:10009",
+        "/proxy1/*": "112.5.183.254:3311"
     },
     "css": [
         "../webresource/m/images/style.css",
