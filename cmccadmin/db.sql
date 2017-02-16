@@ -210,8 +210,20 @@ create table friends (--好友 --props=String user_name,String avatars,int is_se
 ) tablespace cmccuser;
 create sequence friends_seq minvalue 1 maxvalue 99999999999 start with 1 increment by 1 cache 100;
 
-
 alter table friends add msg varchar(40);
+
+create table friends_ext (
+    ext_id number(15) primary key,--自增id
+    user_id number(10),--用户ID
+    friend_id number(10),--好友id
+    memo varchar(10),--备注
+    enable_leave_msg number(1),--允许留言
+    enable_push number(1),--允许推送到首页
+    messages_delete_date date--该时间前的消息不可见
+) tablespace cmccuser;
+
+alter table friends_ext add messages_delete_date date;
+
 
 create table country (--国家 --seq_name=district_seq
     country_id number(6) primary key,--国家id
@@ -251,15 +263,6 @@ create table messages (
 create sequence messages_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
 
 alter table userinfo modify avatars varchar(255);
-
-create table friends_ext (
-    ext_id number(15) primary key,--自增id
-    friend_id number(10),--好友id
-    user_id number(10),--用户ID
-    memo varchar(10),--备注
-    enable_leave_msg number(1),--允许留言
-    enable_push number(1)--允许推送到首页
-) tablespace cmccuser;
 
 create table contacts_backup (--通讯录备份
     backup_id number(12) primary key,--自增id
@@ -402,10 +405,6 @@ insert into business (business_id,business_name,secret_key,type) values (100043,
 
 insert into business (business_id,business_name,secret_key,type) values (100045,'和留言','4411d2e0eddc54cb19ef568443257efb',1);
 
-insert into business (business_id,business_name,secret_key,type) values (100004,'水费','4411d2e0eddc54cb19ef568443257efb',2);
-insert into business (business_id,business_name,secret_key,type) values (100005,'电费','4411d2e0eddc54cb19ef568443257efb',2);
-
-
 create table notification (--消息提醒
     notify_id number(12) primary key,--自增ID
     title varchar(140),--提醒标题
@@ -431,10 +430,10 @@ alter table user_yunmi add account varchar(20);
 --update user_yunmi a set a.user_id=(select b.user_id from account b where b.account=a.account)  where (a.user_id=0 or a.user_id is null) and a.account!='' and a.account is not null
 
 
-create table user_business (
-    ubid number(12) primary key,
-    user_id number(12),
-    user_code varchar(40),
+create table user_business (--用户水电账户
+    ubid number(12) primary key,--自增id
+    user_id number(12),--用户ID
+    user_code varchar(40),--
     funcode varchar(10),
     type varchar(10),
     business_id number(10),
@@ -475,14 +474,12 @@ insert into news_category (category_id,category_name,type,def_news_type) values 
 insert into news_category (category_id,category_name,type,def_news_type) values (2,'服务大厅-生活提醒',3,2);
 insert into news_category (category_id,category_name,type,def_news_type) values (3,'服务大厅-通信提醒',3,2);
 
+insert into news_category (category_id,category_name,type,def_news_type ) values (5,'关于我们',2,1);
+
 
 
 alter table yunmi_redbag_detail modify amount number(10,2);
 alter table yunmi_redbag modify amount number(10,2);
-
------------------------------
---<<2016-12-16 up to date here
------------------------------
 
 
 create table promission_list (--黑白名单
@@ -504,6 +501,42 @@ create table app_version (--app版本
 ) tablespace cmccuser;
 
 
+
+create table video_live_category (--直播分类
+    id number(5) primary key,--自增ID
+    name varchar(100)--频道分类名称
+) tablespace cmccuser;
+
+create sequence video_live_category_seq minvalue 1 maxvalue 99999 start with 1 increment by 1;
+
+
+create table video_live (--直播
+    id number(10) primary key,--自增ID
+    name varchar(100),--频道名称
+    image varchar(255),--图片 --type=file
+    url varchar(600),--播放地址
+    category_id number(5)--分类 --search=true --formSort=1
+    --formType=select --options={ url: '/video_live_category/getAll', params:{}, text: 'name', value: 'id' }
+) tablespace cmccuser;
+
+create sequence video_live_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+
+
+-----------------------------
+--<<2017-2-15 up to date here
+-----------------------------
+
+create table business_settings(--业务提醒设置
+    setting_id number(12) primary key,--自增ID
+    user_id number(12),--用户ID
+    business_id number(10),--业务ID
+    switcher varchar(10)--业务开关(0000000000,每个字符0表示关1表示开) --options=0:在“提醒”中显示,1:在“通知中心”中显示,2:在“手机短信”中显示,3:允许声音
+) tablespace cmccuser;
+
+create sequence business_settings_seq minvalue 1 maxvalue 999999999999 start with 1 increment by 1;
+
+alter table friends_ext add messages_delete_date date;
 -----------------------------
 -----------------------------
 

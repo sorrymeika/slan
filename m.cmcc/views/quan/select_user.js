@@ -11,11 +11,15 @@ var firstLetter = require('utils/firstLetter');
 
 var contact = require('logical/contact');
 
+var friendsModel = require('models/friends');
+
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var routeData = this.route.data;
+
+        console.log(routeData);
 
         var model = this.model = new Model(this.$el, {
             title: '我的好友',
@@ -23,16 +27,18 @@ module.exports = Activity.extend({
             type: routeData.type
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.save = function() {
+        model.getUserShowName = friendsModel.getUserShowName;
+
+        model.save = function () {
 
             var groups = this.get('groups');
             var friends = [];
 
-            groups.forEach(function(group) {
+            groups.forEach(function (group) {
                 friends = friends.concat(util.filter(group.list, 'checked', true));
             });
 
@@ -44,12 +50,12 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([contact.getFriends(), this.waitLoad()]).then(function(results) {
+        Promise.all([contact.friends(), this.waitLoad()]).then(function (results) {
 
             var friendList = results[0].data;
             var selected = model.get('friends');
 
-            friendList.forEach(function(item) {
+            friendList.forEach(function (item) {
                 if (-1 != util.indexOf(selected, 'user_id', item.user_id)) item.checked = true;
             });
 
@@ -60,28 +66,28 @@ module.exports = Activity.extend({
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     },
 
-    groups: function(data) {
+    groups: function (data) {
         var groups = {};
 
         if (!data) return;
 
-        data.forEach(function(item) {
+        data.forEach(function (item) {
 
             var letter = firstLetter(item.user_name).charAt(0).toUpperCase();
 
@@ -92,7 +98,7 @@ module.exports = Activity.extend({
             groups[letter].push(item);
         });
 
-        groups = Object.keys(groups).map(function(key) {
+        groups = Object.keys(groups).map(function (key) {
 
             return {
                 letter: key,

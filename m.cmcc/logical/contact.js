@@ -235,10 +235,16 @@ var contact = Event.mixin({
         });
     },
 
-    deleteFriend: function (user_id) {
+    deleteFriend: function (friend_id) {
 
-        return Http.post('/contact/deleteFriend', {
-            user_id: user_id
+        return Http.post('/friends/deleteFriend', {
+            friend_id: friend_id
+        });
+    },
+
+    clearFriendMessages: function (friend_id) {
+        return Http.post('/messages/clearFriendMessages', {
+            friend_id: friend_id
         });
     }
 });

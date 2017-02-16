@@ -166,6 +166,8 @@ var Touch = Event.mixin(function (el, options) {
                 currentTarget: e.currentTarget
             }));
 
+            document.cancelLongTap && document.cancelLongTap();
+
             return false;
         },
 

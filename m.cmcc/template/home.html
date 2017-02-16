@@ -12,7 +12,7 @@
 </div>
 } @helper notify(id,name) { @this.business(id,name)
 <ul class="pr_m hm_idx__notifi_bg" sn-if="showNotify==@(id)">
-    <li class="flex subitem ml_m {(i!=business.type@(id)data.list.length-1)&&'hm_idx__notifi_item'}" sn-repeat="item,i in business.type@(id)data.list" data-forward="/business/{item.business_id}">
+    <li class="flex subitem ml_m {(i!=business.type@(id)data.list.length-1)&&'hm_idx__notifi_item'}" sn-repeat="item,i in business.type@(id)data.list|filter:!item.switcher||item.switcher.charAt(0)==1&&item.switcher.charAt(1)==1" data-forward="/business/{item.business_id}">
         <i class="unread" sn-if="item.unread">+{item.unread}</i>
         <img sn-src="{sl.thumbnail(item.business_pic)}" />
         <div class="flexitem pl_m">
@@ -142,9 +142,9 @@
                     <p class="avatars ml_m mr_m" data-forward="/contact/friend/{quan.user_id}"><img onerror="this.src='images/default.jpg'" src="{sl.thumbnail(quan.avatars)}" /></p>
                     <div class="bd flexitem lh_xxs">
                         <p class="name cl_dark fs_m" data-forward="/contact/friend/{quan.user_id}">{this.getUserShowName(quan)}</p>
-                        <p class="con fs_m" sn-html="{quan.content}"></p>
+                        <p class="con fs_m" sn-html="{quan.content}" sn-long-tap="delegate.showQuanControl(quan,e)"></p>
                         <ul class="imgs clearfix mt_s">
-                            <li class="img fl_l mr_m" sn-repeat="img,i in quan.imgs" sn-tap="this.showImages(quan.imgs,i)"><img sn-src="{sl.thumbnail(img)}" /></li>
+                            <li class="img fl_l mr_m" sn-repeat="img,i in quan.imgs"  sn-long-tap="delegate.showQuanControl(quan,e)" sn-tap="this.showImages(quan.imgs,i)"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
                         <div class="bar flex fs_s mt_s">
                             <p class="date flexitem">{util.formatDate(quan.add_date,"short")}</p>
@@ -189,7 +189,7 @@
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>
                     <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{this.getUserShowName(item)}</span>
-                        <span class="cl_light fs_s msg dp_b lh_1">{item.msg}</span>
+                        <span class="cl_light fs_s msg dp_b lh_1 to_e" style="width:1.9rem">{item.msg}</span>
                     </p>
                     <p class="date h_bar mr_m pt_s fs_s">{util.formatDate(item.date,"short")}</p>
                 </li>

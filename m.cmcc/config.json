@@ -62,7 +62,7 @@
         "/user/settings": "user/settings",
         "/user/set/{type:\\w+}": "user/set",
         "/user/remind": "user/remind",
-        "/user/remind/{type:\\w+}": "user/remind_one",
+        "/user/remind/{business_id:\\d+}": "user/remind_one",
         "/user/privacy": "user/privacy",
         "/user/quan_privacy/{type:\\d+}": "user/quan_privacy",
         "/user/qa": "user/qa",

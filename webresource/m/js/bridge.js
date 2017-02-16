@@ -140,6 +140,15 @@ define(function (require, exports, module) {
                 hybrid('pickColor', f);
             },
 
+            rn: function (params, cb) {
+                hybrid('rn', Object.assign({
+                    url: '',
+                    token: '',
+                    sign: ''
+
+                }, params), cb || util.noop);
+            },
+
             system: {
                 info: function (callback) {
                     hybrid('system', {

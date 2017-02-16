@@ -7,6 +7,8 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var news = require('logical/news');
+
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -20,7 +22,12 @@ module.exports = Activity.extend({
             self.back(self.swipeRightBackAction)
         }
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Promise.all([news.getCategoryAllNews(5), this.waitLoad()]).then(function (results) {
+            var res = results[0];
+
+            model.set({
+                data: res.data[0]
+            })
 
             self.bindScrollTo(model.refs.main);
 

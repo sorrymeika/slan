@@ -55,12 +55,13 @@ var rSnAttr = /^sn-/;
 
 var Filters = {
     contains: function (source, keywords) {
-        return source.indexOf(keywords) != -1;
+
+        return !keywords || source.indexOf(keywords) != -1;
     },
     like: function (source, keywords) {
         source = source.toLowerCase();
         keywords = keywords.toLowerCase();
-        return source.indexOf(keywords) != -1 || keywords.indexOf(source) != -1;
+        return !keywords || source.indexOf(keywords) != -1 || keywords.indexOf(source) != -1;
     },
     util: util
 };

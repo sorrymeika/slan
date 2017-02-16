@@ -25,13 +25,13 @@ var Month = Model.extend({
 				<div class="pd_size_select">
 					<div class="hd">尺码</div>
 					<ul>
-						<li sn-repeat="item in spec" class="{this.equal(data.PRD_DISPLAY_SPEC,item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}" sn-tap="this.setSpec(item)">{item.split('|')[0]}</li>
+						<li sn-repeat="item in spec" class="{this.equal(util.formatProdSpec(data),item)?'curr':this.isInList(item,data.PRD_COLOR,colorSpec)?'':'disabled'}" sn-tap="this.setSpec(item)">{item.split('|')[0]}</li>
 					</ul>
 				</div>
 				<div class="pd_size_select">
 					<div class="hd">颜色分类</div>
 					<ul>
-						<li sn-repeat="item in color" class="{data.PRD_COLOR==item?'curr':this.isInList(data.PRD_DISPLAY_SPEC,item,colorSpec)?'':'disabled'}" sn-tap="this.setColor(item)">{item}</li>
+						<li sn-repeat="item in color" class="{data.PRD_COLOR==item?'curr':this.isInList(util.formatProdSpec(data),item,colorSpec)?'':'disabled'}" sn-tap="this.setColor(item)">{item}</li>
 					</ul>
 				</div>
 			</div>
@@ -54,7 +54,7 @@ var Month = Model.extend({
 	isInList: function (spec, color, colorSpec) {
 
 		return !!util.first(colorSpec, function (item) {
-			return item.PRD_DISPLAY_SPEC == spec && item.PRD_COLOR == color;
+			return util.formatProdSpec(item) == spec && item.PRD_COLOR == color;
 		});
 	},
 
@@ -83,7 +83,7 @@ var Month = Model.extend({
 		var data = self.get('data');
 
 		var item = util.first(colorSpec, function (item) {
-			return item.PRD_DISPLAY_SPEC == data.PRD_DISPLAY_SPEC && item.PRD_COLOR == data.PRD_COLOR;
+			return util.formatProdSpec(data) == util.formatProdSpec(item) && item.PRD_COLOR == data.PRD_COLOR;
 		});
 
 		if (item) {
@@ -112,8 +112,10 @@ var Month = Model.extend({
 		var colorSpec = self.get('colorSpec');
 		var data = self.get('data');
 		var item = util.first(colorSpec, function (item) {
-			return item.PRD_DISPLAY_SPEC == data.PRD_DISPLAY_SPEC && item.PRD_COLOR == data.PRD_COLOR;
+			return item.PRD_SPEC == data.PRD_SPEC && item.PRD_COLOR == data.PRD_COLOR;
 		});
+
+		console.log('confirm', item, data, colorSpec)
 		var user = userModel.get();
 
 		if (!user) {

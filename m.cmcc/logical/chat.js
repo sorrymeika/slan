@@ -221,7 +221,6 @@ var chat = Event.mixin({
             isSending: true
         };
 
-        this.record(true, params.to_id, params);
 
         return Http.post("/messages/sendMessage", params).then(function (res) {
 
@@ -230,6 +229,7 @@ var chat = Event.mixin({
             params.isSending = false;
             params.add_date = Date.now();
 
+            chat.record(true, params.to_id, params);
             chat.trigger('sendresult:' + to_id, params);
 
             return res;

@@ -26,11 +26,11 @@
         <div class="btn_xl btn_reject" sn-tap="this.rejectFriend()">拒绝</div>
     </div>
     <div class="ct_person__actions ta_c" sn-else-if="person.status==-2">
-        <button class="quan-add_friend bg_0000 mr_m" sn-tap="this.addFriend()"></button>
+        <button class="quan-add_friend bg_0000 mr_m" sn-tap="delegate.addFriend()"></button>
         <button class="quan-call2 bg_0000 ml_m" sn-tap="this.openPhoneCall()"></button>
     </div>
     <div class="ct_person__actions ta_c" sn-else-if="person.status==-11">
-        <button class="quan-add_friend bg_0000 mr_m" sn-tap="this.addFriend()"></button>
+        <button class="quan-add_friend bg_0000 mr_m" sn-tap="delegate.addFriend()"></button>
         <button class="quan-call2 bg_0000 ml_m" sn-tap="this.openPhoneCall()"></button>
     </div>
 </div>

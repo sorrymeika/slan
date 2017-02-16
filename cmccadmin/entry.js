@@ -134,6 +134,14 @@ function startApp(routes, resourceMapping) {
                     title: '分类管理',
                     url: '/news_category/index'
                 }]
+            }, {
+                title: '直播管理',
+                url: '/video_live/index',
+                children: [{
+                    title: '分类管理',
+                    url: '/video_live_category/index'
+                }]
+
             }]
 
         }, util.store(MENU_DATA)));

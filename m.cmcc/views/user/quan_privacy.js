@@ -9,38 +9,44 @@ var popup = require('widget/popup');
 
 var quan = require('logical/quan');
 
+var friendsModel = require('models/friends');
+
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var type = this.type = this.route.params.type;
 
         var model = this.model = new Model(this.$el, {
-            title: type == 1 ? '不看他（她）的朋友圈' : '不让他（她）看我的朋友圈'
+            title: type == 2 ? '不看他（她）的朋友圈' : '不让他（她）看我的朋友圈'
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
-        model.del = function(item) {
-            model._('data').remove('friend_id', item.friend_id);
+        model.del = function (item) {
+            model._('data').remove('user_id', item.user_id);
+
+            quan.deleteQuanBlack(item.black_id);
         }
 
-        model.selectUser = function() {
+        model.selectUser = function () {
             self.forward('/quan/select_user', {
                 type: type,
 
-                onSelect: function(data) {
+                friends: model.get('data'),
+
+                onSelect: function (data) {
                     console.log(data);
                     var list = model.get('data');
                     var appends = [];
 
-                    data.forEach(function(item) {
+                    data.forEach(function (item) {
                         var flag = false;
                         for (var i = 0, len = list.length; i < len; i++) {
                             var selected = list[i];
-                            if (selected.user_id == item.friend_id) {
+                            if (selected.user_id == item.user_id) {
                                 flag = true;
                                 break;
                             }
@@ -48,9 +54,11 @@ module.exports = Activity.extend({
 
                         if (!flag) {
 
+                            quan.addQuanBlack(item.user_id, type);
+
                             appends.push({
-                                friend_id: item.friend_id,
-                                user_name: item.user_name,
+                                user_id: item.user_id,
+                                user_name: friendsModel.getUserShowName(item),
                                 avatars: item.avatars
                             });
                         }
@@ -66,30 +74,48 @@ module.exports = Activity.extend({
 
         loader.showLoading();
 
-        Promise.all([quan.getQuanBlack(type), this.waitLoad()]).then(function(results) {
+        Promise.all([quan.getQuanBlack(type), this.waitLoad()]).then(function (results) {
             var res = results[0];
 
-            model.set('data', res.data || []);
+            var data = res.data || [];
+
+            data.forEach(function (item) {
+                item.user_id = item.friend_id;
+            });
+
+            console.log(data);
+
+            model.set('data', data);
+
+            res.friends && res.friends.forEach(function (friend) {
+                model._('data').update({
+                    user_id: friend.user_id,
+                    avatars: friend.avatars,
+                    user_name: friendsModel.getUserShowName(friend)
+
+                }, 'user_id');
+            });
+
 
             self.bindScrollTo(model.refs.main);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
 
-        }).then(function() {
+        }).then(function () {
             loader.hideLoading();
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     },
 
-    add: function() {
+    add: function () {
         var loader = this.loader;
 
     }

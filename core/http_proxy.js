@@ -1,10 +1,17 @@
-﻿var http = require('http');
+var http = require('http');
 var _ = require('underscore');
+
 
 module.exports = function (host, port, replace) {
 
     return function (request, response) {
-        var url = replace ? replace(request.url) : (request.params[0].indexOf('/') !== 0 ? '/' + request.params[0] : request.params[0]);
+
+        var url = replace
+            ? replace(request.url)
+            : (
+                (request.params[0].indexOf('/') !== 0 ? '/' + request.params[0] : request.params[0])
+                + (request.url.indexOf('?') == -1 ? '' : request.url.substr(request.url.indexOf('?')))
+            );
 
         var options = {
             hostname: host,
@@ -25,7 +32,7 @@ module.exports = function (host, port, replace) {
 
             response.set(res.headers);
             //response.set('Access-Control-Allow-Credentials', true);
-            response.set('Access-Control-Allow-Origin', request.headers.origin);
+            response.set('Access-Control-Allow-Origin', request.headers.origin || '*');
 
             res.on('data', function (chunk) {
                 log(2);

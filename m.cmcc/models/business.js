@@ -20,6 +20,14 @@ var business = vm.createModel({
 
     getGroups: function () {
         return businessGroup;
+    },
+
+    getAll: function () {
+        return this._('list');
+    },
+
+    find: function (business_id) {
+        return this._('list[business_id=' + business_id + '][0]');
     }
 });
 
@@ -48,7 +56,7 @@ business.observe(function () {
     var notifications = business.get('notifications');
     //处理未读消息数量和业务分类的最新一条消息
     //单个业务最新一条消息的显示处理见:logical/business->getAllBusinessAndUnread
-    business._('list').each(function (busiModel, i) {
+    business.getAll().each(function (busiModel, i) {
         var busi = busiModel.get();
 
         //[当前业务分类]1:生活,2:通信,3:娱乐

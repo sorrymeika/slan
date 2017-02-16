@@ -32,6 +32,8 @@ define(function (require, exports, module) {
             this.onResult('CartChange', function () {
                 cart.cartApi.load();
             });
+
+            this.bindScrollTo(cart.refs.main);
         },
 
         onShow: function () {

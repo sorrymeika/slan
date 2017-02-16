@@ -61,7 +61,12 @@ module.exports = Activity.extend({
             });
             console.log("aftersend:", model.get('content'))
 
-            chat.send(data);
+            chat.send(data).catch(function (res) {
+
+                messages.remove('gid', data.gid);
+
+                Toast.showToast(res.message);
+            });
         }
 
         var loader = this.loader = new Loader(this.$el);

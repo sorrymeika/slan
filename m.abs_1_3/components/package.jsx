@@ -29,12 +29,15 @@ var Month = model.ViewModel.extend({
 				</li>
 			</ul>
 		</div>
-	</div><div class="sp_package_ft">
+	</div>
+	<div class="sp_package_ft">
 		<div class="price">
 			<em>总计：</em><b>¥{PPG_PRICE}</b>
 		</div>
 		<div class="buy" sn-tap="this.showList()">查看套餐商品（{qty||0}）</div>
-	</div><div class="sp_package_list" ref="sp_package_list" sn-tap="this.hideList()" style="display:none">
+	</div>
+
+	<div class="sp_package_list" ref="sp_package_list" sn-tap="this.hideList()" style="display:none">
 		<div class="sp_package_hd">
 			确认套餐清单
 		</div>
@@ -51,7 +54,7 @@ var Month = model.ViewModel.extend({
 							<em>￥{prod.PRD_PRICE}</em>
 							<del sn-display="{prod.PRD_PRICE!=0&&prod.PRD_PRICE<prod.PRD_MEMBER_PRICE}" style="display: none;">￥{prod.PRD_MEMBER_PRICE}&nbsp;</del>
 						</p>
-						<b>尺寸:{prod.PRD_DISPLAY_SPEC} 颜色:{prod.PRD_COLOR}  x{prod.qty}</b>
+						<b>尺寸:{util.formatProdSpec(prod)} 颜色:{prod.PRD_COLOR}  x{prod.qty}</b>
 						<div class="btn" sn-tap="this.deleteItem(prod,item.PPS_Model.PST_ID)">删除</div>
 					</li>
 				</ul>
@@ -60,15 +63,16 @@ var Month = model.ViewModel.extend({
 		<div class="sp_package_ft">
 			<div class="buy" sn-tap="this.buy()">加入购物车</div>
 		</div>
-	</div>,
-	
-	deleteItem: function(prod,PST_ID,e){
-		this.getModel('data').each(function(model,i){
-			var ppsModel=model.get('PPS_Model');
-			
-			if (ppsModel.PST_ID==PST_ID){
-				model.getModel('list').remove(function(item) {
-					return item.PRD_ID==prod.PRD_ID;
+	</div>
+	,
+
+	deleteItem: function (prod, PST_ID, e) {
+		this.getModel('data').each(function (model, i) {
+			var ppsModel = model.get('PPS_Model');
+
+			if (ppsModel.PST_ID == PST_ID) {
+				model.getModel('list').remove(function (item) {
+					return item.PRD_ID == prod.PRD_ID;
 				});
 				return false;
 			}
@@ -76,97 +80,99 @@ var Month = model.ViewModel.extend({
 
 		console.log(this);
 		console.log(this.data);
-				
+
 		this.refreshQty();
 	},
-	
-	refreshQty: function(){
-		var self=this;
-		var qty=0;
-		for (var i=0;i<self.data.data.length;i++) {
-			var data=self.data.data[i];
 
-			for (var j=0;data.list&&j<data.list.length;j++) {
-				qty+=data.list[j].qty;
+	refreshQty: function () {
+		var self = this;
+		var qty = 0;
+		for (var i = 0; i < self.data.data.length; i++) {
+			var data = self.data.data[i];
+
+			for (var j = 0; data.list && j < data.list.length; j++) {
+				qty += data.list[j].qty;
 			}
 		}
-		
+
 		self.set({
 			qty: qty
 		})
 	},
-	
-	_hideList: function(){
+
+	_hideList: function () {
 		$(this.refs.sp_package_list).hide();
 	},
-	
-	showList: function(){
+
+	showList: function () {
 		$(this.refs.sp_package_list).show();
 	},
-	
-	hideList: function(e){
+
+	hideList: function (e) {
 		if ($(e.target).hasClass('sp_package_list')) {
 			this._hideList();
 		}
 	},
-	
-	selectSize: function(item,product,e){
-		var self=this;
-		
+
+	selectSize: function (item, product, e) {
+		var self = this;
+
 		var color = [];
 		var spec = [];
-		var data=this.data.data;
-		
+		var data = this.data.data;
+
 		for (var i = 0, len = item.PRD_Lis.length; i < len; i++) {
 			var prod = item.PRD_Lis[i];
-			
+
 			if (color.indexOf(prod.PRD_COLOR) == -1) {
 				color.push(prod.PRD_COLOR);
 			}
-			if (spec.indexOf(prod.PRD_DISPLAY_SPEC) == -1) {
-				spec.push(prod.PRD_DISPLAY_SPEC);
+			var prdSpec = util.formatProdSpec(prod);
+
+			if (spec.indexOf(prdSpec) == -1) {
+				spec.push(prdSpec);
 			}
 		}
 
 		self.size = new Size({
 			btn: '选择商品',
-			
-			confirm: function(item,pstId,qty){
-				
-				self.getModel('data').each(function(model,i){
-					var ppsModel=model.get('PPS_Model');
-					
-					if (ppsModel.PST_ID==pstId){
-						var max=ppsModel.PST_OPTIONAL_QTY;
-						var list= model.get('list');
-						list=list?[].concat(list):[];
-						
-						var count=0;
-						for (var j=0;j<list.length;j++) {
-							count+=list[j].qty;
+
+			confirm: function (item, pstId, qty) {
+
+				self.getModel('data').each(function (model, i) {
+					var ppsModel = model.get('PPS_Model');
+
+					if (ppsModel.PST_ID == pstId) {
+						var max = ppsModel.PST_OPTIONAL_QTY;
+						var list = model.get('list');
+						list = list ? [].concat(list) : [];
+
+						var count = 0;
+						for (var j = 0; j < list.length; j++) {
+							count += list[j].qty;
 						}
-												
-						if (count+qty>max){
+
+						if (count + qty > max) {
 							sl.tip('您选择的商品数量超过该组指定数量');
 							return false;
 						}
-						list.push($.extend({},item,{ qty: qty }));
-							
+						list.push($.extend({}, item, { qty: qty }));
+
 						model.set({
 							list: list
 						});
 						return false;
 					}
 				});
-				
+
 				self.refreshQty();
-				
+
 				self.size.hide();
 			}
 		});
-        
+
 		self.size.$el.appendTo($('body'));
-		
+
 		self.size.set({
 			PST_ID: item.PPS_Model.PST_ID,
 			type: "package",
@@ -177,60 +183,60 @@ var Month = model.ViewModel.extend({
 			qty: 1
 		}).show();
 	},
-	
-	buy: function(item,e) {
-		var self=this;
-		
-		if (!this.data.qty){
+
+	buy: function (item, e) {
+		var self = this;
+
+		if (!this.data.qty) {
 			sl.tip('请选择套餐商品');
 			return;
 		}
-		
-		var prdIds='';
+
+		var prdIds = '';
 		var ppgId;
-		for (var i=0;i<self.data.data.length;i++) {
-			var data=self.data.data[i];
-			
-			ppgId=data.PPG_ID;
-			prdIds+=data.PPS_Model.PST_ID+"-";
-			
+		for (var i = 0; i < self.data.data.length; i++) {
+			var data = self.data.data[i];
+
+			ppgId = data.PPG_ID;
+			prdIds += data.PPS_Model.PST_ID + "-";
+
 			if (!data.list) {
 				sl.tip('请选择分组商品');
 				return;
 			}
-			
-			for (var j=0;j<data.list.length;j++) {
-				for (var qty=0;qty<data.list[j].qty;qty++){
-					prdIds+=data.list[j].PRD_ID+',';
+
+			for (var j = 0; j < data.list.length; j++) {
+				for (var qty = 0; qty < data.list[j].qty; qty++) {
+					prdIds += data.list[j].PRD_ID + ',';
 				}
 			}
-			
-			prdIds+='|';
+
+			prdIds += '|';
 		}
-		
+
 		self.cartAddAPI.setParam({
 			ppgId: ppgId,
 			prdIds: prdIds
 		}).load();
 	},
-	
-	initialize: function() {
-		var self=this;
-		
-		self.user=util.store('user');
-		
+
+	initialize: function () {
+		var self = this;
+
+		self.user = util.store('user');
+
 		self.set({
 			url: encodeURIComponent(location.hash)
 		});
-		
-		var dataAPI=new api.PackageAPI({
+
+		var dataAPI = new api.PackageAPI({
 			$el: self.$el.find('.sp_package'),
 			params: {
 				id: this.data.id
 			},
-			success: function(res){
-				var data=res.data[0];
-				
+			success: function (res) {
+				var data = res.data[0];
+
 				self.set({
 					PPG_MEMO: data.PPG_MEMO,
 					PPG_NAME: data.PPG_NAME,
@@ -240,7 +246,7 @@ var Month = model.ViewModel.extend({
 			}
 		});
 		dataAPI.load();
-		
+
 		self.cartAddAPI = new api.PackageCartAPI({
 			$el: self.$el,
 			checkData: false,
@@ -251,7 +257,7 @@ var Month = model.ViewModel.extend({
 			success: function (res) {
 				if (res.success) {
 					sl.tip('加入购物车成功！');
-					
+
 				} else {
 					sl.tip(res.msg);
 				}

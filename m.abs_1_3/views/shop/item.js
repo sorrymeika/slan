@@ -318,8 +318,10 @@ module.exports = Activity.extend({
                     if (color.indexOf(item.PRD_COLOR) == -1) {
                         color.push(item.PRD_COLOR);
                     }
-                    if (spec.indexOf(item.PRD_DISPLAY_SPEC) == -1) {
-                        spec.push(item.PRD_DISPLAY_SPEC);
+
+                    var prdSpec = util.formatProdSpec(item);
+                    if (spec.indexOf(prdSpec) == -1) {
+                        spec.push(prdSpec);
                     }
                 }
                 console.log(res);

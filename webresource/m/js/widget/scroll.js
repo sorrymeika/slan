@@ -183,6 +183,8 @@ var touchMove = function (e) {
         el.isRefresh = el.scrollTop < -70;
     }
 
+    document.cancelLongTap && document.cancelLongTap();
+
     e.stopPropagation();
     el.__timestamp = +new Date;
 };

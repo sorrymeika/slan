@@ -40,14 +40,14 @@ var businessGroup = businessModel.getGroups();
 module.exports = Activity.extend({
 
     events: {
-        'tap [data-url]': function(e) {
+        'tap [data-url]': function (e) {
             var url = $(e.currentTarget).attr('data-url');
 
             redirect.jump(url);
         }
     },
 
-    onCreate: function() {
+    onCreate: function () {
 
         // $.ajax({
         //     type: 'POST',
@@ -128,12 +128,12 @@ module.exports = Activity.extend({
 
         photoViewer.$el.hide().appendTo('body')
             .addClass('g_beforeshow')
-            .on($.fx.transitionEnd, function() {
+            .on($.fx.transitionEnd, function () {
                 if (!photoViewer.$el.hasClass('g_show')) {
                     photoViewer.$el.hide();
                 }
             })
-            .on('tap', function() {
+            .on('tap', function () {
                 photoViewer.$el.removeClass('g_show');
             });
 
@@ -157,11 +157,42 @@ module.exports = Activity.extend({
 
         model.getUserShowName = friends.getUserShowName;
 
-        model.openEnt = function() {
-            bridge.tab.show('http://share.migu.cn/h5/api/h5/133/2848?channelCode=1380050700381&cpsChannelId=300000100002&cpsPackageChannelId=300000100002', 2);
+
+        var isOpenRn = false;
+
+        model.openEnt = function () {
+
+            if (isOpenRn) return;
+
+            isOpenRn = true;
+
+            var tk = auth.getSign();
+
+            bridge.rn({
+                token: tk._tk,
+                sign: tk._sign
+
+            }, function (result) {
+
+                isOpenRn = false;
+
+                switch (result.action) {
+                    case 'home':
+                        hideTab(1);
+                        break;
+                    case 'quan':
+                        hideTab(3);
+                        break;
+                    case 'shop':
+                        model.openShop();
+                        break;
+                }
+            });
+
+            //bridge.tab.show('http://share.migu.cn/h5/api/h5/133/2848?channelCode=1380050700381&cpsChannelId=300000100002&cpsPackageChannelId=300000100002', 2);
         };
 
-        model.openShop = function() {
+        model.openShop = function () {
             console.log(appconfig.get('shopUrl'));
             bridge.tab.show(appconfig.get('shopUrl'), 3);
         }
@@ -173,32 +204,32 @@ module.exports = Activity.extend({
                     headBg: false
                 });
 
-                setTimeout(function() {
+                setTimeout(function () {
                     bridge.tab.hide();
                 }, 200);
             } else
                 bridge.tab.hide();
         }
 
-        $(window).on('ent_to_home', function() {
+        $(window).on('ent_to_home', function () {
             hideTab(1)
 
-        }).on('ent_to_quan', function() {
+        }).on('ent_to_quan', function () {
             hideTab(3)
 
-        }).on('tabchange_to_2', function() {
+        }).on('tabchange_to_2', function () {
             model.openEnt();
 
-        }).on('tabchange_to_3', function() {
+        }).on('tabchange_to_3', function () {
             model.openShop();
         });
 
-        model.showQuanMenu = function() {
+        model.showQuanMenu = function () {
             $(this.refs.quanMenuMask).show();
             $(this.refs.quanMenu).show();
         }
 
-        model.hideQuanMenu = function(url, e) {
+        model.hideQuanMenu = function (url, e) {
             $(this.refs.quanMenuMask).hide();
             $(this.refs.quanMenu).hide();
 
@@ -206,50 +237,50 @@ module.exports = Activity.extend({
                 self.forward(url);
             }
         }
-        model.exitMenu = function(e) {
+        model.exitMenu = function (e) {
             if ($(e.target).hasClass('hm_home'))
                 self.exitMenu();
         }
 
-        model.backup = function() {
+        model.backup = function () {
             self.forward('/contact/backup');
             return false;
         }
 
         model.onceTrue('change:tab', this.initAllQuan.bind(this));
 
-        model.changeTab = function(tab) {
+        model.changeTab = function (tab) {
             this.set({
                 tab: tab
             });
         }
 
-        model.phoneCall = function() {
+        model.phoneCall = function () {
             self.forward('/hdh/call')
         }
 
-        model.showYunMi = function() {
+        model.showYunMi = function () {
             popup.alert({
                 className: 'ym_rules__popup',
                 title: '云米规则',
                 content: yunMiRules.rule2,
                 btn: '关闭',
-                action: function() { }
+                action: function () { }
             })
         }
 
-        model.toContact = function() {
+        model.toContact = function () {
             this.set({
                 tab: 3
 
-            }).next(function() {
+            }).next(function () {
                 model._('quanTab').tab(2);
             });
         }
 
-        model.showImages = function(imgs, index) {
+        model.showImages = function (imgs, index) {
 
-            photoViewer.setImages(imgs.map(function(src) {
+            photoViewer.setImages(imgs.map(function (src) {
                 return {
                     src: sl.resource(src)
                 }
@@ -260,12 +291,12 @@ module.exports = Activity.extend({
             photoViewer.$el.addClass('g_show');
         }
 
-        model.hideTimeout = function() {
+        model.hideTimeout = function () {
             $(model.refs.timeout).hide();
             $(model.refs.timeoutMask).hide();
         }
 
-        model.receiveYunmi = function() {
+        model.receiveYunmi = function () {
             var data = this.get('currentYunmi');
 
             if (!data || !data.yunmi_id) {
@@ -281,23 +312,23 @@ module.exports = Activity.extend({
 
             loader.showLoading();
 
-            ym.receiveYunmi(data.yunmi_id).then(function(res) {
+            ym.receiveYunmi(data.yunmi_id).then(function (res) {
                 Toast.showToast("恭喜你领取了" + data.amount + "云米");
                 model.set({
                     currentYunmi: null
                 });
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
 
-            }).then(function() {
+            }).then(function () {
                 loader.hideLoading();
             });
         }
 
         this.bindScrollTo(model.refs.life);
 
-        $(model.refs.life).on('scroll', function() {
+        $(model.refs.life).on('scroll', function () {
             var top = this.scroll.scrollTop();
 
             if (top >= 116 * window.innerWidth / 320) {
@@ -316,16 +347,16 @@ module.exports = Activity.extend({
 
     },
 
-    bindOnceLogin: function() {
+    bindOnceLogin: function () {
 
-        this.onceTrue('Show', function() {
+        this.onceTrue('Show', function () {
             if (auth.getAuthToken() && userLogical.getMe()) {
 
                 if (!this.banner) {
                     this.banner = true;
                     var self = this;
 
-                    news.getHomeBanner().then(function(res) {
+                    news.getHomeBanner().then(function (res) {
                         self.slider = new Slider({
                             loop: true,
                             container: self.model.refs.banner,
@@ -334,7 +365,7 @@ module.exports = Activity.extend({
                             dots: true,
                             itemTemplate: '<a href="javascript:;" data-url="<%=linkurl%>"><img src="<%=sl.resource(image)%>" /></a>'
                         });
-                        self.model.next(function() {
+                        self.model.next(function () {
                             self.slider.adjustWidth();
                         })
                     });
@@ -342,16 +373,16 @@ module.exports = Activity.extend({
 
                 contact.friends();
 
-                chat.on('NEW_NOTIFICATIONS_COMING', function() {
+                chat.on('NEW_NOTIFICATIONS_COMING', function () {
                     business.getAllBusinessAndUnread();
                 });
                 business.getAllBusinessAndUnread();
 
-                bridge.getDeviceToken(function(res) {
+                bridge.getDeviceToken(function (res) {
                     var token = res.token;
                     var storedToken = util.store('device_token');
                     if (token != 'get_token_failure' && token != storedToken) {
-                        userLogical.updateDeviceToken(token).then(function() {
+                        userLogical.updateDeviceToken(token).then(function () {
                             util.store('device_token', token);
                         });
                     }
@@ -362,11 +393,11 @@ module.exports = Activity.extend({
         });
     },
 
-    getYunmi: function() {
+    getYunmi: function () {
         var model = this.model;
         var self = this;
 
-        ym.getYunmi().then(function(res) {
+        ym.getYunmi().then(function (res) {
             var current = res.data;
             var next = res.next;
 
@@ -377,7 +408,7 @@ module.exports = Activity.extend({
                 next.timeFix = now - serverNow;
                 next.timeLeft = util.timeLeft(next.start_date - serverNow);
 
-                self.timer = setInterval(function() {
+                self.timer = setInterval(function () {
                     if (location.hash != '#/') return;
 
                     var next = model.get('next');
@@ -407,7 +438,7 @@ module.exports = Activity.extend({
         });
     },
 
-    menu: function() {
+    menu: function () {
 
         var self = this;
 
@@ -416,7 +447,7 @@ module.exports = Activity.extend({
             this._menu.$el.prependTo(this.$el)[0].clientHeight;
         }
 
-        requestAnimationFrame(function() {
+        requestAnimationFrame(function () {
 
             $(self.model.refs.home).addClass('menu_aexit');
             self._menu.$el.addClass('menu_enter');
@@ -425,25 +456,25 @@ module.exports = Activity.extend({
         Application.addBackAction(this.exitMenu);
     },
 
-    exitMenu: function() {
+    exitMenu: function () {
         this._menu && this._menu.$el.removeClass('menu_enter');
         $(this.model.refs.home).removeClass('menu_aexit');
         Application.removeBackAction(this.exitMenu);
     },
 
-    scan: function() {
+    scan: function () {
         var self = this;
 
         this.model.hideQuanMenu();
 
-        bridge.qrcode.scan(function(res) {
+        bridge.qrcode.scan(function (res) {
             var code = res.code;
 
             if (code) {
                 var m = code.match(/cmccfj\:\/\/user\/(\d+)/);
                 if (m && m[1]) {
                     var user_id = parseInt(m[1]);
-                    contact.isFriend(user_id).then(function(res) {
+                    contact.isFriend(user_id).then(function (res) {
                         if (res.data)
                             self.forward('/contact/friend/' + user_id);
                         else
@@ -458,7 +489,7 @@ module.exports = Activity.extend({
         });
     },
 
-    loadPublicQuan: function(isShowLoading) {
+    loadPublicQuan: function (isShowLoading) {
 
         var loader = this.loader;
         var model = this.model;
@@ -470,7 +501,7 @@ module.exports = Activity.extend({
             this.quanSlider = true;
             var self = this;
 
-            news.getQuanBanner().then(function(res) {
+            news.getQuanBanner().then(function (res) {
                 self.quanSlider = new Slider({
                     loop: true,
                     container: self.model.refs.quanBanner,
@@ -479,17 +510,17 @@ module.exports = Activity.extend({
                     dots: true,
                     itemTemplate: '<a href="javascript:;" data-url="<%=linkurl%>"><img src="<%=sl.resource(image)%>" /></a>'
                 });
-                self.model.next(function() {
+                self.model.next(function () {
                     self.quanSlider.adjustWidth();
                 })
             });
         }
 
         Promise.all([publicquan.recommend(), publicquan.myfollow()])
-            .then(function(results) {
-                results.forEach(function(res, i) {
+            .then(function (results) {
+                results.forEach(function (res, i) {
 
-                    res.data.forEach(function(item) {
+                    res.data.forEach(function (item) {
 
                         if (item.pub_quan_msg) {
                             var imgs;
@@ -501,7 +532,7 @@ module.exports = Activity.extend({
                             if ((!imgs || !imgs.length) && /<img\s+/.test(item.pub_quan_msg.content)) {
                                 imgs = [];
 
-                                item.pub_quan_msg.content.replace(/<img\s[^>]*?src=\"([^\"\>]+)\"/g, function(m, src) {
+                                item.pub_quan_msg.content.replace(/<img\s[^>]*?src=\"([^\"\>]+)\"/g, function (m, src) {
                                     imgs.push(src);
                                 });
                             }
@@ -516,23 +547,23 @@ module.exports = Activity.extend({
                     model.set(i == 0 ? "recommendPubQuan" : "myfollowPublicQuan", res.data);
                 });
             })
-            .catch(function(e) {
+            .catch(function (e) {
 
                 if (e.message == '无权限') {
                     self.forward('/login');
                 } else
                     Toast.showToast(e.message);
             })
-            .then(function() {
+            .then(function () {
                 loader.hideLoading();
             });
     },
 
-    initQuan: function(tab) {
+    initQuan: function (tab) {
         var self = this;
         var model = this.model;
 
-        quan.on('sendComment', function(e, data) {
+        quan.on('sendComment', function (e, data) {
 
             var msg = model.getModel('quanData').find('msg_id', data.msg_id);
 
@@ -548,13 +579,13 @@ module.exports = Activity.extend({
             }
         });
 
-        quan.on('publish', function(e, data) {
+        quan.on('publish', function (e, data) {
             var quanData = model.getModel('quanData');
 
             quanData.unshift(data);
         });
 
-        model.commentQuanMsg = function(msg_id, user_id, user_name) {
+        model.commentQuanMsg = function (msg_id, user_id, user_name) {
             self.forward('/quan/comment?msg_id=' + msg_id, user_name && user_id != user.data.user_id ? {
                 user_id: user_id,
                 user_name: user_name
@@ -562,20 +593,20 @@ module.exports = Activity.extend({
             } : undefined);
         }
 
-        model.blackQuanMsg = function(msg_id) {
+        model.blackQuanMsg = function (msg_id) {
             var quanData = model.getModel('quanData');
 
-            quan.black(msg_id).then(function() {
+            quan.black(msg_id).then(function () {
                 Toast.showToast('屏蔽成功');
 
                 quanData.remove('msg_id', msg_id);
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             });
         };
 
-        model.likeQuanMsg = function(msg_id) {
+        model.likeQuanMsg = function (msg_id) {
             var msg = model.getModel('quanData').find('msg_id', msg_id);
             var likes = msg.getModel('quan_likes');
 
@@ -584,7 +615,7 @@ module.exports = Activity.extend({
                 return;
             }
 
-            quan.like(msg_id).then(function() {
+            quan.like(msg_id).then(function () {
 
                 var res = {
                     user_id: user.get("user_id"),
@@ -602,7 +633,7 @@ module.exports = Activity.extend({
 
                 Toast.showToast('点赞成功');
 
-            }).catch(function(e) {
+            }).catch(function (e) {
                 Toast.showToast(e.message);
             });
         }
@@ -616,17 +647,17 @@ module.exports = Activity.extend({
         self.quanLoader.request();
     },
 
-    loadContacts: function() {
+    loadContacts: function () {
 
     },
 
-    initAllQuan: function() {
+    initAllQuan: function () {
         var self = this;
         var model = this.model;
 
         if (model.get('tab') == 3 && !self.tab) {
 
-            model.next(function() {
+            model.next(function () {
 
                 var tab = self.tab = this.refs.tab;
                 var records = {};
@@ -638,7 +669,7 @@ module.exports = Activity.extend({
                 });
                 self.loadPublicQuan(true);
 
-                tab.onceTrue('tabChange', function(e, index) {
+                tab.onceTrue('tabChange', function (e, index) {
 
                     if (records[index]) return;
                     records[index] = true;
@@ -666,12 +697,30 @@ module.exports = Activity.extend({
         }
     },
 
+    showQuanControl: function (quanMsg, e) {
 
-    onLoad: function() {
+        popup.options({
+            options: [e.currentTarget.tagName == 'P' ? {
+                text: '复制',
+                click: function () {
+                }
+            } : {
+                    text: '保存图片',
+                    click: function () {
+                    }
+                }, {
+                text: '收藏',
+                click: function () {
+                }
+            }]
+        })
+    },
+
+    onLoad: function () {
 
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
 
         if (!auth.getAuthToken()) {
@@ -681,7 +730,7 @@ module.exports = Activity.extend({
             seajs.use(['logical/chat']);
 
             if (!self.loadShopUrl) {
-                business.getThirdUrl().then(function(res) {
+                business.getThirdUrl().then(function (res) {
                     appconfig.set(res.data);
                     self.loadShopUrl = true;
                 });
@@ -696,11 +745,11 @@ module.exports = Activity.extend({
         }
     },
 
-    onHide: function() {
+    onHide: function () {
         this.exitMenu();
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

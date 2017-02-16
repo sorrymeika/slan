@@ -22,6 +22,7 @@
         if (longTapTimeout) clearTimeout(longTapTimeout)
         longTapTimeout = null
     }
+    document.cancelLongTap = cancelLongTap;
 
     function cancelAll() {
         if (touchTimeout) clearTimeout(touchTimeout)

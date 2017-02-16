@@ -15,6 +15,10 @@ sl.tip = function (msg) {
     Toast.showToast(msg);
 }
 
+util.formatProdSpec = function (item) {
+    return item.PRD_DISPLAY_SPEC || item.PRD_SPEC.split('|')[0]
+}
+
 var ModelProto = Model.prototype;
 
 ModelProto.bindScrollTo = function (el, options) {

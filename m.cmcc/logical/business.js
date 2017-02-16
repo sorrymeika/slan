@@ -14,6 +14,17 @@ var business = {
         return Http.post('/business/getThirdUrl');
     },
 
+    getBusinessWithSettings: function () {
+        return Http.post('/business/getBusinessWithSettings');
+    },
+
+    setBussnessSetting: function (business_id, switcher) {
+        return Http.post('/business_settings/set', {
+            business_id: business_id,
+            switcher: switcher
+        });
+    },
+
     getAllBusinessAndUnread: function () {
         var last_read_time = util.store('last_read_time');
         if (!last_read_time) {
@@ -74,7 +85,7 @@ var business = {
 
 
                 if (idsOfBusinessWithNoNotification) {
-                     Http.post('/business/getNotificatonsByBusinessIds', {
+                    Http.post('/business/getNotificatonsByBusinessIds', {
                         ids: idsOfBusinessWithNoNotification.join(',')
 
                     }).then(function (res) {

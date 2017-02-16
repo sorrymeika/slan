@@ -7,6 +7,9 @@ var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
 
+var business = require('logical/business');
+
+
 module.exports = Activity.extend({
 
     onCreate: function () {
@@ -17,10 +20,29 @@ module.exports = Activity.extend({
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction)
+            self.back(self.swipeRightBackAction);
         }
 
-        Promise.all([this.waitLoad()]).then(function (results) {
+        Promise.all([business.getBusinessWithSettings(), this.waitLoad()]).then(function (results) {
+
+            var data = util.groupBy('type', results[0].data);
+
+            console.log(data);
+
+            var map = {
+                1: '移动提醒',
+                2: '生活提醒',
+                3: '娱乐提醒',
+                4: '社交提醒'
+            }
+
+            data.forEach(function (typeData) {
+                typeData.name = map[typeData.key.type];
+            })
+
+            model.set({
+                data: data
+            });
 
             self.bindScrollTo(model.refs.main);
 

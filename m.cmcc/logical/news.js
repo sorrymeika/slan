@@ -25,6 +25,12 @@ var news = {
         });
     },
 
+    getCategoryAllNews: function (categoryId) {
+        return Http.post('/news/getCategoryAllNews', {
+            categoryId: categoryId
+        });
+    },
+
     getLifes: function () {
 
         return this.getNewsByCategoryId(2).then(function (res) {

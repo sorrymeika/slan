@@ -9,7 +9,7 @@ var popup = require('widget/popup');
 
 var bridge = require('bridge');
 
-var business = require('logical/business');
+var business = require('../../logical/business');
 var businessModel = require('models/business');
 
 var user = require('models/user');
@@ -17,7 +17,7 @@ var appconfig = require('models/appconfig');
 
 module.exports = Activity.extend({
 
-    onCreate: function() {
+    onCreate: function () {
         var self = this;
         var business_id = this.business_id = this.route.params.id;
         var dataModel = businessModel._('list').find('business_id', business_id);
@@ -29,18 +29,18 @@ module.exports = Activity.extend({
             hasFooter: [100001, 100003, 100002, 100004, 100005, 100026, 100022, 100043, 100045, 100046, 100044].indexOf(parseInt(business_id)) != -1
         });
 
-        model.back = function() {
+        model.back = function () {
             self.back(self.swipeRightBackAction)
         }
 
         Object.assign(model, business.redirect);
 
 
-        model.goToDetail = function(item) {
+        model.goToDetail = function (item) {
             this.jump(item.linkurl);
         }
 
-        model.enterDetail = function() {
+        model.enterDetail = function () {
             switch (business_id) {
                 case '100001':
                     this.enterShop();
@@ -48,24 +48,28 @@ module.exports = Activity.extend({
             }
         }
 
-        model.enterBackup = function() {
+        model.enterBackup = function () {
             self.forward('/contact/backup');
         }
 
-        model.enterWaterBill = function() {
+        model.enterWaterBill = function () {
             self.forward('/life/bill/' + business_id);
         }
 
-        model.enterElecBill = function() {
+        model.enterHDH = function () {
+            self.forward('/hdh/call')
+        }
+
+        model.enterElecBill = function () {
             self.forward('/life/bill/' + business_id);
         }
 
-        var loader = this.loader = business.notificationsLoader(model, function(res) {
+        var loader = this.loader = business.notificationsLoader(model, function (res) {
 
             switch (business_id) {
                 //移动业务
                 case '100001':
-                    res.data.forEach(function(item) {
+                    res.data.forEach(function (item) {
                         if (item.type == -1) {
                             return;
                         }
@@ -155,7 +159,7 @@ module.exports = Activity.extend({
                 case '100022':
                     break;
                 case '100026':
-                    res.data.forEach(function(item) {
+                    res.data.forEach(function (item) {
                         if (item.type == -1) {
                             return;
                         }
@@ -171,8 +175,8 @@ module.exports = Activity.extend({
         });
         self.bindScrollTo(model.refs.main);
 
-        this.waitLoad().then(function() {
-            businessModel.getNotifications().each(function(item) {
+        this.waitLoad().then(function () {
+            businessModel.getNotifications().each(function (item) {
                 if (item.get('business_id') == business_id) {
                     item.set({
                         unread: 0,
@@ -183,16 +187,16 @@ module.exports = Activity.extend({
 
             return loader.request();
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             Toast.showToast(e.message);
         });
     },
 
-    onShow: function() {
+    onShow: function () {
         var self = this;
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
         this.model.destroy();
     }
 });

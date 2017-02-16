@@ -190,14 +190,17 @@ var Activity = Component.extend({
 
     forward: function (url, duration, toggleAnim, data) {
         this.application.forward(url, duration, toggleAnim, data);
+        return this;
     },
 
     back: function (url, duration, toggleAnim, data) {
         this.application.back(url || this.swipeRightBackAction, duration, toggleAnim, data);
+        return this;
     },
 
     replaceWith: function (url, duration) {
         this.application.replace(url, duration);
+        return this;
     },
 
     queryString: function (key, val) {

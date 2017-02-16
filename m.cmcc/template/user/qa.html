@@ -4,14 +4,13 @@
 </header>
 <div ref="main" class="main">
     <div class="ml_m mr_m mt_l flexitem flex uc_qa__search">
-        <div class="icon-search sqr_s"></div> <input type="text" class="flexitem fs_m" placeholder="搜索常见问题">
+        <div class="icon-search sqr_s"></div>
+        <input sn-model="keywords" type="text" class="flexitem fs_m" placeholder="搜索常见问题">
     </div>
-    <ul class="mt_s mt_l bd_t bg_fff pt_1 fs_m">
-        <li class="bd_b lh_bar h_bar pl_m pr_m g_arrow">
-            1、如何捡云米？
-        </li>
-        <li class="bd_b lh_bar h_bar pl_m pr_m g_arrow">
-            2、如何摇云米？
+    <ul class="mt_s pt_1 fs_m">
+        <li class="bd_b mt_m bg_fff" sn-repeat="item in data|filter:contains(item.title,keywords)">
+            <div class="bd_t pl_m pr_m lh_bar h_bar fs_l">{item.title}</div>
+            <div class="pl_m pr_m lh_xs pb_m" sn-html={item.content}></div>
         </li>
     </ul>
 </div>
