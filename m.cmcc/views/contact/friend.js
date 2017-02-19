@@ -64,7 +64,7 @@ module.exports = Activity.extend({
 
         var self = this;
         var personId = this.route.params.id;
-        
+
         popup.confirm({
             title: '温馨提示',
             content: '删除好友，同时删除与该好友的聊天记录？',
@@ -80,6 +80,7 @@ module.exports = Activity.extend({
     },
 
     clearHistory: function () {
+        var personId = this.route.params.id;
 
         popup.confirm({
             title: '温馨提示',
@@ -88,7 +89,7 @@ module.exports = Activity.extend({
             confirmAction: function () {
                 this.hide();
 
-                contact.clearHistory();
+                contact.clearFriendMessages(personId);
             }
         });
     },

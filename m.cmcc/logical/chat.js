@@ -213,6 +213,8 @@ var chat = Event.mixin({
     },
 
     send: function (params) {
+        var gid = params.gid;
+
         params = {
             to_id: params.to_id,
             content: params.content,
@@ -220,7 +222,6 @@ var chat = Event.mixin({
             is_show_time: params.is_show_time || 0,
             isSending: true
         };
-
 
         return Http.post("/messages/sendMessage", params).then(function (res) {
 
@@ -230,7 +231,7 @@ var chat = Event.mixin({
             params.add_date = Date.now();
 
             chat.record(true, params.to_id, params);
-            chat.trigger('sendresult:' + to_id, params);
+            chat.trigger('sendresult:' + params.to_id, params);
 
             return res;
         });

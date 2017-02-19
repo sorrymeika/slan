@@ -699,20 +699,30 @@ module.exports = Activity.extend({
 
     showQuanControl: function (quanMsg, e) {
 
-        popup.options({
+        $(e.currentTarget).addClass('selected');
+
+        var options = popup.options({
             options: [e.currentTarget.tagName == 'P' ? {
                 text: '复制',
                 click: function () {
+                    bridge.system.copyToClipboard(quanMsg.content);
+                    options.hide();
                 }
             } : {
                     text: '保存图片',
                     click: function () {
+                        options.hide();
                     }
                 }, {
                 text: '收藏',
                 click: function () {
+                    options.hide();
                 }
-            }]
+            }],
+
+            onHide: function () {
+                $(e.currentTarget).removeClass('selected');
+            }
         })
     },
 

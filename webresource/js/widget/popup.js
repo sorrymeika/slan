@@ -96,7 +96,8 @@ module.exports = {
 
         var popupParams = {
             className: 'cp_popup__up cp_popup__options',
-            tapMaskToHide: true
+            tapMaskToHide: true,
+            onHide: params.onHide
         };
 
         options.forEach(function (item, i) {
@@ -142,6 +143,8 @@ module.exports = {
             hide: function () {
 
                 this.promise.then(function () {
+
+                    params.onHide && params.onHide();
 
                     params.tapMaskToHide && $mask.off('tap', ret.hide);
 

@@ -157,6 +157,14 @@ define(function (require, exports, module) {
                     }, callback);
                 },
 
+                copyToClipboard: function (text, callback) {
+                    hybrid('system', {
+                        type: 'copyToClipboard',
+                        text: text
+
+                    }, callback);
+                },
+
                 phoneCall: function (phoneNumber, callback) {
                     hybrid('system', {
                         type: 'phoneCall',

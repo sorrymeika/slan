@@ -222,7 +222,6 @@ create table friends_ext (
     messages_delete_date date--该时间前的消息不可见
 ) tablespace cmccuser;
 
-alter table friends_ext add messages_delete_date date;
 
 
 create table country (--国家 --seq_name=district_seq
