@@ -58,6 +58,7 @@
             "logical/news": "./logical/news"
         },
         "models": {
+            "models/home": "./models/home",
             "models/news": "./models/news",
             "models/user": "./models/user",
             "models/yunmi": "./models/yunmi",

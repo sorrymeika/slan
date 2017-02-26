@@ -31,6 +31,12 @@ var business = vm.createModel({
     }
 });
 
+messagesList.observe("list", function () {
+
+    business.set('dataver', Date.now());
+});
+
+
 business.observe(function () {
 
     var data = {};
@@ -44,12 +50,15 @@ business.observe(function () {
     //4:社交提醒,单独处理
     var maxDate = 0;
     messagesList.getList().each(function (item) {
-        data.type4data.unread += item.get('unread') || 0;
 
-        if (item.get('date') > maxDate) {
-            data.type4data.title = item.get('user_name') + ':' + item.get('msg');
-            data.type4data.content = item.get('msg');
-            maxDate = item.get('date');
+        if (item.get('push_to_home')) {
+            data.type4data.unread += item.get('unread') || 0;
+
+            if (item.get('date') > maxDate) {
+                data.type4data.title = item.get('user_name') + ':' + item.get('msg');
+                data.type4data.content = item.get('msg');
+                maxDate = item.get('date');
+            }
         }
     });
 

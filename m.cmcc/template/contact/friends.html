@@ -20,12 +20,14 @@
                         {item.name_for_show}
                     </p>
                 </div>
+                <button class="quan-call3" sn-tap="delegate.phoneCall(item.account)"></button>
+                <button class="quan-sms" sn-tap="delegate.sendSms(item.account)"></button>
             </li>
         </ul>
     </div>
 </div>
 <ul class="ct_friends__letters">
-    <li class="icon-search2 mr_s"></li>
+    <li class="icon-search2"></li>
     <li sn-repeat="item in letters"><a href="javascript:;">{item}</a></li>
     <li>#</li>
 </ul>

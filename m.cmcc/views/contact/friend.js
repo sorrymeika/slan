@@ -21,8 +21,6 @@ module.exports = Activity.extend({
 
         var firend = friends.getFriend(personId);
 
-        console.log(firend);
-
         var model = this.model = new Model(this.$el, {
             title: '详细资料',
             personId: personId,
@@ -92,6 +90,16 @@ module.exports = Activity.extend({
                 contact.clearFriendMessages(personId);
             }
         });
+    },
+
+    setPushSwitch: function (status) {
+        var personId = this.route.params.id;
+        contact.setPushSwitch(personId, status);
+    },
+
+    setLeaveMsgSwitch: function (status) {
+        var personId = this.route.params.id;
+        contact.setLeaveMsgSwitch(personId, status);
     },
 
     onShow: function () {

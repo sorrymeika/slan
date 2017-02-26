@@ -19,7 +19,7 @@ module.exports = Activity.extend({
         var self = this;
 
         var model = this.model = new Model(this.$el, {
-            title: '系统设置'
+            title: '设 置'
         });
 
         model.back = function () {

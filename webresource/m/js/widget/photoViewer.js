@@ -152,7 +152,10 @@ module.exports = Model.extend({
 
         this.originR = this.data.r;
 
-        this.currentItem = this.getModel('images.' + this.data.index);
+        console.log(this.data);
+
+        this.currentItem = this._('images[' + this.data.index + ']');
+        console.log(this.currentItem);
         this.originR = this.currentItem.get("r");
         this.originS = this.currentItem.get("s");
 

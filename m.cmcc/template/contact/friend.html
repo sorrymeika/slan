@@ -20,12 +20,12 @@
 
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m flex">
         <p class="flexitem">好友留言信息</p>
-        <p class="mr_m cp_switch{person.friends_ext.enable_leave_msg?' cp_switch_on':''}" sn-tap="person.friends_ext.enable_leave_msg=!person.friends_ext.enable_leave_msg"></p>
+        <p class="mr_m cp_switch{person.friends_ext.enable_leave_msg!=2?' cp_switch_on':''}" sn-tap="delegate.setLeaveMsgSwitch(person.friends_ext.enable_leave_msg===2?1:2)"></p>
     </div>
 
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m flex">
         <p class="flexitem">推送到生活首页</p>
-        <p class="mr_m cp_switch{person.friends_ext.enable_push?' cp_switch_on':''}" sn-tap="person.friends_ext.enable_push=!person.friends_ext.enable_push"></p>
+        <p class="mr_m cp_switch{person.friends_ext.enable_push!=2?' cp_switch_on':''}" sn-tap="delegate.setPushSwitch(person.friends_ext.enable_push===2?1:2)"></p>
     </div>
 
     <div class="mt_l bd_tb fs_m bg_fff lh_l pl_m" sn-tap="delegate.clearHistory()">

@@ -6,6 +6,7 @@ var Model = require('core/model2').Model;
 var Promise = require('promise');
 var Toast = require('widget/toast');
 var popup = require('widget/popup');
+var PhotoViewer = require('widget/photoViewer');
 
 var userLogical = require('logical/user');
 
@@ -31,12 +32,68 @@ module.exports = Activity.extend({
             });
         }
 
+        var photoViewer = this.photoViewer = new PhotoViewer();
+
+        photoViewer.$el.hide().appendTo('body')
+            .addClass('g_beforeshow')
+            .on($.fx.transitionEnd, function () {
+                if (!photoViewer.$el.hasClass('g_show')) {
+                    photoViewer.$el.hide();
+                }
+            })
+            .on('tap', function () {
+                photoViewer.$el.removeClass('g_show');
+            });
+
+        model.showImages = function (imgs, index) {
+
+            photoViewer.setImages(imgs.map(function (src) {
+                return {
+                    src: sl.resource(src)
+                }
+            }));
+            photoViewer.index(index);
+
+            photoViewer.$el.show()[0].clientHeight;
+            photoViewer.$el.addClass('g_show');
+        }
+
         Loader.showLoading();
 
         Promise.all([userLogical.getFav(), this.waitLoad()]).then(function (results) {
+            var data = results[0].data;
+
+            data.forEach(function (item) {
+
+                if (item.pub_quan_msg) {
+                    var imgs;
+
+                    if (item.pub_quan_msg.imgs) {
+                        imgs = item.pub_quan_msg.imgs.split(',')
+                    }
+
+                    if ((!imgs || !imgs.length) && /<img\s+/.test(item.pub_quan_msg.content)) {
+                        imgs = [];
+
+                        item.pub_quan_msg.content.replace(/<img\s[^>]*?src=\"([^\"\>]+)\"/g, function (m, src) {
+                            imgs.push(src);
+                        });
+                    }
+
+                    if (imgs && imgs.length > 3) {
+                        imgs.length = 3;
+                    }
+                    item.pub_quan_msg.imgs = imgs;
+
+                } else if (item.quan_msgs) {
+                    if (item.quan_msgs.imgs) {
+                        item.quan_msgs.imgs = item.quan_msgs.imgs.split(',');
+                    }
+                }
+            });
 
             model.set({
-                data: results[0].data
+                data: data
             })
 
             self.bindScrollTo(model.refs.main);
@@ -54,6 +111,8 @@ module.exports = Activity.extend({
     },
 
     onDestroy: function () {
+        this.photoViewer.$el.remove();
+        this.photoViewer.destroy();
         this.model.destroy();
     }
 });

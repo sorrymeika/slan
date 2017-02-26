@@ -14,7 +14,7 @@ var PhotoViewer = require('widget/photoViewer');
 var animation = require('animation');
 var Promise = require('promise');
 
-var Menu = require('../components/menu');
+//var Menu = require('../components/menu');
 var yunMiRules = require('../components/yunMiRules');
 var publicquan = require('../logical/publicquan');
 var quan = require('../logical/quan');
@@ -49,95 +49,9 @@ module.exports = Activity.extend({
 
     onCreate: function () {
 
-        // $.ajax({
-        //     type: 'POST',
-        //     url: "http://bmsh.wxcs.cn/manage/notification/receiveWeibo",
-        //     contentType: 'application/json',
-        //     data: JSON.stringify({ "operation_in": { "content": { "request": { "request_time": "20161229163841714", "request_seq": "329503856438", "msisdn": "15705958061", "notify_type": "2", "notify": { "home_city": "592", "dun_type": "2", "useble_balance": "1970", "special_balance": "990", "unuseble_balance": "0", "pre_month_owing": "0", "this_month_owing": "0", "lagging": "0", "defer_cycle": "2", "defer_limit_amout": "10000" } } } } })
-        // });
-
         var self = this;
 
-        /*
-        var exists = function (i) {
-            console.log('exists', i);
-            return i <= 599 ? true : false;
-        }
-        setTimeout(function () {
-            userLogical.getLatestVersion();
-        }, 1000);
-
-        //二分法查找
-        var length = 1003;
-
-        var rangeStart = 1;
-        var rangeEnd = length - 2;
-        var cursor = parseInt((rangeEnd - rangeStart) / 2);
-        var result = 0;
-
-        while (true) {
-
-            if (!exists(cursor)) {
-
-                if (exists(--cursor)) {
-                    result = cursor + 1;
-                    break;
-
-                } else if (rangeStart == cursor) {
-                    result = cursor;
-                    break;
-                }
-                rangeEnd = cursor - 1;
-
-            } else {
-                if (!exists(++cursor)) {
-                    result = cursor;
-                    break;
-
-                } else if (cursor == rangeEnd) {
-                    result = cursor;
-                    break;
-                }
-
-                rangeStart = cursor + 1;
-            }
-
-            if (rangeEnd == rangeStart) {
-                console.log('match', rangeStart)
-                result = exists(rangeStart) ? rangeStart + 1 : rangeStart;
-                break;
-
-            } else if (rangeEnd < rangeStart) {
-                console.log('error', rangeStart, rangeEnd)
-                break;
-            }
-
-            cursor = rangeStart + parseInt((rangeEnd - rangeStart) / 2);
-            console.log("cursor:", rangeStart, rangeEnd, cursor)
-
-            if (cursor <= 0) {
-                console.log('error match')
-                break;
-            }
-        }
-
-        console.log(result, cursor);
-        */
-
-        var photoViewer = this.photoViewer = new PhotoViewer();
-
-        photoViewer.$el.hide().appendTo('body')
-            .addClass('g_beforeshow')
-            .on($.fx.transitionEnd, function () {
-                if (!photoViewer.$el.hasClass('g_show')) {
-                    photoViewer.$el.hide();
-                }
-            })
-            .on('tap', function () {
-                photoViewer.$el.removeClass('g_show');
-            });
-
-        this.exitMenu = this.exitMenu.bind(this);
+        // this.exitMenu = this.exitMenu.bind(this);
 
         var loader = this.loader = new Loader(this.$el);
 
@@ -157,60 +71,6 @@ module.exports = Activity.extend({
 
         model.getUserShowName = friends.getUserShowName;
 
-
-        var isOpenRn = false;
-
-        model.openEnt = function () {
-
-            if (isOpenRn) return;
-
-            isOpenRn = true;
-
-            var tk = auth.getSign();
-
-            bridge.rn({
-                token: tk._tk,
-                sign: tk._sign
-
-            }, function (result) {
-
-                isOpenRn = false;
-
-                switch (result.action) {
-                    case 'home':
-                        hideTab(1);
-                        break;
-                    case 'quan':
-                        hideTab(3);
-                        break;
-                    case 'shop':
-                        model.openShop();
-                        break;
-                }
-            });
-
-            //bridge.tab.show('http://share.migu.cn/h5/api/h5/133/2848?channelCode=1380050700381&cpsChannelId=300000100002&cpsPackageChannelId=300000100002', 2);
-        };
-
-        model.openShop = function () {
-            console.log(appconfig.get('shopUrl'));
-            bridge.tab.show(appconfig.get('shopUrl'), 3);
-        }
-
-        function hideTab(id) {
-            if (model.get('tab') != id) {
-                model.set({
-                    tab: id,
-                    headBg: false
-                });
-
-                setTimeout(function () {
-                    bridge.tab.hide();
-                }, 200);
-            } else
-                bridge.tab.hide();
-        }
-
         $(window).on('ent_to_home', function () {
             hideTab(1)
 
@@ -218,10 +78,10 @@ module.exports = Activity.extend({
             hideTab(3)
 
         }).on('tabchange_to_2', function () {
-            model.openEnt();
+            self.toggleTabToEnt();
 
         }).on('tabchange_to_3', function () {
-            model.openShop();
+            self.openShop();
         });
 
         model.showQuanMenu = function () {
@@ -237,22 +97,14 @@ module.exports = Activity.extend({
                 self.forward(url);
             }
         }
-        model.exitMenu = function (e) {
-            if ($(e.target).hasClass('hm_home'))
-                self.exitMenu();
-        }
+        // model.exitMenu = function (e) {
+        //     if ($(e.target).hasClass('hm_home'))
+        //         self.exitMenu();
+        // }
 
         model.backup = function () {
             self.forward('/contact/backup');
             return false;
-        }
-
-        model.onceTrue('change:tab', this.initAllQuan.bind(this));
-
-        model.changeTab = function (tab) {
-            this.set({
-                tab: tab
-            });
         }
 
         model.phoneCall = function () {
@@ -277,6 +129,19 @@ module.exports = Activity.extend({
                 model._('quanTab').tab(2);
             });
         }
+
+        var photoViewer = this.photoViewer = new PhotoViewer();
+
+        photoViewer.$el.hide().appendTo('body')
+            .addClass('g_beforeshow')
+            .on($.fx.transitionEnd, function () {
+                if (!photoViewer.$el.hasClass('g_show')) {
+                    photoViewer.$el.hide();
+                }
+            })
+            .on('tap', function () {
+                photoViewer.$el.removeClass('g_show');
+            });
 
         model.showImages = function (imgs, index) {
 
@@ -344,8 +209,33 @@ module.exports = Activity.extend({
 
         this.onResult('LOGOUT', this.bindOnceLogin);
         this.bindOnceLogin();
-
     },
+
+    /*
+        menu: function () {
+    
+            var self = this;
+    
+            if (!this._menu) {
+                this._menu = new Menu();
+                this._menu.$el.prependTo(this.$el)[0].clientHeight;
+            }
+    
+            requestAnimationFrame(function () {
+    
+                $(self.model.refs.home).addClass('menu_aexit');
+                self._menu.$el.addClass('menu_enter');
+            });
+    
+            Application.addBackAction(this.exitMenu);
+        },
+    
+        exitMenu: function () {
+            this._menu && this._menu.$el.removeClass('menu_enter');
+            $(this.model.refs.home).removeClass('menu_aexit');
+            Application.removeBackAction(this.exitMenu);
+        },
+    */
 
     bindOnceLogin: function () {
 
@@ -438,54 +328,124 @@ module.exports = Activity.extend({
         });
     },
 
-    menu: function () {
+    openShop: function () {
+        bridge.openInApp(appconfig.get('shopUrl'));
+    },
 
-        var self = this;
+    toggleTabToHome: function () {
 
-        if (!this._menu) {
-            this._menu = new Menu();
-            this._menu.$el.prependTo(this.$el)[0].clientHeight;
+        if (this.showTab(1)) {
+
+            this.model.set({
+                tab: 1,
+                headBg: false
+            });
+        }
+    },
+
+    toggleTabToEnt: function () {
+        if (this.showTab(2)) {
+
+            var self = this;
+            var tk = auth.getSign();
+
+            bridge.rn({
+                token: tk._tk,
+                sign: tk._sign
+
+            }, function (result) {
+
+                isOpenRn = false;
+
+                switch (result.action) {
+                    case 'home':
+                        self.toggleTabToHome();
+                        break;
+
+                    case 'quan':
+                        self.toggleTabToQuan();
+                        break;
+
+                    case 'shop':
+                        self.openShop();
+                        break;
+
+                    case 'uc':
+                        self.toggleTabToUC();
+                        break;
+                }
+            });
+        }
+    },
+
+    toggleTabToQuan: function () {
+        if (this.showTab(3)) {
+
+            if (!this.isInitQuanTab) {
+                this.initQuanTab();
+                this.isInitQuanTab = true;
+
+            } else {
+
+                this.reloadSocialQuan();
+            }
+        }
+    },
+
+    toggleTabToUC: function () {
+        if (this.showTab(4)) {
+        }
+    },
+
+    showTab: function (id) {
+        var model = this.model;
+
+        if (model.get('tab') != id) {
+            model.set({
+                tab: id,
+                headBg: false
+            });
+            return true;
         }
 
-        requestAnimationFrame(function () {
-
-            $(self.model.refs.home).addClass('menu_aexit');
-            self._menu.$el.addClass('menu_enter');
-        });
-
-        Application.addBackAction(this.exitMenu);
+        return false;
     },
 
-    exitMenu: function () {
-        this._menu && this._menu.$el.removeClass('menu_enter');
-        $(this.model.refs.home).removeClass('menu_aexit');
-        Application.removeBackAction(this.exitMenu);
-    },
-
-    scan: function () {
+    initQuanTab: function () {
         var self = this;
+        var model = this.model;
 
-        this.model.hideQuanMenu();
+        model.next(function () {
+            var quanTab = self.quanTab = this.refs.quanTab;
+            var records = {};
+            var count = 1;
+            records[0] = true;
 
-        bridge.qrcode.scan(function (res) {
-            var code = res.code;
+            model.set({
+                quanTab: quanTab
+            });
+            self.loadPublicQuan(true);
 
-            if (code) {
-                var m = code.match(/cmccfj\:\/\/user\/(\d+)/);
-                if (m && m[1]) {
-                    var user_id = parseInt(m[1]);
-                    contact.isFriend(user_id).then(function (res) {
-                        if (res.data)
-                            self.forward('/contact/friend/' + user_id);
-                        else
-                            self.forward('/contact/person/' + user_id);
-                    });
+            quanTab.onceTrue('tabChange', function (e, index) {
 
-                } else if (code.indexOf('http://') == 0 || code.indexOf('https://') == 0) {
-                    bridge.openInApp(code);
+                if (records[index]) return;
+                records[index] = true;
+
+                count++;
+
+                switch (index) {
+
+                    case 1:
+                        self.initSocialQuan(quanTab);
+                        break;
+
+                    case 2:
+                        self.loadContacts();
+                        break;
                 }
-            }
 
+                return count == 3;
+            });
         });
     },
 
@@ -559,7 +519,7 @@ module.exports = Activity.extend({
             });
     },
 
-    initQuan: function (tab) {
+    initSocialQuan: function (quanTab) {
         var self = this;
         var model = this.model;
 
@@ -641,60 +601,15 @@ module.exports = Activity.extend({
         self.quanLoader = quan.createLoader({
             model: model,
             attribute: 'quanData',
-            scroll: tab.refs.items[1]
+            scroll: quanTab.refs.items[1]
         });
 
         self.quanLoader.request();
     },
 
-    loadContacts: function () {
 
-    },
-
-    initAllQuan: function () {
-        var self = this;
-        var model = this.model;
-
-        if (model.get('tab') == 3 && !self.tab) {
-
-            model.next(function () {
-
-                var tab = self.tab = this.refs.tab;
-                var records = {};
-                var count = 1;
-                records[0] = true;
-
-                model.set({
-                    quanTab: tab
-                });
-                self.loadPublicQuan(true);
-
-                tab.onceTrue('tabChange', function (e, index) {
-
-                    if (records[index]) return;
-                    records[index] = true;
-
-                    count++;
-
-                    switch (index) {
-                        case 0:
-                            break;
-
-                        case 1:
-                            self.initQuan(tab);
-                            break;
-
-                        case 2:
-                            self.loadContacts();
-                            break;
-                    }
-
-                    return count == 3;
-                });
-            });
-
-            return true;
-        }
+    reloadSocialQuan: function () {
+        this.quanLoader && this.quanLoader.reload();
     },
 
     showQuanControl: function (quanMsg, e) {
@@ -716,7 +631,13 @@ module.exports = Activity.extend({
                 }, {
                 text: '收藏',
                 click: function () {
-                    options.hide();
+                    userLogical.fav(quanMsg.msg_id, 2).then(function () {
+
+                        Toast.showToast('收藏成功!');
+                        options.hide();
+                    }).catch(function (e) {
+                        Toast.showToast(e.message);
+                    });
                 }
             }],
 
@@ -724,6 +645,36 @@ module.exports = Activity.extend({
                 $(e.currentTarget).removeClass('selected');
             }
         })
+    },
+
+    loadContacts: function () {
+    },
+
+    scan: function () {
+        var self = this;
+
+        this.model.hideQuanMenu();
+
+        bridge.qrcode.scan(function (res) {
+            var code = res.code;
+
+            if (code) {
+                var m = code.match(/cmccfj\:\/\/user\/(\d+)/);
+                if (m && m[1]) {
+                    var user_id = parseInt(m[1]);
+                    contact.isFriend(user_id).then(function (res) {
+                        if (res.data)
+                            self.forward('/contact/friend/' + user_id);
+                        else
+                            self.forward('/contact/person/' + user_id);
+                    });
+
+                } else if (code.indexOf('http://') == 0 || code.indexOf('https://') == 0) {
+                    bridge.openInApp(code);
+                }
+            }
+
+        });
     },
 
     onLoad: function () {
@@ -748,15 +699,15 @@ module.exports = Activity.extend({
 
             self.getYunmi();
 
-            if (self.tab) {
+            if (self.quanTab) {
                 self.loadPublicQuan();
-                self.quanLoader && self.quanLoader.reload();
+                self.reloadSocialQuan();
             }
         }
     },
 
     onHide: function () {
-        this.exitMenu();
+        //this.exitMenu();
     },
 
     onDestroy: function () {

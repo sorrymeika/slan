@@ -65,6 +65,7 @@
         "/user/remind/{business_id:\\d+}": "user/remind_one",
         "/user/privacy": "user/privacy",
         "/user/quan_privacy/{type:\\d+}": "user/quan_privacy",
+        "/user/wallet": "user/wallet",
         "/user/qa": "user/qa",
         "/user/about": "user/about",
 

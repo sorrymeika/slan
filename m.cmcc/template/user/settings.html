@@ -2,25 +2,33 @@
     <div class="head_back" sn-tap="this.back()"></div>
     <div class="head_title">{title}</div>
 </header>
-<div ref="main" class="main">
-    <ul class="mt_l bg_fff pt_1 fs_m uc_settings__items">
-        <li class="user-clock bd_b g_arrow" data-forward="/user/remind">
+<div ref="main" class="main pt_l">
+    <ul class="fs_m uc_settings__items">
+        <li class="bd_tb g_arrow bg_fff" data-forward="/user/fav">
+            我的收藏
+        </li>
+        <li class="bd_b g_arrow bg_fff" data-forward="/user/messages">
+            我的消息
+        </li>
+        <li class="bd_b g_arrow bg_fff" data-forward="/user/qa">
+            常见问题
+        </li>
+        <li class="bd_b g_arrow bg_fff" data-forward="/user/remind">
             提醒设置
         </li>
-        <li class="user-private bd_b g_arrow" data-forward="/user/privacy">
+        <li class="bd_b g_arrow bg_fff" data-forward="/user/privacy">
             隐私设置
         </li>
-        <li class="user-del bd_b" sn-tap="this.clearCache()">
+        <li class="bd_b bg_fff" sn-tap="this.clearCache()">
             <span class="va_m">清除缓存</span>
         </li>
-        <li class="user-new bd_b" sn-tap="this.update()">
+        <li class="bd_b mb_l bg_fff" sn-tap="this.update()">
             <span class="va_m">检测更新</span>
         </li>
-
-        <li class="user-about bd_b g_arrow" data-forward="/user/about">
+        <li class="bd_tb g_arrow bg_fff" data-forward="/user/about">
             <span class="va_m">关于</span>
         </li>
-        <li class="user-user bd_b" sn-tap="this.logout()">
+        <li class="bd_b bg_fff" sn-tap="this.logout()">
             <span class="va_m">退出登录</span>
         </li>
     </ul>

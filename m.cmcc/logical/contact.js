@@ -203,7 +203,7 @@ var contact = Event.mixin({
     },
 
     setFriendMemo: function (friend_id, memo) {
-        return Http.post('/friends/setFriendMemo', {
+        return Http.post('/friends/setFriendExt', {
             friend_id: friend_id,
             memo: memo
         }).then(function (res) {
@@ -212,6 +212,45 @@ var contact = Event.mixin({
                 user_id: friend_id,
                 friends_ext: {
                     memo: memo
+                }
+            }, 'user_id')
+
+            return res;
+        });
+    },
+
+    setPushSwitch: function (friend_id, enable_push) {
+        enable_push = !enable_push ? 2 : enable_push;
+
+        return Http.post('/friends/setFriendExt', {
+            friend_id: friend_id,
+            enable_push: enable_push
+        }).then(function (res) {
+
+            friends.getFriends().update({
+                user_id: friend_id,
+                friends_ext: {
+                    enable_push: enable_push
+                }
+            }, 'user_id')
+
+            return res;
+        });
+    },
+
+    setLeaveMsgSwitch: function (friend_id, enable_leave_msg) {
+        enable_leave_msg = !enable_leave_msg ? 2 : enable_leave_msg;
+
+        return Http.post('/friends/setFriendExt', {
+            friend_id: friend_id,
+            enable_leave_msg: enable_leave_msg
+
+        }).then(function (res) {
+
+            friends.getFriends().update({
+                user_id: friend_id,
+                friends_ext: {
+                    enable_leave_msg: enable_leave_msg
                 }
             }, 'user_id')
 

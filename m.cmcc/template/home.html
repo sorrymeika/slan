@@ -26,18 +26,24 @@
 </ul>
 }
 
-<div class="hm_home dock" ref="home" sn-tap="this.exitMenu()">
-    <header class="flex {headBg?'header_app':'header_trans'} g_anim" sn-if="tab==1">
-        <a href="javascript:;" sn-tap="delegate.menu()" class="hm-icons-person h_bar pl_m pr_m"></a>
+<div class="hm_home dock" ref="home">
+    <header sn-if="tab==1" class="flex {headBg?'header_app':'header_trans'} g_anim">
+        <!--<a href="javascript:;" sn-tap="delegate.menu()" class="hm-icons-person h_bar pl_m pr_m"></a>-->
         <div class="flex_0"></div>
         <div class="hm-icons-shop h_bar pl_m pr_m" data-forward="/business/service"></div>
     </header>
-    <header class="flex header_app" sn-if="tab==3">
-        <a href="javascript:;" sn-tap="delegate.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>
+    <header sn-if="tab==3" class="flex header_app">
+        <!--<a href="javascript:;" sn-tap="delegate.menu()"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="cir ml_m" /></a>-->
         <div class="head_title cl_fff">圈 子</div>
         <div class="head_right">
             <div class="icon-search3 h_bar pl_m pr_s" data-forward="{quanTab.index==0?'/pubquan/search':'/contact/search'}"></div>
             <div class="icon-plus h_bar pl_m pr_l" sn-tap="this.showQuanMenu()"></div>
+        </div>
+    </header>
+    <header sn-if="tab==4" class="flex header_app">
+        <div class="head_title cl_fff">我 的</div>
+        <div class="head_right">
+            <div class="user-setting2 h_bar pl_m pr_l" data-forward="/user/settings"></div>
         </div>
     </header>
     <div sn-if="tab==1" class="hm_idx main" ref="life">
@@ -54,7 +60,7 @@
         <div class="hm_idx__life">
             @this.helpers.notify(2,'生活提醒') @this.helpers.notify(1,'通信提醒') @this.helpers.notify(3,'娱乐提醒') @this.helpers.business(4,'社交提醒')
             <ul class="pr_m hm_idx__notifi_bg" sn-if="showNotify==4">
-                <li class="flex subitem bd_b ml_m" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="{item.type==7?'/contact/person/'+item.user_id:('/contact/chat/'+item.user_id)}">
+                <li class="flex subitem bd_b ml_m" sn-repeat="item in messagesList.list|filter:item.push_to_home|orderBy:date desc" data-forward="{item.type==7?'/contact/person/'+item.user_id:('/contact/chat/'+item.user_id)}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <img onerror="this.src='images/default.jpg'" sn-src="{sl.thumbnail(item.avatars)}" />
                     <div class="flexitem pl_m">
@@ -70,10 +76,10 @@
     </div>
 
     <div sn-if="tab==2" class="hm_idx main" ref="ent">
-        <iframe ref="iframe" frameborder="0" style="width:{window.innerWidth}px;height:{iframeHeight}px" />
+        <!--<iframe ref="iframe" frameborder="0" style="width:{window.innerWidth}px;height:{iframeHeight}px" />-->
     </div>
 
-    <div sn-if="tab==3" class="hm_quan__main" ref="tab" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">
+    <div sn-if="tab==3" class="hm_quan__main" ref="quanTab" sn-require="widget/tab" sn-data="{{items:['公众圈','朋友圈','通讯录']}}">
         <div class="hm_pubquan">
             <div class="hm_pubquan__banner mb_l" ref="quanBanner">
             </div>
@@ -144,7 +150,7 @@
                         <p class="name cl_dark fs_m" data-forward="/contact/friend/{quan.user_id}">{this.getUserShowName(quan)}</p>
                         <p class="con fs_m" sn-html="{quan.content}" sn-long-tap="delegate.showQuanControl(quan,e)"></p>
                         <ul class="imgs clearfix mt_s">
-                            <li class="img fl_l mr_m" sn-repeat="img,i in quan.imgs"  sn-long-tap="delegate.showQuanControl(quan,e)" sn-tap="this.showImages(quan.imgs,i)"><img sn-src="{sl.thumbnail(img)}" /></li>
+                            <li class="img fl_l mr_m" sn-repeat="img,i in quan.imgs" sn-long-tap="delegate.showQuanControl(quan,e)" sn-tap="this.showImages(quan.imgs,i)"><img sn-src="{sl.thumbnail(img)}" /></li>
                         </ul>
                         <div class="bar flex fs_s mt_s">
                             <p class="date flexitem">{util.formatDate(quan.add_date,"short")}</p>
@@ -185,7 +191,7 @@
                 <p class="hm-icons-drop ta_r {isShowMessageList?'show':''} mr_m"></p>
             </div>
             <ul class="hm_contacts__messages" sn-if="isShowMessageList&&messagesList.list.length">
-                <li class="flex h_bar bd_b bg_fff fs_m ps_r" sn-repeat="item in messagesList.list|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
+                <li class="flex h_bar bd_b bg_fff fs_m ps_r" sn-repeat="item in messagesList.list|filter:item.enable_leave_msg|orderBy:date desc" data-forward="/contact/chat/{item.user_id}">
                     <i class="unread" sn-if="item.unread">+{item.unread}</i>
                     <p class="img ml_m"><img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(item.avatars)}" /></p>
                     <p class="flexitem h_bar ml_l pt_s"><span class="name dp_b">{this.getUserShowName(item)}</span>
@@ -200,19 +206,58 @@
 
     <button class="quan-call" sn-if="tab==3&&quanTab.index==2" sn-tap="this.phoneCall()"></button>
 
+    <div sn-if="tab==4" class="hm_uc main pt_m" ref="uc">
+
+        <div class="bd_tb flex mb_m pd_m bg_fff">
+            <img onerror="this.src='images/default.jpg'" sn-src="{sl.resource(user.avatars)}" class="g_avatars dp_b ml_m" data-forward="/user/person" />
+            <p class="fs_m ml_m flexitem" data-forward="/user/person">
+                <span class="name dp_b">{user.user_name}</span>
+                <span class="msg dp_b cl_999">ID：{user.user_id}</span>
+            </p>
+            <p class="user-qrcode2 mr_m" data-forward="/user/qrcode"></p>
+        </div>
+
+        <div class="flex bd_t bg_fff h_bar pl_m pr_m">
+            <div class="user-space"></div>
+            <div class="pl_m">我的空间</div>
+        </div>
+        <div class="flex mb_m bd_tb bg_fff pl_m h_bar">
+            <div class="user-family"></div>
+            <div class="pl_m">我的家庭</div>
+        </div>
+
+        <div class="flex bd_t bg_fff h_bar pl_m pr_m">
+            <div class="user-life"></div>
+            <div class="pl_m">我的生活</div>
+        </div>
+        <div class="flex mb_m bd_tb bg_fff pl_m h_bar">
+            <div class="user-card"></div>
+            <div class="pl_m">我的钱包</div>
+        </div>
+
+        <div class="flex bd_t bg_fff h_bar pl_m pr_m">
+            <div class="user-car"></div>
+            <div class="pl_m">我的出行</div>
+        </div>
+        <div class="flex mb_m bd_tb bg_fff pl_m h_bar">
+            <div class="user-job"></div>
+            <div class="pl_m">我的工作</div>
+        </div>
+    </div>
+
     <footer class="footer bd_t">
         <div>
-            <button class="icon-home{tab==1?'_curr curr':''}" sn-tap="tab=1,headBg=false">
+            <button class="icon-home{tab==1?'_curr curr':''}" sn-tap="delegate.toggleTabToHome()">
                 <span>生活</span>
             </button>
-            <button class="icon-ent{tab==2?'_curr curr':''}" sn-tap="this.openEnt()">
+            <button class="icon-ent{tab==2?'_curr curr':''}" sn-tap="delegate.toggleTabToEnt()">
                 <span>娱乐</span>
             </button>
-            <button class="icon-shop{tab==4?'_curr curr':''}" sn-tap="this.openShop()">
-                <span>商圈</span>
-            </button>
-            <button class="icon-quan{tab==3?'_curr curr':''}" sn-tap="tab=3">
+            <button class="icon-quan{tab==3?'_curr curr':''}" sn-tap="delegate.toggleTabToQuan()">
                 <span>圈子</span>
+            </button>
+            <button class="icon-uc{tab==4?'_curr curr':''}" sn-tap="delegate.toggleTabToUC()">
+                <span>我的</span>
             </button>
         </div>
     </footer>

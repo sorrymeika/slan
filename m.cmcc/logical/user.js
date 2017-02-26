@@ -77,6 +77,13 @@ var User = {
         });
     },
 
+    fav: function (rev_id, fav_type) {
+        return Http.post('/user_fav/add', {
+            rev_id: rev_id,
+            fav_type: fav_type
+        });
+    },
+
     getFav: function () {
         return Http.post('/user_fav/getPage', {
             page: 1,

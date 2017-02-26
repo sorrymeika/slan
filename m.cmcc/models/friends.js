@@ -10,11 +10,11 @@ var friends = vm.createModel({
         friends: util.store('friends') || [],
         newFriendsCount: util.store('newFriendsCount') || 0
     },
-    getFriends: function() {
+    getFriends: function () {
         return this._('friends');
     },
 
-    getFriend: function(user_id) {
+    getFriend: function (user_id) {
         var list = this.getFriends();
         var firend = list.find('user_id', user_id);
 
@@ -26,13 +26,11 @@ var friends = vm.createModel({
         return firend;
     },
 
-    getContacts: function() {
+    getContacts: function () {
         return this._('contacts');
     },
 
-    getUserShowName: function(item) {
-
-        console.log(item);
+    getUserShowName: function (item) {
 
         if (item.user_id == user.get('user_id')) return item.user_name || ('用户' + item.user_id);
 
@@ -41,7 +39,7 @@ var friends = vm.createModel({
         return friend == null ? (item.user_name || ('用户' + item.user_id)) : friend.get('name_for_show');
     },
 
-    addNewFriendsCount: function() {
+    addNewFriendsCount: function () {
 
         return this.set({
             newFriendsCount: this.data.newFriendsCount + 1
@@ -49,12 +47,12 @@ var friends = vm.createModel({
     }
 });
 
-friends.observe('friends', function(e) {
+friends.observe('friends', function (e) {
     var data = this.get('friends');
     var changed = [];
     var name_for_show;
 
-    data.forEach(function(item) {
+    data.forEach(function (item) {
         name_for_show = (item.friends_ext ? (item.friends_ext.memo || item.user_name) : item.user_name) || ('用户' + item.user_id);
         if (item.name_for_show != name_for_show) {
             changed.push({
@@ -68,23 +66,27 @@ friends.observe('friends', function(e) {
         this._('friends').update(changed, 'user_id');
     }
 
-    messagesList.getList().update(data.map(function(item) {
+    console.log('friends change');
+
+    messagesList.getList().update(data.map(function (item) {
         return {
             user_id: item.user_id,
             avatars: item.avatars,
-            user_name: item.name_for_show
+            user_name: item.name_for_show,
+            push_to_home: item.friends_ext ? item.friends_ext.enable_push !== 2 : true,
+            enable_leave_msg: item.friends_ext ? item.friends_ext.enable_leave_msg !== 2 : true
         }
     }), 'user_id', false);
 
     util.store('friends', data);
 });
 
-friends.observe('contacts', function(e) {
+friends.observe('contacts', function (e) {
     util.store('contacts', this._('contacts').data);
 });
 
 
-friends.on('change:newFriendsCount', function(e, count) {
+friends.on('change:newFriendsCount', function (e, count) {
     util.store('newFriendsCount', count);
 });
 
