@@ -1057,8 +1057,10 @@ function changedAndUpdateViewNextTick(model) {
         model.key && model.root.trigger(DATACHANGED_EVENT + ":" + model.key);
 
         while (model) {
-            if (model instanceof Model) {
-                model._linkedParents && model._linkedParents.length && model.root.trigger(LINKEDCHANGE + ":" + model.cid);
+            if (model instanceof Model || model instanceof Collection) {
+                model._linkedParents &&
+                    model._linkedParents.length &&
+                    model.root.trigger(LINKEDCHANGE + ":" + model.cid);
             }
             model = model.parent;
         }
