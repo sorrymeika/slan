@@ -2,6 +2,8 @@ SLAN
 =======
 
 mvvm前端框架
+
+核心文件 https://github.com/sorrymeika/slan/blob/master/webresource/js/core/model2.js
 ---
 
 # Start
