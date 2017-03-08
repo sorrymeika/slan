@@ -104,21 +104,6 @@ function valueCode(str, variables) {
     return '((' + code + ')?' + str + ':"")';
 }
 
-function cloneElement(el, fn) {
-
-    eachElement(el, function (node) {
-        var clone = node.cloneNode(false);
-        node._clone = clone;
-
-        if (node.parentNode && node.parentNode._clone) {
-            node.parentNode._clone.appendChild(clone);
-        }
-
-        fn(node, clone);
-    });
-
-    return el._clone;
-}
 
 function insertElementAfter(cursorElem, elem) {
     if (cursorElem.nextSibling != elem) {
@@ -139,6 +124,62 @@ function closestElement(el, fn) {
     }
     return null;
 }
+
+
+// function cloneElement(el, fn) {
+
+//     eachElement(el, function (node) {
+//         var clone = node.cloneNode(false);
+//         node._clone = clone;
+
+//         if (node.parentNode && node.parentNode._clone) {
+//             node.parentNode._clone.appendChild(clone);
+//         }
+
+//         fn(node, clone);
+//     });
+
+//     return el._clone;
+// }
+
+function cloneElement(node, each) {
+    var stack = [];
+    var parentCloneStack = [];
+    var nodeClone = node.cloneNode(false);
+    var parentNode = nodeClone;
+    var nextSibling;
+
+    each(node, nodeClone);
+
+    node = node.firstChild;
+
+    while (node) {
+
+        clone = node.cloneNode(false);
+        parentNode.appendChild(clone);
+        nextSibling = node.nextSibling;
+
+        each(node, clone);
+
+        if (node.firstChild) {
+            if (nextSibling) {
+                stack.push(nextSibling);
+                parentCloneStack.push(parentNode);
+            }
+            parentNode = clone;
+            node = node.firstChild;
+
+        } else if (nextSibling) {
+            node = nextSibling;
+        } else {
+            parentNode = parentCloneStack.pop();
+            node = stack.pop();
+        }
+    }
+
+    return nodeClone;
+}
+
 
 function eachElement(el, fn) {
     if (!el) return;
