@@ -11,10 +11,14 @@ var toString = {}.toString;
 var LINKEDCHANGE = 'linkedchange';
 var DATACHANGED_EVENT = "datachanged";
 
+var TRANSITION_END = $.fx.transitionEnd;
+var isArray = Array.isArray;
+
+
 var EVENTS = {
     tap: 'tap',
     'long-tap': 'longTap',
-    'transition-end': $.fx.transitionEnd,
+    'transition-end': TRANSITION_END,
     touchstart: 'touchstart',
     touchend: 'touchend',
     touchmove: 'touchmove',
@@ -126,22 +130,6 @@ function closestElement(el, fn) {
 }
 
 
-// function cloneElement(el, fn) {
-
-//     eachElement(el, function (node) {
-//         var clone = node.cloneNode(false);
-//         node._clone = clone;
-
-//         if (node.parentNode && node.parentNode._clone) {
-//             node.parentNode._clone.appendChild(clone);
-//         }
-
-//         fn(node, clone);
-//     });
-
-//     return el._clone;
-// }
-
 function cloneElement(node, each) {
     var stack = [];
     var parentCloneStack = [];
@@ -184,7 +172,7 @@ function cloneElement(node, each) {
 function eachElement(el, fn) {
     if (!el) return;
 
-    if (Array.isArray(el) || el instanceof $.fn.constructor) {
+    if (isArray(el) || el instanceof $.fn.constructor) {
         for (var i = 0, len = el.length; i < len; i++) {
             eachElement(el[i], fn);
         }
@@ -556,7 +544,6 @@ function updateNode(viewModel, el) {
                                 break;
                             default:
                                 throw new Error(nextElement.snIfType, ':snIfType not available');
-                                break;
                         }
                         nextElement = currentElement.nextSibling;
                     }
@@ -638,7 +625,7 @@ function updateNodeAttributes(viewModel, el, attribute) {
                             $(val).insertAfter(el);
                         }
 
-                    } else if ($.isArray(val)) {
+                    } else if (isArray(val)) {
                         var firstChild = val[0];
                         if (firstChild && el.nextSibling != firstChild)
                             val.forEach(function (item) {
@@ -685,7 +672,7 @@ function updateNodeAttributes(viewModel, el, attribute) {
                                 $el.hide();
                         }
                         $el.addClass('sn-display-hide')
-                            .one($.fx.transitionEnd, onHide);
+                            .one(TRANSITION_END, onHide);
                         setTimeout(onHide, 300);
                     }
 
@@ -1060,7 +1047,6 @@ function syncParentData(model) {
     } else {
         parent.data[model._key] = model.data;
     }
-
 }
 
 function setModelByKeys(model, cover, keys, val) {
@@ -1252,7 +1238,7 @@ var ModelProto = {
         }
 
         var data;
-        if (Array.isArray(key)) {
+        if (isArray(key)) {
             data = this.data;
 
             for (var i = key[0] == 'this' ? 1 : 0, len = key.length; i < len; i++) {
@@ -1273,7 +1259,7 @@ var ModelProto = {
     get: function (key) {
         var data = this.value(key);
 
-        return data === null ? null : typeof data == 'object' ? $.extend(true, Array.isArray(data) ? [] : {}, data) : data;
+        return data === null ? null : typeof data == 'object' ? $.extend(true, isArray(data) ? [] : {}, data) : data;
     },
 
     //[cover,object]|[cover,key,val]|[key,va]|[object]
@@ -1293,7 +1279,7 @@ var ModelProto = {
         if (typeof cover != "boolean")
             val = key, key = cover, cover = false;
 
-        var isArrayKey = Array.isArray(key);
+        var isArrayKey = isArray(key);
 
         if (key === null) {
             this.reset();
@@ -1382,7 +1368,7 @@ var ModelProto = {
                     if (!hasChange && origin.changed) hasChange = true;
 
                 } else if (origin instanceof Collection) {
-                    if (!Array.isArray(value)) {
+                    if (!isArray(value)) {
                         if (value == null) {
                             value = [];
                         } else {
@@ -1489,7 +1475,7 @@ ModelProto.getModel = ModelProto._;
 Model.prototype = ModelProto;
 
 var Collection = function (parent, attr, data) {
-    if (Array.isArray(parent)) {
+    if (isArray(parent)) {
         data = parent;
         parent = null;
     }
@@ -1678,9 +1664,9 @@ Collection.prototype = {
 
     add: function (data) {
         var model;
-        var isArray = Array.isArray(data);
+        var dataIsArray = isArray(data);
 
-        if (!isArray) {
+        if (!dataIsArray) {
             data = [data];
         }
         var dataLen = data.length;
@@ -1706,7 +1692,7 @@ Collection.prototype = {
 
             changedAndUpdateViewNextTick(this);
         }
-        return isArray ? results : results[0];
+        return dataIsArray ? results : results[0];
     },
 
     //已有项将被增量覆盖，不在arr中的项将被删除
@@ -1752,7 +1738,7 @@ Collection.prototype = {
         var arrItem;
         var exists;
 
-        if (!Array.isArray(arr)) arr = [arr];
+        if (!isArray(arr)) arr = [arr];
         else arr = [].concat(arr);
 
         var n = arr.length;
@@ -1815,7 +1801,7 @@ Collection.prototype = {
         var model;
         var count;
 
-        if (!$.isArray(data)) {
+        if (!isArray(data)) {
             data = [data];
         }
 
@@ -2045,7 +2031,7 @@ var viewModelList = [];
 function ViewModel(el, data, children) {
     if (el !== false) viewModelList.push(this);
 
-    if ((typeof data === 'undefined' || $.isArray(data)) && (el === undefined || el === null || $.isPlainObject(el)))
+    if ((typeof data === 'undefined' || isArray(data)) && (el === undefined || el === null || $.isPlainObject(el)))
         children = data, data = el, el = this.el;
 
     this.children = children ? [].concat(children) : [];
@@ -2077,7 +2063,7 @@ function ViewModel(el, data, children) {
 var ViewModelProto = {
     //事件处理
     _handleEvent: function (e) {
-        if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
+        if (e.type == TRANSITION_END && e.target != e.currentTarget) {
             return;
         }
         var target = e.currentTarget;

@@ -28,6 +28,10 @@ function combineImages(out, srcs, callback) {
 
             if (count == 0) {
 
+                images.sort(function (a, b) {
+                    return a.alt > b.alt ? 1 : a.alt == b.alt ? 0 : -1;
+                });
+
                 var maxWidth = 0;
                 var height = 0;
                 var margin = 2;
@@ -119,6 +123,10 @@ exports.create = function (options, cb) {
         combineCount--;
         if (combineCount == 0) {
             var codes = "";
+
+            layouts.sort(function (a, b) {
+                return a.name > b.name ? 1 : a.name == b.name ? 0 : -1;
+            })
 
             layouts.forEach(function (layout) {
                 var styleCode;
