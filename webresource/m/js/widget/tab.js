@@ -5,6 +5,11 @@ var Touch = require('core/touch');
 var Model = require('core/model2').Model;
 var Scroll = require('../widget/scroll');
 
+
+function getFixedTabIndex(tab, index) {
+    return index < 0 ? 0 : index >= tab.data.items.length ? tab.data.items.length - 1 : index;
+}
+
 var Tab = Model.extend({
     el: <div class="cp_tab {className}">
         <div class="cp_tab__head bottom_border">
@@ -25,23 +30,7 @@ var Tab = Model.extend({
         cursorX: 0
     },
 
-    viewDidUpdate: function() {
-        var self = this;
-        this.wapperW = this.refs.body.offsetWidth;
-        this.touch.maxX = this.refs.content.offsetWidth - this.wapperW;
-
-        this.refs.items.forEach(function(item) {
-            if (!item.scroll)
-                self.bindScrollTo(item);
-        });
-
-        if (!this.data.cursorWidth)
-            this.refs.heads[this.data.index] && this.set({
-                cursorWidth: this.refs.heads[this.data.index].offsetWidth
-            });
-    },
-
-    initialize: function(data) {
+    initialize: function (data) {
 
         var self = this;
 
@@ -51,11 +40,11 @@ var Tab = Model.extend({
             momentum: false
         });
 
-        this.touch.on('start', function() {
+        this.touch.on('start', function () {
 
             this.minX = 0;
 
-        }).on('move', function() {
+        }).on('move', function () {
 
             self.refs.content.style.webkitTransform = 'translate3d(' + this.x * -1 + 'px,' + this.y * -1 + 'px,0)';
 
@@ -63,8 +52,8 @@ var Tab = Model.extend({
 
             if (x != 0) {
                 var percent = this.isMoveLeft ? x / self.wapperW : (1 - x / self.wapperW);
-                var index = self.fix(this.isMoveLeft ? Math.ceil(this.x / self.wapperW) : Math.floor(this.x / self.wapperW));
-                var currentIndex = self.fix(this.isMoveLeft ? Math.floor(this.x / self.wapperW) : Math.ceil(this.x / self.wapperW));
+                var index = getFixedTabIndex(self, this.isMoveLeft ? Math.ceil(this.x / self.wapperW) : Math.floor(this.x / self.wapperW));
+                var currentIndex = getFixedTabIndex(self, this.isMoveLeft ? Math.floor(this.x / self.wapperW) : Math.ceil(this.x / self.wapperW));
                 if (currentIndex == index) return;
 
                 var currentHead = self.refs.heads[currentIndex];
@@ -80,7 +69,7 @@ var Tab = Model.extend({
                 });
             }
 
-        }).on('end bounceBack', function(e) {
+        }).on('end bounceBack', function (e) {
 
             if (e.type == 'end' && this.shouldBounceBack()) {
                 return;
@@ -96,32 +85,52 @@ var Tab = Model.extend({
 
             console.log(index, self.data.index, this.x, this.startX);
 
-            self.tab(index < 0 ? 0 : index >= self.data.items.length ? self.data.items.length - 1 : index, e.type == 'bounceBack' ? 0 : 250);
+            self.tab(index, e.type == 'bounceBack' ? 0 : 250);
         });
 
-        this.promise = new Promise(function(resove) {
+        this.promise = new Promise(function (resove) {
             self.next(resove);
         });
 
-        this.on('change:index', function(e, value) {
+        this.on('change:index', function (e, value) {
             this.tab(value);
+
+        }).observe('items', function () {
+
+            this.then(function () {
+
+                this.refs.items.forEach(function (item) {
+                    if (!item.scroll)
+                        self.bindScrollTo(item);
+                });
+
+            });
+
         });
     },
 
-    fix: function(index) {
-        return index < 0 ? 0 : index >= this.data.items.length ? this.data.items.length - 1 : index;
+    viewDidUpdate: function () {
+        var self = this;
+        this.wapperW = this.refs.body.offsetWidth;
+        this.touch.maxX = this.refs.content.offsetWidth - this.wapperW;
+
+        if (!this.data.cursorWidth)
+            this.refs.heads[this.data.index] && this.set({
+                cursorWidth: this.refs.heads[this.data.index].offsetWidth
+            });
     },
 
-    tab: function(page, duration) {
+    tab: function (index, duration) {
         var self = this;
-        var index = page >= this.data.items.length ? 0 : page < 0 ? this.data.items.length - 1 : page;
 
-        this.promise.then(function() {
+        index = getFixedTabIndex(this, index);
+
+        this.promise.then(function () {
             var scrollLeft = self.refs.body.offsetWidth * index;
 
             if (scrollLeft != self.touch.x) {
 
-                self.touch.scrollTo(scrollLeft, 0, duration, function() {
+                self.touch.scrollTo(scrollLeft, 0, duration, function () {
                     if (index !== self.data.index) {
                         self.trigger('tabChange', index, self.data.index);
                     }

@@ -101,7 +101,7 @@ function bindBackGesture(application) {
             that.swiperAsync = new Async(function (done) {
 
                 application.mask.show();
-                currentActivity._startExit();
+                currentActivity._startExiting();
 
                 application.get(action, function (activity) {
                     that.needRemove = activity.el.parentNode === null;
@@ -304,7 +304,7 @@ var Application = Component.extend(Object.assign(appProto, {
         var $win = $(window);
         var $el = that.$el;
 
-        window.Application = this;
+        window.application = this;
 
         that.queue = new Async();
 
@@ -421,7 +421,7 @@ var Application = Component.extend(Object.assign(appProto, {
             route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
         }
 
-        currentActivity._startExit();
+        currentActivity._startExiting();
 
         that.get(route, function (activity) {
             that._currentActivity = activity;
@@ -591,7 +591,7 @@ var Application = Component.extend(Object.assign(appProto, {
             return false;
         });
 
-        return {
+        var ret = {
             $el: $iframe,
             window: iframeWin,
             document: iframeDoc,
@@ -614,6 +614,8 @@ var Application = Component.extend(Object.assign(appProto, {
                 })
             }
         }
+
+        return ret;
     }
 }));
 

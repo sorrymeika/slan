@@ -119,7 +119,7 @@ var Month = Model.extend({
 		var user = userModel.get();
 
 		if (!user) {
-			Application.forward("/login?success=" + encodeURIComponent(Application.getCurrentActivity().url));
+			application.forward("/login?success=" + encodeURIComponent(application.getCurrentActivity().url));
 			return;
 		}
 
@@ -197,7 +197,7 @@ var Month = Model.extend({
 					self.hide();
 					//self.forward('/cart?from=' + self.route.url);
 
-					Application.getCurrentActivity().setResult('CartChange');
+					application.getCurrentActivity().setResult('CartChange');
 
 				} else {
 					sl.tip(res.msg);

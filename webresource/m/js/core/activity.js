@@ -231,7 +231,7 @@ var Activity = Component.extend({
     },
 
     isExiting: false,
-    _startExit: function () {
+    _startExiting: function () {
         var self = this;
         if (self.isExiting) return;
         self.isExiting = true;

@@ -371,7 +371,7 @@ var Cart = Model.extend({
 
 		} else {
 
-			Application.forward('/buy')
+			application.forward('/buy')
 
 		}
 	},

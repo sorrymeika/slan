@@ -2183,8 +2183,6 @@ var ViewModelProto = {
         this.trigger('viewDidUpdate');
     },
 
-
-
     _checkOwnNode: function (node) {
         if (typeof node == 'string') {
             node = this.$el.find(node);

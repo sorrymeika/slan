@@ -25,12 +25,12 @@ var Month = model.ViewModel.extend({
 
 	aboutUs: function (e) {
 		this.$el.hide();
-		Application.forward('/news/200');
+		application.forward('/news/200');
 	},
 
 	home: function () {
 		this.$el.hide();
-		Application.back('/');
+		application.back('/');
 	},
 
 	show: function () {

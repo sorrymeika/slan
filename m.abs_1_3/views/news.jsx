@@ -105,7 +105,7 @@ A：使用优惠券订单，如非质量问题，不支持退货退款。<br/>
                         var content;
                         if (res.success) {
                             if (res.edmtype == 1) {
-                                var iframe = Application.createIFrame($main);
+                                var iframe = application.createIFrame($main);
                                 iframe.$el.css({
                                     width: window.innerWidth,
                                     height: $main[0].offsetHeight
