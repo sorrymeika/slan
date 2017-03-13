@@ -128,28 +128,41 @@ module.exports = {
 
     //@params={ className: 'xxx', content:'内容<button click="confirm"></button>',initialize:function(){},confirm:function(){}}
     popup: function (params) {
+        var $container;
+        var prevPromise = popupPromise;
+        var resolveSelf;
         var ret = {
 
             find: function (selector) {
-                return ret.$container.find(selector)
+                return $container.find(selector)
             },
 
             show: function () {
 
-                this.$container.addClass('show');
+                $container.addClass('show');
                 $mask.addClass('show');
             },
 
             hide: function () {
 
-                this.promise.then(function () {
+                var ret = this;
+
+                prevPromise.then(function () {
 
                     params.onHide && params.onHide();
-
                     params.tapMaskToHide && $mask.off('tap', ret.hide);
 
                     (popups.length <= 1) && $mask.removeClass('show');
-                    ret.$container.removeClass('show');
+                    $container.removeClass('show');
+
+                    setTimeout(function () {
+                        if (!$container.hasClass('show')) {
+                            $container[0].parentNode && $container.remove();
+                        }
+                        if (!$mask.hasClass('show')) {
+                            $mask[0].style.display = 'none';
+                        }
+                    }, 500);
 
                     for (var i = popups.length; i >= 0; i--) {
                         if (popups[i] == ret) {
@@ -157,21 +170,19 @@ module.exports = {
                             break;
                         }
                     }
-                    ret.resolve();
+                    resolveSelf();
                 })
-            },
-            promise: popupPromise
+            }
         };
 
-        popupPromise = popupPromise.then(function () {
+        popupPromise = prevPromise.then(function () {
 
             return new Promise(function (resolve, reject) {
-                ret.resolve = resolve;
+                resolveSelf = resolve;
 
-                var $container = $('<div class="cp_popup__container' + (params.className ? ' ' + params.className : '') + '"></div>')
+                $container = $('<div class="cp_popup__container' + (params.className ? ' ' + params.className : '') + '"></div>')
                     .on($.fx.transitionEnd, function () {
                         if (!$(this).hasClass('show')) {
-
                             this.parentNode && this.parentNode.removeChild(this);
                         }
                     })
@@ -191,8 +202,6 @@ module.exports = {
                         ret.hide();
                     })
                 }
-
-                ret.$container = $container;
 
                 $container.append(params.content);
 

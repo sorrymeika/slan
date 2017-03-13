@@ -241,7 +241,7 @@ var Application = Component.extend(Object.assign(appProto, {
 
         if (options.backGesture !== false) bindBackGesture(this);
 
-        var prepareExit = false;
+        var readyForExit = false;
 
         $(window).on('back', function () {
 
@@ -252,12 +252,12 @@ var Application = Component.extend(Object.assign(appProto, {
 
             var hash = location.hash;
             if (!that._currentActivity || that._currentActivity.path == "/" || that._currentActivity.path == options.loginPath) {
-                if (prepareExit) {
+                if (readyForExit) {
                     bridge.exit();
                 } else {
-                    prepareExit = true;
+                    readyForExit = true;
                     setTimeout(function () {
-                        prepareExit = false;
+                        readyForExit = false;
                     }, 2000);
                     Toast.showToast("再按一次退出程序");
                 }
@@ -267,8 +267,14 @@ var Application = Component.extend(Object.assign(appProto, {
             }
 
         }).on('urlchange', function (e, data) {
-
             that.forward(data.url);
+
+        }).on('keyboardWillShow', function (e, keyboardHeight) {
+            that.el.style.bottom = keyboardHeight + 'px';
+
+        }).on('keyboardWillHide', function () {
+            that.el.style.bottom = '0px';
+
         });
 
         if (options.routes) {

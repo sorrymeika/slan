@@ -7,18 +7,17 @@ define(function (require, exports, module) {
         isAndroid = util.android,
         slice = Array.prototype.slice,
         blankFn = function () { },
-        $win = $(window),
         baseUrl = $('meta[name="api-base-url"]').attr('content'),
         hybridFunctions = {};
 
     window.hybridFunctions = hybridFunctions;
 
     window.trigger = function (e, data) {
-        $win.trigger(e.type, e);
+        $(window).trigger(e.type, e);
     };
 
     window.callJS = function (data) {
-        $win.trigger(data.method, data.params);
+        $(window).trigger(data.method, data.params);
     }
 
     var queue = [],

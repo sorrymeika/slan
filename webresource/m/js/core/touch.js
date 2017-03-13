@@ -171,11 +171,6 @@ var Touch = Event.mixin(function (el, options) {
             return false;
         },
 
-        shouldBounceBack: function () {
-            var self = this;
-            return self.options.enableHorizontal && (self.x < self.minX || self.x > self.maxX) || self.options.enableVertical && (self.y < self.minY || self.y > self.maxY);
-        },
-
         _end: function (e) {
             var self = this;
             var endEvent;
@@ -322,6 +317,11 @@ var Touch = Event.mixin(function (el, options) {
             }
 
             return false;
+        },
+
+        shouldBounceBack: function () {
+            var self = this;
+            return self.options.enableHorizontal && (self.x < self.minX || self.x > self.maxX) || self.options.enableVertical && (self.y < self.minY || self.y > self.maxY);
         },
 
         bounceBack: function () {
