@@ -78,6 +78,10 @@ var FILTERS_VARS = (function () {
     return res;
 })();
 
+function isThenable(thenable) {
+    return thenable && typeof thenable.then === 'function';
+}
+
 function testRegExp(regExp, val) {
     return regExp.lastIndex != 0 && (regExp.lastIndex = 0) || regExp.test(val);
 }
@@ -1380,6 +1384,11 @@ var ModelProto = {
                     data[attr] = origin.data;
 
                     if (!hasChange && origin.changed) hasChange = true;
+
+                } else if (isThenable(value)) {
+                    value.then(function (res) {
+                        self.set(attr, res);
+                    });
 
                 } else {
                     valueType = value === null || value === undefined ? null : toString.call(value);
