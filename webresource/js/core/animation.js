@@ -4,31 +4,6 @@ var Matrix2D = require("graphics/matrix2d");
 var tween = require("graphics/tween");
 var CubicBezier = require("graphics/cubicBezier");
 var util = require("util");
-var vendors = ['webkit'/*,'moz','o','ms'*/];
-
-for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-    window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] ||
-        window[vendors[x] + 'CancelRequestAnimationFrame'];
-}
-
-if (!window.requestAnimationFrame) {
-    var lastTime = 0;
-    window.requestAnimationFrame = function (callback) {
-        var now = Date.now();
-        var time = Math.max(0, 16.7 - (now - lastTime));
-        var id = setTimeout(function () {
-            callback(now + time);
-        }, time);
-
-        lastTime = now + time;
-        return id;
-    };
-
-    window.cancelAnimationFrame = function (id) {
-        clearTimeout(id);
-    };
-}
 
 var list = new LinkList();
 var animationStop = true;

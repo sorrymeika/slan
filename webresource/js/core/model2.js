@@ -367,7 +367,7 @@ function updateRepeatElement(viewModel, el) {
             collection = new Collection(viewModel, repeatSource.collectionKey, collectionData);
 
         } else {
-            collection = model && model.findByKey(repeatSource.collectionKey);
+            collection = model && findModelByKey(model, repeatSource.collectionKey);
         }
 
         if (!collection) return;
@@ -492,6 +492,57 @@ function updateRepeatElement(viewModel, el) {
     }
 
     return cursorElem;
+}
+
+function findModelByKey(model, key) {
+    if (model.key == key) return model;
+
+    var models = model._model;
+    var model;
+
+    while (1) {
+        var flag = false;
+
+        for (var modelKey in models) {
+            model = models[modelKey];
+
+            if (model instanceof Model || model instanceof Collection) {
+
+                if (model.key == key) {
+                    return model;
+
+                } else {
+                    var linkedParents = model._linkedParents;
+                    if (linkedParents && linkedParents.length) {
+
+                        for (var i = 0, len = linkedParents.length; i < len; i++) {
+                            var childModelKey = linkedParents[i].childModelKey;
+                            if (key == childModelKey) {
+                                return model;
+
+                            } else if (key.indexOf(childModelKey + '.') == 0) {
+                                flag = true;
+                                key = key.substr(childModelKey.length + 1);
+                                break;
+                            }
+                        }
+
+                    } else if (key.indexOf(model.key + '.') == 0) {
+                        flag = true;
+                    }
+                }
+
+                if (flag && model._model) {
+                    models = model._model;
+                    break;
+                }
+            }
+        }
+
+        if (!flag) break;
+    }
+
+    return null;
 }
 
 function updateNode(viewModel, el) {
@@ -1182,58 +1233,7 @@ var ModelProto = {
         return !result && def !== undefined ? def : result;
     },
 
-    findByKey: function (key) {
-        if (this.key == key) return this;
-
-        var models = this._model;
-        var model;
-
-        while (1) {
-            var flag = false;
-
-            for (var modelKey in models) {
-                model = models[modelKey];
-
-                if (model instanceof Model || model instanceof Collection) {
-
-                    if (model.key == key) {
-                        return model;
-
-                    } else {
-                        var linkedParents = model._linkedParents;
-                        if (linkedParents && linkedParents.length) {
-
-                            for (var i = 0, len = linkedParents.length; i < len; i++) {
-                                var childModelKey = linkedParents[i].childModelKey;
-                                if (key == childModelKey) {
-                                    return model;
-
-                                } else if (key.indexOf(childModelKey + '.') == 0) {
-                                    flag = true;
-                                    key = key.substr(childModelKey.length + 1);
-                                    break;
-                                }
-                            }
-
-                        } else if (key.indexOf(model.key + '.') == 0) {
-                            flag = true;
-                        }
-                    }
-
-                    if (flag && model._model) {
-                        models = model._model;
-                        break;
-                    }
-                }
-            }
-
-            if (!flag) break;
-        }
-
-        return null;
-    },
-
-    value: function (key) {
+    get: function (key) {
         if (typeof key === 'undefined')
             return this.data;
 
@@ -1260,10 +1260,14 @@ var ModelProto = {
         return data;
     },
 
-    get: function (key) {
-        var data = this.value(key);
+    getJSON: function (key) {
+        var data = this.get(key);
 
         return data === null ? null : typeof data == 'object' ? $.extend(true, isArray(data) ? [] : {}, data) : data;
+    },
+
+    toJSON: function () {
+        return $.extend(true, {}, this.data);
     },
 
     //[cover,object]|[cover,key,val]|[key,va]|[object]
@@ -1519,7 +1523,7 @@ Collection.prototype = {
     },
 
     map: function (fn) {
-        return util.map(this.getAll(), fn);
+        return util.map(this.data, fn);
     },
 
     indexOf: function (key, val) {
@@ -1532,14 +1536,14 @@ Collection.prototype = {
             util.lastIndexOf(this.data, key, val);
     },
 
-    getAll: function () {
-        return $.extend(true, [], this.data);
-    },
-
     get: function (i) {
-        if (i == undefined) return this.getAll();
+        if (i == undefined) return this.data;
 
         return this[i].get();
+    },
+
+    toJSON: function () {
+        return $.extend(true, [], this.data);
     },
 
     //@search=n /*第n个*/ | "[attr='val']"/*查询所有*/ | "[attr='val'][n]"/*查询并返回第n个*/ | 
