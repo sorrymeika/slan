@@ -9,7 +9,7 @@ module.exports = Model.extend({
             <li class="cp_photoviewer__item" sn-repeat="item in images"><div class="cp_photoviewer__item_con" ref="items"><p ref="bds"><img style="-webkit-transform:translate(-50%,-50%) rotate({item.r}deg) scale({item.s});-webkit-transform-origin: 50% 50%;" sn-src="{item.src}" ref="images" /></p></div></li>
         </ul>
     </div>),
-    defaultData: {
+    attributes: {
         card: 0,
         x: 0,
         y: 0,
@@ -20,9 +20,9 @@ module.exports = Model.extend({
     },
 
     index: function (index) {
-        if (index === undefined) return this.data.index;
+        if (index === undefined) return this.attributes.index;
 
-        console.log(this.data.index * (this.$el.offsetWidth || window.innerWidth));
+        console.log(this.attributes.index * (this.$el.offsetWidth || window.innerWidth));
 
         this.set({
             x: -1 * index * (this.$el.offsetWidth || window.innerWidth),
@@ -55,14 +55,17 @@ module.exports = Model.extend({
         this._move = this._move.bind(this);
         this._end = this._end.bind(this);
 
-        this.getModel('images').each(function (model) {
+        this._('images').each(function (model) {
             model.set({
                 r: 0,
                 s: 1
             })
         });
+
+        console.log(this.$el);
+
         this.set({
-            x: -1 * this.data.index * (this.$el.offsetWidth || window.innerWidth)
+            x: -1 * this.attributes.index * (this.$el.offsetWidth || window.innerWidth)
         })
 
     },
@@ -116,7 +119,7 @@ module.exports = Model.extend({
             if ((isMoveLeft && this.__startScrollX >= el.scrollWidth - el.clientWidth) || (!isMoveLeft && this.__startScrollX <= 0)) {
 
                 this.__isPreventScroll = true;
-                this.originX = this.data.x;
+                this.originX = this.attributes.x;
 
             } else {
                 this.__isPreventScroll = false;
@@ -147,21 +150,23 @@ module.exports = Model.extend({
         this.isStart = true;
         this.touchLen = -1;
 
-        this.originX = this.data.x;
-        this.originY = this.data.y;
+        this.originX = this.attributes.x;
+        this.originY = this.attributes.y;
 
-        this.originR = this.data.r;
+        this.originR = this.attributes.r;
 
-        console.log(this.data);
+        console.log(this.attributes);
 
-        this.currentItem = this._('images[' + this.data.index + ']');
+        var index = index;
+
+        this.currentItem = this._('images[' + index + ']');
         console.log(this.currentItem);
         this.originR = this.currentItem.get("r");
         this.originS = this.currentItem.get("s");
 
-        this.currentEl = this.refs.items[this.data.index];
-        this.currentImage = this.refs.images[this.data.index];
-        this.currentBd = this.refs.bds[this.data.index];
+        this.currentEl = this.refs.items[index];
+        this.currentImage = this.refs.images[index];
+        this.currentBd = this.refs.bds[index];
 
         if (touches.length == 2) {
             var w = touches[0].pageX - touches[1].pageX;
@@ -231,13 +236,13 @@ module.exports = Model.extend({
             $(this.refs.content).addClass('anim_ease')[0].clientHeight;
 
             var width = elWidth - this.refs.content.offsetWidth;
-            var x = this.data.x;
-            var cX = this.data.index * elWidth * -1;
+            var x = this.attributes.x;
+            var cX = this.attributes.index * elWidth * -1;
 
             x = x > 0 ? 0 : x < width ? width : x < cX && this.isMoveLeft ? cX - elWidth : x > cX && !this.isMoveLeft ? cX + elWidth : cX;
 
             var index = x * -1 / elWidth;
-            var indexChanged = index !== this.data.index;
+            var indexChanged = index !== this.attributes.index;
 
             this.set({
                 x: x,
@@ -259,8 +264,8 @@ module.exports = Model.extend({
 
         } else {
 
-            var width = self.currentImage.offsetWidth * self.currentItem.data.s;
-            var height = self.currentImage.offsetHeight * self.currentItem.data.s;
+            var width = self.currentImage.offsetWidth * self.currentItem.attributes.s;
+            var height = self.currentImage.offsetHeight * self.currentItem.attributes.s;
 
             if (width > elWidth) {
                 this.currentBd.style.width = width + 'px';

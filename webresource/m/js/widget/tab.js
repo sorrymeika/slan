@@ -7,7 +7,7 @@ var Scroll = require('../widget/scroll');
 
 
 function getFixedTabIndex(tab, index) {
-    return index < 0 ? 0 : index >= tab.data.items.length ? tab.data.items.length - 1 : index;
+    return index < 0 ? 0 : index >= tab.attributes.items.length ? tab.attributes.items.length - 1 : index;
 }
 
 var Tab = Model.extend({
@@ -25,7 +25,7 @@ var Tab = Model.extend({
         </div>
     </div>,
 
-    defaultData: {
+    attributes: {
         index: 0,
         cursorX: 0
     },
@@ -75,15 +75,17 @@ var Tab = Model.extend({
                 return;
             }
 
-            var index = e.type == 'bounceBack'
-                ? self.data.index
-                : this.isMoveLeft && this.x - this.startX > 0
-                    ? self.data.index + 1
-                    : !this.isMoveLeft && this.x - this.startX < 0
-                        ? self.data.index - 1
-                        : self.data.index;
+            var index = self.attributes.index;
 
-            console.log(index, self.data.index, this.x, this.startX);
+            index = e.type == 'bounceBack'
+                ? index
+                : this.isMoveLeft && this.x - this.startX > 0
+                    ? index + 1
+                    : !this.isMoveLeft && this.x - this.startX < 0
+                        ? index - 1
+                        : index;
+
+            console.log(index, self.attributes.index, this.x, this.startX);
 
             self.tab(index, e.type == 'bounceBack' ? 0 : 250);
         });
@@ -114,9 +116,9 @@ var Tab = Model.extend({
         this.wapperW = this.refs.body.offsetWidth;
         this.touch.maxX = this.refs.content.offsetWidth - this.wapperW;
 
-        if (!this.data.cursorWidth)
-            this.refs.heads[this.data.index] && this.set({
-                cursorWidth: this.refs.heads[this.data.index].offsetWidth
+        if (!this.attributes.cursorWidth)
+            this.refs.heads[this.attributes.index] && this.set({
+                cursorWidth: this.refs.heads[this.attributes.index].offsetWidth
             });
     },
 
@@ -131,8 +133,8 @@ var Tab = Model.extend({
             if (scrollLeft != self.touch.x) {
 
                 self.touch.scrollTo(scrollLeft, 0, duration, function () {
-                    if (index !== self.data.index) {
-                        self.trigger('tabChange', index, self.data.index);
+                    if (index !== self.attributes.index) {
+                        self.trigger('tabChange', index, self.attributes.index);
                     }
                     self.set({
                         index: index,

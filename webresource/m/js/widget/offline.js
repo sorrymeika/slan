@@ -1,7 +1,7 @@
 var $ = require('$');
-var model = require('core/model2');
+var Component = require('core/component');
 
-var Offline = model.Model.extend({
+var Offline = Component.extend({
     el: '<div class="viewport offline" sn-transition-end="this._hide()">\
         <div class="offline_con">\
             <div class="ico"></div>\
@@ -11,16 +11,15 @@ var Offline = model.Model.extend({
         </div>\
     </div>',
 
-    reload: function() {
-
+    reload: function () {
     },
 
-    initialize: function() {
+    initialize: function () {
         //this.listenTo(this.$el, $.fx.transitionEnd, this._hide);
         this.$el.appendTo('body');
     },
 
-    show: function(reload) {
+    show: function (reload) {
         this.$el.show()[0].clientHeight;
         this.$el.addClass('show');
 
@@ -29,18 +28,18 @@ var Offline = model.Model.extend({
         }
     },
 
-    _hide: function() {
+    _hide: function () {
         !this.$el.hasClass('show') && this.$el.hide();
     },
 
-    hide: function() {
+    hide: function () {
         this.$el.removeClass('show');
     }
 });
 
 var instance;
 
-Offline.getInstance = function() {
+Offline.getInstance = function () {
 
     if (!instance) {
         instance = new Offline();

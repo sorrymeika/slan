@@ -13,6 +13,7 @@ var DATACHANGED_EVENT = "datachanged";
 
 var TRANSITION_END = $.fx.transitionEnd;
 var isArray = Array.isArray;
+var extend = $.extend;
 
 
 var EVENTS = {
@@ -240,17 +241,17 @@ function setRefs(viewModel, el) {
 
 function formatData(viewModel, element, snData) {
     var data = Object.assign({
-        $global: viewModel.$global.data,
+        global: viewModel.global.attributes,
         srcElement: element
 
-    }, Filters, viewModel.data);
+    }, Filters, viewModel.attributes);
 
     if (snData) {
         for (var key in snData) {
             var model = snData[key];
 
             if (model instanceof Model || model instanceof Collection) {
-                data[key] = model.data;
+                data[key] = model.attributes;
 
             } else {
                 data[key] = model;
@@ -349,7 +350,7 @@ function updateRepeatElement(viewModel, el) {
     if (!collection) {
 
         if (repeatSource.isGlobal) {
-            model = viewModel.$global;
+            model = viewModel.global;
 
         } else if (!offsetParent) {
             model = viewModel;
@@ -461,8 +462,8 @@ function updateRepeatElement(viewModel, el) {
                     sort = orderBy[i];
                     isDesc = orderBy[i + 1] == false;
 
-                    a = am.model.data[sort];
-                    b = bm.model.data[sort];
+                    a = am.model.attributes[sort];
+                    b = bm.model.attributes[sort];
 
                     ret = isDesc ? (a > b ? -1 : a < b ? 1 : 0) : (a > b ? 1 : a < b ? -1 : 0);
 
@@ -1065,7 +1066,7 @@ function genFunction(expression) {
                                 return match;
                             }
 
-                            if (name.indexOf("$global.") == 0) {
+                            if (name.indexOf("global.") == 0) {
                                 isGlobal = true;
                             }
                             return prefix + valueCode(name, variables);
@@ -1096,11 +1097,11 @@ function syncParentData(model) {
     } else if (parent instanceof Collection) {
         var index = parent.indexOf(model);
         if (index != -1) {
-            parent.data[index] = model.data;
+            parent.array[index] = model.attributes;
         }
 
     } else {
-        parent.data[model._key] = model.data;
+        parent.attributes[model._key] = model.attributes;
     }
 }
 
@@ -1113,7 +1114,7 @@ function setModelByKeys(model, cover, keys, val) {
 
         if (!(model._model[key] instanceof Model)) {
             tmp = model._model[key] = new Model(model, key, {});
-            model.data[key] = tmp.data;
+            model.attributes[key] = tmp.attributes;
 
             model = tmp;
 
@@ -1150,7 +1151,7 @@ function changedAndUpdateViewNextTick(model) {
     }).render();
 }
 
-var Model = function (parent, key, data) {
+var Model = function (parent, key, attributes) {
 
     if (parent instanceof Model) {
         this.key = parent.key ? parent.key + '.' + key : key;
@@ -1166,15 +1167,15 @@ var Model = function (parent, key, data) {
 
     this.cid = util.guid();
 
-    this.type = typeof data == 'object' ? 'object' : 'value';
-    this.data = this.type == 'object' ? $.extend({}, data) : data;
+    this.type = typeof attributes == 'object' ? 'object' : 'value';
+    this.attributes = this.type == 'object' ? extend({}, attributes) : attributes;
 
     this._model = {};
     this.parent = parent;
     this.root = parent.root;
     this.changed = false;
 
-    this.set(data);
+    this.set(attributes);
 }
 
 
@@ -1235,7 +1236,7 @@ var ModelProto = {
 
     get: function (key) {
         if (typeof key === 'undefined')
-            return this.data;
+            return this.attributes;
 
         if (typeof key == 'string' && key.indexOf('.') != -1) {
             key = key.split('.');
@@ -1243,7 +1244,7 @@ var ModelProto = {
 
         var data;
         if (isArray(key)) {
-            data = this.data;
+            data = this.attributes;
 
             for (var i = key[0] == 'this' ? 1 : 0, len = key.length; i < len; i++) {
                 if (!(data = data[key[i]]))
@@ -1251,10 +1252,10 @@ var ModelProto = {
             }
 
         } else if (key == 'this') {
-            return this.data;
+            return this.attributes;
 
         } else {
-            data = this.data[key];
+            data = this.attributes[key];
         }
 
         return data;
@@ -1263,11 +1264,11 @@ var ModelProto = {
     getJSON: function (key) {
         var data = this.get(key);
 
-        return data === null ? null : typeof data == 'object' ? $.extend(true, isArray(data) ? [] : {}, data) : data;
+        return data === null ? null : typeof data == 'object' ? extend(true, isArray(data) ? [] : {}, data) : data;
     },
 
     toJSON: function () {
-        return $.extend(true, {}, this.data);
+        return extend(true, {}, this.attributes);
     },
 
     //[cover,object]|[cover,key,val]|[key,va]|[object]
@@ -1291,7 +1292,7 @@ var ModelProto = {
 
         if (key === null) {
             this.reset();
-            this.data = null;
+            this.attributes = null;
             return this;
 
         } else if (!isArrayKey && typeof key == 'object') {
@@ -1301,8 +1302,8 @@ var ModelProto = {
             val = key;
             key = '';
 
-            if (this.data != val) {
-                this.data = val;
+            if (this.attributes != val) {
+                this.attributes = val;
 
                 syncParentData(this);
 
@@ -1327,10 +1328,10 @@ var ModelProto = {
                 (attrs = {})[key] = val;
             }
         }
-        if (this.data === null || !$.isPlainObject(this.data))
-            this.data = {}, syncParentData(this);
+        if (this.attributes === null || !$.isPlainObject(this.attributes))
+            this.attributes = {}, syncParentData(this);
 
-        var data = this.data;
+        var data = this.attributes;
         model = this._model;
 
         if (cover) {
@@ -1352,7 +1353,7 @@ var ModelProto = {
             if (origin !== value) {
                 if (value instanceof Model || value instanceof Collection) {
                     model[attr] = value;
-                    data[attr] = value.data;
+                    data[attr] = value instanceof Collection ? value.array : value.attributes;
 
                     if (origin instanceof Model || origin instanceof Collection) {
                         unlinkModels(self, origin);
@@ -1366,12 +1367,12 @@ var ModelProto = {
 
                     if (value === null || value === undefined) {
                         origin.reset();
-                        origin.data = null;
+                        origin.attributes = null;
 
                     } else {
                         origin.set(coverChild, value);
                     }
-                    data[attr] = origin.data;
+                    data[attr] = origin.attributes;
 
                     if (!hasChange && origin.changed) hasChange = true;
 
@@ -1385,7 +1386,7 @@ var ModelProto = {
                     }
 
                     origin.set(value);
-                    data[attr] = origin.data;
+                    data[attr] = origin.array;
 
                     if (!hasChange && origin.changed) hasChange = true;
 
@@ -1401,13 +1402,13 @@ var ModelProto = {
                         case '[object Object]':
                             value = new Model(this, attr, value);
                             model[attr] = value;
-                            data[attr] = value.data;
+                            data[attr] = value.attributes;
                             break;
 
                         case '[object Array]':
                             value = new Collection(this, attr, value);
                             model[attr] = value;
-                            data[attr] = value.data;
+                            data[attr] = value.array;
                             break;
 
                         default:
@@ -1456,8 +1457,8 @@ var ModelProto = {
 
     reset: function () {
         var data = {};
-        for (var attr in this.data) {
-            data[attr] = null;
+        for (var key in this.attributes) {
+            data[key] = null;
         }
         this.set(data);
     },
@@ -1487,64 +1488,34 @@ ModelProto.getModel = ModelProto._;
 
 Model.prototype = ModelProto;
 
-var Collection = function (parent, attr, data) {
+var Collection = function (parent, attributeName, array) {
     if (isArray(parent)) {
-        data = parent;
+        array = parent;
         parent = null;
     }
-    if (!parent) {
-        parent = new ViewModel(false);
-    }
-    if (!attr) {
-        attr = "$list";
-    }
+
+    if (!parent) parent = new ViewModel(false);
+
+    if (!attributeName) attributeName = "$list";
 
     this.cid = util.guid();
 
     this.parent = parent;
-    this.key = parent.key ? (parent.key + "." + attr) : attr;
-    this._key = attr;
+    this.key = parent.key ? (parent.key + "." + attributeName) : attributeName;
+    this._key = attributeName;
 
     this.root = parent.root;
     this.changed = false;
 
-    this.data = [];
-    parent.data[attr] = this.data;
+    this.array = [];
+    parent.attributes[attributeName] = this.array;
 
-    data && this.add(data);
+    if (array) this.add(array);
 }
 
 Collection.prototype = {
 
     length: 0,
-
-    size: function () {
-        return this.data.length;
-    },
-
-    map: function (fn) {
-        return util.map(this.data, fn);
-    },
-
-    indexOf: function (key, val) {
-        return key instanceof Model ? Array.prototype.indexOf.call(this, key) :
-            util.indexOf(this.data, key, val);
-    },
-
-    lastIndexOf: function (key, val) {
-        return key instanceof Model ? Array.prototype.lastIndexOf.call(this, key) :
-            util.lastIndexOf(this.data, key, val);
-    },
-
-    get: function (i) {
-        if (i == undefined) return this.data;
-
-        return this[i].get();
-    },
-
-    toJSON: function () {
-        return $.extend(true, [], this.data);
-    },
 
     //@search=n /*第n个*/ | "[attr='val']"/*查询所有*/ | "[attr='val'][n]"/*查询并返回第n个*/ | 
     // "[attr='val'][+]"/*一个都不存在则添加*/ | "[attr='val'][+n]"/*结果小于n个则添加*/ |
@@ -1570,18 +1541,17 @@ Collection.prototype = {
         var index = match[3] ? parseInt(match[3]) : operation == '+' ? 0 : undefined;
 
         var test = util.query(query);
-        var data = this.data;
-
+        var array = this.array;
 
         //移除操作
         if (operation == '-') {
             var j = 0;
             var results = [];
             var from = index === undefined ? 0 : index;
-            var to = index === undefined ? data.length : index;
+            var to = index === undefined ? array.length : index;
 
-            for (var i = 0, n = data.length; i < n; i++) {
-                if (test(data[i])) {
+            for (var i = 0, n = array.length; i < n; i++) {
+                if (test(array[i])) {
 
                     if (j >= from && j <= to) {
 
@@ -1599,8 +1569,8 @@ Collection.prototype = {
 
             //根据条件查询
             var results = [];
-            for (var i = 0, n = data.length; i < n; i++) {
-                if (test(data[i])) {
+            for (var i = 0, n = array.length; i < n; i++) {
+                if (test(array[i])) {
 
                     results.push(next ? this[i]._(next) : this[i]);
                 }
@@ -1611,8 +1581,8 @@ Collection.prototype = {
 
             //根据条件查询，并返回第n个结果
             var j = 0;
-            for (var i = 0, n = data.length; i < n; i++) {
-                if (test(data[i])) {
+            for (var i = 0, n = array.length; i < n; i++) {
+                if (test(array[i])) {
                     if (j === index) {
                         return next ? this[i]._(next) : this[i];
                     }
@@ -1623,16 +1593,44 @@ Collection.prototype = {
         }
     },
 
-    set: function (data) {
+    size: function () {
+        return this.array.length;
+    },
 
-        if (!data || data.length == 0) {
+    map: function (fn) {
+        return util.map(this.array, fn);
+    },
+
+    indexOf: function (key, val) {
+        return key instanceof Model ? Array.prototype.indexOf.call(this, key) :
+            util.indexOf(this.array, key, val);
+    },
+
+    lastIndexOf: function (key, val) {
+        return key instanceof Model ? Array.prototype.lastIndexOf.call(this, key) :
+            util.lastIndexOf(this.array, key, val);
+    },
+
+    get: function (i) {
+        if (i == undefined) return this.array;
+
+        return this[i].get();
+    },
+
+    toJSON: function () {
+        return extend(true, [], this.array);
+    },
+
+    set: function (array) {
+
+        if (!array || array.length == 0) {
             this.clear();
 
         } else {
             var modelsLen = this.length;
 
-            if (data.length < modelsLen) {
-                this.splice(data.length, modelsLen - data.length)
+            if (array.length < modelsLen) {
+                this.splice(array.length, modelsLen - array.length)
             }
 
             var i = 0;
@@ -1640,7 +1638,7 @@ Collection.prototype = {
             var item;
 
             this.each(function (model) {
-                item = data[i];
+                item = array[i];
 
                 if (item instanceof Model) {
 
@@ -1652,7 +1650,7 @@ Collection.prototype = {
                         linkModels(this, item, this.key + '^child');
 
                         this[i] = item;
-                        this.data[i] = item.data;
+                        this.array[i] = item.array;
                     }
 
                 } else {
@@ -1665,7 +1663,7 @@ Collection.prototype = {
                 i++;
             });
 
-            this.add(i == 0 ? data : data.slice(i, data.length));
+            this.add(i == 0 ? array : array.slice(i, array.length));
 
             if (!this.changed && hasChange) {
                 changedAndUpdateViewNextTick(this);
@@ -1675,19 +1673,19 @@ Collection.prototype = {
     },
 
 
-    add: function (data) {
+    add: function (array) {
         var model;
-        var dataIsArray = isArray(data);
+        var dataIsArray = isArray(array);
 
         if (!dataIsArray) {
-            data = [data];
+            array = [array];
         }
-        var dataLen = data.length;
+        var dataLen = array.length;
         var results = [];
 
         if (dataLen) {
             for (var i = 0; i < dataLen; i++) {
-                var dataItem = data[i];
+                var dataItem = array[i];
 
                 if (dataItem instanceof Model) {
 
@@ -1698,7 +1696,7 @@ Collection.prototype = {
                 }
 
                 this[this.length++] = model;
-                this.data.push(model.data);
+                this.array.push(model.attributes);
 
                 results.push(model);
             }
@@ -1758,7 +1756,7 @@ Collection.prototype = {
         var result;
 
         for (var i = length - 1; i >= 0; i--) {
-            item = this.data[i];
+            item = this.array[i];
             exists = false;
 
             for (var j = 0; j < n; j++) {
@@ -1795,10 +1793,10 @@ Collection.prototype = {
         return this;
     },
 
-    updateBy: function (attr, val, data) {
-        var array = this.data;
+    updateBy: function (attribute, val, data) {
+        var array = this.array;
         for (var i = 0; i < array.length; i++) {
-            if (array[i][attr] === val) {
+            if (array[i][attribute] === val) {
                 this[i].set(data);
             }
         }
@@ -1831,7 +1829,7 @@ Collection.prototype = {
 
             Array.prototype.splice.call(this, count, 0, model)
 
-            this.data.splice(count, 0, model.data);
+            this.array.splice(count, 0, model.arributes);
         }
 
         changedAndUpdateViewNextTick(this);
@@ -1850,7 +1848,7 @@ Collection.prototype = {
             });
         }
 
-        this.data.splice(start, count);
+        this.array.splice(start, count);
 
         if (data)
             this.insert(start, data);
@@ -1877,9 +1875,9 @@ Collection.prototype = {
         } else fn = key;
 
         for (var i = this.length - 1; i >= 0; i--) {
-            if (fn.call(this, this.data[i], i)) {
+            if (fn.call(this, this.array[i], i)) {
                 Array.prototype.splice.call(this, i, 1);
-                this.data.splice(i, 1);
+                this.array.splice(i, 1);
             }
         }
 
@@ -1889,11 +1887,11 @@ Collection.prototype = {
     },
 
     clear: function () {
-        if (this.length == 0 && this.data.length == 0) return;
+        if (this.length == 0 && this.array.length == 0) return;
         for (var i = 0; i < this.length; i++) {
             delete this[i];
         }
-        this.length = this.data.length = 0;
+        this.length = this.array.length = 0;
 
         changedAndUpdateViewNextTick(this);
 
@@ -1921,7 +1919,7 @@ Collection.prototype = {
         } else fn = key;
 
         for (var i = 0; i < this.length; i++) {
-            if (fn.call(this, this.data[i], i)) {
+            if (fn.call(this, this.array[i], i)) {
                 return this[i];
             }
         }
@@ -1929,7 +1927,7 @@ Collection.prototype = {
     },
 
     filter: function (key, val) {
-        return util.filter(this.data, key, val);
+        return util.filter(this.array, key, val);
     }
 }
 
@@ -2000,7 +1998,7 @@ function RepeatSource(viewModel, el, parent) {
 
     parent && parent.appendChild(this);
 
-    if (parentAlias == '$global') {
+    if (parentAlias == 'global') {
         this.isGlobal = true;
 
         attrs.shift();
@@ -2039,13 +2037,20 @@ RepeatSource.prototype.appendChild = function (child) {
     this.children.push(child);
 }
 
-var viewModelList = [];
+var viewModelCache = [];
 
-function ViewModel(el, data, children) {
-    if (el !== false) viewModelList.push(this);
 
-    if ((typeof data === 'undefined' || isArray(data)) && (el === undefined || el === null || $.isPlainObject(el)))
-        children = data, data = el, el = this.el;
+/**
+ * 双向绑定model
+ * @param {string|element|boolean} [template] 字符类型或dom元素时为模版
+ * @param {object} [attributes] 属性
+ * @param {array} children 字节点列表
+ */
+function ViewModel(template, attributes, children) {
+    if (template !== false) viewModelCache.push(this);
+
+    if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
+        children = attributes, attributes = template, template = this.el;
 
     this.children = children ? [].concat(children) : [];
 
@@ -2055,10 +2060,11 @@ function ViewModel(el, data, children) {
     this.cid = util.guid();
     this.snModelKey = 'sn-' + this.cid + 'model';
 
-    this.data = $.extend({}, this.defaultData, data);
+    this.attributes = extend({}, this.attributes, attributes);
+
+    this.repeats = {};
 
     this._model = {};
-    this.repeats = {};
     this._expressions = {
         length: 0
     };
@@ -2066,14 +2072,16 @@ function ViewModel(el, data, children) {
     this.refs = {};
     this.root = this;
 
-    el && this.bind(el);
+    template && this.bind(template);
 
-    this.set(this.data);
+    this.set(this.attributes);
 
-    this.initialize.call(this, data);
+    this.initialize.call(this, attributes);
 }
 
 var ViewModelProto = {
+    initialize: util.noop,
+
     //事件处理
     _handleEvent: function (e) {
         if (e.type == TRANSITION_END && e.target != e.currentTarget) {
@@ -2098,8 +2106,6 @@ var ViewModelProto = {
             return res;
         }
     },
-
-    initialize: util.noop,
 
     dataOfElement: function (el, modelName, value) {
         var attrs = modelName.split('.');
@@ -2272,9 +2278,9 @@ var ViewModelProto = {
             this.$el.off(eventName, attr, this._handleEvent);
         }
 
-        for (var i = 0, len = viewModelList.length; i < len; i++) {
-            if (viewModelList[i] == this) {
-                viewModelList.splice(i, 1);
+        for (var i = 0, len = viewModelCache.length; i < len; i++) {
+            if (viewModelCache[i] == this) {
+                viewModelCache.splice(i, 1);
                 break;
             }
         }
@@ -2302,11 +2308,11 @@ Event.mixin(ViewModel);
 ViewModel.extend = util.extend;
 
 
-var global = new ViewModel;
+var global = new ViewModel();
 
 global._render = function () {
 
-    viewModelList.forEach(function (viewModel) {
+    viewModelCache.forEach(function (viewModel) {
         var refs = {};
 
         eachElement(viewModel.$el, function (el) {
@@ -2328,28 +2334,33 @@ global._render = function () {
     global._nextTick = null;
 };
 
-ViewModel.prototype.$global = global;
+ViewModel.prototype.global = global;
 
 
-exports.global = exports.Global = global;
+exports.global = global;
 
 exports.ViewModel = exports.Model = ViewModel;
 
 exports.createModel = function (props) {
-    var model = Object.assign(new ViewModel, props);
+    var attributes;
+    if (props.attributes) {
+        attributes = props.attributes;
+        delete attributes;
+    }
 
-    if (props && props.defaultData) model.set(props.defaultData);
-
-    return model;
+    return Object.assign(new ViewModel(attributes), props);
 }
 
 
 exports.Collection = Collection;
 
 exports.createCollection = function (props) {
-    var model = Object.assign(new Collection, props);
 
-    if (props && props.defaultData) model.set(props.defaultData);
+    var array;
+    if (props.array) {
+        array = props.array;
+        delete array;
+    }
 
-    return model;
+    return Object.assign(new Collection(array), props);
 }
