@@ -248,6 +248,9 @@ var touchEnd = function (e) {
     e.cancelTap === undefined && (e.cancelTap = el.__isScroll || touchStartEvent.isHoldScroll);
 
     if ((el.__isScroll && !el.__isStop) || touchStartEvent.isHoldScroll) {
+        // 移除长按监听
+        document.cancelLongTap && document.cancelLongTap();
+
         e.stopPropagation();
         // 阻止click事件
         e.preventDefault();

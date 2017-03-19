@@ -7,8 +7,7 @@ var ArrayProto = Array.prototype,
     android = ua.match(/(Android);?[\s\/]+([\d.]+)?/),
     isAndroid = !!android,
     guid = 0,
-    osVersion,
-    nativeKeys = Object.keys
+    osVersion;
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -243,15 +242,17 @@ var util = {
         return this.randomString(36);
     },
 
-    isFalse: function (value) {
-        return !value || ($.isArray(value) && !value.length) || (typeof value == 'object' && util.isEmptyObject(value));
+    isNo: function (value) {
+        return !value || (Array.isArray(value) && !value.length) || (typeof value == 'object' && util.isEmptyObject(value));
     },
 
-    isTrue: function (value) {
-        return !this.isFalse(value);
+    isYes: function (value) {
+        return !this.isNo(value);
     },
 
     isEmptyObject: function (obj) {
+        if (!obj) return false;
+
         for (var name in obj) {
             return false;
         }
@@ -266,11 +267,11 @@ var util = {
         return equals(a, b, true);
     },
 
-    keys: function (obj) {
-        if (nativeKeys) return nativeKeys(obj);
+    keys: Object.keys ? Object.keys : function (obj) {
         var keys = [];
         for (var key in obj)
             if (hasOwnProperty.call(obj, key)) keys.push(key);
+
         return keys;
     },
 
@@ -628,12 +629,8 @@ var util = {
         return a.substr(a.length - (n || 2));
     },
 
-    formatMoney: function (number) {
-        return (number + '').replace(/(\d{3})+(\.|$)/, function (match, a) {
-            return match.replace(/\d{3}/g, function (a) {
-                return ',' + a
-            })
-        }).replace(/^,/, '');
+    commafy: function (number) {
+        return (number + '').replace(/\d{1,3}(?=(\d{3})+(\.\d+)?$)/g, '$&,')
     },
 
     value: function (data, names) {
@@ -869,7 +866,15 @@ var util = {
     },
     noop: function () { },
 
-    circlePoint: function (x0, y0, r, a) {
+    /**
+     * 获取圆上的点坐标
+     * 
+     * @param {number} x0 原点x
+     * @param {number} y0 原点y
+     * @param {number} r 半径
+     * @param {number} a 角度
+     */
+    pointOnCircle: function (x0, y0, r, a) {
         return {
             x: x0 + r * Math.cos(a * Math.PI / 180),
             y: y0 + r * Math.sin(a * Math.PI / 180)

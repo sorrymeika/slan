@@ -261,7 +261,7 @@ var Cart = Model.extend({
 
 	getTotal: function (bag_amount, coupon, Points, freecouponcode) {
 
-		if (util.isTrue(this.data.data_baglist) || util.isTrue(this.data.data_package)) {
+		if (util.isYes(this.data.data_baglist) || util.isYes(this.data.data_package)) {
 
 			var couponPrice = coupon && coupon.VCA_DEDUCT_AMOUNT ? coupon.VCA_DEDUCT_AMOUNT : 0;
 			var total;
@@ -435,7 +435,7 @@ var Cart = Model.extend({
 				<i class="js_delete sp_cart__delete" data-wacid="{ppg.SPB_WAC_ID}" data-groupid="{ppg.SPB_GROUP}" data-ppgid="{ppg.PPG_ID}" sn-tap="this.del()"></i>
 			</div>
 
-			<div class="my_nodata" sn-if="{!loading&&util.isFalse(data_baglist)&&util.isFalse(data_package)}">
+			<div class="my_nodata" sn-if="{!loading&&util.isNo(data_baglist)&&util.isNo(data_package)}">
 				<div class="icon"></div>
 				<div class="text">您的购物车内还没有商品</div>
 				<div class="btn" data-back="/?tab=0">去逛逛吧</div>

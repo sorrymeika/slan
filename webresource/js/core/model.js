@@ -921,7 +921,7 @@
                             el.innerHTML = val;
                             break;
                         case 'sn-if':
-                            if (util.isFalse(val)) {
+                            if (util.isNo(val)) {
                                 if (el.parentNode) {
                                     if (!el.snReplacement) {
                                         el.snReplacement = document.createComment('if');
@@ -938,7 +938,7 @@
                             break;
                         case 'display':
                         case 'sn-display':
-                            el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                            el.style.display = util.isNo(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                             break;
                         case 'sn-style':
                         case 'style':

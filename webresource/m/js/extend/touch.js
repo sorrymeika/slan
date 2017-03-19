@@ -107,7 +107,7 @@
                 }
 
                 // normal tap
-                else if ('last' in touch) {
+                else if ('last' in touch && Date.now() - touch.last < 300) {
                     forClick = {
                         pageX: changedTouch.pageX,
                         pageY: changedTouch.pageY,

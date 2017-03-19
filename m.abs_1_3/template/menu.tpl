@@ -7,7 +7,7 @@
             </h1>
             <h2 sn-binding="html:user.BirthDay|date:'yyyy/MM/dd'"></h2>
         </div>
-        <div class="menu_username" sn-binding="display:user|isFalse" style="display:none">
+        <div class="menu_username" sn-binding="display:user|isNo" style="display:none">
             <div class="btn_mid">登录</div>
         </div>
     </div>

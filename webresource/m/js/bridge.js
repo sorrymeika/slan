@@ -369,9 +369,9 @@ define(function (require, exports, module) {
             alert('slapp://' + JSON.stringify(data));
 
         else {
-            console.log(data);
 
             var cb = hybridFunctions[data.callback];
+
             switch (data.method) {
                 case 'system':
                     switch (data.params.type) {
@@ -380,6 +380,27 @@ define(function (require, exports, module) {
                             break;
                     }
                     break;
+
+                case 'image':
+                    switch (data.params.type) {
+                        case "camera":
+                        case "photo":
+                            cb({
+                                id: 0
+                            });
+                            break;
+                        case "upload":
+                            cb({
+                                success: true,
+                                data: {
+                                    msg_id: 1,
+                                    content: '2016/11/08/204e3e8de3af42049b4f5308b4a3aa29.png'
+                                }
+                            });
+                            break;
+                    }
+                    break;
+
                 case 'getDeviceToken':
                     cb('46e68c4b71854f9943edaac95a9d1552a3352c91');
                     break;

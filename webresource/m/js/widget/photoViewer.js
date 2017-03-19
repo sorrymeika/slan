@@ -6,7 +6,7 @@ var util = require('util');
 module.exports = Model.extend({
     el: (<div class="cp_photoviewer" sn-tap="this.resetSize()" sn-touchstart="this.touchStart()" sn-touchmove="this.touchMove()" sn-touchend="this.touchEnd()">
         <ul class="cp_photoviewer__con" ref="content" style="-webkit-transform:translate({x}px,0px);width:{images.length*100}%">
-            <li class="cp_photoviewer__item" sn-repeat="item in images"><div class="cp_photoviewer__item_con" ref="items"><p ref="bds"><img style="-webkit-transform:translate(-50%,-50%) rotate({item.r}deg) scale({item.s});-webkit-transform-origin: 50% 50%;" sn-src="{item.src}" ref="images" /></p></div></li>
+            <li class="cp_photoviewer__item" sn-repeat="item in images"><div class="cp_photoviewer__item_con" ref="items"><p ref="bds"><img sn-long-tap="this.onLongTapImage(item)" style="-webkit-transform:translate(-50%,-50%) rotate({item.r}deg) scale({item.s});-webkit-transform-origin: 50% 50%;" sn-src="{item.src}" ref="images" /></p></div></li>
         </ul>
     </div>),
     attributes: {
@@ -68,6 +68,14 @@ module.exports = Model.extend({
             x: -1 * this.attributes.index * (this.$el.offsetWidth || window.innerWidth)
         })
 
+    },
+
+    onLongTapImage: function (item, e) {
+        this.trigger('imagelongtap', item, e.currentTarget);
+    },
+
+    observeImageLongTap: function (fn) {
+        this.on('imagelongtap', fn);
     },
 
     viewDidUpdate: function () {
@@ -155,12 +163,9 @@ module.exports = Model.extend({
 
         this.originR = this.attributes.r;
 
-        console.log(this.attributes);
-
-        var index = index;
+        var index = this.attributes.index;
 
         this.currentItem = this._('images[' + index + ']');
-        console.log(this.currentItem);
         this.originR = this.currentItem.get("r");
         this.originS = this.currentItem.get("s");
 

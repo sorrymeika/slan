@@ -663,7 +663,7 @@ module.exports = Activity.extend({
             vipName: levels[level],
             levelAmounts: levelAmounts,
             energyPercent: percent * 100 + '%',
-            ucCardAmounts: util.formatMoney(total) + (total > 50000 ? '' : ('/' + util.formatMoney(levelAmounts)))
+            ucCardAmounts: util.commafy(total) + (total > 50000 ? '' : ('/' + util.commafy(levelAmounts)))
         });
 
         if (total != self.model.data.energy) {

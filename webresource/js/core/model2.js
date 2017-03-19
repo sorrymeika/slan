@@ -31,6 +31,7 @@ var EVENTS = {
     focus: 'focus',
     blur: 'blur'
 };
+
 var GLOBAL_VARIABLES = {
     'new': true,
     'this': true,
@@ -52,7 +53,6 @@ var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rset = /([\w$]+(?:\.[\w$]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[\w$][!=]==?|[^;=])+?)(?=;|,|\)|$)/g;
 var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
 var rSnAttr = /^sn-/;
-
 
 // console.log('t$y_p0e=type_$==1?2:1;alert()'.match(rset))
 // console.log('!=><+-|?([]*)'.match(/[!=><?\s:(),%&|+*\-\/\[\]]+/));
@@ -442,10 +442,11 @@ function updateRepeatElement(viewModel, el) {
     if (orderBy) {
 
         if (typeof orderBy == 'string') {
+            // 排序方法
             list.sort(viewModel[orderBy]);
 
         } else {
-            //@orderByCode=['a',true,someFunctionId,false]
+            // orderBy=['a',true,someFunctionId,false]
             orderBy = orderBy.map(function (item) {
                 if (typeof item === 'number') {
 
@@ -453,7 +454,6 @@ function updateRepeatElement(viewModel, el) {
                 }
                 return item;
             });
-
 
             list.sort(function (am, bm) {
                 var ret = 0;
@@ -487,7 +487,7 @@ function updateRepeatElement(viewModel, el) {
         repeatSource.loopIndexAlias && (elem.snData[repeatSource.loopIndexAlias] = index);
     });
 
-    //移除过滤掉的element
+    // 移除过滤掉的element
     for (var i = 0; i < elementsLength; i++) {
         if (!elemContain[i]) {
             var elem = elements[i];
@@ -646,7 +646,7 @@ function updateNodeAttributes(viewModel, el, attribute) {
             case "sn-else-if":
                 var val = executeFunction(viewModel, attrsBinding[key], data);
 
-                if (util.isFalse(val)) {
+                if (util.isNo(val)) {
                     if (el.parentNode) {
                         el.parentNode.removeChild(el);
                     }
@@ -709,10 +709,10 @@ function updateNodeAttributes(viewModel, el, attribute) {
                 break;
 
             case 'sn-visible':
-                el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                el.style.display = util.isNo(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                 break;
             case 'display':
-                el.style.display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                el.style.display = util.isNo(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
                 break;
             case 'sn-display':
                 var $el = $(el);
@@ -721,7 +721,7 @@ function updateNodeAttributes(viewModel, el, attribute) {
                     isInitDisplay = false;
                     $el.addClass('sn-display')[0].clientHeight;
                 }
-                var display = util.isFalse(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                var display = util.isNo(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
 
                 if (display == 'none') {
                     if (!$el.hasClass('sn-display-hide')) {
@@ -1331,7 +1331,6 @@ var ModelProto = {
             coverChild = false,
             root = this.root;
 
-
         if (typeof cover != "boolean")
             val = key, key = cover, cover = false;
 
@@ -1775,6 +1774,7 @@ Collection.prototype = {
                 }
 
                 this[this.length++] = model;
+
                 this.array.push(model.attributes);
 
                 results.push(model);
@@ -1851,6 +1851,7 @@ Collection.prototype = {
         var n = arr.length;
         var result;
 
+
         for (var i = length - 1; i >= 0; i--) {
             item = this.array[i];
             exists = false;
@@ -1891,6 +1892,7 @@ Collection.prototype = {
 
     // 已有项将被增量覆盖，不在arr中的项将被删除
     updateTo: function (arr, primaryKeyOrFunc) {
+
         return this.update(arr, primaryKeyOrFunc, true);
     },
 
@@ -2143,9 +2145,9 @@ var viewModelCache = [];
 
 /**
  * 双向绑定model
- * @param {string|element|boolean} [template] 字符类型或dom元素时为模版
- * @param {object} [attributes] 属性
- * @param {array} children 字节点列表
+ * @param {String|Element|Boolean} [template] 字符类型或dom元素时为模版
+ * @param {Object} [attributes] 属性
+ * @param {Array} children 字节点列表
  */
 function ViewModel(template, attributes, children) {
     if (template !== false) viewModelCache.push(this);
@@ -2443,10 +2445,11 @@ exports.global = global;
 exports.ViewModel = exports.Model = ViewModel;
 
 exports.createModel = function (props) {
+
     var attributes;
     if (props.attributes) {
         attributes = props.attributes;
-        delete attributes;
+        delete props.attributes;
     }
 
     return Object.assign(new ViewModel(attributes), props);
@@ -2460,7 +2463,7 @@ exports.createCollection = function (props) {
     var array;
     if (props.array) {
         array = props.array;
-        delete array;
+        delete props.array;
     }
 
     return Object.assign(new Collection(array), props);
