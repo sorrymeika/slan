@@ -1572,6 +1572,13 @@ Collection.prototype = {
      * 
      * 查询所有符合的:
      * collection._("[attr='val']")
+     * 数据类型也相同:[attr=='val']
+     * 以val开头:[attr^='val']
+     * 以val结尾:[attr$='val']
+     * 包含val，区分大小写:[attr*='val']
+     * 包含val，不区分大小写:[attr~='val']
+     * 或:[attr='val'|attr=1,attr='val'|attr=1]
+     * 且:[attr='val'&attr=1,attr='val'|attr=1]
      * 
      * 查询并返回第n个:
      * collection._("[attr='val'][n]")
@@ -1582,10 +1589,10 @@ Collection.prototype = {
      * 结果小于n个时则添加:
      * collection._("[attr='val'][+n]")
      * 
-     * 删除全部搜索到的，并返回被删除的
+     * 删除全部搜索到的，并返回被删除的:
      * collection._("[attr='val'][-]")
      * 
-     * 删除搜索结果中第n个，并返回被删除的
+     * 删除搜索结果中第n个，并返回被删除的:
      * collection._("[attr='val'][-n]")
      * 
      * @param {string} search 查询条件
@@ -1615,7 +1622,7 @@ Collection.prototype = {
         var test = util.query(query);
         var array = this.array;
 
-        //移除操作
+        // 移除操作
         if (operation == '-') {
             var j = 0;
             var results = [];
@@ -1639,7 +1646,7 @@ Collection.prototype = {
 
         } else if (index === undefined) {
 
-            //根据条件查询
+            // 根据条件查询
             var results = [];
             for (var i = 0, n = array.length; i < n; i++) {
                 if (test(array[i])) {
@@ -1651,7 +1658,7 @@ Collection.prototype = {
 
         } else {
 
-            //根据条件查询，并返回第n个结果
+            // 根据条件查询，并返回第n个结果
             var j = 0;
             for (var i = 0, n = array.length; i < n; i++) {
                 if (test(array[i])) {
@@ -1778,22 +1785,39 @@ Collection.prototype = {
         return dataIsArray ? results : results[0];
     },
 
-    //已有项将被增量覆盖，不在arr中的项将被删除
-    updateTo: function (arr, primaryKeyOrFunc) {
-        return this.update(arr, primaryKeyOrFunc, true);
+    /**
+     * 根据 Model 的 attributeName 更新Model
+     * collection.updateBy('id', 123, { name: '更新掉name' })
+     * 
+     * @param {String} attributeName 属性名
+     * @param {any} val 属性值
+     * @param {Object} data
+     * 
+     * @return {Collection} self
+     */
+    updateBy: function (attributeName, val, data) {
+        var array = this.array;
+        for (var i = 0; i < array.length; i++) {
+            if (array[i][attributeName] === val) {
+                this[i].set(data);
+            }
+        }
+        return this;
     },
 
-    //只更新collection中匹配到的
-    updateMatched: function (arr, primaryKeyOrFunc) {
-        return this.update(arr, primaryKeyOrFunc, false);
-    },
-
-    //增量更新
-    deltaUpdate: function (arr, primaryKeyOrFunc) {
-        return this.update(arr, primaryKeyOrFunc);
-    },
-
-    //@updateType=undefined:collection中存在既覆盖，不存在既添加|true:根据arr更新，不在arr中的项将被删除|false:只更新collection中存在的
+    /**
+     * 更新 collection 中的 model
+     * 
+     * updateType=undefined:collection中存在既覆盖，不存在既添加
+     * updateType=true:根据arr更新，不在arr中的项将被删除
+     * updateType=false:只更新collection中存在的
+     * 
+     * @param {array} arr 需要更新的数组
+     * @param {string|function} primaryKey 唯一健 或 (a, b)=>boolean
+     * @param {boolean|undefined} [updateType] 更新类型
+     * 
+     * @return {Collection} self
+     */
     update: function (arr, primaryKey, updateType) {
         if (typeof arr === 'boolean')
             arr = [arr, primaryKey, updateType], updateType = arr[0], primaryKey = arr[2], arr = arr[1];
@@ -1865,14 +1889,14 @@ Collection.prototype = {
         return this;
     },
 
-    updateBy: function (attribute, val, data) {
-        var array = this.array;
-        for (var i = 0; i < array.length; i++) {
-            if (array[i][attribute] === val) {
-                this[i].set(data);
-            }
-        }
-        return this;
+    // 已有项将被增量覆盖，不在arr中的项将被删除
+    updateTo: function (arr, primaryKeyOrFunc) {
+        return this.update(arr, primaryKeyOrFunc, true);
+    },
+
+    // 只更新collection中匹配到的
+    updateMatches: function (arr, primaryKeyOrFunc) {
+        return this.update(arr, primaryKeyOrFunc, false);
     },
 
     unshift: function (data) {
@@ -1930,7 +1954,12 @@ Collection.prototype = {
         return spliced;
     },
 
-    //@[key,val]|function(){return true|false;}|Model
+    /**
+     * 移除Model
+     * 
+     * @param {String|Model|Function} key 删除条件，(arrayItem)=>boolean
+     * @param {any} val
+     */
     remove: function (key, val) {
         var fn;
 
