@@ -46,14 +46,17 @@ var GLOBAL_VARIABLES = {
     'document': true
 };
 
-var rfilter = /\s*\|\s*([a-zA-Z_0-9]+)((?:\s*(?:\:|;)\s*\({0,1}\s*([a-zA-Z_0-9\.-]+|'(?:\\'|[^'])*')\){0,1})*)/g;
 var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
-var rrepeat = /([$a-zA-Z_0-9]+)(?:\s*,(\s*[a-zA-Z_0-9]+)){0,1}\s+in\s+([$a-zA-Z_0-9]+(?:\.[$a-zA-Z_0-9\(\,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
+var rrepeat = /([\w$]+)(?:\s*,(\s*[\w$]+)){0,1}\s+in\s+([\w$]+(?:\.[\w$\(,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
-var rvar = /(?:\{|,)\s*[$a-zA-Z0-9]+\s*\:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+[_,a-zA-Z0-9]+\s*\=|(^|[\!\=\>\<\?\s\:\(\),\%&\|\+\-\*\/\[\]]+)([\$a-zA-Z_][\$a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*(?![a-zA-Z_0-9]*\())/g;
-var rset = /([a-zA-Z_0-9]+(?:\.[a-zA-Z_0-9]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[^;=])+?)(?=\;|\,|\)|$)/g;
+var rset = /([\w$]+(?:\.[\w$]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[\w$][!=]==?|[^;=])+?)(?=;|,|\)|$)/g;
 var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
 var rSnAttr = /^sn-/;
+
+
+// console.log('t$y_p0e=type_$==1?2:1;alert()'.match(rset))
+// console.log('!=><+-|?([]*)'.match(/[!=><?\s:(),%&|+*\-\/\[\]]+/));
+// console.log('!=:><+-|?([]*)'.match(/:/))
 
 //var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|[^\)])*)\)/g;
 //   /(?:\((?:\(.*?\)|.)*?\)|.)/
@@ -87,7 +90,7 @@ function testRegExp(regExp, val) {
     return regExp.lastIndex != 0 && (regExp.lastIndex = 0) || regExp.test(val);
 }
 
-function valueCode(str, variables) {
+function valueExpression(str, variables) {
     var arr = str.split('.');
     var alias = arr[0];
     var result = [];
@@ -741,9 +744,10 @@ function updateNodeAttributes(viewModel, el, attribute) {
                     $el.removeClass('sn-display-hide');
                 }
                 break;
-            case 'sn-style':
+            case 'sn-css':
                 el.style.cssText += val;
                 break;
+            case 'sn-style':
             case 'style':
                 el.style.cssText = val;
                 break;
@@ -757,7 +761,7 @@ function updateNodeAttributes(viewModel, el, attribute) {
                 break;
             case 'sn-src':
                 if (el.getAttribute('sn-' + viewModel.cid + 'load') || el.getAttribute('sn-' + viewModel.cid + 'error'))
-                    $(el).one('load error', viewModel._handleEvent);
+                    $(el).one('load error', viewModel._handleSnEvent);
 
                 if (el.src) {
                     el.src = val;
@@ -830,6 +834,7 @@ function bindNodeAttributes(viewModel, el) {
                 case 'sn-html':
                 case 'sn-display':
                 case 'sn-style':
+                case 'sn-css':
                 case "sn-data":
                     if (val.indexOf("{") == -1 || val.indexOf("}") == -1) {
                         val = '{' + val + '}';
@@ -881,11 +886,11 @@ function bindNodeAttributes(viewModel, el) {
 
                                 return $1 + $2 + ($2 ? ',e)' : 'e)');
                             })
-                                /*.replace(rset, function (match, $1, $2) {
-                                                                    //test
-                                                                    return match;
+                                // .replace(rset, function (match, $1, $2) {
+                                //     console.log(match, $1, $2);
+                                //     return match;
 
-                                                                })*/
+                                // })
                                 .replace(rset, 'this.dataOfElement(e.currentTarget,"$1",$2)');
 
                             var fid = createFunction(viewModel, '{' + content + '}');
@@ -958,9 +963,9 @@ function bindElement(viewModel, $el) {
         var eventName = EVENTS[key];
         var attr = '[sn-' + viewModel.cid + eventName + ']';
 
-        $el.on(eventName, attr, viewModel._handleEvent)
+        $el.on(eventName, attr, viewModel._handleSnEvent)
             .filter(attr)
-            .on(eventName, viewModel._handleEvent);
+            .on(eventName, viewModel._handleSnEvent);
     }
 
     var fns = new Function('return [' + viewModel._codes.join(',') + ']')();
@@ -1041,6 +1046,26 @@ function createFunction(viewModel, expression) {
     return ret;
 }
 
+var EXPRESSION_RE = /(?:\{|,)\s*[\w$]+\s*:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+('(?:\\'|[^'])*'|[^;]+);|(^|[!=><?\s:(),%&|+*\-\/\[\]]+)([$a-zA-Z_][\w$]*(?:\.[\w$]+)*(?![\w$]*\())/g;
+
+var VARS_RE = /([\w$]+)\s*(?:=(?:'(?:\\'|[^'])*'|[^;,]+))?/g;
+
+// 测试代码
+// console.log('{var a=2,c=2;b=4,t$y_p0e=type_$==1?2:1}'.match(EXPRESSION_RE))
+// var match = 'a=34,c';
+// var m;
+// while (m = VARS_RE.exec(match)) {
+//     console.log(m);
+// }
+// console.log(genFunction('{var a=2,c;b=4,t$y_p0e=type_$==1?2:1}').code)
+
+/**
+ * 将字符串转为function
+ * 
+ * @param {string} expression 转化为function的表达式，如：
+ *      {user.name+user.age} 或 
+ *      {var a=2,c=2,b;b=name+tt,t$y_p0e=type_$==1?2:1}
+ */
 function genFunction(expression) {
     if (!testRegExp(rmatch, expression)) return;
 
@@ -1055,25 +1080,26 @@ function genFunction(expression) {
                 return '\'+(' +
                     exp.replace(/\\\\/g, '\\')
                         .replace(/\\'/g, '\'')
-                        .replace(rvar, function (match, prefix, name) {
-                            if (!name) {
-                                if (match.indexOf('var ') == 0) {
-                                    return match.replace(/var\s+([^\=]+)\=/, function (match, $0) {
-                                        variables = (variables || []).concat($0.split(','));
-                                        return $0 + '=';
-                                    });
-                                }
-                                return match;
-                            }
+                        .replace(EXPRESSION_RE, function (match, vars, prefix, name) {
 
-                            if (name.indexOf("global.") == 0) {
+                            if (vars) {
+                                var m;
+                                while (m = VARS_RE.exec(vars)) {
+                                    (variables || (variables = [])).push(m[1]);
+                                }
+                                return vars + ',';
+
+                            } else if (!name) {
+                                return match;
+
+                            } else if (name.indexOf("global.") == 0) {
                                 isGlobal = true;
                             }
-                            return prefix + valueCode(name, variables);
+                            return prefix + valueExpression(name, variables);
                         }) +
                     ')+\'';
             }) +
-        '\';}catch(e){console.error(e);return \'\';}';
+        '\';}catch(e){console.error(e);console.log($data,arguments.callee.toString());return \'\';}';
 
     content = content.replace('return \'\'+', 'return ').replace(/\+\'\'/g, '')
 
@@ -1089,7 +1115,7 @@ function genFunction(expression) {
 }
 
 
-function syncParentData(model) {
+function updateParentAttrTo(model) {
     var parent = model.parent;
 
     if (!parent) {
@@ -1105,7 +1131,7 @@ function syncParentData(model) {
     }
 }
 
-function setModelByKeys(model, cover, keys, val) {
+function setModelAttrOnKeys(model, cover, keys, val) {
     var lastKey = keys.pop();
     var tmp;
 
@@ -1206,8 +1232,29 @@ var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-
 
 var ModelProto = {
 
-    //@key=someattr.collection[attr^='somevalue'|1=1,att2=2]
-    // console.log(model._('c[id=222][0].options[text~="aa"&value="1"][0]'))
+    /**
+     * 搜索子Model/Collection，
+     * 支持多种搜索条件
+     * 
+     * 搜索子Model:
+     * model._('user') 或 model._('user.address')
+     * 
+     * 根据查询条件查找子Collection下的Model:
+     * model._('collection[id=222][0].options[text~="aa"&value="1"][0]')
+     * model._('collection[id=222][0].options[text~="aa"&value="1",attr^='somevalue'|attr=1][0]')
+     * 
+     * 且条件:
+     * model._("collection[attr='somevalue'&att2=2][1].aaa[333]")
+     * 
+     * 或条件:
+     * model._("collection[attr^='somevalue'|attr=1]")
+     * 
+     * 不存在时添加，不可用模糊搜索:
+     * model._("collection[attr='somevalue',attr2=1][+]")
+     * 
+     * @param {string} search 搜索条件
+     * @param {any} [def] collection[attr='val'][+]时的默认值
+     */
     _: function (search, def) {
 
         var attr;
@@ -1305,7 +1352,7 @@ var ModelProto = {
             if (this.attributes != val) {
                 this.attributes = val;
 
-                syncParentData(this);
+                updateParentAttrTo(this);
 
                 changedAndUpdateViewNextTick(this);
             }
@@ -1315,7 +1362,7 @@ var ModelProto = {
             keys = isArrayKey ? key : key.split('.');
 
             if (keys.length > 1) {
-                model = setModelByKeys(this, cover, keys, val);
+                model = setModelAttrOnKeys(this, cover, keys, val);
 
                 if (model.changed) {
                     changedAndUpdateViewNextTick(this);
@@ -1329,7 +1376,7 @@ var ModelProto = {
             }
         }
         if (this.attributes === null || !$.isPlainObject(this.attributes))
-            this.attributes = {}, syncParentData(this);
+            this.attributes = {}, updateParentAttrTo(this);
 
         var data = this.attributes;
         model = this._model;
@@ -1517,10 +1564,35 @@ Collection.prototype = {
 
     length: 0,
 
-    //@search=n /*第n个*/ | "[attr='val']"/*查询所有*/ | "[attr='val'][n]"/*查询并返回第n个*/ | 
-    // "[attr='val'][+]"/*一个都不存在则添加*/ | "[attr='val'][+n]"/*结果小于n个则添加*/ |
-    // "[attr='val'][-]"/*删除全部，并返回被删除的*/ | "[attr='val'][-n]"/*删除第n个，并返回被删除的*/
-    //@def=数据不存在时默认添加的数据
+    /**
+     * 查询Collection的子Model/Collection
+     * 
+     * 第n个:
+     * collection._(1)
+     * 
+     * 查询所有符合的:
+     * collection._("[attr='val']")
+     * 
+     * 查询并返回第n个:
+     * collection._("[attr='val'][n]")
+     * 
+     * 一个都不存在则添加:
+     * collection._("[attr='val'][+]")
+     * 
+     * 结果小于n个时则添加:
+     * collection._("[attr='val'][+n]")
+     * 
+     * 删除全部搜索到的，并返回被删除的
+     * collection._("[attr='val'][-]")
+     * 
+     * 删除搜索结果中第n个，并返回被删除的
+     * collection._("[attr='val'][-n]")
+     * 
+     * @param {string} search 查询条件
+     * @param {object} [def] 数据不存在时默认添加的数据
+     * 
+     * @return {array|Model|Collection}
+     */
     _: function (search, def) {
 
         if (typeof search == 'number' || /^\d+$/.test(search))
@@ -2055,7 +2127,7 @@ function ViewModel(template, attributes, children) {
     this.children = children ? [].concat(children) : [];
 
     this._render = this._render.bind(this);
-    this._handleEvent = this._handleEvent.bind(this);
+    this._handleSnEvent = this._handleSnEvent.bind(this);
 
     this.cid = util.guid();
     this.snModelKey = 'sn-' + this.cid + 'model';
@@ -2083,7 +2155,7 @@ var ViewModelProto = {
     initialize: util.noop,
 
     //事件处理
-    _handleEvent: function (e) {
+    _handleSnEvent: function (e) {
         if (e.type == TRANSITION_END && e.target != e.currentTarget) {
             return;
         }
@@ -2275,7 +2347,7 @@ var ViewModelProto = {
             var eventName = EVENTS[key];
             var attr = '[sn-' + this.cid + eventName + ']';
 
-            this.$el.off(eventName, attr, this._handleEvent);
+            this.$el.off(eventName, attr, this._handleSnEvent);
         }
 
         for (var i = 0, len = viewModelCache.length; i < len; i++) {

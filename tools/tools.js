@@ -517,7 +517,15 @@ Tools.prototype = {
 
 Tools.compressCss = compressCss;
 Tools.compressHTML = compressHTML;
-Tools.compressJs = compressJs;
+Tools.compressJs = function (code, names) {
+    try {
+        return compressJs(code, names);
+    } catch (e) {
+
+        console.log(code);
+        console.log(e);
+    }
+};
 Tools.save = save;
 Tools.copy = copy;
 Tools.replaceDefine = replaceDefine;

@@ -1,12 +1,17 @@
-﻿var $ = require('$'),
-    util = require('util'),
-    animation = require('../core/animation'),
-    ScrollView = require('./scrollview');
+﻿var $ = require('$');
+var util = require('util');
+var animation = require('../core/animation');
+var ScrollView = require('./scrollview');
+
+var Toast = require('./toast');
+
+var iOS = util.iOS;
+var android = util.android;
 
 var _start = function (e) {
     var self = this;
 
-    if (!self.scrollView && self.parentNode.scrollTop != 0) {
+    if (!self.scrollView && self.parentNode.scrollTop !== 0) {
         self.isStop = true;
     } else {
         var point = e.touches[0],
@@ -44,7 +49,7 @@ var _move = function (e) {
 
     var scrollView = self.scrollView;
 
-    if ((scrollView ? scrollView.touch.y <= 0 : self.parentNode.scrollTop == 0) && deltaY > 0) {
+    if ((scrollView ? scrollView.touch.y <= 0 : self.parentNode.scrollTop === 0) && deltaY > 0) {
 
         self.isMoved = true;
         self.refreshAgain = true;
@@ -68,7 +73,6 @@ var _end = function (e) {
         var point = e.changedTouches[0],
             from = self.ty,
             end = from > 70 ? 50 : 0,
-            ty,
             dy = self.oy - point.pageY,
             bounce = function () {
 
@@ -77,7 +81,7 @@ var _end = function (e) {
 
                 }, 300 + dy * -1, 'cubic-bezier(.3,.78,.43,.95)', function () {
                     self.refreshAgain = false;
-                    if (!self.isLoading && end != 0) {
+                    if (!self.isLoading && end !== 0) {
                         self.isLoading = self.isDataLoading = true;
                         self.$refresh.html('<div class="dataloading"></div>');
                         self.$.triggerHandler('refresh');
@@ -119,7 +123,7 @@ var _refresh = function () {
         };
 
     self.options.refresh.call(this, complete, function (error) {
-        sl.tip(typeof error == 'string' ? error : error.msg);
+        Toast.showToast(typeof error === 'string' ? error : error.msg);
         complete();
     });
 };
@@ -129,9 +133,9 @@ var touchStartEvent = {};
 var touchStart = function (e) {
     var el = this,
         point = e.touches[0],
-        now = +new Date;
+        now = Date.now();
 
-    if (e.touches.length == 2) {
+    if (e.touches.length === 2) {
         el.__isStop = true;
         return;
     }
@@ -179,14 +183,14 @@ var touchMove = function (e) {
     el.__isMoved = true;
     el.__isScroll = true;
 
-    if (util.ios && el.$refresh && el.scrollTop < 0) {
+    if (iOS && el.$refresh && el.scrollTop < 0) {
         el.isRefresh = el.scrollTop < -70;
     }
 
     document.cancelLongTap && document.cancelLongTap();
 
     e.stopPropagation();
-    el.__timestamp = +new Date;
+    el.__timestamp = Date.now();
 };
 
 var scrollStop = function (el) {
@@ -195,7 +199,7 @@ var scrollStop = function (el) {
 
         el._stm = null;
 
-        if (!el.__params || el.__params.x != el.scrollLeft || el.__params.y != el.scrollTop) {
+        if (!el.__params || el.__params.x !== el.scrollLeft || el.__params.y !== el.scrollTop) {
 
             $(el).trigger('scrollStop', (el.__params = {
                 x: el.scrollLeft,
@@ -214,27 +218,26 @@ var scroll = function () {
     var el = this;
 
     el.__isScroll = true;
-    el.__timestamp = +new Date;
+    el.__timestamp = Date.now();
 
     if (!touchStartEvent.scrolling && !el.__isMoved) {
         touchStartEvent.isHoldScroll = el.__timestamp - touchStartEvent.startTime < 32;
         touchStartEvent.scrolling = true;
     }
-    if (el.__hasMomentum || util.android) {
+    if (el.__hasMomentum || android) {
         scrollStop(el);
     }
 };
 
 var touchEnd = function (e) {
     var el = this,
-        $el = $(el),
         pointY = e.changedTouches[0].pageY,
         dy = Math.abs(el.__lastPY - pointY);
 
     if (el.__isMoved || touchStartEvent.isHoldScroll)
         scrollStop(el);
 
-    if (util.ios && dy < 5) {
+    if (iOS && dy < 5) {
         el.__isStop = false;
         el.__hasMomentum = false;
 
@@ -244,8 +247,9 @@ var touchEnd = function (e) {
 
     e.cancelTap === undefined && (e.cancelTap = el.__isScroll || touchStartEvent.isHoldScroll);
 
-    if (el.__isScroll && !el.__isStop || touchStartEvent.isHoldScroll) {
+    if ((el.__isScroll && !el.__isStop) || touchStartEvent.isHoldScroll) {
         e.stopPropagation();
+        // 阻止click事件
         e.preventDefault();
     }
     el.__isScroll = false;
@@ -260,18 +264,17 @@ var touchEnd = function (e) {
 function Scroll(el, options) {
 
     var $el = $(el);
-    var self = this;
 
     el.__timestamp = 0;
 
-    if (util.ios) {
+    if (iOS) {
         $el.css({
             '-webkit-overflow-scrolling': 'touch',
             overflowY: options.vScroll ? 'scroll' : '',
             overflowX: options.hScroll ? 'scroll' : ''
         })
 
-    } else if (util.android) {
+    } else if (android) {
         $el.css({
             overflowY: options.vScroll ? 'auto' : '',
             overflowX: options.hScroll ? 'auto' : ''
@@ -350,13 +353,13 @@ ScrollBindResult.prototype = {
     },
 
     get: function (el) {
-        if (typeof el === 'number') return this.items[i];
+        if (typeof el === 'number') return this.items[el];
 
-        return util.first(this.items, typeof el == 'string' ? function (item) {
+        return this.items.find(typeof el === 'string' ? function (item) {
             return item.$el.filter(el).length > 0;
 
         } : function (item) {
-            return item.el == el;
+            return item.el === el;
         });
     },
 
@@ -406,7 +409,8 @@ exports.bind = function (selector, options) {
 
         var $el = $(el).addClass('scrollview');
 
-        if (options && options.useScroll || util.android && parseFloat(util.osVersion <= 2.3)) {
+        if ((options && options.useScroll) ||
+            (android && parseFloat(util.osVersion <= 2.3))) {
             ret = scrollView = new ScrollView(el, options);
         }
         else {
@@ -425,12 +429,12 @@ exports.bind = function (selector, options) {
             var height = options ? options.height : this.$el.height();
             var top = scrollTop + height;
 
-            if (height == 0) return;
+            if (height === 0) return;
 
             images && images.each(function () {
                 var parent = this.offsetParent;
                 var imgTop = this.offsetTop;
-                while (parent && parent != el && parent != document.body) {
+                while (parent && parent !== el && parent !== document.body) {
                     imgTop += parent.offsetTop;
                     parent = parent.offsetParent;
                 }
@@ -462,7 +466,7 @@ exports.bind = function (selector, options) {
                         offsetTop += node.offsetTop;
                         node = node.offsetParent;
                     }
-                    while (node && el != node && !$.contains(node, el));
+                    while (node && el !== node && !$.contains(node, el));
 
                     var y = offsetTop - (window.innerHeight / 4 - 60);
 
@@ -479,7 +483,7 @@ exports.bind = function (selector, options) {
             var $scroller = $el.children('.scroller_container'),
                 $refresh = $('<div class="refresh" style="height:50px;text-align:center;line-height:50px;">下拉刷新</div>');
 
-            if (!$scroller.length) $scroller = ScrollView.insertScroller($el);
+            if (!$scroller.length) $scroller = insertScroller($el);
 
             var scroller = $scroller[0];
 

@@ -115,7 +115,7 @@
                         target: e.target,
                         timestamp: Date.now()
                     };
-                    
+
                     // don't fire tap when delta position changed by more than 30 pixels,
                     // for instance when moving to a point and back to origin
                     if (deltaX < 30 && deltaY < 30 && !e.cancelTap && touch.el[0] === e.target) {
@@ -127,6 +127,8 @@
                         // (cancelTouch cancels processing of single vs double taps for faster 'tap' response)
 
                         var event = $.Event('tap')
+                        event.pageX = changedTouch.pageX;
+                        event.pageY = changedTouch.pageY;
                         event.cancelTouch = cancelAll
                         touch.el.trigger(event)
 
