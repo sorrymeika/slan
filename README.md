@@ -104,7 +104,10 @@ var model = new ViewModel(template, {
 ```js
 // 通过 `model.set` 方法来改变数据
 model.set({
-    date: Date.now()+10000
+    date: Date.now()+10000,
+    user: {
+        userName: 'asdf'
+    }
 });
 
 // 通过 `createModel` 创建的model的 `set` 方法改变数据
@@ -112,7 +115,7 @@ user.set({
     userName: '小红'
 })
 
-// 通过 `collection.set` 方法改变数据
+// 通过 `collection.set` 方法覆盖数据
 collection.set([{
     id: 1,
     name: 'A'
@@ -131,9 +134,37 @@ collection.update([{ id: 3, name: 'C1' }, { id: 4, name: 'D1' }], function(a, b)
 });
 ```
 
+# Model/Collection 查询
+
+* `-`
+```js
+// 详情见源码
+model._('collection[name~="aa"|id=1,type!=2]').toJSON();
+collection._('[name="aa"]').toJSON();
+```
+
+# 监听 Model
+
+* `observe / removeObserve / on('change:child.attribute',cb)` 
+```js
+// 监听所有数据变动
+model.observe(function(e) {
+
+});
+
+// 监听 `user` 数据变动
+model.observe('user', function(e) {
+
+});
+
+// 监听 `user.userName` 数据变动
+model.on('change:user.userName', function(e) {
+
+});
+```
+
 
 # sn-属性
-
 
 * `sn-[events]` dom事件
 
