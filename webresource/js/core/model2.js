@@ -269,7 +269,7 @@ function executeFunction(viewModel, functionId, data) {
     return viewModel.fns[functionId].call(viewModel, data);
 }
 
-function updateRequireView(viewModel, el) {
+function updateRequiredView(viewModel, el) {
     var id = el.getAttribute('sn-data');
     var data = !id ? null : executeFunction(viewModel, id, formatData(viewModel, el.snData, el));
     var instance;
@@ -572,7 +572,7 @@ function updateNode(viewModel, el) {
                     };
 
                 } else {
-                    if (el.snRequire) updateRequireView(viewModel, el);
+                    if (el.snRequire) updateRequiredView(viewModel, el);
                     else setRefs(viewModel, el);
 
                     var nextElement = el.nextSibling;
@@ -610,7 +610,7 @@ function updateNode(viewModel, el) {
                     return currentElement.nextSibling;
                 }
             } else if (el.snRequire) {
-                updateRequireView(viewModel, el);
+                updateRequiredView(viewModel, el);
             } else {
                 setRefs(viewModel, el);
             }
