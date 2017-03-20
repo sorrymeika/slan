@@ -1530,9 +1530,9 @@ var ModelProto = {
         return this._model[key];
     }
 }
-ModelProto.getModel = ModelProto._;
 
 Model.prototype = ModelProto;
+
 
 var Collection = function (parent, attributeName, array) {
     if (isArray(parent)) {

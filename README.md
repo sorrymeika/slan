@@ -242,7 +242,7 @@ var model = new ViewModel(this.$el, {
 ```html
 @use '../components/tab' as tab;
 
-<div class="tab" sn-require="widget/tab" sn-data="{{items:['生活服务','通信服务']}}"></div>
+<div class="tab" sn-require="components/tab" sn-data="{{items:['生活服务','通信服务']}}"></div>
 ```
 
 
