@@ -207,9 +207,12 @@ var model = new ViewModel(this.$el, {
 ```
 
 ```html
-<ul class="item" sn-repeat="item,i in list|filter:like(item.name,'2')|orderBy:item.name">这是标题{title}，加上{item.name}
-<li sn-repeat="child in item.children">{i}/{child.name+child.age}</li>
-</ul>
+<div class="item" sn-repeat="item,i in list|filter:like(item.name,'2')|orderBy:item.name">
+    <p>这是标题{title}，加上{item.name}</p>
+    <ul>
+        <li sn-repeat="child in item.children">{i}/{child.name+child.age}</li>
+    </ul>
+</div>
 ```
 
 * `[sn-if]` `[sn-else-if]` `[sn-else]` 条件控制
@@ -267,7 +270,7 @@ var model = new ViewModel(this.$el, {
         * util---------工具类
     * m---------m站专用文件夹
         * 同上
-* m.caulse    ---------项目文件夹
+* m.cause    ---------项目文件夹
     * dest---------打包文件夹
     * components---------组件文件夹
     * images ---------项目图片/css
@@ -282,12 +285,12 @@ var model = new ViewModel(this.$el, {
 
 ## global.json
 
-* `dest`打包文件夹
-* `api`服务端api地址
-* `proxy`代理设置(一般情况无需配置)
-* `css`公用css，主项目和子项目公用的css，多个css会在打包后合并
-* `images`图片文件夹，打包后会将该文件夹下的图片移动到dest文件夹
-* `combine`js文件合并配置
+* `dest` 打包文件夹
+* `api` 服务端api地址
+* `proxy` 代理设置(一般情况无需配置)
+* `css` 公用css，主项目和子项目公用的css，多个css会在打包后合并
+* `images` 图片文件夹，打包后会将该文件夹下的图片移动到dest文件夹
+* `combine` js文件合并配置
 
 ```js
 {
@@ -299,21 +302,21 @@ var model = new ViewModel(this.$el, {
     }
 }
 ```
-* `path`查找js的位置，类似于环境变量
-* `port`开发服务器的访问端口
-* `projects`项目文件夹，主项目和子项目都放在该数组中
-* `env`环境配置，打包时--build参数使用该配置里的对应项，如`node app.js --build=test`会使用`env.test`的配置
-* `framework`框架打包配置
+* `path` 查找js的位置，类似于环境变量
+* `port` 开发服务器的访问端口
+* `projects` 项目文件夹，主项目和子项目都放在该数组中
+* `env` 环境配置，打包时--build参数使用该配置里的对应项，如`node app.js --build=test`会使用`env.test`的配置
+* `framework` 框架打包配置
 
 ## config.json
 
-* `global.json`->`projects`中配置的主项目和子项目文件夹中每个都要有config.json
+* `global.json` -> `projects` 中配置的主项目和子项目文件夹中每个都要有config.json
 * `css`当前项目独用的css，多个css会在打包后合并
 * `js`当前项目独用的js，多个js会在打包后合并
 * `images`当前项目独用的images
 * `route`当前项目的路由配置
 
-### 路由 config.json > route
+### 路由 config.json -> route
 ```javascript
 "route": {
     //将#/映射到index,从项目view/template文件夹中搜索index.js/index.html
@@ -324,8 +327,6 @@ var model = new ViewModel(this.$el, {
 ```
 
 
-
-
 # 页面
 
 ## Views
@@ -334,17 +335,21 @@ var model = new ViewModel(this.$el, {
 * views下的js文件名称要同route中配置的一样
 * 视图继承自Activity类,｀var Activity = require('core/activity')｀
 
-### Activity
+### Activity 页面管理器
 
 * Activity.extend(options)方法，返回Activity的子类
 * options 参数:
-    * onCreate方法，初始化视图时调用
-    * onShow方法，每次显示视图时调用
-    * onPause方法，每次隐藏视图时调用
-    * onDestroy方法，销毁视图时调用
-    * events对象，事件处理
+    * `onCreate` 事件，初始化视图时调用
+    * `onAppear` 事件，每次动画开始时调用
+    * `onShow` 事件，每次进入动画结束时调用
+    * `onLoad` 事件，第一次进入动画结束时调用
+    * `onPause` 事件，每次隐藏视图时调用
+    * `onHide` 事件，每次离开动画结束时触发
+    * `onResume` 事件，每次重启时调用
+    * `onDestroy` 事件，销毁视图时调用
+    * `events` 对象，事件处理 `(Discarded)`
 
-* `back(url)`方法，返回某页面(返回动画)
+* `back(url)` 方法，返回某页面(返回动画)
 
 ```javascript
 module.exports = Activity.extend({
@@ -364,7 +369,7 @@ module.exports = Activity.extend({
 })
 ```
 
-* `forward(url)`方法，前进到某页面(前进动画)
+* `forward(url)` 方法，前进到某页面(前进动画)
 
 ```javascript
 module.exports = Activity.extend({
@@ -384,7 +389,10 @@ module.exports = Activity.extend({
 })
 ```
 
-* `query`对象，链接`?`号后面的内容
+* `replaceWith(url)` 方法，替换当前Activity
+
+
+* `query` 对象，链接`?`号后面的内容
 
 ```javascript
 module.exports = Activity.extend({
@@ -398,11 +406,11 @@ module.exports = Activity.extend({
     }
 })
 ```
-* `el`对象，当前element
+* `el` 对象，当前element
 
-* `$el`对象，当前$(element)
+* `$el` 对象，当前$(element)
 
-* `model`对象，数据视图双向绑定，需要在onCreate时初始化，具体可见`template`
+* `model` 对象，数据视图双向绑定，需要在onCreate时初始化，具体可见`template`
 
 ```javascript
 var Activity = require('core/activity');
