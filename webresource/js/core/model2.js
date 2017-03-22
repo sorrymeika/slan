@@ -1927,7 +1927,7 @@ Collection.prototype = {
 
             Array.prototype.splice.call(this, count, 0, model)
 
-            this.array.splice(count, 0, model.arributes);
+            this.array.splice(count, 0, model.attributes);
         }
 
         changedAndUpdateViewNextTick(this);
@@ -2027,6 +2027,11 @@ Collection.prototype = {
             }
         }
         return null;
+    },
+
+    last: function () {
+
+        return this.length === 0 ? null : this[this.length - 1];
     },
 
     filter: function (key, val) {
