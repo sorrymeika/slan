@@ -53,6 +53,10 @@ var util = {
         return ++guid;
     },
 
+    uuid: function () {
+        return this.randomString(36);
+    },
+
     randomString: function (len) {
         var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(''),
             uuid = '',
@@ -73,8 +77,12 @@ var util = {
         return uuid;
     },
 
-    uuid: function () {
-        return this.randomString(36);
+    random: function (min, max) {
+        if (max == null) {
+            max = min;
+            min = 0;
+        }
+        return min + Math.floor(Math.random() * (max - min + 1));
     },
 
     isNo: function (value) {
@@ -92,14 +100,6 @@ var util = {
             return false;
         }
         return true;
-    },
-
-    random: function (min, max) {
-        if (max == null) {
-            max = min;
-            min = 0;
-        }
-        return min + Math.floor(Math.random() * (max - min + 1));
     },
 
     log: function (msg) {
@@ -121,6 +121,37 @@ var util = {
         return (number + '').replace(/\d{1,3}(?=(\d{3})+(\.\d+)?$)/g, '$&,')
     },
 
+    /**
+     * 获取圆上的点坐标
+     * 
+     * @param {number} x0 原点x
+     * @param {number} y0 原点y
+     * @param {number} r 半径
+     * @param {number} a 角度
+     */
+    pointOnCircle: function (x0, y0, r, a) {
+        return {
+            x: x0 + r * Math.cos(a * Math.PI / 180),
+            y: y0 + r * Math.sin(a * Math.PI / 180)
+        };
+    },
+
+    fixFloat: function (f) {
+        return Math.round((typeof f === 'number' ? f : parseFloat(f || 0)) * 100) / 100;
+    },
+
+    currency: function (prefix, str) {
+        if (str == undefined) {
+            str = prefix;
+            prefix = null;
+        }
+        return (prefix === undefined || prefix === null ? '' : prefix) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
+    },
+
+    rmb: function (str) {
+        return this.currency('¥', str);
+    },
+
     value: function (data, names) {
         if (typeof names === 'string')
             names = names.split('.');
@@ -132,11 +163,36 @@ var util = {
         return data;
     },
 
+    encodeHTML: function (text) {
+        return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
+    },
+
     format: function (format, str) {
         var args = arguments;
         return format.replace(/\{(\d+)\}/g, function (match, index) {
             return args[parseInt(index) + 1];
         })
+    },
+
+    template: function (str, data) {
+        var tmpl = 'var __p=[];var $data=obj||{};with($data){__p.push(\'' +
+            str.replace(/\\/g, '\\\\')
+                .replace(/'/g, '\\\'')
+                .replace(/<%=([\s\S]+?)%>/g, function (match, code) {
+                    return '\',' + code.replace(/\\'/, '\'') + ',\'';
+                })
+                .replace(/<%([\s\S]+?)%>/g, function (match, code) {
+                    return '\');' + code.replace(/\\'/, '\'')
+                        .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
+                })
+                .replace(/\r/g, '\\r')
+                .replace(/\n/g, '\\n')
+                .replace(/\t/g, '\\t') +
+            '\');}return __p.join("");',
+
+            func = new Function('obj', tmpl);
+
+        return data ? func(data) : func;
     },
 
     timeLeft: function (timestamp) {
@@ -159,7 +215,12 @@ var util = {
             pad(seconds)
     },
 
-    //yyyy-MM-dd HH:mm:ss
+    /**
+     * string 转 date
+     * 
+     * @param {String} date
+     * @return {Date}
+     */
     parseDate: function (date) {
         date = date.split(/\s+|\:|\-|年|月|日|\//).map(function (time) {
             return parseInt(time);
@@ -268,47 +329,6 @@ var util = {
         return style;
     },
 
-    fixFloat: function (f) {
-        return Math.round((typeof f === 'number' ? f : parseFloat(f || 0)) * 100) / 100;
-    },
-
-    currency: function (prefix, str) {
-        if (str == undefined) {
-            str = prefix;
-            prefix = null;
-        }
-        return (prefix === undefined || prefix === null ? '' : prefix) + ((Math.round(parseFloat(str) * 100) / 100) || 0);
-    },
-
-    rmb: function (str) {
-        return currency('¥', str);
-    },
-
-    template: function (str, data) {
-        var tmpl = 'var __p=[];var $data=obj||{};with($data){__p.push(\'' +
-            str.replace(/\\/g, '\\\\')
-                .replace(/'/g, '\\\'')
-                .replace(/<%=([\s\S]+?)%>/g, function (match, code) {
-                    return '\',' + code.replace(/\\'/, '\'') + ',\'';
-                })
-                .replace(/<%([\s\S]+?)%>/g, function (match, code) {
-                    return '\');' + code.replace(/\\'/, '\'')
-                        .replace(/[\r\n\t]/g, ' ') + '__p.push(\'';
-                })
-                .replace(/\r/g, '\\r')
-                .replace(/\n/g, '\\n')
-                .replace(/\t/g, '\\t') +
-            '\');}return __p.join("");',
-
-            func = new Function('obj', tmpl);
-
-        return data ? func(data) : func;
-    },
-
-    encodeHTML: function (text) {
-        return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
-    },
-
     cookie: function (a, b, c, p) {
         if (typeof b === 'undefined') {
             var res = document.cookie.match(new RegExp("(^| )" + a + "=([^;]*)(;|$)"));
@@ -329,6 +349,7 @@ var util = {
             document.cookie = a + "=" + escape(b) + (c || "") + ";path=" + (p || '/')
         }
     },
+
     store: typeof localStorage !== 'undefined' ? function (key, value) {
         if (location.search && /(?:\?|&)STORE_ID\=(\d+)/.test(location.search)) {
             key = RegExp.$1 + ")" + key;
@@ -348,22 +369,8 @@ var util = {
         else
             this.cookie(key, JSON.stringify(value));
     },
-    noop: function () { },
 
-    /**
-     * 获取圆上的点坐标
-     * 
-     * @param {number} x0 原点x
-     * @param {number} y0 原点y
-     * @param {number} r 半径
-     * @param {number} a 角度
-     */
-    pointOnCircle: function (x0, y0, r, a) {
-        return {
-            x: x0 + r * Math.cos(a * Math.PI / 180),
-            y: y0 + r * Math.sin(a * Math.PI / 180)
-        };
-    }
+    noop: function () { }
 };
 
 
@@ -689,18 +696,8 @@ function lastIndexOf(arr, key, val) {
 util.lastIndexOf = lastIndexOf;
 
 
-/**
- * 数组操作
- * 
- * @param {Array} array 
- */
-function ArrayQuery(array) {
-    this.array = array;
-}
-
 
 var RE_QUERY_ATTR = /([\w]+)(\^|\*|\=|\!|\$|\~)?\=(\d+|null|undefined|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|(?:.*?(?=[,\|&])))([,\|&])?/g;
-
 
 /**
  * 将 query 编译成 查询方法
@@ -814,6 +811,16 @@ function matchObject(queryGroups, obj) {
     return result;
 }
 
+
+/**
+ * 数组操作
+ * 
+ * @param {Array} array 
+ */
+function ArrayQuery(array) {
+    this.array = array;
+}
+
 /**
  * 筛选数组
  * 
@@ -829,8 +836,15 @@ function matchObject(queryGroups, obj) {
  *     attr: 'somevalue11'
  * });
  */
-function query(query, array) {
-    if (!array) return compileQuery(query);
+util.query = function (query, array) {
+    if (!array) {
+        return compileQuery(query);
+
+    } else if (typeof query !== 'string') {
+        var tmp = array;
+        array = query;
+        query = tmp;
+    }
 
     var match = compileQuery(query);
     var results = [];
@@ -843,7 +857,8 @@ function query(query, array) {
 }
 
 ArrayQuery.prototype._ = function (query) {
-    return util.query(query, this);
+
+    return new ArrayQuery(util.query(query, this.array));
 }
 
 
@@ -885,10 +900,8 @@ function map(arr, key) {
 util.map = map;
 
 ArrayQuery.prototype.map = function (key) {
-    this.array = map(this.array, key);
-    return this;
+    return new ArrayQuery(map(this.array, key));
 }
-
 
 /**
  * 筛选数组中匹配的
@@ -927,8 +940,7 @@ function filter(arr, key, val) {
 util.filter = util.find = filter;
 
 ArrayQuery.prototype.filter = function (key, val) {
-    this.array = filter(this, key, val);
-    return this;
+    return new ArrayQuery(filter(this.array, key, val));
 }
 
 
@@ -942,15 +954,15 @@ ArrayQuery.prototype.filter = function (key, val) {
 function first(array, key, val) {
 
     if (typeof key === 'string' && arguments.length == 3) {
-
         for (var i = 0, len = array.length; i < len; i++) {
             if (array[i][key] == val) return array[i];
         }
-    } else if (typeof key === 'function') {
 
+    } else if (typeof key === 'function') {
         for (var i = 0, len = array.length; i < len; i++) {
             if (key(array[i], i)) return array[i];
         }
+
     } else {
         for (var i = 0, len = array.length; i < len; i++) {
             if (contains(array[i], key)) return array[i];
@@ -959,6 +971,8 @@ function first(array, key, val) {
 
     return null;
 }
+
+util.first = first;
 
 ArrayQuery.prototype.find = function (key, val) {
     return first(this.array, key, val);
@@ -1006,7 +1020,6 @@ ArrayQuery.prototype.remove = function (key, val) {
     return this;
 }
 
-
 ArrayQuery.prototype.toArray = ArrayQuery.prototype.toJSON = function () {
     return this.array;
 }
@@ -1014,10 +1027,6 @@ ArrayQuery.prototype.toArray = ArrayQuery.prototype.toJSON = function () {
 util.array = function (array) {
     return new ArrayQuery(array);
 }
-
-
-util.first = first;
-
 
 
 util.remove = remove;
