@@ -2360,6 +2360,18 @@ var ViewModel = Event.mixin(
             return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
         },
 
+        getRef: function (name, cb) {
+            if (this.refs[name])
+                return cb(this.refs[name]);
+
+            this.onceTrue('viewDidUpdate', function () {
+                if (this.refs[name]) {
+                    cb(this.refs[name]);
+                    return true;
+                }
+            })
+        },
+
         _checkOwnNode: function (node) {
             if (typeof node == 'string') {
                 node = this.$el.find(node);
