@@ -47,11 +47,11 @@ var GLOBAL_VARIABLES = {
     'document': true
 };
 
-var rvalue = /^((-)*\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
+var rvalue = /^((-)?\d+|true|false|undefined|null|'(?:\\'|[^'])*')$/;
 var rrepeat = /([\w$]+)(?:\s*,(\s*[\w$]+)){0,1}\s+in\s+([\w$]+(?:\.[\w$\(,\)]+){0,})(?:\s*\|\s*filter\s*\:\s*(.+?)){0,1}(?:\s*\|\s*orderBy\:(.+)){0,1}(\s|$)/;
 var rmatch = /\{\s*(.+?)\s*\}(?!\s*\})/g;
 var rset = /([\w$]+(?:\.[\w$]+)*)\s*=\s*((?:\((?:'(?:\\'|[^'])*'|[^\)])+\)|'(?:\\'|[^'])*'|[\w$][!=]==?|[^;=])+?)(?=;|,|\)|$)/g;
-var rfunc = /\b((?:this\.){0,1}[\.\w]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
+var rfunc = /\b((?:this\.){0,1}[\.\w$]+\()((?:'(?:\\'|[^'])*'|\((?:\((?:\((?:\(.*?\)|.)*?\)|.)*?\)|[^\)])*\)|[^\)])*)\)/g;
 var rSnAttr = /^sn-/;
 
 // console.log('t$y_p0e=type_$==1?2:1;alert()'.match(rset))
@@ -666,11 +666,9 @@ function updateNodeAttributes(viewModel, el, attribute) {
         }
     }
 
-    var attr;
     for (var i = 0, n = keys.length; i < n; i++) {
 
-        attr = keys[i];
-
+        var attr = keys[i];
         var val = executeFunction(viewModel, attrsBinding[attr], data);
 
         if (attrs[attr] === val) continue;
@@ -1163,7 +1161,9 @@ function changedAndUpdateViewNextTick(model) {
     model.root.one(DATACHANGED_EVENT, function () {
         model.changed = false;
 
-        model.key && model.root.trigger(DATACHANGED_EVENT + ":" + model.key);
+        model.key && model.root.trigger(new Event(DATACHANGED_EVENT + ":" + model.key, {
+            target: model
+        }));
 
         while (model) {
             if (model instanceof Model || model instanceof Collection) {
@@ -1229,6 +1229,8 @@ var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-
 // }
 
 // console.log("[attr^='somevalue',att2=2][+1].aaa[333]".match(RE_COLL_QUERY));
+
+// console.log(util.query("[attr!=undefined]", [{ attr: 1 }]))
 
 var ModelProto = {
 
@@ -1472,13 +1474,41 @@ var ModelProto = {
             changedAndUpdateViewNextTick(this);
 
             for (var i = 0, length = changes.length; i < length; i += 3) {
-                root.trigger("change:" + changes[i], changes[i + 1], changes[i + 2]);
+                root.trigger(new Event("change:" + changes[i], {
+                    target: this
+
+                }), changes[i + 1], changes[i + 2]);
             }
         }
 
         return self;
     },
 
+    contains: function (model) {
+        if (model === this) return false;
+
+        for (var parent = model.parent; parent; parent = model.parent) {
+            if (parent === this) return true;
+        }
+        return false;
+    },
+
+    /**
+     * 监听当前 Model 的属性值变化
+     */
+    change: function (attributeName, fn) {
+        var self = this;
+
+        this.root.on("change:" + attributeName, function (e, oldValue, newValue) {
+            if (e.target === this) {
+                return fn.call(self, e, oldValue, newValue);
+            }
+        });
+    },
+
+    /**
+     * 监听子 Model / Collection 变化
+     */
     observe: function (key, fn) {
         if (typeof key === 'function') {
             fn = key;
@@ -1487,7 +1517,15 @@ var ModelProto = {
             key = ':' + (this.key ? this.key + '.' + key : key);
         }
 
-        return this.root.on(DATACHANGED_EVENT + key, fn);
+        var self = this;
+        var cb = function (e) {
+            if (e.target === self || self.contains(e.target)) {
+                return fn.call(self, e);
+            }
+        }
+        cb._cb = fn;
+
+        return this.root.on(DATACHANGED_EVENT + key, cb);
     },
 
     removeObserve: function (key, fn) {
@@ -1808,13 +1846,12 @@ Collection.prototype = {
     /**
      * 更新 collection 中的 model
      * 
-     * updateType=undefined:collection中存在既覆盖，不存在既添加
-     * updateType=true:根据arr更新，不在arr中的项将被删除
-     * updateType=false:只更新collection中存在的
-     * 
      * @param {array} arr 需要更新的数组
      * @param {string|function} primaryKey 唯一健 或 (a, b)=>boolean
      * @param {boolean|undefined} [updateType] 更新类型
+     * updateType=undefined:collection中存在既覆盖，不存在既添加
+     * updateType=true:根据arr更新，不在arr中的项将被删除
+     * updateType=false:只更新collection中存在的
      * 
      * @return {Collection} self
      */
@@ -2039,6 +2076,8 @@ Collection.prototype = {
     }
 }
 
+Collection.prototype.toArray = Collection.prototype.toJSON;
+
 
 function RepeatSource(viewModel, el, parent) {
     var self = this;
@@ -2147,47 +2186,48 @@ RepeatSource.prototype.appendChild = function (child) {
 
 var viewModelCache = [];
 
+var ViewModel = util.createClass(Object.assign(Object.create(ModelProto), {
 
-/**
- * 双向绑定model
- * @param {String|Element|Boolean} [template] 字符类型或dom元素时为模版
- * @param {Object} [attributes] 属性
- * @param {Array} children 字节点列表
- */
-function ViewModel(template, attributes, children) {
-    if (template !== false) viewModelCache.push(this);
+    /**
+     * 双向绑定model
+     * 
+     * @param {String|Element|Boolean} [template] 字符类型或dom元素时为模版
+     * @param {Object} [attributes] 属性
+     * @param {Array} children 字节点列表
+     */
+    constructor: function (template, attributes, children) {
+        if (template !== false) viewModelCache.push(this);
 
-    if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
-        children = attributes, attributes = template, template = this.el;
+        if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
+            children = attributes, attributes = template, template = this.el;
 
-    this.children = children ? [].concat(children) : [];
+        this.children = children ? [].concat(children) : [];
 
-    this._render = this._render.bind(this);
-    this._handleSnEvent = this._handleSnEvent.bind(this);
+        this._render = this._render.bind(this);
+        this._handleSnEvent = this._handleSnEvent.bind(this);
 
-    this.cid = util.guid();
-    this.snModelKey = 'sn-' + this.cid + 'model';
+        this.cid = util.guid();
+        this.snModelKey = 'sn-' + this.cid + 'model';
 
-    this.attributes = extend({}, this.attributes, attributes);
+        this.attributes = extend({}, this.attributes, attributes);
 
-    this.repeats = {};
+        this.repeats = {};
 
-    this._model = {};
-    this._expressions = {
-        length: 0
-    };
-    this.fns = [];
-    this.refs = {};
-    this.root = this;
+        this._model = {};
+        this._expressions = {
+            length: 0
+        };
+        this.fns = [];
+        this.refs = {};
+        this.root = this;
 
-    template && this.bind(template);
+        template && this.bind(template);
 
-    this.set(this.attributes);
+        this.set(this.attributes);
 
-    this.initialize.call(this, attributes);
-}
+        this.initialize.call(this, attributes);
+    },
 
-var ViewModelProto = {
     initialize: util.noop,
 
     //事件处理
@@ -2290,7 +2330,10 @@ var ViewModelProto = {
         var self = this;
 
         do {
-            this.trigger(DATACHANGED_EVENT);
+            this.trigger(new Event(DATACHANGED_EVENT, {
+                target: this
+            }));
+
             this._nextTick = null;
             this.refs = {};
 
@@ -2406,15 +2449,12 @@ var ViewModelProto = {
         }
 
     }
-}
 
-ViewModelProto.then = ViewModelProto.next;
+}));
 
-ViewModel.prototype = Object.assign(Object.create(ModelProto), ViewModelProto);
+ViewModel.prototype.then = ViewModel.prototype.next;
+
 Event.mixin(ViewModel);
-
-ViewModel.extend = util.extend;
-
 
 var global = new ViewModel();
 

@@ -5,26 +5,33 @@
 
 var COMPONENT_EXTENDS = ['el', 'initialize', 'className', 'render', 'template'];
 
-var Component = Event.mixin(function(options) {
-    var self = this;
+var Component = util.createClass({
 
-    if (options) {
-        Object.assign(this, util.pick(options, COMPONENT_EXTENDS));
-        options.events && Object.assign(this.events, options.events);
-    }
+    constructor: function (options) {
+        var self = this;
 
-    self.cid = util.guid();
+        if (options) {
+            Object.assign(this, util.pick(options, COMPONENT_EXTENDS));
+            options.events && Object.assign(this.events, options.events);
+        }
 
-    self.setElement(self.el);
+        self.cid = util.guid();
 
-    self.onDestroy && self.on('Destroy', self.onDestroy);
+        self.setElement(self.el);
 
-    self.initialize.apply(self, slice.call(arguments));
+        self.onDestroy && self.on('Destroy', self.onDestroy);
 
-}, {
+        self.initialize.apply(self, slice.call(arguments));
+
+    },
+
     initialize: util.noop,
 
-    setElement: function(element, delegate) {
+    $: function (selector) {
+        return this.$el.filter(selector).add(this.$el.find(selector));
+    },
+
+    setElement: function (element, delegate) {
         if (element) {
             if (this.$el) this.undelegateEvents();
             this.$el = $(element);
@@ -35,17 +42,17 @@ var Component = Event.mixin(function(options) {
         return this;
     },
 
-    undelegateEvents: function() {
+    undelegateEvents: function () {
         this.$el.off('.delegateEvents' + this.cid);
         return this;
     },
 
-    delegateEvents: function() {
+    delegateEvents: function () {
         this.listen(this.events);
         return this;
     },
 
-    listen: function(events, fn) {
+    listen: function (events, fn) {
         var self = this;
 
         if (!fn) {
@@ -68,7 +75,7 @@ var Component = Event.mixin(function(options) {
         return self;
     },
 
-    listenTo: function(target) {
+    listenTo: function (target) {
 
         var args = slice.apply(arguments),
             fn = args[args.length - 1];
@@ -85,16 +92,12 @@ var Component = Event.mixin(function(options) {
         return this;
     },
 
-    $: function(selector) {
-        return this.$el.filter(selector).add(this.$el.find(selector));
-    },
-
-    destroy: function() {
+    destroy: function () {
         var $el = this.$el,
             self = this,
             target;
 
-        this._bindListenTo && $.each(this._bindListenTo, function(i, attrs) {
+        this._bindListenTo && $.each(this._bindListenTo, function (i, attrs) {
             target = attrs.shift();
             target.off.apply(target, attrs);
         });
@@ -104,8 +107,8 @@ var Component = Event.mixin(function(options) {
 
         self.trigger('Destroy');
     }
-});
+})
 
-Component.extend = util.extend;
+Event.mixin(Component);
 
 module.exports = Component;

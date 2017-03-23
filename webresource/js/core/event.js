@@ -203,18 +203,18 @@ var event = {
     }
 };
 
-Event.mixin = function (Fn, ext) {
-    Object.assign(typeof Fn == 'function' ? Fn.prototype : Fn, event, ext);
+Event.mixin = function (fn, ext) {
+    Object.assign(typeof fn == 'function' ? fn.prototype : fn, event, ext);
 
-    return Fn;
+    return fn;
 }
 
-Event.extend = function (Fn, ext) {
-    Fn.prototype = Object.create(event);
+Event.extend = function (fn, ext) {
+    fn.prototype = Object.create(event);
 
-    ext && Object.assign(Fn.prototype, ext);
+    ext && Object.assign(fn.prototype, ext);
 
-    return Fn;
+    return fn;
 }
 
 return Event;

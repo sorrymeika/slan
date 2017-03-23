@@ -1,3 +1,8 @@
+/**
+ * 作者: sunlu
+ * 用途: 工具类
+ */
+
 var ArrayProto = Array.prototype,
     slice = ArrayProto.slice,
     concat = ArrayProto.concat,
@@ -15,180 +20,6 @@ if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
 else if (ie) osVersion = ie[1].split('.');
 
-
-var RE_QUERY_ATTR = /([_a-zA-Z0-9]+)(\^|\*|\=|\!|\$|\~)?\=(\d+|null|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|(?:.*?(?=[,\|&])))([,\|&])?/g;
-
-function matchObject(queryGroups, obj) {
-
-    var result = true;
-    var flag;
-    var val;
-    var group;
-
-    if (queryGroups) {
-
-        for (var i = 0, length = queryGroups.length; i < length; i++) {
-            group = queryGroups[i];
-            result = true;
-
-            for (var j = 0, n = group.length; j < n; j++) {
-                item = group[j];
-                val = obj[item.attr];
-
-                switch (item.op) {
-                    case '=':
-                        result = val === item.val;
-                        break;
-                    case '!':
-                        result = val != item.val;
-                        break;
-                    case '^':
-                        result = val && (val.slice(0, item.val.length) == item.val);
-                        break;
-                    case '$':
-                        result = val && (val.slice(-item.val.length) == item.val);
-                        break;
-                    case '*':
-                        result = val && val.indexOf(item.val) != -1;
-                        break;
-                    case '~':
-                        result = item.val !== null && item.val !== undefined
-                            ? val && val.toLowerCase().indexOf(('' + item.val).toLowerCase()) != -1 : true;
-                        break;
-                    default:
-                        result = val == item.val;
-                        break;
-                }
-
-                if (!result) {
-                    if (item.lg == '&') {
-                        break;
-                    }
-
-                } else {
-
-                    if (item.lg == '|') {
-                        break;
-                    }
-
-                }
-            }
-
-            if (!result)
-                break;
-        }
-    }
-    return result;
-}
-
-//@query="attr^='somevalue'|c1=1,att2=2"
-function compileQuery(query) {
-    var group = [];
-    var groups = [group];
-
-    query.replace(RE_QUERY_ATTR, function (match, attr, op, val, lg) {
-        //console.log(match, attr, op, val, lg);
-
-        if (val.charAt(0) == '\'' && val.slice(-1) == '\'') {
-            val = val.slice(1, -1).replace(/\\\'/g, '\'');
-        } else {
-            val = JSON.parse(val);
-        }
-
-        group.push({
-            attr: attr,
-            op: op,
-            val: val,
-            lg: lg
-        });
-
-        if (lg == ',') {
-            groups.push(group = []);
-        }
-    });
-
-    return groups[0].length > 0 ? function (obj) {
-
-        return matchObject(groups, obj);
-
-    } : function () { return true; };
-}
-
-function equals(a, b, identical) {
-    if (identical ? a === b : a == b) return true;
-
-    var typeA = toString.call(a);
-    var typeB = toString.call(b);
-
-    if (typeA !== typeB) return false;
-
-    switch (typeA) {
-        case '[object Object]':
-            var keysA = Object.keys(a);
-
-            if (keysA.length != Object.keys(b).length) {
-                return false;
-            }
-            var key;
-
-            for (var i = keysA.length; i >= 0; i--) {
-                key = keysA[i];
-
-                if (!equals(a[key], b[key], identical)) return false;
-            }
-            break;
-
-        case '[object Array]':
-            if (a.length != b.length) {
-                return true;
-            }
-
-            for (var i = a.length; i >= 0; i--) {
-                if (!equals(a[i], b[i], identical)) return false;
-            }
-            break;
-
-        case '[object Date]':
-            return +a == +b;
-
-        case '[object RegExp]':
-            return ('' + a) === ('' + b);
-
-        default:
-            if (identical ? a !== b : a != b) return false;
-    }
-
-    return true;
-}
-
-function contains(parent, obj) {
-    var typeA = toString.call(parent);
-
-    switch (typeA) {
-        case '[object Object]':
-            var keys = Object.keys(obj);
-
-            for (var i = keys.length; i >= 0; i--) {
-                var key = keys[i];
-
-                if (obj[key] != parent[key]) return false;
-            }
-            break;
-
-        case '[object Array]':
-            if (!Array.isArray(obj)) return parent.indexOf(obj[i]) != -1;
-
-            for (var i = obj.length; i >= 0; i--) {
-                if (parent.indexOf(obj[i]) == -1) return false;
-            }
-            break;
-
-        default:
-            return obj == parent;
-    }
-    return true;
-}
-
 var util = {
 
     isInApp: /SLApp/.test(ua),
@@ -198,6 +29,10 @@ var util = {
     android: isAndroid,
     osVersion: osVersion ? parseFloat(osVersion[0] + '.' + osVersion[1]) : 0,
     isInWechat: /micromessenger/i.test(ua),
+
+    getPath: function (url) {
+        return url ? url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
+    },
 
     joinPath: function () {
         var args = [].slice.apply(arguments);
@@ -259,45 +94,6 @@ var util = {
         return true;
     },
 
-    contains: contains,
-
-    equals: equals,
-
-    identifyWith: function (a, b) {
-        return equals(a, b, true);
-    },
-
-    keys: Object.keys ? Object.keys : function (obj) {
-        var keys = [];
-        for (var key in obj)
-            if (hasOwnProperty.call(obj, key)) keys.push(key);
-
-        return keys;
-    },
-
-    extend: function (proto) {
-        var parent = this,
-            child = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function () {
-                return parent.apply(this, arguments);
-            };
-
-        var Surrogate = function () {
-            this.constructor = child;
-        };
-        Surrogate.prototype = parent.prototype;
-        child.prototype = new Surrogate;
-
-        for (var key in proto)
-            child.prototype[key] = proto[key];
-
-        for (var key in parent)
-            child[key] = parent[key];
-
-        child.__super__ = parent.prototype;
-
-        return child;
-    },
-
     random: function (min, max) {
         if (max == null) {
             max = min;
@@ -314,314 +110,6 @@ var util = {
             msg += ArrayProto.slice.call(arguments, 1).join(' ');
         }
         this.$log.html(msg + '<br>' + this.$log.html());
-    },
-
-    query: function (query, arr) {
-        if (!arr) return compileQuery(query);
-
-        var match = compileQuery(query);
-        var results = [];
-
-        for (var i = 0, n = arr.length; i < n; i++) {
-            if (match(attr[i])) results.push(arr[i]);
-        }
-
-        return results;
-    },
-
-    //@query='day,sum(amount)'
-    //@data=[{ day:333,amout:22 },{ day:333,amout:22 }]
-    //@return=[{key:{ day: 333 },sum: 44, group: [...]}]
-    groupBy: function (query, data) {
-        var results = [];
-        var keys = [];
-        var operations = [];
-
-        query.split(/\s*,\s*/).forEach(function (item) {
-            var m = /(sum|avg)\(([^\)]+)\)/.exec(item);
-
-            console.log(m);
-
-            if (m) {
-                operations.push({
-                    operation: m[1],
-                    key: m[2]
-                })
-
-            } else {
-                keys.push(item);
-            }
-        });
-
-        data.forEach(function (item) {
-            var key = {};
-            var group = false;
-
-            for (var j = 0, k = keys.length; j < k; j++) {
-                key[keys[j]] = item[keys[j]];
-            }
-
-            for (var i = 0, n = results.length; i < n; i++) {
-
-                if (equals(results[i].key, key)) {
-                    group = results[i];
-                    break;
-                }
-            }
-
-            if (!group) {
-                group = {
-                    key: key,
-                    count: 0,
-                    group: []
-                }
-                results.push(group);
-            }
-
-            for (var i = 0, n = operations.length; i < n; i++) {
-                var okey = operations[i].key;
-
-                switch (operations[i].operation) {
-                    case 'sum':
-                        if (!group.sum) {
-                            group.sum = {};
-                        }
-                        if (group.sum[okey] === undefined) {
-                            group.sum[okey] = 0;
-                        }
-                        group.sum[okey] += item[okey];
-                        break;
-                    case 'avg':
-                        if (!group.avg) {
-                            group.avg = {};
-                        }
-                        if (group.avg[okey] === undefined) {
-                            group.avg[okey] = 0;
-                        }
-                        group.avg[okey] = (group.avg[okey] * group.count + item[okey]) / (group.count + 1);
-                        break;
-                }
-            }
-
-            group.count++;
-            group.group.push(item);
-
-        });
-        return results;
-    },
-
-    sum: function (arr, key) {
-        var fn;
-        var result = 0;
-
-        if (typeof key === 'string') {
-            for (var i = 0, n = arr.length; i < n; i++) {
-                result += arr[i][key];
-            }
-
-        } else {
-            for (var i = 0, n = arr.length; i < n; i++) {
-                result += key(arr[i], i);
-            }
-        }
-
-        return result;
-    },
-
-    indexOf: function (arr, key, val) {
-        var length = arr.length;
-        var keyType = typeof key;
-
-        if (keyType === 'string' && arguments.length == 3) {
-            for (var i = 0; i < length; i++) {
-                if (arr[i][key] == val) return i;
-            }
-
-        } else if (keyType === 'function') {
-            for (var i = 0; i < length; i++) {
-                if (key(arr[i], i)) return i;
-            }
-
-        } else {
-            for (var i = 0; i < length; i++) {
-                if (contains(arr[i], key)) return i;
-            }
-        }
-
-        return -1;
-    },
-
-    lastIndexOf: function (arr, key, val) {
-        var length = arr.length;
-        var keyType = typeof key;
-
-        if (keyType === 'string' && arguments.length == 3) {
-            for (var i = arr.length - 1; i >= 0; i--) {
-                if (arr[i][key] == val) return i;
-            }
-
-        } else if (keyType === 'function') {
-            for (var i = arr.length - 1; i >= 0; i--) {
-                if (key(arr[i], i)) return i;
-            }
-
-        } else {
-            for (var i = arr.length - 1; i >= 0; i--) {
-                if (contains(arr[i], key)) return i;
-            }
-        }
-
-        return -1;
-    },
-
-    map: function (arr, key) {
-        var result = [];
-
-        if (typeof key === 'string') {
-            for (var i = 0, len = arr.length; i < len; i++) {
-                result.push(arr[i][key]);
-            }
-
-        } else if (Array.isArray(key)) {
-            var item;
-            var k;
-            for (var i = 0, len = arr.length; i < len; i++) {
-                item = {};
-                for (var j = key.length - 1; j >= 0; j--) {
-                    k = key[j];
-                    if (k in arr[i]) item[k] = arr[i][k];
-                }
-                result.push(item);
-            }
-
-        } else {
-            for (var i = 0, len = arr.length; i < len; i++) {
-                result.push(key(arr[i], i));
-            }
-        }
-
-        return result;
-    },
-
-    first: function (arr, key, val) {
-
-        if (typeof key === 'string' && arguments.length == 3) {
-
-            for (var i = 0, len = arr.length; i < len; i++) {
-                if (arr[i][key] == val) return arr[i];
-            }
-        } else if (typeof key === 'function') {
-
-            for (var i = 0, len = arr.length; i < len; i++) {
-                if (key(arr[i], i)) return arr[i];
-            }
-        } else {
-            for (var i = 0, len = arr.length; i < len; i++) {
-                if (contains(arr[i], key)) return arr[i];
-            }
-        }
-
-        return null;
-    },
-
-    exclude: function (arr, key, val) {
-        var length = arr.length;
-        var keyType = typeof key;
-        var result = [];
-
-        if (keyType === 'string' && arguments.length == 3) {
-            for (var i = 0; i < length; i++) {
-                if (arr[i][key] != val)
-                    result.push(arr[i]);
-            }
-
-        } else if (keyType === 'function') {
-            for (var i = 0; i < length; i++) {
-                if (!key(arr[i], i))
-                    result.push(arr[i]);
-            }
-
-        } else {
-            for (var i = 0; i < length; i++) {
-                if (!contains(arr[i], key))
-                    result.push(arr[i]);
-            }
-        }
-
-        return result;
-    },
-
-    find: function (arr, key, val) {
-        var length = arr.length;
-        var keyType = typeof key;
-        var result = [];
-
-        if (keyType === 'string' && arguments.length == 3) {
-            for (var i = 0; i < length; i++) {
-                if (arr[i][key] == val)
-                    result.push(arr[i]);
-            }
-
-        } else if (keyType === 'function') {
-            for (var i = 0; i < length; i++) {
-                if (key(arr[i], i))
-                    result.push(arr[i]);
-            }
-
-        } else {
-            for (var i = 0; i < length; i++) {
-                if (contains(arr[i], key))
-                    result.push(arr[i]);
-            }
-        }
-
-        return result;
-    },
-
-    remove: function (arr, key, val) {
-        var length = arr.length;
-        var keyType = typeof key;
-        var result = [];
-
-        if (keyType === 'string' && arguments.length == 3) {
-            for (var i = length - 1; i >= 0; i--) {
-                if (arr[i][key] == val)
-                    arr.splice(i, 1);
-            }
-
-        } else if (keyType === 'function') {
-            for (var i = length - 1; i >= 0; i--) {
-                if (key(arr[i], i))
-                    arr.splice(i, 1);
-            }
-
-        } else {
-            for (var i = length - 1; i >= 0; i--) {
-                if (contains(arr[i], key))
-                    arr.splice(i, 1);
-            }
-        }
-
-        return result;
-    },
-
-    pick: function (obj, iteratee) {
-        var result = {},
-            key;
-        if (obj == null) return result;
-        if (typeof iteratee === 'function') {
-            for (key in obj) {
-                var value = obj[key];
-                if (iteratee(value, key, obj)) result[key] = value;
-            }
-        } else {
-            var keys = concat.apply([], slice.call(arguments, 1));
-            for (var i = 0, length = keys.length; i < length; i++) {
-                key = keys[i];
-                if (key in obj) result[key] = obj[key];
-            }
-        }
-        return result;
     },
 
     pad: function (num, n) {
@@ -821,10 +309,6 @@ var util = {
         return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
     },
 
-    getPath: function (url) {
-        return url ? url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
-    },
-
     cookie: function (a, b, c, p) {
         if (typeof b === 'undefined') {
             var res = document.cookie.match(new RegExp("(^| )" + a + "=([^;]*)(;|$)"));
@@ -879,17 +363,702 @@ var util = {
             x: x0 + r * Math.cos(a * Math.PI / 180),
             y: y0 + r * Math.sin(a * Math.PI / 180)
         };
-    },
-
-    validateEmail: function (email) {
-        return /^[-_a-zA-Z0-9\.]+@([-_a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,3}$/.test(email)
-    },
-
-    validateMobile: function (str) {
-        return /^1[0-9]{10}$/.test(str)
     }
 };
 
-util.filter = util.find;
+
+/**
+ * Array/Object 处理相关方法
+ */
+
+function classExtend(proto) {
+    var parent = this,
+        child = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function () {
+            return parent.apply(this, arguments);
+        };
+
+    var Surrogate = function () {
+        this.constructor = child;
+    };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    for (var key in proto)
+        child.prototype[key] = proto[key];
+
+    for (var key in parent)
+        child[key] = parent[key];
+
+    child.__super__ = parent.prototype;
+
+    return child;
+}
+
+util.createClass = function (proto) {
+
+    var func = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function () {
+        this.constructor = func;
+    }
+
+    func.prototype = proto;
+
+    func.extend = classExtend;
+
+    return func;
+}
+
+/**
+ * pick Object
+ */
+util.pick = function (obj, iteratee) {
+    var result = {},
+        key;
+    if (obj == null) return result;
+    if (typeof iteratee === 'function') {
+        for (key in obj) {
+            var value = obj[key];
+            if (iteratee(value, key, obj)) result[key] = value;
+        }
+    } else {
+        var keys = concat.apply([], slice.call(arguments, 1));
+        for (var i = 0, length = keys.length; i < length; i++) {
+            key = keys[i];
+            if (key in obj) result[key] = obj[key];
+        }
+    }
+    return result;
+}
+
+
+/**
+ * 判断两个 Object/Array 是否相等
+ * 
+ * @param {any} a
+ * @param {any} b
+ * @param {boolean} [identical] 是否全等`===`
+ */
+function equals(a, b, identical) {
+    if (identical ? a === b : a == b) return true;
+
+    var typeA = toString.call(a);
+    var typeB = toString.call(b);
+
+    if (typeA !== typeB) return false;
+
+    switch (typeA) {
+        case '[object Object]':
+            var keysA = Object.keys(a);
+
+            if (keysA.length != Object.keys(b).length) {
+                return false;
+            }
+            var key;
+
+            for (var i = keysA.length; i >= 0; i--) {
+                key = keysA[i];
+
+                if (!equals(a[key], b[key], identical)) return false;
+            }
+            break;
+
+        case '[object Array]':
+            if (a.length != b.length) {
+                return true;
+            }
+
+            for (var i = a.length; i >= 0; i--) {
+                if (!equals(a[i], b[i], identical)) return false;
+            }
+            break;
+
+        case '[object Date]':
+            return +a == +b;
+
+        case '[object RegExp]':
+            return ('' + a) === ('' + b);
+
+        default:
+            if (identical ? a !== b : a != b) return false;
+    }
+
+    return true;
+}
+
+util.equals = equals;
+
+util.identifyWith = function (a, b) {
+    return equals(a, b, true);
+}
+
+/**
+ * 判断一个`Object`和另外一个`Object`是否`keys`重合且值相等
+ * 
+ * @param {Object|Array} parent 
+ * @param {Object|any} obj 
+ */
+function contains(parent, obj) {
+    var typeA = toString.call(parent);
+
+    switch (typeA) {
+        case '[object Object]':
+            var keys = Object.keys(obj);
+
+            for (var i = keys.length; i >= 0; i--) {
+                var key = keys[i];
+
+                if (obj[key] != parent[key]) return false;
+            }
+            break;
+
+        case '[object Array]':
+            if (!Array.isArray(obj)) return parent.indexOf(obj[i]) != -1;
+
+            for (var i = obj.length; i >= 0; i--) {
+                if (parent.indexOf(obj[i]) == -1) return false;
+            }
+            break;
+
+        default:
+            return obj == parent;
+    }
+    return true;
+}
+
+util.contains = contains;
+
+
+/**
+ * 将数组分组
+ * 
+ * @param {String} query 分组条件
+ * @param {Array} data 
+ * @return {Array}
+ * 
+ * @example
+ * groupBy('day,sum(amount)', [{ day:333,amout:22 },{ day:333,amout:22 }])
+ * // [{key:{ day: 333 },sum: 44, group: [...]}]
+ */
+function groupBy(query, data) {
+    var results = [];
+    var keys = [];
+    var operations = [];
+
+    query.split(/\s*,\s*/).forEach(function (item) {
+        var m = /(sum|avg)\(([^\)]+)\)/.exec(item);
+
+        console.log(m);
+
+        if (m) {
+            operations.push({
+                operation: m[1],
+                key: m[2]
+            })
+
+        } else {
+            keys.push(item);
+        }
+    });
+
+    data.forEach(function (item) {
+        var key = {};
+        var group = false;
+
+        for (var j = 0, k = keys.length; j < k; j++) {
+            key[keys[j]] = item[keys[j]];
+        }
+
+        for (var i = 0, n = results.length; i < n; i++) {
+
+            if (equals(results[i].key, key)) {
+                group = results[i];
+                break;
+            }
+        }
+
+        if (!group) {
+            group = {
+                key: key,
+                count: 0,
+                group: []
+            }
+            results.push(group);
+        }
+
+        for (var i = 0, n = operations.length; i < n; i++) {
+            var okey = operations[i].key;
+
+            switch (operations[i].operation) {
+                case 'sum':
+                    if (!group.sum) {
+                        group.sum = {};
+                    }
+                    if (group.sum[okey] === undefined) {
+                        group.sum[okey] = 0;
+                    }
+                    group.sum[okey] += item[okey];
+                    break;
+                case 'avg':
+                    if (!group.avg) {
+                        group.avg = {};
+                    }
+                    if (group.avg[okey] === undefined) {
+                        group.avg[okey] = 0;
+                    }
+                    group.avg[okey] = (group.avg[okey] * group.count + item[okey]) / (group.count + 1);
+                    break;
+            }
+        }
+
+        group.count++;
+        group.group.push(item);
+
+    });
+    return results;
+}
+
+util.groupBy = groupBy;
+
+function sum(arr, key) {
+    var fn;
+    var result = 0;
+
+    if (typeof key === 'string') {
+        for (var i = 0, n = arr.length; i < n; i++) {
+            result += arr[i][key];
+        }
+
+    } else {
+        for (var i = 0, n = arr.length; i < n; i++) {
+            result += key(arr[i], i);
+        }
+    }
+
+    return result;
+}
+
+util.sum = sum;
+
+function indexOf(arr, key, val) {
+    var length = arr.length;
+    var keyType = typeof key;
+
+    if (keyType === 'string' && arguments.length == 3) {
+        for (var i = 0; i < length; i++) {
+            if (arr[i][key] == val) return i;
+        }
+
+    } else if (keyType === 'function') {
+        for (var i = 0; i < length; i++) {
+            if (key(arr[i], i)) return i;
+        }
+
+    } else {
+        for (var i = 0; i < length; i++) {
+            if (contains(arr[i], key)) return i;
+        }
+    }
+
+    return -1;
+}
+
+util.indexOf = indexOf;
+
+function lastIndexOf(arr, key, val) {
+    var length = arr.length;
+    var keyType = typeof key;
+
+    if (keyType === 'string' && arguments.length == 3) {
+        for (var i = arr.length - 1; i >= 0; i--) {
+            if (arr[i][key] == val) return i;
+        }
+
+    } else if (keyType === 'function') {
+        for (var i = arr.length - 1; i >= 0; i--) {
+            if (key(arr[i], i)) return i;
+        }
+
+    } else {
+        for (var i = arr.length - 1; i >= 0; i--) {
+            if (contains(arr[i], key)) return i;
+        }
+    }
+
+    return -1;
+}
+
+util.lastIndexOf = lastIndexOf;
+
+
+/**
+ * 数组操作
+ * 
+ * @param {Array} array 
+ */
+function ArrayQuery(array) {
+    this.array = array;
+}
+
+
+var RE_QUERY_ATTR = /([\w]+)(\^|\*|\=|\!|\$|\~)?\=(\d+|null|undefined|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|(?:.*?(?=[,\|&])))([,\|&])?/g;
+
+
+/**
+ * 将 query 编译成 查询方法
+ * 
+ * @param {String} query 要编译的string
+ * query = "attr^='somevalue'|c1=1,att2=2"
+ * 
+ * @return {Function} (Object)=>boolean
+ */
+function compileQuery(query) {
+    var group = [];
+    var groups = [group];
+
+    query.replace(RE_QUERY_ATTR, function (match, attr, op, val, lg) {
+        //console.log(match, attr, op, val, lg);
+
+        if (val.charAt(0) == '\'' && val.slice(-1) == '\'') {
+            val = val.slice(1, -1).replace(/\\\'/g, '\'');
+        } else {
+            val = val === 'undefined' ? undefined : JSON.parse(val);
+        }
+
+        group.push({
+            attr: attr,
+            op: op,
+            val: val,
+            lg: lg
+        });
+
+        if (lg == ',') {
+            groups.push(group = []);
+        }
+    });
+
+    return groups[0].length > 0 ? function (obj) {
+
+        return matchObject(groups, obj);
+
+    } : function () { return true; };
+}
+
+
+/**
+ * 判断某 Object 是否匹配`compileQuery`方法编译后的查询条件组
+ * 
+ * @param {Array} queryGroups 查询条件组 
+ * @param {Object} obj 
+ * 
+ * @returns {boolean}
+ */
+function matchObject(queryGroups, obj) {
+
+    var result = true;
+    var flag;
+    var val;
+    var group;
+
+    if (queryGroups) {
+
+        for (var i = 0, length = queryGroups.length; i < length; i++) {
+            group = queryGroups[i];
+            result = true;
+
+            for (var j = 0, n = group.length; j < n; j++) {
+                item = group[j];
+                val = obj[item.attr];
+
+                switch (item.op) {
+                    case '=':
+                        result = val === item.val;
+                        break;
+                    case '!':
+                        result = val != item.val;
+                        break;
+                    case '^':
+                        result = val && (val.slice(0, item.val.length) == item.val);
+                        break;
+                    case '$':
+                        result = val && (val.slice(-item.val.length) == item.val);
+                        break;
+                    case '*':
+                        result = val && val.indexOf(item.val) != -1;
+                        break;
+                    case '~':
+                        result = item.val !== null && item.val !== undefined
+                            ? val && val.toLowerCase().indexOf(('' + item.val).toLowerCase()) != -1 : true;
+                        break;
+                    default:
+                        result = val == item.val;
+                        break;
+                }
+
+                if (!result) {
+                    if (item.lg == '&') {
+                        break;
+                    }
+
+                } else {
+
+                    if (item.lg == '|') {
+                        break;
+                    }
+
+                }
+            }
+
+            if (!result)
+                break;
+        }
+    }
+    return result;
+}
+
+/**
+ * 筛选数组
+ * 
+ * @param {String} query 查询字符串
+ * @param {Array} array 被查询的数组
+ * 
+ * @example
+ * console.log(util.query("[attr!=undefined]", [{ attr: 1 }]))
+ * 
+ * 判断Object是否匹配
+ * var match = util.query("attr^='somevalue'|c1=1,att2!=2");
+ * match({
+ *     attr: 'somevalue11'
+ * });
+ */
+function query(query, array) {
+    if (!array) return compileQuery(query);
+
+    var match = compileQuery(query);
+    var results = [];
+
+    for (var i = 0, n = array.length; i < n; i++) {
+        if (match(array[i])) results.push(array[i]);
+    }
+
+    return results;
+}
+
+ArrayQuery.prototype._ = function (query) {
+    return util.query(query, this);
+}
+
+
+/**
+ * map到一个新数组
+ * 
+ * @param {Array} arr 
+ * @param {String|Function|Array} key 
+ */
+function map(arr, key) {
+    var result = [];
+
+    if (typeof key === 'string') {
+        for (var i = 0, len = arr.length; i < len; i++) {
+            result.push(arr[i][key]);
+        }
+
+    } else if (Array.isArray(key)) {
+        var item;
+        var k;
+        for (var i = 0, len = arr.length; i < len; i++) {
+            item = {};
+            for (var j = key.length - 1; j >= 0; j--) {
+                k = key[j];
+                if (k in arr[i]) item[k] = arr[i][k];
+            }
+            result.push(item);
+        }
+
+    } else {
+        for (var i = 0, len = arr.length; i < len; i++) {
+            result.push(key(arr[i], i));
+        }
+    }
+
+    return result;
+}
+
+util.map = map;
+
+ArrayQuery.prototype.map = function (key) {
+    this.array = map(this.array, key);
+    return this;
+}
+
+
+/**
+ * 筛选数组中匹配的
+ * 
+ * @param {Array} arr 
+ * @param {String|Function|Object} key 
+ * @param {any} val 
+ */
+function filter(arr, key, val) {
+    var length = arr.length;
+    var keyType = typeof key;
+    var result = [];
+
+    if (keyType === 'string' && arguments.length == 3) {
+        for (var i = 0; i < length; i++) {
+            if (arr[i][key] == val)
+                result.push(arr[i]);
+        }
+
+    } else if (keyType === 'function') {
+        for (var i = 0; i < length; i++) {
+            if (key(arr[i], i))
+                result.push(arr[i]);
+        }
+
+    } else {
+        for (var i = 0; i < length; i++) {
+            if (contains(arr[i], key))
+                result.push(arr[i]);
+        }
+    }
+
+    return result;
+}
+
+util.filter = util.find = filter;
+
+ArrayQuery.prototype.filter = function (key, val) {
+    this.array = filter(this, key, val);
+    return this;
+}
+
+
+/**
+ * 查找第一个匹配的
+ * 
+ * @param {Array} array 
+ * @param {String|Function} key 
+ * @param {any} [val]
+ */
+function first(array, key, val) {
+
+    if (typeof key === 'string' && arguments.length == 3) {
+
+        for (var i = 0, len = array.length; i < len; i++) {
+            if (array[i][key] == val) return array[i];
+        }
+    } else if (typeof key === 'function') {
+
+        for (var i = 0, len = array.length; i < len; i++) {
+            if (key(array[i], i)) return array[i];
+        }
+    } else {
+        for (var i = 0, len = array.length; i < len; i++) {
+            if (contains(array[i], key)) return array[i];
+        }
+    }
+
+    return null;
+}
+
+ArrayQuery.prototype.find = function (key, val) {
+    return first(this.array, key, val);
+}
+
+
+/**
+ * 移除数组中匹配的
+ * 
+ * @param {Array} arr 
+ * @param {String|Function} key 
+ * @param {any} [val] 
+ */
+function remove(arr, key, val) {
+    var length = arr.length;
+    var keyType = typeof key;
+    var result = [];
+
+    if (keyType === 'string' && arguments.length == 3) {
+        for (var i = length - 1; i >= 0; i--) {
+            if (arr[i][key] == val)
+                arr.splice(i, 1);
+        }
+
+    } else if (keyType === 'function') {
+        for (var i = length - 1; i >= 0; i--) {
+            if (key(arr[i], i))
+                arr.splice(i, 1);
+        }
+
+    } else {
+        for (var i = length - 1; i >= 0; i--) {
+            if (contains(arr[i], key))
+                arr.splice(i, 1);
+        }
+    }
+
+    return result;
+}
+
+util.remove = remove;
+
+ArrayQuery.prototype.remove = function (key, val) {
+    remove(this.array, key, val);
+    return this;
+}
+
+
+ArrayQuery.prototype.toArray = ArrayQuery.prototype.toJSON = function () {
+    return this.array;
+}
+
+util.array = function (array) {
+    return new ArrayQuery(array);
+}
+
+
+util.first = first;
+
+
+
+util.remove = remove;
+
+util.exclude = function (arr, key, val) {
+    var length = arr.length;
+    var keyType = typeof key;
+    var result = [];
+
+    if (keyType === 'string' && arguments.length == 3) {
+        for (var i = 0; i < length; i++) {
+            if (arr[i][key] != val)
+                result.push(arr[i]);
+        }
+
+    } else if (keyType === 'function') {
+        for (var i = 0; i < length; i++) {
+            if (!key(arr[i], i))
+                result.push(arr[i]);
+        }
+
+    } else {
+        for (var i = 0; i < length; i++) {
+            if (!contains(arr[i], key))
+                result.push(arr[i]);
+        }
+    }
+
+    return result;
+}
+
+/**
+ * 常用验证
+ */
+
+util.validateEmail = function (email) {
+    return /^[-_a-zA-Z0-9\.]+@([-_a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,3}$/.test(email)
+}
+
+util.validateMobile = function (str) {
+    return /^1[0-9]{10}$/.test(str)
+}
 
 module.exports = util;

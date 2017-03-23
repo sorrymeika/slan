@@ -752,523 +752,527 @@
         }
     }
 
-    function ViewModel(el, data) {
-        if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
-            data = el, el = this.el;
+    var ViewModel = util.createClass(
 
-        this.cid = util.guid();
+        $.extend(Object.create(Model.prototype), {
 
-        this.eventsCache = {};
+            constructor: function (el, data) {
+                if (typeof data === 'undefined' && (el == undefined || $.isPlainObject(el)))
+                    data = el, el = this.el;
 
-        this.data = $.extend({}, data);
-        this.model = {};
-        this.repeats = {};
-        this._fns = [];
-        this.fns = [];
-        this.refs = {};
-        this.root = this;
-        this._elements = {};
+                this.cid = util.guid();
 
-        el && this.bind(el);
+                this.eventsCache = {};
 
-        this._initSet = true;
-        this.set(this.data);
-        this._initSet = false;
+                this.data = $.extend({}, data);
+                this.model = {};
+                this.repeats = {};
+                this._fns = [];
+                this.fns = [];
+                this.refs = {};
+                this.root = this;
+                this._elements = {};
 
-        this.onDestroy && this.on('Destroy', this.onDestroy);
+                el && this.bind(el);
 
-        this.initialize.call(this, el, data);
-    }
+                this._initSet = true;
+                this.set(this.data);
+                this._initSet = false;
 
-    ViewModel.prototype = $.extend(Object.create(Model.prototype), {
-        key: '',
+                this.onDestroy && this.on('Destroy', this.onDestroy);
 
-        initialize: util.noop,
+                this.initialize.call(this, el, data);
+            },
 
-        setState: function (cover, key, value) {
-            this.$state.set(cover, key, value);
-            return this;
-        },
+            key: '',
 
-        getState: function (key) {
-            return this.$state.get(key);
-        },
+            initialize: util.noop,
 
-        next: function (callback) {
-            return this.one('viewDidUpdate', callback);
-        },
+            setState: function (cover, key, value) {
+                this.$state.set(cover, key, value);
+                return this;
+            },
 
-        compile: function (code) {
-            var index = this._fns.indexOf(code);
-            if (index == -1)
-                this._fns.push(code), index = this._fns.length - 1;
+            getState: function (key) {
+                return this.$state.get(key);
+            },
 
-            return (this.fns.length + index);
-        },
+            next: function (callback) {
+                return this.one('viewDidUpdate', callback);
+            },
 
-        _compile: function (expression, repeat, listen) {
+            compile: function (code) {
+                var index = this._fns.indexOf(code);
+                if (index == -1)
+                    this._fns.push(code), index = this._fns.length - 1;
 
-            var self = this;
-            var variables;
+                return (this.fns.length + index);
+            },
 
-            var content = 'try{return \'' +
-                expression
-                    .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
-                    .replace(rmatch, function (match, exp) {
-                        return '\'+(' + exp.replace(/\\\\/g, '\\').replace(/\\'/g, '\'').replace(rvar, function (match, prefix, name) {
-                            if (!name) {
-                                if (match.indexOf('var ') == 0) {
-                                    return match.replace(/var\s+([^\=]+)=/, function (match, $0) {
-                                        variables = (variables || []).concat($0.split(','));
-                                        return $0 + '=';
-                                    });
+            _compile: function (expression, repeat, listen) {
+
+                var self = this;
+                var variables;
+
+                var content = 'try{return \'' +
+                    expression
+                        .replace(/\\/g, '\\\\').replace(/'/g, '\\\'')
+                        .replace(rmatch, function (match, exp) {
+                            return '\'+(' + exp.replace(/\\\\/g, '\\').replace(/\\'/g, '\'').replace(rvar, function (match, prefix, name) {
+                                if (!name) {
+                                    if (match.indexOf('var ') == 0) {
+                                        return match.replace(/var\s+([^\=]+)=/, function (match, $0) {
+                                            variables = (variables || []).concat($0.split(','));
+                                            return $0 + '=';
+                                        });
+                                    }
+                                    return match;
                                 }
-                                return match;
-                            }
 
-                            var attrs = name.split('.');
-                            var alias = attrs[0];
+                                var attrs = name.split('.');
+                                var alias = attrs[0];
 
-                            if (alias == "$state") {
-                                self.$state.on('change:' + name.replace('$state.', '').replace(/\./g, '/'), listen);
+                                if (alias == "$state") {
+                                    self.$state.on('change:' + name.replace('$state.', '').replace(/\./g, '/'), listen);
+                                    return prefix + isNull(name);
+
+                                } else if (!alias || Filters[alias] || snGlobal.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(name)) {
+
+                                    return prefix + name;
+                                }
+                                var loopIndex;
+
+                                if (repeat) {
+                                    for (var rp = repeat; rp != null; rp = rp.parent) {
+                                        if (alias == rp.alias) {
+                                            attrs[0] = rp.collectionName + '^child';
+                                            break;
+
+                                        } else if (alias == rp.indexAlias) {
+                                            loopIndex = rp;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                var eventName = (loopIndex ?
+                                    loopIndex.collectionName + '/' + loopIndex.alias + '/' + loopIndex.indexAlias :
+                                    attrs.join('/').replace(/\./g, '/'));
+
+                                self.on('change:' + eventName, listen);
+
                                 return prefix + isNull(name);
+                            }) + ')+\'';
+                        }) +
+                    '\';}catch(e){return \'\';}';
 
-                            } else if (!alias || Filters[alias] || snGlobal.indexOf(alias) != -1 || (variables && variables.indexOf(alias) != -1) || rvalue.test(name)) {
+                var code = 'function(global,model,el){' +
+                    withData(repeat, (variables && variables.length ? 'var ' + variables.join(',') + ';' : '') + content.replace('return \'\'+', 'return ').replace(/\+\'\'/g, '')) +
+                    '}';
 
-                                return prefix + name;
-                            }
-                            var loopIndex;
+                return this.compile(code);
+            },
 
-                            if (repeat) {
-                                for (var rp = repeat; rp != null; rp = rp.parent) {
-                                    if (alias == rp.alias) {
-                                        attrs[0] = rp.collectionName + '^child';
-                                        break;
+            call: function (id, arg0, arg1, arg2, arg3) {
+                var fn = this.fns[id];
 
-                                    } else if (alias == rp.indexAlias) {
-                                        loopIndex = rp;
-                                        break;
+                switch (arguments.length) {
+                    case 1:
+                        return fn.call(this);
+                    case 2:
+                        return fn.call(this, arg0);
+                    case 3:
+                        return fn.call(this, arg0, arg1);
+                    case 4:
+                        return fn.call(this, arg0, arg1, arg2);
+                    case 5:
+                        return fn.call(this, arg0, arg1, arg2, arg3);
+                    default:
+                        return fn.apply(this, arguments);
+                }
+            },
+
+            _render: function (el, attribute) {
+
+                var self = this;
+                if (el.bindings) {
+                    var attrs;
+                    if (attribute)
+                        (attrs = {})[attribute] = el.bindings[attribute];
+                    else
+                        attrs = el.bindings;
+
+                    for (var attr in attrs) {
+                        var val = self.call(attrs[attr], Filters, self._closestByEl(el), el);
+
+                        switch (attr) {
+                            case 'textContent':
+                                if (el.textContent !== val + '') {
+                                    el.textContent = val;
+                                }
+                                break;
+                            case 'value':
+                                if (el.tagName == 'INPUT' || el.tagName == 'SELECT' || el.tagName == 'TEXTAREA') {
+                                    if (el.value != val || el.value === '' && val === 0) {
+                                        el.value = val;
+                                    }
+                                } else
+                                    el.setAttribute(attr, val);
+                                break;
+                            case 'html':
+                            case 'sn-html':
+                                el.innerHTML = val;
+                                break;
+                            case 'sn-if':
+                                if (util.isNo(val)) {
+                                    if (el.parentNode) {
+                                        if (!el.snReplacement) {
+                                            el.snReplacement = document.createComment('if');
+                                            el.parentNode.insertBefore(el.snReplacement, el);
+                                        }
+                                        el.parentNode.removeChild(el);
+                                    }
+
+                                } else {
+                                    if (!el.parentNode) {
+                                        el.snReplacement.parentNode.insertBefore(el, el.snReplacement);
                                     }
                                 }
-                            }
+                                break;
+                            case 'display':
+                            case 'sn-display':
+                                el.style.display = util.isNo(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
+                                break;
+                            case 'sn-style':
+                            case 'style':
+                                el.style.cssText += val;
+                                break;
+                            case 'checked':
+                            case 'selected':
+                                (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
+                                break;
+                            case 'src':
+                            case 'sn-src':
+                                var $el = $(el).one('load error', function () {
+                                    $el.animate({
+                                        opacity: 1
+                                    }, 200);
+                                }).css({
+                                    opacity: 0
 
-                            var eventName = (loopIndex ?
-                                loopIndex.collectionName + '/' + loopIndex.alias + '/' + loopIndex.indexAlias :
-                                attrs.join('/').replace(/\./g, '/'));
-
-                            self.on('change:' + eventName, listen);
-
-                            return prefix + isNull(name);
-                        }) + ')+\'';
-                    }) +
-                '\';}catch(e){return \'\';}';
-
-            var code = 'function(global,model,el){' +
-                withData(repeat, (variables && variables.length ? 'var ' + variables.join(',') + ';' : '') + content.replace('return \'\'+', 'return ').replace(/\+\'\'/g, '')) +
-                '}';
-
-            return this.compile(code);
-        },
-
-        call: function (id, arg0, arg1, arg2, arg3) {
-            var fn = this.fns[id];
-
-            switch (arguments.length) {
-                case 1:
-                    return fn.call(this);
-                case 2:
-                    return fn.call(this, arg0);
-                case 3:
-                    return fn.call(this, arg0, arg1);
-                case 4:
-                    return fn.call(this, arg0, arg1, arg2);
-                case 5:
-                    return fn.call(this, arg0, arg1, arg2, arg3);
-                default:
-                    return fn.apply(this, arguments);
-            }
-        },
-
-        _render: function (el, attribute) {
-
-            var self = this;
-            if (el.bindings) {
-                var attrs;
-                if (attribute)
-                    (attrs = {})[attribute] = el.bindings[attribute];
-                else
-                    attrs = el.bindings;
-
-                for (var attr in attrs) {
-                    var val = self.call(attrs[attr], Filters, self._closestByEl(el), el);
-
-                    switch (attr) {
-                        case 'textContent':
-                            if (el.textContent !== val + '') {
-                                el.textContent = val;
-                            }
-                            break;
-                        case 'value':
-                            if (el.tagName == 'INPUT' || el.tagName == 'SELECT' || el.tagName == 'TEXTAREA') {
-                                if (el.value != val || el.value === '' && val === 0) {
-                                    el.value = val;
-                                }
-                            } else
+                                }).attr({
+                                    src: val
+                                });
+                                break;
+                            default:
                                 el.setAttribute(attr, val);
-                            break;
-                        case 'html':
-                        case 'sn-html':
-                            el.innerHTML = val;
-                            break;
-                        case 'sn-if':
-                            if (util.isNo(val)) {
-                                if (el.parentNode) {
-                                    if (!el.snReplacement) {
-                                        el.snReplacement = document.createComment('if');
-                                        el.parentNode.insertBefore(el.snReplacement, el);
-                                    }
-                                    el.parentNode.removeChild(el);
-                                }
-
-                            } else {
-                                if (!el.parentNode) {
-                                    el.snReplacement.parentNode.insertBefore(el, el.snReplacement);
-                                }
-                            }
-                            break;
-                        case 'display':
-                        case 'sn-display':
-                            el.style.display = util.isNo(val) ? 'none' : val == 'block' || val == 'inline' || val == 'inline-block' ? val : '';
-                            break;
-                        case 'sn-style':
-                        case 'style':
-                            el.style.cssText += val;
-                            break;
-                        case 'checked':
-                        case 'selected':
-                            (el[attr] = !!val) ? el.setAttribute(attr, attr) : el.removeAttribute(attr);
-                            break;
-                        case 'src':
-                        case 'sn-src':
-                            var $el = $(el).one('load error', function () {
-                                $el.animate({
-                                    opacity: 1
-                                }, 200);
-                            }).css({
-                                opacity: 0
-
-                            }).attr({
-                                src: val
-                            });
-                            break;
-                        default:
-                            el.setAttribute(attr, val);
-                            break;
+                                break;
+                        }
                     }
                 }
-            }
-        },
+            },
 
-        _renderEls: function (elements, attr) {
-            for (var i = 0, n = elements && elements.length; i < n; i++) {
-                this._render(elements[i], attr);
-            }
-
-        },
-        _bindAttr: function (node, attr, expression, repeat) {
-            var self = this;
-            var elements;
-
-            if (!rmatch.test(expression)) return;
-
-            (node.bindings || (node._elements = [], node.bindings = {}))[attr] = self._compile(expression, repeat, function (e, model) {
-                if (!repeat) {
-                    self._render(node, attr);
-
-                } else if (model instanceof Model) {
-                    elements = (model == self || model.under()) ? node._elements : model._elements[node.snElementId];
-
-                    self._renderEls(elements);
-
-                } else if (model instanceof Collection) {
-                    for (var i = 0, n = model.models.length; i < n; i++) {
-
-                        elements = model.models[i]._elements[node.snElementId];
-
-                        self._renderEls(elements);
-                    }
-                } else if ($.isArray(model)) {
-                    for (var el, i = 0, n = model.length; i < n; i++) {
-                        el = model[i];
-
-                        elements = el.snModel._elements[node.snElementId];
-
-                        self._renderEls(elements);
-                    }
+            _renderEls: function (elements, attr) {
+                for (var i = 0, n = elements && elements.length; i < n; i++) {
+                    this._render(elements[i], attr);
                 }
-            });
-        },
 
-        _closestByEl: function (el) {
-            return this.upperRepeatEl(el, function (el) {
-                return el.snModel;
-            });
-        },
+            },
+            _bindAttr: function (node, attr, expression, repeat) {
+                var self = this;
+                var elements;
 
-        _getByEl: function (el, name) {
-            var self = this;
-            var attrs = name.split('.');
-            var alias = attrs[0];
+                if (!rmatch.test(expression)) return;
 
-            if (alias == 'this') {
-                return self;
-            } else if (alias == "$state")
-                return self.$state;
+                (node.bindings || (node._elements = [], node.bindings = {}))[attr] = self._compile(expression, repeat, function (e, model) {
+                    if (!repeat) {
+                        self._render(node, attr);
 
-            return this.upperRepeatEl(el, function (el) {
-                if (el.snRepeat.repeat.alias == alias)
+                    } else if (model instanceof Model) {
+                        elements = (model == self || model.under()) ? node._elements : model._elements[node.snElementId];
+
+                        self._renderEls(elements);
+
+                    } else if (model instanceof Collection) {
+                        for (var i = 0, n = model.models.length; i < n; i++) {
+
+                            elements = model.models[i]._elements[node.snElementId];
+
+                            self._renderEls(elements);
+                        }
+                    } else if ($.isArray(model)) {
+                        for (var el, i = 0, n = model.length; i < n; i++) {
+                            el = model[i];
+
+                            elements = el.snModel._elements[node.snElementId];
+
+                            self._renderEls(elements);
+                        }
+                    }
+                });
+            },
+
+            _closestByEl: function (el) {
+                return this.upperRepeatEl(el, function (el) {
                     return el.snModel;
-            });
-        },
-        _getVal: function (model, name) {
-            var model = model == this || model instanceof Model ? model : this._getByEl(model, name);
+                });
+            },
 
-            return model.get(model == this ? name : name.replace(/^[^\.]+\./, ''));
-        },
+            _getByEl: function (el, name) {
+                var self = this;
+                var attrs = name.split('.');
+                var alias = attrs[0];
 
-        _setByEl: function (el, name, value) {
-            var model = this._getByEl(el, name);
+                if (alias == 'this') {
+                    return self;
+                } else if (alias == "$state")
+                    return self.$state;
 
-            model.set(model == this || model == self.$state ? name : name.replace(/^[^\.]+\./, ''), value);
-        },
+                return this.upperRepeatEl(el, function (el) {
+                    if (el.snRepeat.repeat.alias == alias)
+                        return el.snModel;
+                });
+            },
+            _getVal: function (model, name) {
+                var model = model == this || model instanceof Model ? model : this._getByEl(model, name);
 
-        _triggerChangeEvent: function (eventName, model) {
-            var self = this;
+                return model.get(model == this ? name : name.replace(/^[^\.]+\./, ''));
+            },
 
-            !model && (model = this);
+            _setByEl: function (el, name, value) {
+                var model = this._getByEl(el, name);
 
-            eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
+                model.set(model == this || model == self.$state ? name : name.replace(/^[^\.]+\./, ''), value);
+            },
 
-            var eventsCache = self.eventsCache[eventName] || (self.eventsCache[eventName] = []);
+            _triggerChangeEvent: function (eventName, model) {
+                var self = this;
 
-            (eventsCache.indexOf(model) == -1) && eventsCache.push(model);
+                !model && (model = this);
 
-            if (!self.changeEventsTimer) {
-                self.changeEventsTimer = setTimeout(function () {
-                    var now = Date.now();
-                    var roots = [];
+                eventName = 'change' + (eventName ? ":" + eventName : '').replace(/\./g, '/');
 
-                    for (var key in self.eventsCache) {
+                var eventsCache = self.eventsCache[eventName] || (self.eventsCache[eventName] = []);
 
-                        eventsCache = self.eventsCache[key];
+                (eventsCache.indexOf(model) == -1) && eventsCache.push(model);
 
-                        for (var i = 0, n = eventsCache.length; i < n; i++)
-                            self.trigger(key, eventsCache[i]);
-                    }
+                if (!self.changeEventsTimer) {
+                    self.changeEventsTimer = setTimeout(function () {
+                        var now = Date.now();
+                        var roots = [];
 
-                    self.eventsCache = {};
-                    self.changeEventsTimer = null;
-                    self.trigger("viewDidUpdate");
+                        for (var key in self.eventsCache) {
 
-                }, 0);
-            }
+                            eventsCache = self.eventsCache[key];
 
-            return this;
-        },
+                            for (var i = 0, n = eventsCache.length; i < n; i++)
+                                self.trigger(key, eventsCache[i]);
+                        }
 
-        upperRepeatEl: function (el, fn, ret) {
+                        self.eventsCache = {};
+                        self.changeEventsTimer = null;
+                        self.trigger("viewDidUpdate");
 
-            while (el) {
-                if (el.snRepeatNode)
-                    el = el.snRepeatNode;
+                    }, 0);
+                }
 
-                if (el.snModel && el.snRepeat) {
-                    if ((val = fn(el)) !== undefined) return val;
+                return this;
+            },
 
-                    el = el.snReplacement;
+            upperRepeatEl: function (el, fn, ret) {
 
-                } else
-                    break;
-            }
+                while (el) {
+                    if (el.snRepeatNode)
+                        el = el.snRepeatNode;
 
-            return ret === undefined ? this : ret;
-        },
+                    if (el.snModel && el.snRepeat) {
+                        if ((val = fn(el)) !== undefined) return val;
 
-        bind: function (el) {
-            var self = this;
-            var elements = [];
-            var snModelName = 'sn-' + self.cid + 'model';
+                        el = el.snReplacement;
 
-            var $el = $(el).on('input change blur', '[' + snModelName + ']', function (e) {
-                var target = e.currentTarget;
-                var name = target.getAttribute(snModelName);
+                    } else
+                        break;
+                }
 
-                self._setByEl(target, name, target.value);
-            });
+                return ret === undefined ? this : ret;
+            },
 
-            self.$el = !self.$el ? $el : self.$el.add($el);
+            bind: function (el) {
+                var self = this;
+                var elements = [];
+                var snModelName = 'sn-' + self.cid + 'model';
 
-            eachElement($el, function (child, i, extendRepeat) {
-                if (child.snViewModel) return false;
+                var $el = $(el).on('input change blur', '[' + snModelName + ']', function (e) {
+                    var target = e.currentTarget;
+                    var name = target.getAttribute(snModelName);
 
-                if (child.nodeType == 1) {
-                    var repeat = child.getAttribute('sn-repeat');
-                    if (repeat != null) {
-                        var match = repeat.match(rrepeat);
-                        var collectionName = match[3];
-                        var viewModel = collectionName.indexOf('$state') == 0 ? self.$state : self;
-                        repeat = new Repeat({
-                            root: self,
-                            viewModel: viewModel,
-                            parent: extendRepeat,
-                            alias: match[1],
-                            indexAlias: match[2],
-                            collectionName: collectionName,
-                            filters: match[4],
-                            orderBy: match[5],
-                            el: child
-                        });
-                        (viewModel.repeats[repeat.collectionName] || (viewModel.repeats[repeat.collectionName] = [])).push(repeat);
+                    self._setByEl(target, name, target.value);
+                });
 
-                        if (!extendRepeat) {
-                            repeat.append({
-                                replacement: repeat.replacement,
-                                model: self
+                self.$el = !self.$el ? $el : self.$el.add($el);
+
+                eachElement($el, function (child, i, extendRepeat) {
+                    if (child.snViewModel) return false;
+
+                    if (child.nodeType == 1) {
+                        var repeat = child.getAttribute('sn-repeat');
+                        if (repeat != null) {
+                            var match = repeat.match(rrepeat);
+                            var collectionName = match[3];
+                            var viewModel = collectionName.indexOf('$state') == 0 ? self.$state : self;
+                            repeat = new Repeat({
+                                root: self,
+                                viewModel: viewModel,
+                                parent: extendRepeat,
+                                alias: match[1],
+                                indexAlias: match[2],
+                                collectionName: collectionName,
+                                filters: match[4],
+                                orderBy: match[5],
+                                el: child
                             });
-                        }
+                            (viewModel.repeats[repeat.collectionName] || (viewModel.repeats[repeat.collectionName] = [])).push(repeat);
 
-                    } else {
-                        repeat = extendRepeat;
-                    }
-
-                    for (var j = child.attributes.length - 1; j >= 0; j--) {
-                        var attr = child.attributes[j].name;
-                        var val = child.attributes[j].value;
-
-                        if (val) {
-                            if (attr == 'sn-error') {
-                                attr = 'onerror'
-                            } else if (attr == 'sn-src') {
-                                attr = 'src'
+                            if (!extendRepeat) {
+                                repeat.append({
+                                    replacement: repeat.replacement,
+                                    model: self
+                                });
                             }
-                            if (attr == "ref") {
-                                self.refs[val] = child;
-
-                            } else if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr.indexOf('sn-') != 0) {
-                                if (attr.indexOf('sn-') == 0 && val.indexOf("{{") == -1 && val.indexOf("}}") == -1) {
-                                    val = '{{' + val + '}}';
-                                }
-                                self._bindAttr(child, attr, val, repeat);
-
-                            } else if (attr == 'sn-model') {
-                                child.removeAttribute(attr);
-                                child.setAttribute("sn-" + self.cid + "model", val);
-
-                            } else {
-                                var origAttr = attr;
-
-                                attr = attr.replace(/^sn-/, '');
-
-                                var evt = snEvents[attr];
-
-                                if (evt) {
-                                    child.removeAttribute(origAttr);
-
-                                    attr = "sn-" + self.cid + "-" + evt;
-
-                                    if (rset.test(val) || rthis.test(val)) {
-                                        var content = val.replace(rthis, function (match, $1, $2) {
-                                            return $1 + "e" + ($2 ? ',' : '') + $2 + ")";
-
-                                        }).replace(rset, 'this._setByEl(e.currentTarget,"$1",$2)');
-
-                                        var code = 'function(e,model,global){var el=e.currentTarget;' + withData(repeat, content) + "}";
-                                        child.setAttribute(attr, self.compile(code));
-
-                                    } else {
-                                        child.setAttribute(attr, val);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (!repeat && child.bindings) {
-                        elements.push(child);
-                    }
-                    return repeat;
-
-                } else if (child.nodeType == 3) {
-                    self._bindAttr(child, 'textContent', child.textContent, extendRepeat);
-                    if (!extendRepeat && child.bindings) {
-                        elements.push(child);
-                    }
-                }
-            });
-
-            $el.each(function () {
-                this.snViewModel = self.cid;
-                this.model = self;
-            })
-
-            //事件处理
-            var _handleEvent = function (e) {
-                if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
-                    return;
-                }
-
-                var target = e.currentTarget;
-                var eventCode = target.getAttribute('sn-' + self.cid + '-' + e.type);
-                var fn;
-                var ctx;
-
-                if (eventCode == 'false') {
-                    return false;
-
-                } else if (/^\d+$/.test(eventCode)) {
-                    var model = self._closestByEl(target);
-                    (model.root === self) && self.call(eventCode, e, model, Filters);
-
-                } else {
-                    var args = [e];
-                    var argName;
-                    var argNames = eventCode.split(':');
-
-                    for (var i = 0; i < argNames.length; i++) {
-                        var attr = argNames[i];
-                        if (i == 0) {
-                            ctx = self._getByEl(target, attr);
-                            fn = self._getVal(ctx, attr);
-
-                            e.model = self._closestByEl(target, attr);
 
                         } else {
-                            args.push(self._getVal(target, attr));
+                            repeat = extendRepeat;
+                        }
+
+                        for (var j = child.attributes.length - 1; j >= 0; j--) {
+                            var attr = child.attributes[j].name;
+                            var val = child.attributes[j].value;
+
+                            if (val) {
+                                if (attr == 'sn-error') {
+                                    attr = 'onerror'
+                                } else if (attr == 'sn-src') {
+                                    attr = 'src'
+                                }
+                                if (attr == "ref") {
+                                    self.refs[val] = child;
+
+                                } else if (attr == 'sn-display' || attr == 'sn-html' || attr == 'sn-if' || attr == 'sn-style' || attr.indexOf('sn-') != 0) {
+                                    if (attr.indexOf('sn-') == 0 && val.indexOf("{{") == -1 && val.indexOf("}}") == -1) {
+                                        val = '{{' + val + '}}';
+                                    }
+                                    self._bindAttr(child, attr, val, repeat);
+
+                                } else if (attr == 'sn-model') {
+                                    child.removeAttribute(attr);
+                                    child.setAttribute("sn-" + self.cid + "model", val);
+
+                                } else {
+                                    var origAttr = attr;
+
+                                    attr = attr.replace(/^sn-/, '');
+
+                                    var evt = snEvents[attr];
+
+                                    if (evt) {
+                                        child.removeAttribute(origAttr);
+
+                                        attr = "sn-" + self.cid + "-" + evt;
+
+                                        if (rset.test(val) || rthis.test(val)) {
+                                            var content = val.replace(rthis, function (match, $1, $2) {
+                                                return $1 + "e" + ($2 ? ',' : '') + $2 + ")";
+
+                                            }).replace(rset, 'this._setByEl(e.currentTarget,"$1",$2)');
+
+                                            var code = 'function(e,model,global){var el=e.currentTarget;' + withData(repeat, content) + "}";
+                                            child.setAttribute(attr, self.compile(code));
+
+                                        } else {
+                                            child.setAttribute(attr, val);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!repeat && child.bindings) {
+                            elements.push(child);
+                        }
+                        return repeat;
+
+                    } else if (child.nodeType == 3) {
+                        self._bindAttr(child, 'textContent', child.textContent, extendRepeat);
+                        if (!extendRepeat && child.bindings) {
+                            elements.push(child);
                         }
                     }
+                });
 
-                    fn.apply(ctx, args);
+                $el.each(function () {
+                    this.snViewModel = self.cid;
+                    this.model = self;
+                })
+
+                //事件处理
+                var _handleEvent = function (e) {
+                    if (e.type == $.fx.transitionEnd && e.target != e.currentTarget) {
+                        return;
+                    }
+
+                    var target = e.currentTarget;
+                    var eventCode = target.getAttribute('sn-' + self.cid + '-' + e.type);
+                    var fn;
+                    var ctx;
+
+                    if (eventCode == 'false') {
+                        return false;
+
+                    } else if (/^\d+$/.test(eventCode)) {
+                        var model = self._closestByEl(target);
+                        (model.root === self) && self.call(eventCode, e, model, Filters);
+
+                    } else {
+                        var args = [e];
+                        var argName;
+                        var argNames = eventCode.split(':');
+
+                        for (var i = 0; i < argNames.length; i++) {
+                            var attr = argNames[i];
+                            if (i == 0) {
+                                ctx = self._getByEl(target, attr);
+                                fn = self._getVal(ctx, attr);
+
+                                e.model = self._closestByEl(target, attr);
+
+                            } else {
+                                args.push(self._getVal(target, attr));
+                            }
+                        }
+
+                        fn.apply(ctx, args);
+                    }
+                };
+
+                for (var key in snEvents) {
+                    var eventName = snEvents[key];
+                    var attr = '[sn-' + self.cid + '-' + eventName + ']';
+                    $el.on(eventName, attr, _handleEvent);
                 }
-            };
 
-            for (var key in snEvents) {
-                var eventName = snEvents[key];
-                var attr = '[sn-' + self.cid + '-' + eventName + ']';
-                $el.on(eventName, attr, _handleEvent);
+                this.fns = this.fns.concat(window.eval('[' + this._fns.join(',') + ']'));
+                this._fns.length = 0;
+
+                for (var i = 0, len = elements.length; i < len; i++) {
+                    self._render(elements[i]);
+                }
+
+                return this;
             }
 
-            this.fns = this.fns.concat(window.eval('[' + this._fns.join(',') + ']'));
-            this._fns.length = 0;
+        }, util.pick(Component.prototype, ['$', 'undelegateEvents', 'listenTo', 'listen', 'destroy']))
+    );
 
-            for (var i = 0, len = elements.length; i < len; i++) {
-                self._render(elements[i]);
-            }
 
-            return this;
-        }
-
-    }, util.pick(Component.prototype, ['$', 'undelegateEvents', 'listenTo', 'listen', 'destroy']));
-
-    ViewModel.extend = util.extend;
 
     exports.State = ViewModel.prototype.$state = new ViewModel();
 
