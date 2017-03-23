@@ -404,10 +404,10 @@ function classExtend(proto) {
 util.createClass = function (proto) {
 
     var func = hasOwnProperty.call(proto, 'constructor') ? proto.constructor : function () {
-        this.constructor = func;
     }
 
     func.prototype = proto;
+    func.prototype.constructor = func;
 
     func.extend = classExtend;
 

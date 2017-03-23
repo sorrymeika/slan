@@ -1,3 +1,8 @@
+/**
+ * 作者: sunlu
+ * 用途: ViewModel
+ */
+
 var $ = require('$');
 var Base = require('./base');
 var util = require('util');
@@ -1177,37 +1182,6 @@ function changedAndUpdateViewNextTick(model) {
     }).render();
 }
 
-var Model = function (parent, key, attributes) {
-
-    if (parent instanceof Model) {
-        this.key = parent.key ? parent.key + '.' + key : key;
-        this._key = key;
-
-    } else if (parent instanceof Collection) {
-        this.key = parent.key + '^child';
-        this._key = parent._key + '^child';
-
-    } else {
-        throw new Error('Model\'s parent mast be Collection or Model');
-    }
-
-    this.cid = util.guid();
-
-    this.type = typeof attributes == 'object' ? 'object' : 'value';
-    this.attributes = this.type == 'object' ? extend({}, attributes) : attributes;
-
-    this._model = {};
-    this.parent = parent;
-    this.root = parent.root;
-    this.changed = false;
-
-    this.set(attributes);
-}
-
-
-var RE_QUERY = /(?:^|\.)([_a-zA-Z0-9]+)(\[(?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+\](?:\[[\+\-]?\d*\])?)?/g;
-var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-]?)(\d+)?\])?(?:\.(.*))?/;
-
 
 // var a = util.query("attr^='somevalue'|c1=1,att2!=2")({
 //     attr: 'somevalue11'
@@ -1229,10 +1203,39 @@ var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-
 // }
 
 // console.log("[attr^='somevalue',att2=2][+1].aaa[333]".match(RE_COLL_QUERY));
-
 // console.log(util.query("[attr!=undefined]", [{ attr: 1 }]))
+var RE_QUERY = /(?:^|\.)([_a-zA-Z0-9]+)(\[(?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+\](?:\[[\+\-]?\d*\])?)?/g;
+var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-]?)(\d+)?\])?(?:\.(.*))?/;
 
-var ModelProto = {
+
+var Model = util.createClass({
+
+    constructor: function (parent, key, attributes) {
+
+        if (parent instanceof Model) {
+            this.key = parent.key ? parent.key + '.' + key : key;
+            this._key = key;
+
+        } else if (parent instanceof Collection) {
+            this.key = parent.key + '^child';
+            this._key = parent._key + '^child';
+
+        } else {
+            throw new Error('Model\'s parent mast be Collection or Model');
+        }
+
+        this.cid = util.guid();
+
+        this.type = typeof attributes == 'object' ? 'object' : 'value';
+        this.attributes = this.type == 'object' ? extend({}, attributes) : attributes;
+
+        this._model = {};
+        this.parent = parent;
+        this.root = parent.root;
+        this.changed = false;
+
+        this.set(attributes);
+    },
 
     /**
      * 搜索子Model/Collection，
@@ -1567,9 +1570,8 @@ var ModelProto = {
 
         return this._model[key];
     }
-}
 
-Model.prototype = ModelProto;
+});
 
 
 var Collection = function (parent, attributeName, array) {
@@ -2186,275 +2188,275 @@ RepeatSource.prototype.appendChild = function (child) {
 
 var viewModelCache = [];
 
-var ViewModel = util.createClass(Object.assign(Object.create(ModelProto), {
+var ViewModel = Event.mixin(
+    Model.extend({
 
-    /**
-     * 双向绑定model
-     * 
-     * @param {String|Element|Boolean} [template] 字符类型或dom元素时为模版
-     * @param {Object} [attributes] 属性
-     * @param {Array} children 字节点列表
-     */
-    constructor: function (template, attributes, children) {
-        if (template !== false) viewModelCache.push(this);
+        /**
+         * 双向绑定model
+         * 
+         * @param {String|Element|Boolean} [template] 字符类型或dom元素时为模版
+         * @param {Object} [attributes] 属性
+         * @param {Array} children 字节点列表
+         */
+        constructor: function (template, attributes, children) {
+            if (template !== false) viewModelCache.push(this);
 
-        if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
-            children = attributes, attributes = template, template = this.el;
+            if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
+                children = attributes, attributes = template, template = this.el;
 
-        this.children = children ? [].concat(children) : [];
+            this.children = children ? [].concat(children) : [];
 
-        this._render = this._render.bind(this);
-        this._handleSnEvent = this._handleSnEvent.bind(this);
+            this._render = this._render.bind(this);
+            this._handleSnEvent = this._handleSnEvent.bind(this);
 
-        this.cid = util.guid();
-        this.snModelKey = 'sn-' + this.cid + 'model';
+            this.cid = util.guid();
+            this.snModelKey = 'sn-' + this.cid + 'model';
 
-        this.attributes = extend({}, this.attributes, attributes);
+            this.attributes = extend({}, this.attributes, attributes);
 
-        this.repeats = {};
+            this.repeats = {};
 
-        this._model = {};
-        this._expressions = {
-            length: 0
-        };
-        this.fns = [];
-        this.refs = {};
-        this.root = this;
-
-        template && this.bind(template);
-
-        this.set(this.attributes);
-
-        this.initialize.call(this, attributes);
-    },
-
-    initialize: util.noop,
-
-    //事件处理
-    _handleSnEvent: function (e) {
-        if (e.type == TRANSITION_END && e.target != e.currentTarget) {
-            return;
-        }
-        var target = e.currentTarget;
-        var eventCode = target.getAttribute('sn-' + this.cid + e.type);
-        var fn;
-        var ctx;
-
-        if (eventCode == 'false') {
-            return false;
-
-        } else if (/^\d+$/.test(eventCode)) {
-
-            var snData = formatData(this, target, target.snData);
-
-            snData.e = e;
-
-            var res = executeFunction(this, eventCode, snData);
-
-            return res;
-        }
-    },
-
-    dataOfElement: function (el, modelName, value) {
-        var attrs = modelName.split('.');
-        var model;
-
-        if (el.snData && attrs[0] in el.snData) {
-            model = el.snData[attrs.shift()];
-        } else {
-            model = this;
-        }
-
-        if (arguments.length == 3) {
-            model.set(attrs, value);
-            return this;
-        }
-
-        return model.get(attrs);
-    },
-
-    bind: function (el) {
-
-        var self = this;
-        var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
-            var target = e.currentTarget;
-
-            switch (e.type) {
-                case 'change':
-                case 'blur':
-                    switch (target.tagName) {
-                        case 'TEXTAREA':
-                            return;
-                        case 'INPUT':
-                            switch (target.type) {
-                                case 'hidden':
-                                case 'radio':
-                                case 'checkbox':
-                                case 'file':
-                                    break;
-                                default:
-                                    return;
-                            }
-                            break;
-                    }
-                    break;
-            }
-
-            self.dataOfElement(target, target.getAttribute(self.snModelKey), target.value);
-        });
-
-        bindElement(this, $el);
-
-        self.$el = (self.$el || $()).add($el);
-
-        $el.each(function () {
-            this.snViewModel = self;
-        })
-
-        return this;
-    },
-
-    render: function () {
-        if (!this._nextTick) {
-            this._nextTick = this._rendering ? 1 : requestAnimationFrame(this._render);
-        }
-    },
-
-    _render: function () {
-        this._rendering = true;
-
-        this.viewWillUpdate && this.viewWillUpdate();
-
-        console.time('render-' + this.cid);
-
-        var self = this;
-
-        do {
-            this.trigger(new Event(DATACHANGED_EVENT, {
-                target: this
-            }));
-
-            this._nextTick = null;
+            this._model = {};
+            this._expressions = {
+                length: 0
+            };
+            this.fns = [];
             this.refs = {};
+            this.root = this;
 
-            eachElement(this.$el, function (el) {
-                if (el.snViewModel && el.snViewModel != self || self._nextTick) return false;
+            template && this.bind(template);
 
-                return updateNode(self, el);
+            this.set(this.attributes);
+
+            this.initialize.call(this, attributes);
+        },
+
+        initialize: util.noop,
+
+        //事件处理
+        _handleSnEvent: function (e) {
+            if (e.type == TRANSITION_END && e.target != e.currentTarget) {
+                return;
+            }
+            var target = e.currentTarget;
+            var eventCode = target.getAttribute('sn-' + this.cid + e.type);
+            var fn;
+            var ctx;
+
+            if (eventCode == 'false') {
+                return false;
+
+            } else if (/^\d+$/.test(eventCode)) {
+
+                var snData = formatData(this, target, target.snData);
+
+                snData.e = e;
+
+                var res = executeFunction(this, eventCode, snData);
+
+                return res;
+            }
+        },
+
+        dataOfElement: function (el, modelName, value) {
+            var attrs = modelName.split('.');
+            var model;
+
+            if (el.snData && attrs[0] in el.snData) {
+                model = el.snData[attrs.shift()];
+            } else {
+                model = this;
+            }
+
+            if (arguments.length == 3) {
+                model.set(attrs, value);
+                return this;
+            }
+
+            return model.get(attrs);
+        },
+
+        bind: function (el) {
+
+            var self = this;
+            var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
+                var target = e.currentTarget;
+
+                switch (e.type) {
+                    case 'change':
+                    case 'blur':
+                        switch (target.tagName) {
+                            case 'TEXTAREA':
+                                return;
+                            case 'INPUT':
+                                switch (target.type) {
+                                    case 'hidden':
+                                    case 'radio':
+                                    case 'checkbox':
+                                    case 'file':
+                                        break;
+                                    default:
+                                        return;
+                                }
+                                break;
+                        }
+                        break;
+                }
+
+                self.dataOfElement(target, target.getAttribute(self.snModelKey), target.value);
             });
 
-        } while (this._nextTick);
+            bindElement(this, $el);
 
-        console.timeEnd('render-' + this.cid);
+            self.$el = (self.$el || $()).add($el);
 
-        this._rendering = false;
+            $el.each(function () {
+                this.snViewModel = self;
+            })
 
-        this.viewDidUpdate && this.viewDidUpdate();
-        this.trigger('viewDidUpdate');
-    },
+            return this;
+        },
 
-    _checkOwnNode: function (node) {
-        if (typeof node == 'string') {
-            node = this.$el.find(node);
+        render: function () {
+            if (!this._nextTick) {
+                this._nextTick = this._rendering ? 1 : requestAnimationFrame(this._render);
+            }
+        },
 
-            if (!node.length)
-                throw new Error('is not own node');
+        _render: function () {
+            this._rendering = true;
 
-        } else {
+            this.viewWillUpdate && this.viewWillUpdate();
 
-            this.$el.each(function () {
-                if (!$.contains(this, node))
+            console.time('render-' + this.cid);
+
+            var self = this;
+
+            do {
+                this.trigger(new Event(DATACHANGED_EVENT, {
+                    target: this
+                }));
+
+                this._nextTick = null;
+                this.refs = {};
+
+                eachElement(this.$el, function (el) {
+                    if (el.snViewModel && el.snViewModel != self || self._nextTick) return false;
+
+                    return updateNode(self, el);
+                });
+
+            } while (this._nextTick);
+
+            console.timeEnd('render-' + this.cid);
+
+            this._rendering = false;
+
+            this.viewDidUpdate && this.viewDidUpdate();
+            this.trigger('viewDidUpdate');
+        },
+
+        nextUpdate: function (cb) {
+            return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
+        },
+
+        _checkOwnNode: function (node) {
+            if (typeof node == 'string') {
+                node = this.$el.find(node);
+
+                if (!node.length)
                     throw new Error('is not own node');
-            });
-        }
-        return node;
-    },
 
-    isOwnNode: function (node) {
-        if (typeof node == 'string') {
-            return !this.$el.find(node).length;
+            } else {
 
-        } else {
-            var flag = true;
-            this.$el.each(function () {
-                if (!$.contains(this, node)) return false;
-            });
-            return flag;
-        }
-    },
-
-    before: function (newNode, referenceNode) {
-
-        referenceNode = this._checkOwnNode(referenceNode);
-
-        return bindNewElement(this, newNode)
-            .insertBefore(referenceNode);
-    },
-
-    after: function (newNode, referenceNode) {
-        referenceNode = this._checkOwnNode(referenceNode);
-
-        return bindNewElement(this, newNode)
-            .insertAfter(referenceNode);
-    },
-
-    append: function (newNode, parentNode) {
-        parentNode = this._checkOwnNode(parentNode);
-
-        return bindNewElement(this, newNode)
-            .appendTo(parentNode);
-    },
-
-    prepend: function (newNode, parentNode) {
-        parentNode = this._checkOwnNode(parentNode);
-
-        return bindNewElement(this, newNode)
-            .prependTo(parentNode);
-    },
-
-    next: function (cb) {
-        return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
-    },
-
-    destroy: function () {
-        this.$el.off('input change blur', '[' + this.snModelKey + ']')
-            .each(function () {
-                this.snViewModel = null;
-            });
-
-        for (var key in EVENTS) {
-            var eventName = EVENTS[key];
-            var attr = '[sn-' + this.cid + eventName + ']';
-
-            this.$el.off(eventName, attr, this._handleSnEvent);
-        }
-
-        for (var i = 0, len = viewModelCache.length; i < len; i++) {
-            if (viewModelCache[i] == this) {
-                viewModelCache.splice(i, 1);
-                break;
+                this.$el.each(function () {
+                    if (!$.contains(this, node))
+                        throw new Error('is not own node');
+                });
             }
-        }
+            return node;
+        },
 
-        var children = this._linkedModels;
-        if (children) {
-            for (var i = 0, len = children.length; i < len; i++) {
-                var link = children[i];
-                var childModel = link.childModel;
-                var linkedParents = childModel._linkedParents;
+        isOwnNode: function (node) {
+            if (typeof node == 'string') {
+                return !this.$el.find(node).length;
 
-                linkedParents.splice(linkedParents.indexOf(link), 1);
-                childModel.root.off(LINKEDCHANGE + ':' + childModel.cid, link.cb);
+            } else {
+                var flag = true;
+                this.$el.each(function () {
+                    if (!$.contains(this, node)) return false;
+                });
+                return flag;
             }
+        },
+
+        before: function (newNode, referenceNode) {
+
+            referenceNode = this._checkOwnNode(referenceNode);
+
+            return bindNewElement(this, newNode)
+                .insertBefore(referenceNode);
+        },
+
+        after: function (newNode, referenceNode) {
+            referenceNode = this._checkOwnNode(referenceNode);
+
+            return bindNewElement(this, newNode)
+                .insertAfter(referenceNode);
+        },
+
+        append: function (newNode, parentNode) {
+            parentNode = this._checkOwnNode(parentNode);
+
+            return bindNewElement(this, newNode)
+                .appendTo(parentNode);
+        },
+
+        prepend: function (newNode, parentNode) {
+            parentNode = this._checkOwnNode(parentNode);
+
+            return bindNewElement(this, newNode)
+                .prependTo(parentNode);
+        },
+
+        destroy: function () {
+            this.$el.off('input change blur', '[' + this.snModelKey + ']')
+                .each(function () {
+                    this.snViewModel = null;
+                });
+
+            for (var key in EVENTS) {
+                var eventName = EVENTS[key];
+                var attr = '[sn-' + this.cid + eventName + ']';
+
+                this.$el.off(eventName, attr, this._handleSnEvent);
+            }
+
+            for (var i = 0, len = viewModelCache.length; i < len; i++) {
+                if (viewModelCache[i] == this) {
+                    viewModelCache.splice(i, 1);
+                    break;
+                }
+            }
+
+            var children = this._linkedModels;
+            if (children) {
+                for (var i = 0, len = children.length; i < len; i++) {
+                    var link = children[i];
+                    var childModel = link.childModel;
+                    var linkedParents = childModel._linkedParents;
+
+                    linkedParents.splice(linkedParents.indexOf(link), 1);
+                    childModel.root.off(LINKEDCHANGE + ':' + childModel.cid, link.cb);
+                }
+            }
+
         }
 
-    }
+    })
+);
 
-}));
-
-ViewModel.prototype.then = ViewModel.prototype.next;
-
-Event.mixin(ViewModel);
+ViewModel.prototype.next = ViewModel.prototype.nextUpdate;
 
 var global = new ViewModel();
 
@@ -2485,6 +2487,7 @@ global._render = function () {
 ViewModel.prototype.global = global;
 
 
+
 exports.global = global;
 
 exports.ViewModel = exports.Model = ViewModel;
@@ -2499,7 +2502,6 @@ exports.createModel = function (props) {
 
     return Object.assign(new ViewModel(attributes), props);
 }
-
 
 exports.Collection = Collection;
 

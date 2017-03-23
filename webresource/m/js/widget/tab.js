@@ -99,7 +99,7 @@ var Tab = Model.extend({
 
         }).observe('items', function () {
 
-            this.then(function () {
+            this.next(function () {
 
                 this.refs.items.forEach(function (item) {
                     if (!item.scroll)
