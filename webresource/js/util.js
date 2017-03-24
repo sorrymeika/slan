@@ -903,6 +903,11 @@ ArrayQuery.prototype.map = function (key) {
     return new ArrayQuery(map(this.array, key));
 }
 
+
+ArrayQuery.prototype.concat = function (array) {
+    return new ArrayQuery(this.array.concat(array));
+}
+
 /**
  * 筛选数组中匹配的
  * 
@@ -1020,18 +1025,14 @@ ArrayQuery.prototype.remove = function (key, val) {
     return this;
 }
 
-ArrayQuery.prototype.toArray = ArrayQuery.prototype.toJSON = function () {
-    return this.array;
-}
-
-util.array = function (array) {
-    return new ArrayQuery(array);
-}
-
-
-util.remove = remove;
-
-util.exclude = function (arr, key, val) {
+/**
+ * 排除匹配的
+ * 
+ * @param {Array} arr 
+ * @param {String|Function|Object} key 
+ * @param {any} [val] 
+ */
+function exclude(arr, key, val) {
     var length = arr.length;
     var keyType = typeof key;
     var result = [];
@@ -1057,6 +1058,21 @@ util.exclude = function (arr, key, val) {
 
     return result;
 }
+
+util.exclude = exclude;
+
+ArrayQuery.prototype.exclude = function (key, val) {
+    return new ArrayQuery(exclude(this.array, key, val));
+}
+
+ArrayQuery.prototype.toArray = ArrayQuery.prototype.toJSON = function () {
+    return this.array;
+}
+
+util.array = function (array) {
+    return new ArrayQuery(array);
+}
+
 
 /**
  * 常用验证

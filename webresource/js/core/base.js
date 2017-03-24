@@ -1,4 +1,5 @@
 ﻿var $ = require('$');
+if (!window.Promise) window.Promise = require('promise');
 
 if (!Object.create) Object.create = function (o) {
     var F = function () { };

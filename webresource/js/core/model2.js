@@ -224,10 +224,10 @@ function eachElement(el, fn) {
     }
 }
 
-function setRefs(viewModel, el) {
+function setRef(viewModel, el) {
     var refName = el.getAttribute('ref');
 
-    if (refName) {
+    if (refName && !el.snRequire) {
         var ref = el.snRequireInstance || el;
         var refs = viewModel.refs[refName];
 
@@ -274,21 +274,36 @@ function executeFunction(viewModel, functionId, data) {
     return viewModel.fns[functionId].call(viewModel, data);
 }
 
+
+function checkOwnNode(viewModel, node) {
+    if (typeof node == 'string') {
+        node = viewModel.$el.find(node);
+
+        if (!node.length)
+            throw new Error('is not own node');
+
+    } else {
+
+        viewModel.$el.each(function () {
+            if (!$.contains(this, node))
+                throw new Error('is not own node');
+        });
+    }
+    return node;
+}
+
 function updateRequiredView(viewModel, el) {
     var id = el.getAttribute('sn-data');
     var data = !id ? null : executeFunction(viewModel, id, formatData(viewModel, el.snData, el));
-    var instance;
 
     if (el.snRequireInstance) {
-        instance = el.snRequireInstance;
-        if (data && !util.equals(data, instance._originData)) {
-            instance._originData = data;
-            instance.set(data);
-        }
+        el.snRequireInstance.set(data);
 
     } else {
         var children = [];
         var node;
+        var instance;
+
         for (var i = 0, j = el.childNodes.length - 1; i < j; i++) {
             node = el.childNodes[i];
 
@@ -299,13 +314,14 @@ function updateRequiredView(viewModel, el) {
             }
         }
 
-        el.snRequireInstance = instance = new el.snRequire(data, children);
-
-        instance._originData = data;
+        instance = el.snRequireInstance = new el.snRequire(data, children);
 
         instance.$el.appendTo(el);
+
+        delete el.snRequire;
     }
-    setRefs(viewModel, el);
+
+    setRef(viewModel, el);
 }
 
 function cloneRepeatElement(source, snData) {
@@ -577,8 +593,8 @@ function updateNode(viewModel, el) {
                     };
 
                 } else {
-                    if (el.snRequire) updateRequiredView(viewModel, el);
-                    else setRefs(viewModel, el);
+                    if (el.snRequireInstance || el.snRequire) updateRequiredView(viewModel, el);
+                    else setRef(viewModel, el);
 
                     var nextElement = el.nextSibling;
                     var currentElement = el;
@@ -614,10 +630,12 @@ function updateNode(viewModel, el) {
 
                     return currentElement.nextSibling;
                 }
-            } else if (el.snRequire) {
+
+            } else if (el.snRequireInstance || el.snRequire) {
                 updateRequiredView(viewModel, el);
+
             } else {
-                setRefs(viewModel, el);
+                setRef(viewModel, el);
             }
         }
 
@@ -853,10 +871,11 @@ function bindNodeAttributes(viewModel, el) {
                         el.snIsGlobal = fid.isGlobal;
                         el.removeAttribute(attr);
 
-                    } else if (attr == "ref") {
+                    } else if (attr == "ref" && !el.getAttribute('sn-require')) {
                         viewModel.refs[val] = el;
                     }
                     break;
+
                 case 'sn-model':
                     el.removeAttribute(attr);
                     el.setAttribute(viewModel.snModelKey, val);
@@ -868,7 +887,7 @@ function bindNodeAttributes(viewModel, el) {
                     //处理事件绑定
                     var origAttr = attr;
 
-                    attr = attr.replace(/^sn-/, '');
+                    attr = attr.replace(rSnAttr, '');
 
                     var evt = EVENTS[attr];
 
@@ -2317,6 +2336,83 @@ var ViewModel = Event.mixin(
             return this;
         },
 
+        nextUpdate: function (cb) {
+            return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
+        },
+
+        getRef: function (name, cb) {
+            var ref = this.refs[name];
+
+            if (ref) {
+                if (!cb) return ref;
+                else cb.call(this, ref);
+
+            } else {
+
+                var self = this;
+                var getRef = function (resolve) {
+
+                    self.onceTrue('viewDidUpdate', function () {
+
+                        if (this.refs[name]) {
+                            resolve.call(this, this.refs[name]);
+                            return true;
+                        }
+                    });
+                }
+
+                if (cb) {
+                    getRef(cb);
+
+                } else {
+
+                    return new Promise(getRef)
+                }
+            }
+        },
+
+        isOwnNode: function (node) {
+            if (typeof node == 'string') {
+                return !this.$el.find(node).length;
+
+            } else {
+                var flag = true;
+                this.$el.each(function () {
+                    if (!$.contains(this, node)) return false;
+                });
+                return flag;
+            }
+        },
+
+        before: function (newNode, referenceNode) {
+
+            referenceNode = checkOwnNode(this, referenceNode);
+
+            return bindNewElement(this, newNode)
+                .insertBefore(referenceNode);
+        },
+
+        after: function (newNode, referenceNode) {
+            referenceNode = checkOwnNode(this, referenceNode);
+
+            return bindNewElement(this, newNode)
+                .insertAfter(referenceNode);
+        },
+
+        append: function (newNode, parentNode) {
+            parentNode = checkOwnNode(this, parentNode);
+
+            return bindNewElement(this, newNode)
+                .appendTo(parentNode);
+        },
+
+        prepend: function (newNode, parentNode) {
+            parentNode = checkOwnNode(this, parentNode);
+
+            return bindNewElement(this, newNode)
+                .prependTo(parentNode);
+        },
+
         render: function () {
             if (!this._nextTick) {
                 this._nextTick = this._rendering ? 1 : requestAnimationFrame(this._render);
@@ -2354,81 +2450,6 @@ var ViewModel = Event.mixin(
 
             this.viewDidUpdate && this.viewDidUpdate();
             this.trigger('viewDidUpdate');
-        },
-
-        nextUpdate: function (cb) {
-            return this._nextTick ? this.one('viewDidUpdate', cb) : cb.call(this);
-        },
-
-        getRef: function (name, cb) {
-            if (this.refs[name])
-                return cb(this.refs[name]);
-
-            this.onceTrue('viewDidUpdate', function () {
-                if (this.refs[name]) {
-                    cb(this.refs[name]);
-                    return true;
-                }
-            })
-        },
-
-        _checkOwnNode: function (node) {
-            if (typeof node == 'string') {
-                node = this.$el.find(node);
-
-                if (!node.length)
-                    throw new Error('is not own node');
-
-            } else {
-
-                this.$el.each(function () {
-                    if (!$.contains(this, node))
-                        throw new Error('is not own node');
-                });
-            }
-            return node;
-        },
-
-        isOwnNode: function (node) {
-            if (typeof node == 'string') {
-                return !this.$el.find(node).length;
-
-            } else {
-                var flag = true;
-                this.$el.each(function () {
-                    if (!$.contains(this, node)) return false;
-                });
-                return flag;
-            }
-        },
-
-        before: function (newNode, referenceNode) {
-
-            referenceNode = this._checkOwnNode(referenceNode);
-
-            return bindNewElement(this, newNode)
-                .insertBefore(referenceNode);
-        },
-
-        after: function (newNode, referenceNode) {
-            referenceNode = this._checkOwnNode(referenceNode);
-
-            return bindNewElement(this, newNode)
-                .insertAfter(referenceNode);
-        },
-
-        append: function (newNode, parentNode) {
-            parentNode = this._checkOwnNode(parentNode);
-
-            return bindNewElement(this, newNode)
-                .appendTo(parentNode);
-        },
-
-        prepend: function (newNode, parentNode) {
-            parentNode = this._checkOwnNode(parentNode);
-
-            return bindNewElement(this, newNode)
-                .prependTo(parentNode);
         },
 
         destroy: function () {
