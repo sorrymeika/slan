@@ -3,12 +3,14 @@ var util = require('util');
 var bridge = require('bridge');
 var Base = require('./base');
 var Component = require('./component');
-var appProto = require('./appProto');
 var animation = require('./animation');
 var LinkList = require('./linklist');
 var Queue = require('./queue');
 var Touch = require('./touch');
 var Route = require('./route');
+
+var ActivityManager = require('./activityManager');
+
 var Activity = require('./activity');
 var Toast = require('../widget/toast');
 
@@ -80,7 +82,7 @@ function bindBackGesture(application) {
         that.minX = that.width * -1;
         that.maxX = 0;
 
-        var currentActivity = application._currentActivity;
+        var currentActivity = application.activityManager.getCurrentActivity();
         var isSwipeLeft = that.isSwipeLeft = deltaX > 0;
 
         that.swiper = null;
@@ -103,7 +105,7 @@ function bindBackGesture(application) {
                 application.mask.show();
                 currentActivity._startExiting();
 
-                application.get(action, function (activity) {
+                application.activityManager.get(action, function (activity) {
                     that.needRemove = activity.el.parentNode === null;
                     adjustActivity(currentActivity, activity);
 
@@ -133,14 +135,17 @@ function bindBackGesture(application) {
         });
 
     }).on('stop', function () {
-        var that = this;
 
-        that.isCancelSwipe = that.isMoveLeft !== that.isSwipeLeft || Math.abs(that.deltaX) <= 10;
+        this.isCancelSwipe = this.isMoveLeft !== this.isSwipeLeft || Math.abs(this.deltaX) <= 10;
 
-        if (!that.isCancelSwipe)
-            application._currentActivity.trigger('Pause');
+        var currentActivity = application.activityManager.getCurrentActivity()
 
-        if (that.swiperQueue) {
+        if (!this.isCancelSwipe)
+            currentActivity.trigger('Pause');
+
+        if (this.swiperQueue) {
+            var that = this;
+
             that.swiperQueue.push(function () {
 
                 that._isInAnim = true;
@@ -148,8 +153,7 @@ function bindBackGesture(application) {
                 application.queue.push(function (err, res, next) {
 
                     that.swiper.animate(200, that.isCancelSwipe ? 0 : 100, function () {
-                        var activity = that.swipeActivity,
-                            currentActivity = application._currentActivity;
+                        var activity = that.swipeActivity;
 
                         that._isInAnim = false;
 
@@ -162,7 +166,7 @@ function bindBackGesture(application) {
                         } else {
                             activity.isForward = that.isSwipeOpen;
 
-                            application._currentActivity = that.swipeActivity;
+                            application.activityManager.setCurrentActivity(activity);
                             application.navigate(activity.url, that.isSwipeOpen);
 
                             currentActivity.trigger('Hide');
@@ -189,10 +193,11 @@ function bindBackGesture(application) {
     });
 }
 
-var Application = Component.extend(Object.assign(appProto, {
+
+var Application = Component.extend({
+
     events: {
         'tap,click a[href]:not(.js-link-default)': function (e) {
-            var that = this;
             var target = $(e.currentTarget);
             var href = target.attr('href');
 
@@ -200,7 +205,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 if (e.type == 'tap') {
                     if (!/^#/.test(href)) href = '#' + href;
 
-                    target.attr('back') != null ? that.back(href) : that.forward(href);
+                    target.attr('back') != null ? this.back(href) : this.forward(href);
                 }
 
             } else if (sl.isInApp && href.indexOf('http') == 0) {
@@ -230,18 +235,23 @@ var Application = Component.extend(Object.assign(appProto, {
     el: '<div class="viewport"><div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div></div>',
 
     initialize: function (options) {
-        var that = this;
         //var preventEvents = 'tap click touchmove touchstart';
 
-        that.el = that.$el[0];
-        that.mask = that.$el.children('.screen'); //.off(preventEvents).on(preventEvents, false);
+        this.routeManager = options.routeManager;
 
-        that.history = [];
-        that._backAction = [];
+        this.activityManager = options.activityManager;
+        this.activityManager.application = this;
+
+        this.el = this.$el[0];
+        this.mask = this.$el.children('.screen'); //.off(preventEvents).on(preventEvents, false);
+
+        this.history = [];
+        this._backAction = [];
 
         if (options.backGesture !== false) bindBackGesture(this);
 
         var readyForExit = false;
+        var that = this;
 
         $(window).on('back', function () {
 
@@ -251,7 +261,9 @@ var Application = Component.extend(Object.assign(appProto, {
             }
 
             var hash = location.hash;
-            if (!that._currentActivity || that._currentActivity.path == "/" || that._currentActivity.path == options.loginPath) {
+            var currentActivity = that.getCurrentActivity();
+
+            if (!currentActivity || currentActivity.path == "/" || currentActivity.path == options.loginPath) {
                 if (readyForExit) {
                     bridge.exit();
                 } else {
@@ -263,7 +275,7 @@ var Application = Component.extend(Object.assign(appProto, {
                 }
 
             } else {
-                that.back(that._currentActivity.referrer || '/');
+                that.back(currentActivity.referrer || '/');
             }
 
         }).on('urlchange', function (e, data) {
@@ -276,10 +288,6 @@ var Application = Component.extend(Object.assign(appProto, {
             that.el.style.bottom = '0px';
 
         });
-
-        if (options.routes) {
-            this.mapRoutes(options.routes);
-        }
     },
 
     addBackAction: function (fn) {
@@ -302,25 +310,23 @@ var Application = Component.extend(Object.assign(appProto, {
     },
 
     getCurrentActivity: function () {
-        return this._currentActivity;
+        return this.activityManager.getCurrentActivity();
     },
 
     start: function (delay) {
         var that = this;
         var $win = $(window);
-        var $el = that.$el;
+        var $el = this.$el;
 
-        window.application = this;
-
-        that.$el = $(that.el);
+        this.$el = $(that.el);
 
         if (bridge.hasStatusBar) {
             $('body').addClass('has_status_bar');
         }
 
-        that.hash = Route.formatUrl(location.hash);
+        this.hash = Route.formatUrl(location.hash);
 
-        that.historyQueue = Queue.done();
+        this.historyQueue = Queue.done();
 
         var delayPromise;
 
@@ -340,31 +346,34 @@ var Application = Component.extend(Object.assign(appProto, {
             $el.appendTo(document.body);
         }
 
-        that.queue = new Queue();
+        this.queue = new Queue();
 
-        that.get(that.hash, function (activity) {
+        this.activityManager.get(this.hash, function (activity) {
 
             that.history.push(that.hash);
 
             activity.$el.appendTo(that.el);
-            that._currentActivity = activity;
+
+            that.activityManager.setCurrentActivity(activity);
 
             activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
 
-
             (delayPromise || Promise.resolve()).then(function () {
-                activity.$el.css({
-                    opacity: 0
-                }).addClass('active').animate({
-                    opacity: 1
 
-                }, 'ease-out', 400);
+                activity.doAfterCreate(function () {
+                    activity.$el.css({
+                        opacity: 0
+                    }).addClass('active').animate({
+                        opacity: 1
 
-                activity.trigger('Appear').trigger('Show');
+                    }, 'ease-out', 400);
 
-                that.trigger('Start');
+                    activity.trigger('Appear').trigger('Show');
 
-                that.queue.shift();
+                    that.trigger('Start');
+
+                    that.queue.shift();
+                });
             });
 
             $win.on('hashchange', function () {
@@ -398,22 +407,24 @@ var Application = Component.extend(Object.assign(appProto, {
 
     _toggle: function (route, options, toggleFinish, queueDone) {
 
-        var that = this,
-            prevActivity,
-            currentActivity = that._currentActivity,
-            url = route.url,
-            isForward = options.isForward,
-            duration = options.duration === undefined ? 400 : options.duration;
+        var activityManager = this.activityManager;
+        var currentActivity = activityManager.getCurrentActivity();
 
+        var url = route.url;
 
         if (currentActivity.path == route.path) {
-            that.navigate(url, 2);
-
-            that.checkQueryString(currentActivity, route);
+            this.navigate(url, 2);
+            activityManager.checkQueryString(currentActivity, route);
             queueDone();
             return;
         }
-        that.navigate(url, isForward);
+
+        var isForward = options.isForward;
+        var duration = options.duration === undefined ? 400 : options.duration;
+        var prevActivity;
+        var that = this;
+
+        this.navigate(url, isForward);
 
         route.isForward = isForward;
 
@@ -431,12 +442,12 @@ var Application = Component.extend(Object.assign(appProto, {
 
         currentActivity._startExiting();
 
-        that.get(route, function (activity) {
-            that._currentActivity = activity;
+        activityManager.get(route, function (activity) {
 
             adjustActivity(currentActivity, activity);
 
-            that.checkQueryString(activity, route);
+            activityManager.setCurrentActivity(activity)
+                .checkQueryString(activity, route);
 
             currentActivity.trigger('Pause');
 
@@ -486,59 +497,58 @@ var Application = Component.extend(Object.assign(appProto, {
     //改变当前hash但不触发viewchange
     //@isForward=2:location.replace,true:location.hash,false:history.go(-n)
     navigate: function (url, isForward) {
-        var that = this;
 
-        that.historyQueue.push(function () {
+        this.historyQueue.push(function () {
             var index,
                 hashChanged = !Route.compareUrl(url, location.hash);
 
-            that.hashChanged = hashChanged;
+            this.hashChanged = hashChanged;
 
             if (isForward === 2) {
-                that.history[that.history.length - 1] = url;
+                this.history[this.history.length - 1] = url;
                 hashChanged && (location.replace('#' + url));
 
             } else if (isForward) {
 
-                that.history.push(url);
+                this.history.push(url);
                 hashChanged && (location.hash = url);
 
             } else {
-                index = lastIndexOf(that.history, url);
+                index = lastIndexOf(this.history, url);
 
                 if (index == -1) {
-                    that.history.length = 0;
-                    that.history.push(url);
+                    this.history.length = 0;
+                    this.history.push(url);
                     hashChanged && (location.replace('#' + url));
 
                 } else {
-                    var go = index + 1 - that.history.length;
+                    var go = index + 1 - this.history.length;
 
                     hashChanged && go && setTimeout(function () {
                         history.go(go);
                     }, 0);
-                    that.history.length = index + 1;
+                    this.history.length = index + 1;
                 }
             }
-            return hashChanged ? this : null;
-        });
+
+            return hashChanged ? this.historyQueue : null;
+
+        }, this);
 
     },
 
     _navigate: function (url, isForward, duration, toggleAnim, data) {
-        var self = this;
-        var route = this.route.match(url);
+        var route = this.routeManager.match(url);
 
         if (route) {
-            var queue = this.queue;
 
-            queue.push(function (err, res, next) {
+            this.queue.push(function (err, res, next) {
                 var options = {};
 
                 if (typeof duration == "string") data = toggleAnim, toggleAnim = duration, duration = 400;
                 else if (typeof duration == "object") data = duration, toggleAnim = null, duration = 400;
 
-                var currentActivity = self._currentActivity;
+                var currentActivity = this.activityManager.getCurrentActivity();
 
                 if (data) {
                     Object.assign(route.data, data);
@@ -549,16 +559,16 @@ var Application = Component.extend(Object.assign(appProto, {
                 duration !== null && (options.duration = duration);
                 toggleAnim !== null && (options.toggleAnim = toggleAnim);
 
-                self._toggle(route, options, isForward && isForward != 2 ? null : function () {
+                this._toggle(route, options, isForward && isForward != 2 ? null : function () {
                     currentActivity.destroy();
 
                 }, next);
 
-                return this;
-            });
+                return this.queue;
+            }, this);
 
         } else {
-            location.hash = this._currentActivity.url;
+            location.hash = this.activityManager.getCurrentActivity().url;
         }
     },
 
@@ -573,56 +583,25 @@ var Application = Component.extend(Object.assign(appProto, {
 
     replace: function (url, duration) {
         this._navigate(url, 2, duration || 0);
-    },
-
-    createIFrame: function ($container) {
-        var $iframe = $('<iframe width="' + window.innerWidth + 'px" frameborder="0" />').appendTo($container);
-        var iframeWin = $iframe[0].contentWindow;
-        var iframeDoc = iframeWin.document;
-        var self = this;
-
-        $(iframeDoc.body).on('click', 'a[href]', function (e) {
-            var target = $(e.currentTarget);
-            var href = target.attr('href');
-
-            if (!/^(http\:|https\:|javascript\:|mailto\:|tel\:)/.test(href)) {
-                e.preventDefault();
-                if (!/^#/.test(href)) href = '#' + href;
-
-                target.attr('back') != null ? self.back(href) : self.forward(href);
-
-            } else if (sl.isInApp && href.indexOf('http') == 0) {
-                bridge.openInApp(href);
-            }
-            return false;
-        });
-
-        var ret = {
-            $el: $iframe,
-            window: iframeWin,
-            document: iframeDoc,
-            html: function (content) {
-
-                iframeDoc.body.innerHTML = '<style>p{ padding:0;margin:0 0 10px 0; }img{width:100%;height:auto;display:block;}</style>' + content;
-
-                $iframe.css({
-                    height: iframeDoc.documentElement.scrollHeight
-                });
-
-                [].forEach.call(iframeDoc.querySelectorAll('img'), function (img) {
-                    img.style.width = "100%";
-                    img.style.height = "auto";
-                    img.onload = function () {
-                        $iframe.css({
-                            height: iframeDoc.documentElement.scrollHeight
-                        });
-                    }
-                })
-            }
-        }
-
-        return ret;
     }
-}));
+});
+
+
+Application.create = function (options) {
+
+    var routeManager = new Route(options.routes);
+
+    var activityManager = new ActivityManager({
+        routeManager: routeManager
+    });
+
+    var application = new Application({
+        activityManager: activityManager,
+        routeManager: routeManager,
+        loginPath: options.loginPath
+    });
+
+    return application;
+};
 
 module.exports = Application;

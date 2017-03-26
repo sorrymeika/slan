@@ -28,16 +28,28 @@ var Page = Component.extend({
         if (!that.$el.data('path')) {
             that.$el.data('url', that.url).data('path', that.path);
 
-            seajs.use(that.route.template, function (razor) {
-                that.razor = razor;
+            var promise = new Promise(function (resolve) {
 
-                that.$el.html(that.razor.html(that.data)).appendTo(that.application.$el);
-                that.trigger("Create");
-                that.onCreate();
-            });
+                seajs.use(that.route.template, function (razor) {
+                    that.razor = razor;
+
+                    that.$el.html(that.razor.html(that.data)).appendTo(that.application.$el);
+                    that.trigger("Create");
+                    that.onCreate();
+
+                    resolve();
+                });
+            })
+
+            this.doAfterCreate = function (fn) {
+                promise.then(fn)
+            }
 
         } else {
             this.onCreate();
+            this.doAfterCreate = function (fn) {
+                fn();
+            }
         }
     },
 

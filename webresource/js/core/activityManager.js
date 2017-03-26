@@ -1,8 +1,6 @@
 ﻿
-var $ = require('$'),
-    util = require('util'),
-    Route = require('./route');
-
+var $ = require('$');
+var util = require('util');
 var Event = require('./event');
 var getPath = util.getPath;
 
@@ -46,12 +44,28 @@ function setActivityRoute(activity, route) {
     activity.query = route.query;
 }
 
-function fuckActivity(activity) {
-    setActivityReferrer(activity, this.route);
-    setActivityRoute(activity, this.route);
+/**
+ * Activity 管理器
+ */
+function ActivityManager(options) {
+
+    this.routeManager = options.routeManager;
 }
 
-var ActivityManager = {
+ActivityManager.prototype = {
+
+    _activities: {},
+
+    _currentActivity: null,
+
+    setCurrentActivity: function (currentActivity) {
+        this._currentActivity = currentActivity;
+        return this;
+    },
+
+    getCurrentActivity: function () {
+        return this._currentActivity;
+    },
 
     checkQueryString: function (activity, route) {
         if (route.data) {
@@ -85,22 +99,13 @@ var ActivityManager = {
         }
     },
 
-    mapRoutes: function (routes) {
-        this.route = new Route(routes);
-        return this;
-    },
-    skip: 0,
-
-    _currentActivity: null,
-    _activities: {},
-
     set: function (url, activity) {
         this._activities[getPath(url)] = activity;
     },
 
     get: function (url, callback) {
-        var that = this,
-            route = typeof url === 'string' ? that.route.match(url) : url;
+        var that = this;
+        var route = typeof url === 'string' ? this.routeManager.match(url) : url;
 
         if (!route) {
             return;
@@ -116,27 +121,36 @@ var ActivityManager = {
             })(function () {
 
                 seajs.use(route.view, function (Activity) {
-                    var $el,
-                        options = {
-                            application: that,
-                            route: route,
-                            fuckMe: fuckActivity
-                        };
 
                     if (null != Activity) {
-                        $el = that.$el.find('[data-path="' + route.path + '"]');
+                        var application = that.application;
+                        var options = {
+                            application: application,
+                            fuckMe: function (activity) {
+                                setActivityReferrer(activity, route);
+                                setActivityRoute(activity, route);
+                            }
+                        }
+                        var $el = application.$el.find('[data-path="' + route.path + '"]');
+
                         if ($el.length) {
                             options.el = $el;
                         }
 
                         activity = new Activity(options);
 
+                        activity.on('Destroy', function () {
+
+                            that.remove(this.path);
+                        })
+
                         that.set(path, activity);
 
-                        callback.call(that, activity, route);
+                        activity.doAfterCreate(function () {
+                            callback.call(that, activity, route);
+                        })
 
                     } else {
-                        that.skip++;
                         location.hash = that._currentActivity.url;
                     }
                 });
@@ -152,6 +166,6 @@ var ActivityManager = {
     remove: function (url) {
         this._activities[getPath(url)] = null;
     }
-};
+}
 
 module.exports = ActivityManager;

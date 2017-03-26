@@ -18,13 +18,6 @@ var STATUS = {
     DESTORY: 4
 }
 
-function onDestroy(instance) {
-    if (instance._scrolls) instance._scrolls.destroy();
-
-    instance.onDestroy && instance.onDestroy();
-    instance.application.remove(instance.url);
-}
-
 function onStatusChange(e) {
 
     switch (e.type) {
@@ -40,7 +33,10 @@ function onStatusChange(e) {
             break;
 
         case 'Destroy':
-            onDestroy(this);
+
+            if (this._scrolls) this._scrolls.destroy();
+
+            this.onDestroy && this.onDestroy();
             this.status = STATUS.DESTORY;
             break;
     }
@@ -83,15 +79,27 @@ var Activity = Component.extend({
         if (!self.$el.data('path')) {
             self.$el.data('url', self.url).data('path', self.path);
 
-            seajs.use(self.route.template, function (razor) {
-                self.razor = razor;
-                self.$el.html(razor.html(self.data)).appendTo(self.application.$el);
+            var promise = new Promise(function (resolve) {
 
-                self.onCreate();
-            });
+                seajs.use(self.route.template, function (razor) {
+                    self.razor = razor;
+                    self.$el.html(razor.html(self.data)).appendTo(self.application.$el);
+
+                    self.onCreate();
+
+                    resolve();
+                });
+            })
+
+            this.doAfterCreate = function (fn) {
+                promise.then(fn)
+            }
 
         } else {
             this.onCreate();
+            this.doAfterCreate = function (fn) {
+                fn();
+            }
         }
     },
 

@@ -196,7 +196,7 @@ var FormComponent = function (options) {
         }
     }
 
-    this.valid = valids = new Valid(valids, model.data.data);
+    this.valid = valids = new Valid(valids, model.attributes.data);
 
     valids.each(function (key, option) {
 
@@ -292,7 +292,7 @@ FormComponent.prototype = {
     },
 
     data: function () {
-        return $.extend({}, this.model.data.data);
+        return $.extend({}, this.model.attributes.data);
     },
 
     reset: function () {
@@ -311,7 +311,7 @@ FormComponent.prototype = {
         var name = $target.attr('name');
         var res = this.valid.validate(name);
 
-        if (!this.model.data.result) this.model.set({
+        if (!this.model.attributes.result) this.model.set({
             result: {}
         });
 
@@ -385,7 +385,7 @@ FormComponent.prototype = {
             } else {
                 var processData = true;
                 var data = this.contentType == "application/json" ?
-                    JSON.stringify(this.model.data.data) : window.FormData ?
+                    JSON.stringify(this.model.attributes.data) : window.FormData ?
                         (processData = false, this.contentType = false, new FormData(this.form)) :
                         this.$el.serialize();
 

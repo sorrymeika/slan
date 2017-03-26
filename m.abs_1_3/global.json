@@ -93,7 +93,6 @@
         "core/model2": "../webresource/js/core/model2",
         "core/route": "../webresource/js/core/route",
         "core/animation": "../webresource/js/core/animation",
-        "core/appProto": "../webresource/js/core/appProto",
         "core/app": "../webresource/m/js/core/app",
         "core/activity": "../webresource/m/js/core/activity",
         "core/touch": "../webresource/m/js/core/touch",
