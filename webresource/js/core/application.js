@@ -33,10 +33,10 @@ var Navigation = Component.extend({
     el: '<div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:2000;display:none"></div><div class="viewport"></div>',
 
     initialize: function (options) {
+
         this.routeManager = options.routeManager;
 
-        this.activityManager = options.activityManager;
-        this.activityManager.application = this;
+        this.activityManager = options.activityManager.setApplication(this);
 
         this.$mask = $(this.$el[0]).on('click', false);
         this.el = this.$el[1];

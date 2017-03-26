@@ -235,14 +235,13 @@ var Application = Component.extend({
     el: '<div class="viewport"><div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:20000;display:none"></div></div>',
 
     initialize: function (options) {
-        //var preventEvents = 'tap click touchmove touchstart';
 
         this.routeManager = options.routeManager;
 
-        this.activityManager = options.activityManager;
-        this.activityManager.application = this;
+        this.activityManager = options.activityManager.setApplication(this);
 
         this.el = this.$el[0];
+        //var preventEvents = 'tap click touchmove touchstart';
         this.mask = this.$el.children('.screen'); //.off(preventEvents).on(preventEvents, false);
 
         this.history = [];

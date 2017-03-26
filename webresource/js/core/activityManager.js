@@ -67,6 +67,11 @@ ActivityManager.prototype = {
         return this._currentActivity;
     },
 
+    setApplication: function (application) {
+        this.application = application;
+        return this;
+    },
+
     checkQueryString: function (activity, route) {
         if (route.data) {
             Object.assign(activity.route.data, route.data);
