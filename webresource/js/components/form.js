@@ -474,9 +474,11 @@ var RichTextBox = function ($input, options) {
 RichTextBox.prototype = {
     val: function (val) {
         var self = this;
-        self.queue.push(function () {
+        self.queue.push(function (err, res, next) {
 
             self.editor.setContent(val, false);
+
+            next();
         });
         self.$input.val(val).trigger('change');
     }

@@ -35,8 +35,6 @@ exports.msg = function (msg) {
             next();
 
         }, self.msec);
-
-        return this;
     })
 }
 

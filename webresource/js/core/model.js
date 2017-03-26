@@ -1,7 +1,6 @@
 ﻿define(function (require, exports, module) {
     var $ = require('$'),
         util = require('util'),
-        Base = require('./base'),
         Event = require('./event'),
         Component = require('./component');
 

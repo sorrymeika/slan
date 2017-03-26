@@ -1,4 +1,6 @@
-﻿var Route = require('./route');
+﻿var Base = require('./base');
+
+var Route = require('./route');
 var ActivityManager = require('./activityManager');
 var Application = require('./application');
 

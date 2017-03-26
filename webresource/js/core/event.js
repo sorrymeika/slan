@@ -1,5 +1,3 @@
-var Base = require('./base');
-
 var slice = [].slice,
     separator = /\s+/,
 
@@ -217,4 +215,4 @@ Event.extend = function (fn, ext) {
     return fn;
 }
 
-return Event;
+module.exports = Event;

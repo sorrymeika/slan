@@ -1,11 +1,6 @@
 ﻿var util = require('util');
 
-var Route = function (options) {
-    this.routes = [];
-    this.append(options);
-};
-
-Route.formatUrl = function (hash) {
+function formatUrl(hash) {
     var searchIndex = hash.indexOf('?');
     var search = '';
     if (searchIndex != -1) {
@@ -15,10 +10,15 @@ Route.formatUrl = function (hash) {
     return (hash.replace(/^#+|\/$/, '') || '/') + search;
 }
 
-Route.compareUrl = function (a, b) {
-
-    return this.formatUrl(a).toLowerCase() == this.formatUrl(b).toLowerCase();
+function compareUrl(a, b) {
+    return formatUrl(a).toLowerCase() == formatUrl(b).toLowerCase();
 }
+
+
+function Route(options) {
+    this.routes = [];
+    this.append(options);
+};
 
 Route.prototype.append = function (options) {
     var option,
@@ -62,7 +62,7 @@ Route.prototype.append = function (options) {
 Route.prototype.match = function (url) {
     var result = null,
         query = {},
-        hash = url = Route.formatUrl(url),
+        hash = url = formatUrl(url),
         index = url.indexOf('?'),
         search,
         routes = this.routes,
@@ -121,5 +121,9 @@ Route.prototype.match = function (url) {
 
     return result;
 }
+
+
+Route.formatUrl = formatUrl;
+Route.compareUrl = compareUrl;
 
 module.exports = Route;

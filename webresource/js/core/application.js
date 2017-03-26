@@ -1,7 +1,6 @@
 
 var $ = require('$'),
     util = require('util'),
-    Base = require('./base'),
     Route = require('./route'),
     Component = require('./component'),
     Queue = require('./queue');
@@ -88,8 +87,6 @@ var Navigation = Component.extend({
                 else
                     that.skip = 0;
             });
-
-            return this;
         });
 
         return that;
@@ -140,8 +137,6 @@ var Navigation = Component.extend({
 
                 next();
             });
-
-            return queue;
         });
     }
 });

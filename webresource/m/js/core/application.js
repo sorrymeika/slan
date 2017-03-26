@@ -1,7 +1,6 @@
 var $ = require('$');
 var util = require('util');
 var bridge = require('bridge');
-var Base = require('./base');
 var Component = require('./component');
 var animation = require('./animation');
 var LinkList = require('./linklist');
@@ -127,10 +126,12 @@ function bindBackGesture(application) {
 
         if (!that.swiperQueue) return;
 
-        that.swiperQueue.push(function () {
+        that.swiperQueue.push(function (err, res, next) {
             that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
                 0 :
                 (Math.abs(deltaX) * 100 / that.width));
+
+            next();
         });
 
     }).on('stop', function () {
@@ -145,7 +146,7 @@ function bindBackGesture(application) {
         if (this.swiperQueue) {
             var that = this;
 
-            that.swiperQueue.push(function () {
+            that.swiperQueue.push(function (err, res, swiperQueueNext) {
 
                 that._isInAnim = true;
 
@@ -181,12 +182,12 @@ function bindBackGesture(application) {
 
                         next();
                     });
-
-                    return this;
                 });
 
                 that.swiperQueue = null;
                 that.swiper = null;
+
+                swiperQueueNext();
             });
         }
     });
@@ -327,11 +328,11 @@ var Application = Component.extend({
 
         this.historyQueue = Queue.done();
 
-        var delayPromise;
+        var promise;
 
         if (delay) {
 
-            delayPromise = new Promise(function (resolve) {
+            promise = new Promise(function (resolve) {
 
                 setTimeout(function () {
                     $el.appendTo(document.body);
@@ -343,6 +344,8 @@ var Application = Component.extend({
 
         } else {
             $el.appendTo(document.body);
+
+            promise = Promise.resolve();
         }
 
         this.queue = new Queue();
@@ -357,7 +360,7 @@ var Application = Component.extend({
 
             activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
 
-            (delayPromise || Promise.resolve()).then(function () {
+            promise.then(function () {
 
                 activity.doAfterCreate(function () {
                     activity.$el.css({
@@ -384,7 +387,7 @@ var Application = Component.extend({
                     that.historyQueue.shift();
 
                 } else {
-                    that.historyQueue.push(function () {
+                    that.historyQueue.push(function (err, res, next) {
 
                         hashIndex = lastIndexOf(that.history, hash);
                         if (hashIndex == -1) {
@@ -392,6 +395,8 @@ var Application = Component.extend({
                         } else {
                             that.back(hash);
                         }
+
+                        next();
                     });
                 }
             });
@@ -487,7 +492,6 @@ var Application = Component.extend({
             }
 
             //setTimeout(finish, duration + 300);
-
             //anim.finish = finish;
             //animation.parallel(anims);
         });
@@ -511,7 +515,7 @@ var Application = Component.extend({
      */
     navigate: function (url, isForward) {
 
-        this.historyQueue.push(function () {
+        this.historyQueue.push(function (err, res, next) {
             var index,
                 hashChanged = !Route.compareUrl(url, location.hash);
 
@@ -544,7 +548,7 @@ var Application = Component.extend({
                 }
             }
 
-            return hashChanged ? this.historyQueue : null;
+            if (!hashChanged) next();
 
         }, this);
 
@@ -577,7 +581,6 @@ var Application = Component.extend({
 
                 }, next);
 
-                return this.queue;
             }, this);
 
         } else {

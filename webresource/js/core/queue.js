@@ -20,46 +20,8 @@ function done(queue, err, res) {
         } else if (typeof next == 'function') {
             var nextReturn = next.call(ctx, err, res, doneFirst);
 
-            if (nextReturn instanceof Queue) {
-                if (nextReturn !== queue) {
-                    nextReturn.then(doneFirst);
-                }
-
-            } else {
-                done(queue, null, nextReturn);
-            }
-
-        } else if (next instanceof Array) {
-            var errors = [],
-                result = [],
-                count = 0;
-
-            for (var i = 0, n = next.length; i < n; i++) {
-                (function (fn, i, n) {
-
-                    if (typeof fn == 'function') {
-                        fn = fn.call(ctx, err, res, doneFirst);
-                    }
-
-                    if (fn instanceof Async) {
-
-                        fn.then(function (err, obj) {
-                            if (err) errors[i] = err;
-
-                            count++;
-                            result[i] = obj;
-
-                            if (count >= n) done(queue, errors, result);
-                        });
-
-                    } else {
-                        count++;
-                        result[i] = fn;
-
-                        if (count >= n) done(queue, null, result);
-                    }
-
-                })(next[i], i, n);
+            if (nextReturn instanceof Queue && nextReturn !== queue) {
+                nextReturn.then(doneFirst);
             }
 
         } else {
@@ -104,34 +66,12 @@ var Queue = function (callback, ctx) {
 
 Queue.prototype = {
 
-    each: function (argsList, callback, ctx) {
-
-        var self = this,
-            fn = function () {
-                self._count = argsList.length;
-                self.result = [];
-                self.errors = [];
-
-                argsList.forEach(function (args, j) {
-
-                    callback.call(this, j, args);
-                });
-
-                return self;
-            };
-
-        self.queue.append([fn, ctx || this]);
-
-        return self;
-    },
-
     start: function (number) {
         var self = this,
             fn = function () {
                 self._count = number;
                 self.result = [];
                 self.errors = [];
-                return self;
             };
 
         self.queue.append([fn, this]);
@@ -152,12 +92,30 @@ Queue.prototype = {
         }
     },
 
-    bind: function (fn) {
+    each: function (argsList, callback, ctx) {
+
+        var doneOne = this.done.bind(this);
         var self = this;
 
-        return function () {
-            self.then(slice.call(arguments), fn, this);
-        }
+        var fn = function () {
+            self._count = argsList.length;
+            self.result = [];
+            self.errors = [];
+
+            argsList.forEach(function (args, j) {
+
+                callback.call(self, j, args, doneOne);
+            });
+        };
+
+        this.queue.append([fn, ctx || this]);
+
+        this.push(function (err, res, next) {
+            next(this.errors.length ? this.errors : null, this.result);
+
+        }, this);
+
+        return this;
     },
 
     push: function (callback, ctx) {
