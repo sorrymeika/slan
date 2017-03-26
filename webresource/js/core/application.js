@@ -4,12 +4,11 @@ var $ = require('$'),
     Base = require('./base'),
     Route = require('./route'),
     Component = require('./component'),
-    Async = require('./queue');
+    Queue = require('./queue');
 
 var noop = util.noop,
     slice = Array.prototype.slice,
-    getPath = util.getPath,
-    checkQueryString = appProto.checkQueryString;
+    getPath = util.getPath;
 
 var Navigation = Component.extend({
     events: {
@@ -30,15 +29,19 @@ var Navigation = Component.extend({
             }
         }
     },
+    skip: 0,
+
     el: '<div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:2000;display:none"></div><div class="viewport"></div>',
+
     initialize: function (options) {
-        var that = this;
+        this.routeManager = options.routeManager;
 
-        that.$mask = $(that.$el[0]).on('click', false);
-        that.el = that.$el[1];
-        that.queue = Async.done();
+        this.activityManager = options.activityManager;
+        this.activityManager.application = this;
 
-        options.routes && this.mapRoutes(options.routes);
+        this.$mask = $(this.$el[0]).on('click', false);
+        this.el = this.$el[1];
+        this.queue = Queue.done();
     },
 
     start: function () {
@@ -59,10 +62,10 @@ var Navigation = Component.extend({
 
         that.queue.push(function (err, res, next) {
 
-            that.get(that.hash, function (activity) {
+            that.activityManager.get(that.hash, function (activity) {
 
                 activity.$el.show().appendTo(that.el);
-                that._currentActivity = activity;
+                that.activityManager.setCurrentActivity(activity);
 
                 activity.doAfterCreate(function () {
 
@@ -103,29 +106,30 @@ var Navigation = Component.extend({
 
         var that = this;
         var queue = this.queue;
+        var activityManager = this.activityManager;
 
         queue.push(function (err, res, next) {
-            var currentActivity = that._currentActivity,
-                route = that.route.match(url);
+            var currentActivity = activityManager.getCurrentActivity(),
+                route = that.routeManager.match(url);
 
             if (queue.queue.length == 0 && !Route.compareUrl(url, location.hash)) {
                 that.navigate(url);
             }
 
             if (currentActivity.path == route.path) {
-                checkQueryString(currentActivity, route);
+                activityManager.checkQueryString(currentActivity, route);
 
                 next();
                 return;
             }
 
-            that.get(route, function (activity) {
-                checkQueryString(activity, route);
+            activityManager.get(route, function (activity) {
+                activityManager.checkQueryString(activity, route);
 
                 if (activity.path != currentActivity.path) {
-                    that._currentActivity = activity;
+                    activityManager.setCurrentActivity(activity);
 
-                    if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
+                    if (activity.el.parentNode === null) activity.$el.appendTo(that.el);
 
                     activity.$el.show().siblings('.view').hide();
 
@@ -142,6 +146,5 @@ var Navigation = Component.extend({
     }
 });
 
-sl.Navigation = Navigation;
 
 module.exports = Navigation;

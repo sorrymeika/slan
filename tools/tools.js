@@ -11,30 +11,7 @@ var compressCss = function (res) {
     }).replace(/[\r\n]/mg, '').replace(/;}/mg, '}').replace(/\s*\/\*.*?\*\/\s*/mg, '');
 }
 
-var compressor = UglifyJS.Compressor({
-    sequences: true,  // join consecutive statemets with the “comma operator”
-    properties: true,  // optimize property access: a["foo"] → a.foo
-    drop_console: true,
-    drop_debugger: true,  // discard “debugger” statements
-    unsafe: false, // some unsafe optimizations (see below)
-    conditionals: true,  // optimize if-s and conditional expressions
-    comparisons: true,  // optimize comparisons
-    evaluate: true,  // evaluate constant expressions
-    booleans: true,  // optimize boolean expressions
-    loops: true,  // optimize loops
-    unused: true,  // drop unused variables/functions
-    hoist_funs: true,  // hoist function declarations
-    hoist_vars: false, // hoist variable declarations
-    if_return: true,  // optimize if-s followed by return/continue
-    join_vars: true,  // join var declarations
-    cascade: true,  // try to cascade `right` into `left` in sequences
-    side_effects: true,  // drop side-effect-free statements
-    warnings: false,  // warn about potentially dangerous optimizations/code
-    dead_code: true,  // discard unreachable code
-    global_defs: {
-        ENV: "prod"
-    }
-});
+
 
 var rcmd = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|(?:^|\b|\uFEFF)(module\.exports\s*=|exports\.[a-z0-9A-Z\._]+\s*=)/mg;
 var rdefine = /"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/(?=[^\/])|\/\/.*|\.\s*define|(?:^|\uFEFF|[^$])(\bdefine\()/g;
@@ -74,12 +51,46 @@ function formatJs(jsText) {
 }
 
 
+var __compressor;
+var __compressor_global_defs;
+
+function getCompressor() {
+
+    if (!__compressor)
+        __compressor = UglifyJS.Compressor({
+            sequences: true,  // join consecutive statemets with the “comma operator”
+            properties: true,  // optimize property access: a["foo"] → a.foo
+            drop_console: true,
+            drop_debugger: true,  // discard “debugger” statements
+            unsafe: false, // some unsafe optimizations (see below)
+            conditionals: true,  // optimize if-s and conditional expressions
+            comparisons: true,  // optimize comparisons
+            evaluate: true,  // evaluate constant expressions
+            booleans: true,  // optimize boolean expressions
+            loops: true,  // optimize loops
+            unused: true,  // drop unused variables/functions
+            hoist_funs: true,  // hoist function declarations
+            hoist_vars: false, // hoist variable declarations
+            if_return: true,  // optimize if-s followed by return/continue
+            join_vars: true,  // join var declarations
+            cascade: true,  // try to cascade `right` into `left` in sequences
+            side_effects: true,  // drop side-effect-free statements
+            warnings: false,  // warn about potentially dangerous optimizations/code
+            dead_code: true,  // discard unreachable code
+            global_defs: Object.assign({
+                ENV: "production"
+            }, __compressor_global_defs)
+        });
+
+    return __compressor;
+}
+
 var compressJs = function (code, mangle_names) {
     code = replaceBOM(code).replace(/\/\/<--debug[\s\S]+?\/\/debug-->/img, '');
 
     var ast = UglifyJS.parse(code);
     ast.figure_out_scope();
-    ast = ast.transform(compressor);
+    ast = ast.transform(getCompressor());
     ast.compute_char_frequency();
     ast.mangle_names(mangle_names);
     code = ast.print_to_string();
@@ -526,6 +537,12 @@ Tools.compressJs = function (code, names) {
         console.log(e);
     }
 };
+
+Tools.setJsCompressorGlobalDef = function (globalDef) {
+
+    __compressor_global_defs = globalDef;
+}
+
 Tools.save = save;
 Tools.copy = copy;
 Tools.replaceDefine = replaceDefine;

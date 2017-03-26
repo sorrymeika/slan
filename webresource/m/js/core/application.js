@@ -7,9 +7,8 @@ var animation = require('./animation');
 var LinkList = require('./linklist');
 var Queue = require('./queue');
 var Touch = require('./touch');
-var Route = require('./route');
 
-var ActivityManager = require('./activityManager');
+var Route = require('./route');
 
 var Activity = require('./activity');
 var Toast = require('../widget/toast');
@@ -494,8 +493,22 @@ var Application = Component.extend({
         });
     },
 
-    //改变当前hash但不触发viewchange
-    //@isForward=2:location.replace,true:location.hash,false:history.go(-n)
+    /**
+     * 改变当前hash但不触发viewchange
+     * 
+     * @param {String} url 地址
+     * @param {boolean|number} [isForward] 前进、后退状态
+     * 
+     * @example
+     * // location.replace方式
+     * application.navigate(url, 2);
+     * 
+     * // location.hash = url;
+     * application.navigate(url, true);
+     * 
+     * // history.go(-n)
+     * application.navigate(url, false);
+     */
     navigate: function (url, isForward) {
 
         this.historyQueue.push(function () {
@@ -572,7 +585,10 @@ var Application = Component.extend({
         }
     },
 
-    //@arguments=[url,[[duration],[toggleAnim],[data]]]
+    /**
+     * 前进动画条转到指定页面
+     * [url, [[duration], [toggleAnim], [data]]]
+     */
     forward: function (url, duration, toggleAnim, data) {
         this._navigate(url, true, duration, toggleAnim, data);
     },
@@ -586,22 +602,5 @@ var Application = Component.extend({
     }
 });
 
-
-Application.create = function (options) {
-
-    var routeManager = new Route(options.routes);
-
-    var activityManager = new ActivityManager({
-        routeManager: routeManager
-    });
-
-    var application = new Application({
-        activityManager: activityManager,
-        routeManager: routeManager,
-        loginPath: options.loginPath
-    });
-
-    return application;
-};
 
 module.exports = Application;
