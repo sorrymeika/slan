@@ -33,7 +33,7 @@ ModelProto.bindScrollTo = function (el, options) {
     return sbr;
 }
 
-ModelProto.getScrollView = function (el) {
+ModelProto.getScroll = function (el) {
     return this._scrolls.get(el);
 }
 

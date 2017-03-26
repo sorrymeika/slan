@@ -2,7 +2,6 @@
 var util = require('util'),
     Event = require('./event'),
     Promise = require('promise'),
-    Async = require('./async'),
     Scroll = require('widget/scroll'),
     Component = require('./component'),
     bridge = require('bridge'),
@@ -56,10 +55,7 @@ var Activity = Component.extend({
     status: STATUS.INIT,
 
     initialize: function (options) {
-        var self = this,
-            async = Async.done();
-
-        self._async = async;
+        var self = this;
 
         self.application = options.application;
 
@@ -86,10 +82,17 @@ var Activity = Component.extend({
 
         if (!self.$el.data('path')) {
             self.$el.data('url', self.url).data('path', self.path);
-            async.then(self._template, self);
-        }
 
-        async.then(self.onCreate, self);
+            seajs.use(self.route.template, function (razor) {
+                self.razor = razor;
+                self.$el.html(razor.html(self.data)).appendTo(self.application.$el);
+
+                self.onCreate();
+            });
+
+        } else {
+            this.onCreate();
+        }
     },
 
     bindScrollTo: function (el, options) {
@@ -105,45 +108,8 @@ var Activity = Component.extend({
         return sbr;
     },
 
-    getScrollView: function (el) {
+    getScroll: function (el) {
         return this._scrolls.get(el);
-    },
-
-    _template: function (err, res, done) {
-
-        var self = this,
-            count = 1,
-            async = self._async,
-            callback = function () {
-                count--;
-                if (count == 0) {
-                    self.$el.html(self.razor.html(self.data)).appendTo(self.application.$el);
-                    done();
-                }
-            };
-
-        if (self.route.api) {
-            count++;
-            $.ajax({
-                url: self.route.api,
-                type: 'GET',
-                dataType: 'json',
-                success: function (res) {
-                    self.data = res;
-                    callback(res);
-                },
-                error: function (xhr) {
-                    callback({ success: false, content: xhr.responseText });
-                }
-            });
-        }
-
-        seajs.use(self.route.template, function (razor) {
-            self.razor = razor;
-            callback();
-        });
-
-        return async;
     },
 
     onCreate: util.noop,
@@ -181,11 +147,6 @@ var Activity = Component.extend({
 
     compareUrl: function (url) {
         return getUrlPath(url) === this.route.path.toLowerCase();
-    },
-
-    then: function (fn) {
-        this._async.then(fn, this);
-        return this;
     },
 
     forward: function (url, duration, toggleAnim, data) {
@@ -248,10 +209,9 @@ var Activity = Component.extend({
         self.application.mask.hide();
 
         self.isExiting = false;
-        self.then(function () {
-            self.$el.addClass('active');
-            self.trigger('Show');
-        });
+
+        self.$el.addClass('active');
+        self.trigger('Show');
     }
 });
 

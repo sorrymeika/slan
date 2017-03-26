@@ -1,7 +1,7 @@
 ﻿var _ = require('underscore');
 
 var path = require('path');
-var Async = require('./async');
+var Queue = require('./queue');
 var fs = require('fs');
 
 function ConfigLoader(configPath, env) {

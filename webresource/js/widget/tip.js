@@ -1,51 +1,49 @@
-﻿define(function (require, exports) {
+﻿
+var $ = require('$'),
+    util = require('util'),
+    Queue = require('core/queue');
 
-    var $ = require('$'),
-        util = require('util'),
-        Async = require('core/async');
+var $el = $('<div class="tip" style="display:none"></div>')
+    .on($.fx.transitionEnd, function () {
+        if ($el.hasClass('tip-hide')) {
+            $el.hide();
+        }
+    })
+    .appendTo(document.body),
+    timer;
 
-    var $el = $('<div class="tip" style="display:none"></div>')
-        .on($.fx.transitionEnd, function () {
-            if ($el.hasClass('tip-hide')) {
-                $el.hide();
-            }
-        })
-        .appendTo(document.body),
-        timer;
+var queue = Queue.done();
 
-    var async = Async.done();
+exports.msec = 2000;
 
-    exports.msec = 2000;
+exports.show = function () {
+    if (!$el.hasClass('tip-show'))
+        $el.removeClass('tip-hide').show().addClass('tip-show');
+}
 
-    exports.show = function () {
-        if (!$el.hasClass('tip-show'))
-            $el.removeClass('tip-hide').show().addClass('tip-show');
-    }
+exports.msg = function (msg) {
+    var self = this;
 
-    exports.msg = function (msg) {
-        var self = this;
+    queue.push(function (err, res, next) {
+        $el.html(msg);
+        self.show();
 
-        async.then(function (err, res, done) {
-            $el.html(msg);
-            self.show();
+        setTimeout(function () {
 
-            setTimeout(function () {
+            self.hide();
 
-                self.hide();
+            next();
 
-                done();
+        }, self.msec);
 
-            }, self.msec);
+        return this;
+    })
+}
 
-            return this;
-        })
-    }
+exports.hide = function () {
+    $el.removeClass('tip-show').addClass('tip-hide');
+}
 
-    exports.hide = function () {
-        $el.removeClass('tip-show').addClass('tip-hide');
-    }
-
-    sl.tip = function (msg) {
-        exports.msg(msg);
-    };
-});
+sl.tip = function (msg) {
+    exports.msg(msg);
+};

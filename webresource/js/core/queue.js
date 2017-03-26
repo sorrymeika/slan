@@ -3,9 +3,9 @@ var slice = Array.prototype.slice;
 var rparam = /^\$(\d+)$/;
 
 
-function done(async, err, res) {
-    var doneSelf = async.doneSelf,
-        then = async.queue.shift(),
+function done(queue, err, res) {
+    var doneFirst = queue.shift,
+        then = queue.queue.shift(),
         next,
         ctx,
         promise;
@@ -14,19 +14,19 @@ function done(async, err, res) {
         next = then[0];
         ctx = then[1];
 
-        if (next instanceof Async) {
-            next.then(doneSelf, ctx);
+        if (next instanceof Queue) {
+            next.then(doneFirst, ctx);
 
         } else if (typeof next == 'function') {
-            var nextReturn = next.call(ctx, err, res, doneSelf);
+            var nextReturn = next.call(ctx, err, res, doneFirst);
 
-            if (nextReturn instanceof Async) {
-                if (nextReturn !== async) {
-                    nextReturn.then(doneSelf);
+            if (nextReturn instanceof Queue) {
+                if (nextReturn !== queue) {
+                    nextReturn.then(doneFirst);
                 }
 
             } else {
-                done(async, null, nextReturn);
+                done(queue, null, nextReturn);
             }
 
         } else if (next instanceof Array) {
@@ -38,7 +38,7 @@ function done(async, err, res) {
                 (function (fn, i, n) {
 
                     if (typeof fn == 'function') {
-                        fn = fn.call(ctx, err, res, doneSelf);
+                        fn = fn.call(ctx, err, res, doneFirst);
                     }
 
                     if (fn instanceof Async) {
@@ -49,25 +49,25 @@ function done(async, err, res) {
                             count++;
                             result[i] = obj;
 
-                            if (count >= n) done(async, errors, result);
+                            if (count >= n) done(queue, errors, result);
                         });
 
                     } else {
                         count++;
                         result[i] = fn;
 
-                        if (count >= n) done(async, null, result);
+                        if (count >= n) done(queue, null, result);
                     }
 
                 })(next[i], i, n);
             }
 
         } else {
-            done(async, null, next);
+            done(queue, null, next);
         }
 
     } else {
-        async.state = STATUS.DONE;
+        queue.state = STATUS.DONE;
     }
 };
 
@@ -78,16 +78,16 @@ var STATUS = {
 };
 
 
-var Async = function (callback, ctx) {
-    if (!(this instanceof Async))
-        return new Async(callback, ctx);
+var Queue = function (callback, ctx) {
+    if (!(this instanceof Queue))
+        return new Queue(callback, ctx);
 
     var self = this;
 
     this.queue = new LinkList();
     this.state = STATUS.PENDDING;
 
-    this.doneSelf = function (err, res) {
+    this.shift = function (err, res) {
         done(self, err, res);
     };
 
@@ -98,11 +98,11 @@ var Async = function (callback, ctx) {
     } else if (callback) {
         this.state = STATUS.PENDDING;
 
-        callback.call(ctx || this, this.doneSelf);
+        callback.call(ctx || this, this.shift);
     }
 }
 
-Async.prototype = {
+Queue.prototype = {
 
     each: function (argsList, callback, ctx) {
 
@@ -139,7 +139,7 @@ Async.prototype = {
         return self;
     },
 
-    next: function (index, err, data) {
+    done: function (index, err, data) {
         this._count--;
 
         if (err)
@@ -160,7 +160,7 @@ Async.prototype = {
         }
     },
 
-    then: function (callback, ctx) {
+    push: function (callback, ctx) {
         var self = this;
 
         self.queue.append([callback, ctx || this]);
@@ -175,63 +175,13 @@ Async.prototype = {
     }
 };
 
-Async.prototype['await'] = Async.prototype.then;
 
-Async.done = function (data) {
+Queue.done = function (data) {
 
-    return new Async(function (done) {
+    return new Queue(function (done) {
 
-        data instanceof Async ? data.await(done) : done(this, data);
+        data instanceof Queue ? data.push(done) : done(this, data);
     });
 }
 
-module.exports = Async;
-
-/*
-var promise=Async(function () {
-var that=this;
-
-setTimeout(function () {
-console.log('init');
-
-that.done(null,'tes1t');
-
-},2000);
-
-return that;
-});
-
-promise.when(function () {
-var dfd=Async();
-
-setTimeout(function () {
-console.log('when');
-
-dfd.done(null,'test');
-
-},2000);
-
-return dfd;
-})
-.then(function (err,result) {
-setTimeout(function () {
-console.log('then',err,result);
-
-promise.done();
-
-},1000);
-
-return promise;
-})
-.then(function (err,result) {
-
-setTimeout(function () {
-console.log('end',err,result);
-
-promise.done();
-
-},500);
-
-return promise;
-});
-*/
+module.exports = Queue;

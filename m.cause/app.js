@@ -3,7 +3,7 @@
 //app.all('*', http_proxy('localhost', 6004));
 //app.all('*', http_proxy('192.168.0.106', 6004));
 
-var Async = require('../core/async');
+var queue = require('../core/queue');
 var fs = require('fs');
 var fsc = require('../core/fs');
 var path = require('path');

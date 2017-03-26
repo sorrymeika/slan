@@ -53,7 +53,7 @@ function fuckActivity(activity) {
 
 var ActivityManager = {
 
-    checkQueryString: function(activity, route) {
+    checkQueryString: function (activity, route) {
         if (route.data) {
             Object.assign(activity.route.data, route.data);
         }
@@ -85,7 +85,7 @@ var ActivityManager = {
         }
     },
 
-    mapRoutes: function(routes) {
+    mapRoutes: function (routes) {
         this.route = new Route(routes);
         return this;
     },
@@ -94,11 +94,11 @@ var ActivityManager = {
     _currentActivity: null,
     _activities: {},
 
-    set: function(url, activity) {
+    set: function (url, activity) {
         this._activities[getPath(url)] = activity;
     },
 
-    get: function(url, callback) {
+    get: function (url, callback) {
         var that = this,
             route = typeof url === 'string' ? that.route.match(url) : url;
 
@@ -110,12 +110,12 @@ var ActivityManager = {
         var activity = this._activities[path];
 
         if (activity == null) {
-            (function(fn) {
+            (function (fn) {
                 route.package ? seajs.use(route.package + ".js?v" + sl.buildVersion, fn) : fn();
 
-            })(function() {
+            })(function () {
 
-                seajs.use(route.view, function(Activity) {
+                seajs.use(route.view, function (Activity) {
                     var $el,
                         options = {
                             application: that,
@@ -133,10 +133,7 @@ var ActivityManager = {
 
                         that.set(path, activity);
 
-                        activity.then(function() {
-
-                            callback.call(that, activity, route);
-                        });
+                        callback.call(that, activity, route);
 
                     } else {
                         that.skip++;
@@ -152,7 +149,7 @@ var ActivityManager = {
         }
     },
 
-    remove: function(url) {
+    remove: function (url) {
         this._activities[getPath(url)] = null;
     }
 };

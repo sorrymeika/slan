@@ -5,7 +5,7 @@ var Tools = require('./../tools/tools');
 var Util = require('util');
 var util = require('./util');
 var razor = require('./razor');
-var Async = require('./async');
+var Queue = require('./queue');
 var fs = require('fs');
 
 _.extend(Util, util);

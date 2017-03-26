@@ -1,12 +1,12 @@
 ﻿var path = require('path');
 var fs = require('fs');
-var Async = require('./async');
+var Queue = require('./queue');
 var razor = require('./razor');
 var configloader = require('./configloader');
 var Tools = require('../tools/tools');
 
 var build = function (config, routes, projectsRequires) {
-    var tmplPromise = Async.resolve();
+    var tmplPromise = Queue.done();
     var views = {};
     var Route = require('./route');
     var route = new Route(routes);
@@ -19,7 +19,7 @@ var build = function (config, routes, projectsRequires) {
             callback = function () {
                 count--;
                 if (count == 0) {
-                    tmplPromise.next(i);
+                    tmplPromise.done(i);
                 }
             },
             root = buildConfig.root == '/' ? '/' : (buildConfig.root + '/'),

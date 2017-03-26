@@ -6,7 +6,7 @@ var Component = require('./component');
 var appProto = require('./appProto');
 var animation = require('./animation');
 var LinkList = require('./linklist');
-var Async = require('./async');
+var Queue = require('./queue');
 var Touch = require('./touch');
 var Route = require('./route');
 var Activity = require('./activity');
@@ -69,8 +69,8 @@ function bindBackGesture(application) {
             isForward,
             deltaX = that.deltaX;
 
-        if (that.isDirectionY || that.swiperAsync || that.swiper) {
-            if (that.swiperAsync) {
+        if (that.isDirectionY || that.swiperQueue || that.swiper) {
+            if (that.swiperQueue) {
                 that._stop();
             }
             that.stop();
@@ -98,7 +98,7 @@ function bindBackGesture(application) {
         }
 
         if (action) {
-            that.swiperAsync = new Async(function (done) {
+            that.swiperQueue = new Queue(function (next) {
 
                 application.mask.show();
                 currentActivity._startExiting();
@@ -112,21 +112,21 @@ function bindBackGesture(application) {
                     that.swiper = new animation.Animation(getToggleAnimation(isForward, currentActivity, activity));
                     that.swipeActivity = activity;
 
-                    done();
+                    next();
                 });
             });
 
         } else {
-            that.swiperAsync = null;
+            that.swiperQueue = null;
         }
 
     }).on('move', function (e) {
         var that = this,
             deltaX = that.deltaX;
 
-        if (!that.swiperAsync) return;
+        if (!that.swiperQueue) return;
 
-        that.swiperAsync.await(function () {
+        that.swiperQueue.push(function () {
             that.swiper.step(that.isSwipeLeft && deltaX < 0 || !that.isSwipeLeft && deltaX > 0 ?
                 0 :
                 (Math.abs(deltaX) * 100 / that.width));
@@ -140,12 +140,12 @@ function bindBackGesture(application) {
         if (!that.isCancelSwipe)
             application._currentActivity.trigger('Pause');
 
-        if (that.swiperAsync) {
-            that.swiperAsync.await(function () {
+        if (that.swiperQueue) {
+            that.swiperQueue.push(function () {
 
                 that._isInAnim = true;
 
-                application.queue.await(function (err, res, done) {
+                application.queue.push(function (err, res, next) {
 
                     that.swiper.animate(200, that.isCancelSwipe ? 0 : 100, function () {
                         var activity = that.swipeActivity,
@@ -176,13 +176,13 @@ function bindBackGesture(application) {
                             }
                         }
 
-                        done();
+                        next();
                     });
 
                     return this;
                 });
 
-                that.swiperAsync = null;
+                that.swiperQueue = null;
                 that.swiper = null;
             });
         }
@@ -312,8 +312,6 @@ var Application = Component.extend(Object.assign(appProto, {
 
         window.application = this;
 
-        that.queue = new Async();
-
         that.$el = $(that.el);
 
         if (bridge.hasStatusBar) {
@@ -322,21 +320,27 @@ var Application = Component.extend(Object.assign(appProto, {
 
         that.hash = Route.formatUrl(location.hash);
 
-        that.historyAsync = Async.done();
+        that.historyQueue = Queue.done();
+
+        var delayPromise;
 
         if (delay) {
-            setTimeout(function () {
-                $el.appendTo(document.body);
 
-                delay.doneSelf();
+            delayPromise = new Promise(function (resolve) {
 
-            }, delay);
+                setTimeout(function () {
+                    $el.appendTo(document.body);
 
-            delay = new Async();
+                    resolve();
+
+                }, delay);
+            });
 
         } else {
             $el.appendTo(document.body);
         }
+
+        that.queue = new Queue();
 
         that.get(that.hash, function (activity) {
 
@@ -347,23 +351,21 @@ var Application = Component.extend(Object.assign(appProto, {
 
             activity.$el.transform(require('anim/' + activity.toggleAnim).openEnterAnimationTo);
 
-            activity.then(delay)
-                .then(function (err, res, done) {
-                    activity.$el.css({
-                        opacity: 0
-                    }).addClass('active').animate({
-                        opacity: 1
 
-                    }, 'ease-out', 400);
+            (delayPromise || Promise.resolve()).then(function () {
+                activity.$el.css({
+                    opacity: 0
+                }).addClass('active').animate({
+                    opacity: 1
 
-                    activity.trigger('Appear').trigger('Show');
+                }, 'ease-out', 400);
 
-                    that.trigger('Start');
+                activity.trigger('Appear').trigger('Show');
 
-                    done();
+                that.trigger('Start');
 
-                    that.queue.doneSelf();
-                });
+                that.queue.shift();
+            });
 
             $win.on('hashchange', function () {
                 var hash = that.hash = Route.formatUrl(location.hash);
@@ -371,10 +373,10 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 if (that.hashChanged) {
                     that.hashChanged = false;
-                    that.historyAsync.doneSelf();
+                    that.historyQueue.shift();
 
                 } else {
-                    that.historyAsync.then(function () {
+                    that.historyQueue.push(function () {
 
                         hashIndex = lastIndexOf(that.history, hash);
                         if (hashIndex == -1) {
@@ -438,44 +440,41 @@ var Application = Component.extend(Object.assign(appProto, {
 
             currentActivity.trigger('Pause');
 
-            activity.then(function () {
-                activity.trigger('Appear');
+            activity.trigger('Appear');
 
-                var ease = 'cubic-bezier(.34,.86,.54,.99)';
-                var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
-                var anim;
-                var executedFinish = false;
-                var finish = function () {
-                    if (executedFinish) return;
-                    executedFinish = true;
+            var ease = 'cubic-bezier(.34,.86,.54,.99)';
+            var anims = getToggleAnimation(isForward, currentActivity, activity, options.toggleAnim);
+            var anim;
+            var executedFinish = false;
+            var finish = function () {
+                if (executedFinish) return;
+                executedFinish = true;
 
-                    currentActivity.trigger('Hide');
-                    activity._enterAnimationEnd();
-                    toggleFinish && toggleFinish.call(that, activity);
-                    queueDone();
-                };
+                currentActivity.trigger('Hide');
+                activity._enterAnimationEnd();
+                toggleFinish && toggleFinish.call(that, activity);
+                queueDone();
+            };
 
-                for (var i = 0, n = anims.length; i < n; i++) {
-                    anim = anims[i];
-
-                    if (!duration) {
-                        anim.el.css(animation.transform(anim.css).css);
-
-                    } else {
-                        anim.ease = ease;
-                        anim.duration = duration;
-
-                        anim.el.css(animation.transform(anim.start).css)
-                            .animate(animation.transform(anim.css).css, duration, ease, finish);
-                    }
-                }
-                currentActivity.$el.addClass('active');
+            for (var i = 0, n = anims.length; i < n; i++) {
+                anim = anims[i];
 
                 if (!duration) {
-                    finish();
-                }
-            });
+                    anim.el.css(animation.transform(anim.css).css);
 
+                } else {
+                    anim.ease = ease;
+                    anim.duration = duration;
+
+                    anim.el.css(animation.transform(anim.start).css)
+                        .animate(animation.transform(anim.css).css, duration, ease, finish);
+                }
+            }
+            currentActivity.$el.addClass('active');
+
+            if (!duration) {
+                finish();
+            }
 
             //setTimeout(finish, duration + 300);
 
@@ -489,7 +488,7 @@ var Application = Component.extend(Object.assign(appProto, {
     navigate: function (url, isForward) {
         var that = this;
 
-        that.historyAsync.then(function () {
+        that.historyQueue.push(function () {
             var index,
                 hashChanged = !Route.compareUrl(url, location.hash);
 
@@ -533,7 +532,7 @@ var Application = Component.extend(Object.assign(appProto, {
         if (route) {
             var queue = this.queue;
 
-            queue.await(function (err, res, queueDone) {
+            queue.push(function (err, res, next) {
                 var options = {};
 
                 if (typeof duration == "string") data = toggleAnim, toggleAnim = duration, duration = 400;
@@ -552,7 +551,8 @@ var Application = Component.extend(Object.assign(appProto, {
 
                 self._toggle(route, options, isForward && isForward != 2 ? null : function () {
                     currentActivity.destroy();
-                }, queueDone);
+
+                }, next);
 
                 return this;
             });

@@ -1,4 +1,4 @@
-define(function(require, exports, module) {
+define(function (require, exports, module) {
 
     var $ = require('$'),
         util = require('util'),
@@ -6,7 +6,7 @@ define(function(require, exports, module) {
         Route = require('./route'),
         appProto = require('./appProto'),
         Component = require('./component'),
-        Async = require('./async');
+        Async = require('./queue');
 
     var noop = util.noop,
         slice = Array.prototype.slice,
@@ -15,7 +15,7 @@ define(function(require, exports, module) {
 
     var Navigation = Component.extend($.extend(appProto, {
         events: {
-            'click a[href]:not(.js-link-default)': function(e) {
+            'click a[href]:not(.js-link-default)': function (e) {
                 var that = this,
                     target = $(e.currentTarget);
 
@@ -33,17 +33,17 @@ define(function(require, exports, module) {
             }
         },
         el: '<div class="screen" style="position:fixed;top:0px;bottom:0px;right:0px;width:100%;background:rgba(0,0,0,0);z-index:2000;display:none"></div><div class="viewport"></div>',
-        initialize: function(options) {
+        initialize: function (options) {
             var that = this;
 
             that.$mask = $(that.$el[0]).on('click', false);
             that.el = that.$el[1];
-            that.async = Async.done();
+            that.queue = Async.done();
 
             options.routes && this.mapRoutes(options.routes);
         },
 
-        start: function() {
+        start: function () {
             var that = this,
                 $win = $(window),
                 $body = $(document.body),
@@ -59,20 +59,18 @@ define(function(require, exports, module) {
             if (!location.hash) location.hash = '/';
             that.hash = Route.formatUrl(location.hash);
 
-            that.async.then(function(err, res, done) {
-                that.get(that.hash, function(activity) {
+            that.queue.push(function (err, res, next) {
+                that.get(that.hash, function (activity) {
                     activity.$el.show().appendTo(that.el);
                     that._currentActivity = activity;
 
-                    activity.then(function() {
-                        activity.trigger('Resume').trigger('Show');
+                    activity.trigger('Resume').trigger('Show');
 
-                        that.trigger('start');
-                        done();
-                    });
+                    that.trigger('start');
+                    next();
                 });
 
-                $win.on('hashchange', function() {
+                $win.on('hashchange', function () {
                     that.hash = Route.formatUrl(location.hash);
 
                     if (that.skip == 0) {
@@ -91,32 +89,34 @@ define(function(require, exports, module) {
             return that;
         },
 
-        navigate: function(url) {
+        navigate: function (url) {
             url = Route.formatUrl(url);
             this.skip++;
             location.hash = url;
         },
 
-        to: function(url) {
+        to: function (url) {
             url = Route.formatUrl(url);
 
-            var that = this,
-                async = that.async;
+            var that = this;
+            var queue = this.queue;
 
-            async.await(function(err, res, done) {
+            queue.push(function (err, res, next) {
                 var currentActivity = that._currentActivity,
                     route = that.route.match(url);
 
-                if (async.queue.length == 0 && !Route.compareUrl(url, location.hash)) {
+                if (queue.queue.length == 0 && !Route.compareUrl(url, location.hash)) {
                     that.navigate(url);
                 }
 
                 if (currentActivity.path == route.path) {
                     checkQueryString(currentActivity, route);
-                    done();
+
+                    next();
                     return;
                 }
-                that.get(route, function(activity) {
+
+                that.get(route, function (activity) {
                     checkQueryString(activity, route);
 
                     if (activity.path != currentActivity.path) {
@@ -126,14 +126,15 @@ define(function(require, exports, module) {
 
                         activity.$el.show().siblings('.view').hide();
 
-                        activity.then(function() {
+                        activity.then(function () {
                             activity.trigger('Resume').trigger('Show');
                         });
                     }
-                    done();
+
+                    next();
                 });
 
-                return async;
+                return queue;
             });
         }
     }));

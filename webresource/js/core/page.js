@@ -1,8 +1,7 @@
 var $ = require('$'),
     util = require('util'),
     Base = require('./base'),
-    Component = require('./component'),
-    Async = require('./async');
+    Component = require('./component');
 
 var noop = util.noop,
     indexOf = util.indexOf,
@@ -12,48 +11,8 @@ var noop = util.noop,
 var Page = Component.extend({
     el: '<div class="view"></div>',
 
-    _template: function (res, err, done) {
-        var that = this,
-            count = 1,
-            callback = function () {
-                count--;
-                if (count == 0) {
-                    that.$el.html(that.razor.html(that.data)).appendTo(that.application.$el);
-                    that.trigger("Create");
-
-                    done();
-                }
-            };
-
-        if (that.route.api) {
-            count++;
-            $.ajax({
-                url: that.route.api,
-                type: 'GET',
-                dataType: 'json',
-                success: function (res) {
-                    that.data = res;
-                    callback(res);
-                },
-                error: function (xhr) {
-                    callback({ success: false, content: xhr.responseText });
-                }
-            });
-        }
-
-        seajs.use(that.route.template, function (razor) {
-            that.razor = razor;
-            callback();
-        });
-
-        return that.async;
-    },
-
     initialize: function (options) {
-        var that = this,
-            async = Async.done();
-
-        that.async = async;
+        var that = this;
 
         options.fuckMe(this);
 
@@ -68,9 +27,18 @@ var Page = Component.extend({
 
         if (!that.$el.data('path')) {
             that.$el.data('url', that.url).data('path', that.path);
-            async.await(that._template, that);
+
+            seajs.use(that.route.template, function (razor) {
+                that.razor = razor;
+
+                that.$el.html(that.razor.html(that.data)).appendTo(that.application.$el);
+                that.trigger("Create");
+                that.onCreate();
+            });
+
+        } else {
+            this.onCreate();
         }
-        async.await(that.onCreate, that);
     },
 
     onCreate: noop,
@@ -93,11 +61,6 @@ var Page = Component.extend({
     },
 
     onQueryChange: noop,
-
-    then: function (fn) {
-        this.async.await(fn, this);
-        return this;
-    },
 
     queryString: function (key, val) {
         if (typeof val === 'undefined')
