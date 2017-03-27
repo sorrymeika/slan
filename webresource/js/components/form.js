@@ -155,7 +155,7 @@ var FormComponent = function (options) {
     });
 
     if (selectsOptions.length)
-        model.on('datachanged', function (e) {
+        model.observe(function (e) {
             selectsOptions.forEach(function (selectOptions) {
                 var params = {};
                 var willReturn = false;

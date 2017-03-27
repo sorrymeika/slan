@@ -12,7 +12,7 @@ util.style('.sn-display { opacity: 1; -webkit-transition: opacity 300ms ease-out
 .sn-display-show { opacity: 1; }\
 .sn-display-hide { opacity: 0; }');
 
-var toString = {}.toString;
+var toString = Object.prototype.toString;
 var LINKEDCHANGE = 'linkedchange';
 var DATACHANGED_EVENT = "datachanged";
 
@@ -1153,7 +1153,7 @@ function updateParentAttrTo(model) {
     }
 }
 
-function setModelAttrOnKeys(model, cover, keys, val) {
+function updateModelOnKeys(model, cover, keys, val) {
     var lastKey = keys.pop();
     var tmp;
 
@@ -1173,13 +1173,13 @@ function setModelAttrOnKeys(model, cover, keys, val) {
     return model.set(cover, lastKey, val);
 }
 
-function changedAndUpdateViewNextTick(model) {
+function updateViewNextTick(model) {
     if (model.changed) return;
 
     model.changed = true;
 
     if (model.parent instanceof Collection) {
-        changedAndUpdateViewNextTick(model.parent);
+        updateViewNextTick(model.parent);
     }
 
     model.root.one(DATACHANGED_EVENT, function () {
@@ -1377,7 +1377,7 @@ var Model = util.createClass({
 
                 updateParentAttrTo(this);
 
-                changedAndUpdateViewNextTick(this);
+                updateViewNextTick(this);
             }
             return this;
 
@@ -1385,10 +1385,10 @@ var Model = util.createClass({
             keys = isArrayKey ? key : key.split('.');
 
             if (keys.length > 1) {
-                model = setModelAttrOnKeys(this, cover, keys, val);
+                model = updateModelOnKeys(this, cover, keys, val);
 
                 if (model.changed) {
-                    changedAndUpdateViewNextTick(this);
+                    updateViewNextTick(this);
                 }
                 return this;
 
@@ -1493,7 +1493,7 @@ var Model = util.createClass({
         }
 
         if (hasChange) {
-            changedAndUpdateViewNextTick(this);
+            updateViewNextTick(this);
 
             for (var i = 0, length = changes.length; i < length; i += 3) {
                 root.trigger(new Event("change:" + changes[i], {
@@ -1803,7 +1803,7 @@ Collection.prototype = {
             this.add(i == 0 ? array : array.slice(i, array.length));
 
             if (!this.changed && hasChange) {
-                changedAndUpdateViewNextTick(this);
+                updateViewNextTick(this);
             }
         }
         return this;
@@ -1839,7 +1839,7 @@ Collection.prototype = {
                 results.push(model);
             }
 
-            changedAndUpdateViewNextTick(this);
+            updateViewNextTick(this);
         }
         return dataIsArray ? results : results[0];
     },
@@ -1988,7 +1988,7 @@ Collection.prototype = {
             this.array.splice(count, 0, model.attributes);
         }
 
-        changedAndUpdateViewNextTick(this);
+        updateViewNextTick(this);
         return this;
     },
 
@@ -2009,7 +2009,7 @@ Collection.prototype = {
         if (data)
             this.insert(start, data);
         else
-            changedAndUpdateViewNextTick(this);
+            updateViewNextTick(this);
 
         return spliced;
     },
@@ -2042,7 +2042,7 @@ Collection.prototype = {
             }
         }
 
-        changedAndUpdateViewNextTick(this);
+        updateViewNextTick(this);
 
         return this;
     },
@@ -2054,7 +2054,7 @@ Collection.prototype = {
         }
         this.length = this.array.length = 0;
 
-        changedAndUpdateViewNextTick(this);
+        updateViewNextTick(this);
 
         return this;
     },
@@ -2517,11 +2517,7 @@ global._render = function () {
     global._nextTick = null;
 };
 
-ViewModel.prototype.global = global;
-
-
-
-exports.global = global;
+ViewModel.prototype.global = exports.global = global;
 
 exports.ViewModel = exports.Model = ViewModel;
 
