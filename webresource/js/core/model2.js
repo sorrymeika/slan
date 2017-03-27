@@ -327,7 +327,6 @@ function cloneRepeatElement(source, snData) {
     return cloneElement(source, function (node, clone) {
 
         clone.snData = snData;
-        clone.snIsGlobal = node.snIsGlobal;
 
         if (node.snRepeatSource) {
             clone.snRepeatSource = node.snRepeatSource;
@@ -817,9 +816,8 @@ function bindNodeAttributes(viewModel, el) {
 
         if (fid) {
             el.snBinding = {
-                textContent: fid.id
+                textContent: fid
             };
-            el.snIsGlobal = fid.isGlobal;
             el.textContent = '';
         }
         return;
@@ -860,11 +858,10 @@ function bindNodeAttributes(viewModel, el) {
                     var fid = createFunction(viewModel, val);
 
                     if (attr == "sn-data" && fid) {
-                        el.setAttribute(attr, fid.id);
+                        el.setAttribute(attr, fid);
 
                     } else if (fid) {
-                        (el.snBinding || (el.snBinding = {}))[attr] = fid.id;
-                        el.snIsGlobal = fid.isGlobal;
+                        (el.snBinding || (el.snBinding = {}))[attr] = fid;
                         el.removeAttribute(attr);
 
                     } else if (attr == "ref" && !el.getAttribute('sn-require')) {
@@ -913,7 +910,7 @@ function bindNodeAttributes(viewModel, el) {
 
                             var fid = createFunction(viewModel, '{' + content + '}');
                             if (fid) {
-                                el.setAttribute(attr, fid.id);
+                                el.setAttribute(attr, fid);
                             }
 
                         } else {
@@ -1040,10 +1037,10 @@ function createFunction(viewModel, expression) {
 
     if (!expression) return null;
 
-    var expObj = viewModel._expressions[expression];
+    var expId = viewModel._expressions[expression];
 
-    if (expObj) {
-        return expObj;
+    if (expId) {
+        return expId;
     }
 
     var res = genFunction(expression);
@@ -1052,16 +1049,11 @@ function createFunction(viewModel, expression) {
 
     viewModel._codes.push('function($data){' + res.code + '}');
 
-    var id = viewModel._expressions.length++;
+    expId = viewModel._expressions.length++;
 
-    var ret = {
-        id: id,
-        isGlobal: res.isGlobal
-    }
+    viewModel._expressions[expression] = expId;
 
-    viewModel._expressions[expression] = ret;
-
-    return ret;
+    return expId;
 }
 
 var EXPRESSION_RE = /(?:\{|,)\s*[\w$]+\s*:|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^\/\r\n])+\/[img]*(?=[\)|\.|,])|\/\/.*|\bvar\s+('(?:\\'|[^'])*'|[^;]+);|(^|[!=><?\s:(),%&|+*\-\/\[\]]+)([$a-zA-Z_][\w$]*(?:\.[\w$]+)*(?![\w$]*\())/g;
@@ -1088,7 +1080,6 @@ function genFunction(expression) {
     if (!testRegExp(rmatch, expression)) return;
 
     var variables;
-    var isGlobal = false;
 
     var content = FILTERS_VARS + 'try{return \'' +
         expression
@@ -1124,7 +1115,6 @@ function genFunction(expression) {
     }
 
     return {
-        isGlobal: isGlobal,
         code: content,
         variables: variables
     };
@@ -2135,11 +2125,11 @@ function RepeatSource(viewModel, el, parent) {
                 var sortType = sort[1];
 
                 if (sortKey.charAt(0) == '{' && sortKey.charAt(sortKey.length - 1) == '}') {
-                    sortKey = createFunction(viewModel, sortKey).id;
+                    sortKey = createFunction(viewModel, sortKey);
                 }
 
                 if (sortType.charAt(0) == '{' && sortType.charAt(sortType.length - 1) == '}') {
-                    sortType = createFunction(viewModel, sortType).id;
+                    sortType = createFunction(viewModel, sortType);
 
                 } else {
                     sortType = sortType == 'desc' ? false : true;
@@ -2161,7 +2151,7 @@ function RepeatSource(viewModel, el, parent) {
 
     if (parentAlias == 'this') {
         this.isFn = true;
-        this.fid = createFunction(viewModel, '{' + collectionKey + '}').id;
+        this.fid = createFunction(viewModel, '{' + collectionKey + '}');
 
         collectionKey = collectionKey.replace(/\./g, '/');
 
