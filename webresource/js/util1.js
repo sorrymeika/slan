@@ -6,16 +6,15 @@
 var ArrayProto = Array.prototype,
     slice = ArrayProto.slice,
     concat = ArrayProto.concat,
-    hasOwnProperty = Object.prototype.hasOwnProperty;
-
-var guid = 0;
-
-var ua = typeof navigator == 'undefined' ? '' : navigator.userAgent,
+    ua = typeof navigator == 'undefined' ? '' : navigator.userAgent,
     ios = ua.match(/(iPhone|iPad|iPod).*OS\s([\d_]+)/i),
     ie = ua.match(/MSIE (\d+)/i),
     android = ua.match(/(Android);?[\s\/]+([\d.]+)?/),
     isAndroid = !!android,
+    guid = 0,
     osVersion;
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 if (ios) osVersion = ios[2].split('_');
 else if (android) osVersion = android[2].split('.');
@@ -32,23 +31,20 @@ var util = {
     isInWechat: /micromessenger/i.test(ua),
 
     getPath: function (url) {
-        return url ? url.replace(/^http:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
+        return url ? url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
     },
 
     joinPath: function () {
         var args = [].slice.apply(arguments);
-        var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
+        var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^\:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');
         var flag = true;
-
-        var replacePath = function (match, name) {
-            if (name == '..') return match;
-            if (!flag) flag = true;
-            return '';
-        };
-
         while (flag) {
             flag = false;
-            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, replacePath);
+            result = result.replace(/([^\/]+)\/\.\.(\/|$)/g, function (match, name) {
+                if (name == '..') return match;
+                if (!flag) flag = true;
+                return '';
+            })
         }
         return result.replace(/\/$/, '');
     },
@@ -90,7 +86,7 @@ var util = {
     },
 
     isNo: function (value) {
-        return !value || (Array.isArray(value) && !value.length) || (typeof value == 'object' && this.isEmptyObject(value));
+        return !value || (Array.isArray(value) && !value.length) || (typeof value == 'object' && util.isEmptyObject(value));
     },
 
     isYes: function (value) {
@@ -167,20 +163,12 @@ var util = {
         return data;
     },
 
-    params: function (params) {
-
-        return Object.keys(params).map(function (key) {
-
-            return key + "=" + (params[key] ? encodeURIComponent(params[key]) : '');
-        }).join('&');
-    },
-
     encodeHTML: function (text) {
         return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
     },
 
-    format: function (format) {
-        var args = slice.call(arguments);
+    format: function (format, str) {
+        var args = arguments;
         return format.replace(/\{(\d+)\}/g, function (match, index) {
             return args[parseInt(index) + 1];
         })
@@ -205,6 +193,124 @@ var util = {
             func = new Function('obj', tmpl);
 
         return data ? func(data) : func;
+    },
+
+    timeLeft: function (timestamp) {
+        var pad = this.pad;
+        var days = Math.floor(timestamp / (1000 * 60 * 60 * 24));
+        timestamp = timestamp % (1000 * 60 * 60 * 24);
+
+        var hours = Math.floor(timestamp / (1000 * 60 * 60));
+        timestamp = timestamp % (1000 * 60 * 60);
+
+        var minutes = Math.floor(timestamp / (1000 * 60));
+        timestamp = timestamp % (1000 * 60);
+
+        var seconds = Math.floor(timestamp / 1000);
+        timestamp = timestamp % (1000);
+
+        return (days == 0 ? '' : (days + '天 ')) +
+            pad(hours) + ":" +
+            pad(minutes) + ":" +
+            pad(seconds)
+    },
+
+    /**
+     * string 转 date
+     * 
+     * @param {String} date
+     * @return {Date}
+     */
+    parseDate: function (date) {
+        date = date.split(/\s+|\:|\-|年|月|日|\//).map(function (time) {
+            return parseInt(time);
+        });
+
+        return new Date(date[0], date[1] - 1, date[2], date[3], date[4], date[5]);
+    },
+
+    formatDate: function (d, f) {
+        if (typeof d === "string" && /^\/Date\(\d+\)\/$/.test(d)) {
+            d = new Function("return new " + d.replace(/\//g, ''))();
+        } else if (typeof d === 'string' && !f) {
+            f = d, d = new Date;
+        } else if (typeof d === 'number') {
+            d = new Date(d);
+        } else if (!(d instanceof Date)) {
+            return '';
+        }
+        var pad = util.pad;
+
+        if (f === 'minutes') {
+            var now = new Date();
+            var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            var res = '';
+            if (today - date == 86400000) {
+                res += '昨天 ';
+            } else if (today - date == 0) {
+                //res += '今天';
+            } else {
+                res += pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + " ";
+            }
+            res += pad(d.getHours()) + ':' + pad(d.getMinutes());
+            return res;
+
+        } else if (f === 'short') {
+            var now = new Date();
+            var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            if (today - date == 86400000) {
+                return '昨天' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+
+            } else if (today - date == 0) {
+                var minutes = Math.round((now - d) / 60000);
+
+                if (minutes <= 2) {
+                    return '刚刚';
+
+                } else if (minutes < 60) {
+                    return minutes + '分钟前';
+
+                } else {
+                    var hours = Math.round(minutes / 60);
+                    if (hours < 12) {
+                        return hours + '小时前';
+                    } else {
+                        return pad(d.getHours()) + ':' + pad(d.getMinutes());
+                    }
+                }
+
+            } else {
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+            }
+        }
+
+        var week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+
+        var y = d.getFullYear() + "",
+            M = d.getMonth() + 1,
+            D = d.getDate(),
+            H = d.getHours(),
+            m = d.getMinutes(),
+            s = d.getSeconds(),
+            mill = d.getMilliseconds() + "0000";
+        return (f || 'yyyy-MM-dd HH:mm:ss').replace(/\y{4}/, y)
+            .replace(/y{2}/, y.substr(2, 2))
+            .replace(/M{2}/, pad(M))
+            .replace(/M/, M)
+            .replace(/W/, week[d.getDay()])
+            .replace(/d{2,}/, pad(D))
+            .replace(/d/, D)
+            .replace(/H{2,}/i, pad(H))
+            .replace(/H/i, H)
+            .replace(/m{2,}/, pad(m))
+            .replace(/m/, m)
+            .replace(/s{2,}/, pad(s))
+            .replace(/s/, s)
+            .replace(/f+/, function (w) {
+                return mill.substr(0, w.length)
+            });
     },
 
     style: function (css) {
@@ -244,7 +350,7 @@ var util = {
         }
     },
 
-    store: function (key, value) {
+    store: typeof localStorage !== 'undefined' ? function (key, value) {
         if (location.search && /(?:\?|&)STORE_ID\=(\d+)/.test(location.search)) {
             key = RegExp.$1 + ")" + key;
         }
@@ -255,143 +361,17 @@ var util = {
             localStorage.removeItem(key);
         else
             localStorage.setItem(key, JSON.stringify(value));
+    } : function () {
+        if (typeof value === 'undefined')
+            return JSON.parse(this.cookie(key));
+        if (value === null)
+            this.cookie(key, null);
+        else
+            this.cookie(key, JSON.stringify(value));
     },
 
     noop: function () { }
 };
-
-
-/**
- * 简单时间处理方法
- */
-
-/**
- * @param {number} timestamp
- */
-util.timeLeft = function (timestamp) {
-    var pad = this.pad;
-    var days = Math.floor(timestamp / (1000 * 60 * 60 * 24));
-    timestamp = timestamp % (1000 * 60 * 60 * 24);
-
-    var hours = Math.floor(timestamp / (1000 * 60 * 60));
-    timestamp = timestamp % (1000 * 60 * 60);
-
-    var minutes = Math.floor(timestamp / (1000 * 60));
-    timestamp = timestamp % (1000 * 60);
-
-    var seconds = Math.floor(timestamp / 1000);
-    timestamp = timestamp % (1000);
-
-    return (days == 0 ? '' : (days + '天 ')) +
-        pad(hours) + ":" +
-        pad(minutes) + ":" +
-        pad(seconds)
-}
-
-/**
- * string 转 date
- * 
- * @param {String} date
- * @return {Date}
- */
-util.parseDate = function (date) {
-    date = date.split(/\s+|\:|\-|年|月|日|\//).map(function (time) {
-        return parseInt(time);
-    });
-
-    return new Date(date[0], date[1] - 1, date[2], date[3], date[4], date[5]);
-}
-
-/**
- * date 转 string
- * 
- * @param {Date|timestamp} d
- * @param {String} f 格式化字符串:yyyy-MM-dd HH:mm:ss_ffff | short | minutes
- * @return {Date}
- */
-util.formatDate = function (d, f) {
-    if (typeof d === "string" && /^\/Date\(\d+\)\/$/.test(d)) {
-        d = new Function("return new " + d.replace(/\//g, ''))();
-    } else if (typeof d === 'string' && !f) {
-        f = d, d = new Date;
-    } else if (typeof d === 'number') {
-        d = new Date(d);
-    } else if (!(d instanceof Date)) {
-        return '';
-    }
-    var pad = util.pad;
-
-    if (f === 'minutes') {
-        var now = new Date();
-        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        var res = '';
-        if (today - date == 86400000) {
-            res += '昨天 ';
-        } else if (today - date == 0) {
-            //res += '今天';
-        } else {
-            res += pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + " ";
-        }
-        res += pad(d.getHours()) + ':' + pad(d.getMinutes());
-        return res;
-
-    } else if (f === 'short') {
-        var now = new Date();
-        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        if (today - date == 86400000) {
-            return '昨天' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-
-        } else if (today - date == 0) {
-            var minutes = Math.round((now - d) / 60000);
-
-            if (minutes <= 2) {
-                return '刚刚';
-
-            } else if (minutes < 60) {
-                return minutes + '分钟前';
-
-            } else {
-                var hours = Math.round(minutes / 60);
-                if (hours < 12) {
-                    return hours + '小时前';
-                } else {
-                    return pad(d.getHours()) + ':' + pad(d.getMinutes());
-                }
-            }
-
-        } else {
-            return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
-        }
-    }
-
-    var week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-
-    var y = d.getFullYear() + "",
-        M = d.getMonth() + 1,
-        D = d.getDate(),
-        H = d.getHours(),
-        m = d.getMinutes(),
-        s = d.getSeconds(),
-        mill = d.getMilliseconds() + "0000";
-    return (f || 'yyyy-MM-dd HH:mm:ss').replace(/\y{4}/, y)
-        .replace(/y{2}/, y.substr(2, 2))
-        .replace(/M{2}/, pad(M))
-        .replace(/M/, M)
-        .replace(/W/, week[d.getDay()])
-        .replace(/d{2,}/, pad(D))
-        .replace(/d/, D)
-        .replace(/H{2,}/i, pad(H))
-        .replace(/H/i, H)
-        .replace(/m{2,}/, pad(m))
-        .replace(/m/, m)
-        .replace(/s{2,}/, pad(s))
-        .replace(/s/, s)
-        .replace(/f+/, function (w) {
-            return mill.substr(0, w.length)
-        });
-}
 
 
 /**
@@ -717,7 +697,7 @@ util.lastIndexOf = lastIndexOf;
 
 
 
-var RE_QUERY_ATTR = /([\w]+)(\^|\*|=|!|\$|~)?\=(\d+|null|undefined|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|(?:.*?(?=[,\|&])))([,\|&])?/g;
+var RE_QUERY_ATTR = /([\w]+)(\^|\*|\=|\!|\$|\~)?\=(\d+|null|undefined|true|false|'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|(?:.*?(?=[,\|&])))([,\|&])?/g;
 
 /**
  * 将 query 编译成 查询方法
@@ -774,7 +754,6 @@ function matchObject(queryGroups, obj) {
     var flag;
     var val;
     var group;
-    var item;
 
     if (queryGroups) {
 

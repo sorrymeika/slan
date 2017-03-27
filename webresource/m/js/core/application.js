@@ -7,7 +7,7 @@ var LinkList = require('./linklist');
 var Queue = require('./queue');
 var Touch = require('./touch');
 
-var Route = require('./route');
+var URI = require('./url');
 
 var Activity = require('./activity');
 var Toast = require('../widget/toast');

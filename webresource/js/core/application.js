@@ -1,7 +1,6 @@
 
 var $ = require('$'),
     util = require('util'),
-    Route = require('./route'),
     Component = require('./component'),
     Queue = require('./queue');
 
