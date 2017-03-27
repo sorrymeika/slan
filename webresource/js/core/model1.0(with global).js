@@ -249,6 +249,7 @@ function setRef(viewModel, el) {
 
 function formatData(viewModel, element, snData) {
     var data = Object.assign({
+        global: viewModel.global.attributes,
         srcElement: element
 
     }, Filters, viewModel.attributes);
@@ -372,7 +373,10 @@ function updateRepeatElement(viewModel, el) {
 
     if (!collection) {
 
-        if (!offsetParent) {
+        if (repeatSource.isGlobal) {
+            model = viewModel.global;
+
+        } else if (!offsetParent) {
             model = viewModel;
 
         } else {
@@ -1109,8 +1113,10 @@ function genFunction(expression) {
 
                             } else if (!name) {
                                 return match;
-                            }
 
+                            } else if (name.indexOf("global.") == 0) {
+                                isGlobal = true;
+                            }
                             return prefix + valueExpression(name, variables);
                         }) +
                     ')+\'';
@@ -1593,7 +1599,7 @@ var Collection = function (parent, attributeName, array) {
         parent = null;
     }
 
-    if (!parent) parent = new ViewModel();
+    if (!parent) parent = new ViewModel(false);
 
     if (!attributeName) attributeName = "$list";
 
@@ -2108,6 +2114,7 @@ function RepeatSource(viewModel, el, parent) {
 
         if (res) {
             this.filter = new Function('$data', res.code);
+            this.filterIsGlobal = res.isGlobal;
         }
     }
 
@@ -2159,13 +2166,20 @@ function RepeatSource(viewModel, el, parent) {
 
     parent && parent.appendChild(this);
 
-    if (parentAlias == 'this') {
+    if (parentAlias == 'global') {
+        this.isGlobal = true;
+
+        attrs.shift();
+        collectionKey = attrs.join('.');
+
+    } else if (parentAlias == 'this') {
         this.isFn = true;
         this.fid = createFunction(viewModel, '{' + collectionKey + '}').id;
 
         collectionKey = collectionKey.replace(/\./g, '/');
 
     } else {
+        this.isGlobal = false;
 
         while (parent) {
             if (parent.alias == parentAlias) {
@@ -2178,6 +2192,8 @@ function RepeatSource(viewModel, el, parent) {
         }
     }
 
+    replacement.snIsGlobal = this.isGlobal || this.filterIsGlobal;
+
     this.collectionKey = collectionKey;
 }
 
@@ -2188,6 +2204,8 @@ RepeatSource.isRepeatNode = function (node) {
 RepeatSource.prototype.appendChild = function (child) {
     this.children.push(child);
 }
+
+var viewModelCache = [];
 
 var ViewModel = Event.mixin(
     Model.extend({
@@ -2200,6 +2218,7 @@ var ViewModel = Event.mixin(
          * @param {Array} children 字节点列表
          */
         constructor: function (template, attributes, children) {
+            if (template !== false) viewModelCache.push(this);
 
             if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
                 children = attributes, attributes = template, template = this.el;
@@ -2446,6 +2465,13 @@ var ViewModel = Event.mixin(
                 this.$el.off(eventName, attr, this._handleSnEvent);
             }
 
+            for (var i = 0, len = viewModelCache.length; i < len; i++) {
+                if (viewModelCache[i] == this) {
+                    viewModelCache.splice(i, 1);
+                    break;
+                }
+            }
+
             var children = this._linkedModels;
             if (children) {
                 for (var i = 0, len = children.length; i < len; i++) {
@@ -2464,6 +2490,34 @@ var ViewModel = Event.mixin(
 );
 
 ViewModel.prototype.next = ViewModel.prototype.nextUpdate;
+
+var global = new ViewModel();
+
+global._render = function () {
+
+    viewModelCache.forEach(function (viewModel) {
+        var refs = {};
+
+        eachElement(viewModel.$el, function (el) {
+            if (el.snViewModel && el.snViewModel != viewModel) return false;
+
+            if (el.snIsGlobal) {
+                if (el.nodeType == 1) {
+                    var ref = el.getAttribute('ref');
+                    if (ref && !refs[ref]) {
+                        viewModel.refs[ref] = null;
+                        refs[ref] = true;
+                    }
+                }
+                return updateNode(viewModel, el);
+            }
+        });
+    });
+
+    global._nextTick = null;
+};
+
+ViewModel.prototype.global = exports.global = global;
 
 exports.ViewModel = exports.Model = ViewModel;
 
