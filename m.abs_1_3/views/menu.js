@@ -17,7 +17,7 @@
             }
         },
 
-        swipeLeftBackAction: '/',
+        swipeBackReverse: '/',
 
         onCreate: function () {
             var self = this;

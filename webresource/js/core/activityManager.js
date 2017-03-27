@@ -18,7 +18,7 @@ function setActivityReferrer(activedInstance, route) {
                 currActivity.route.prevActivity = activedInstance.route.prevActivity;
                 currActivity.referrer = currActivity.route.referrer = activedInstance.referrer;
                 currActivity.referrerDir = currActivity.route.referrerDir = activedInstance.referrerDir;
-                currActivity.swipeRightBackAction = activedInstance.swipeRightBackAction;
+                currActivity.swipeBack = activedInstance.swipeBack;
                 break;
             }
             prevRoute = prevActivity.route;
@@ -28,9 +28,9 @@ function setActivityReferrer(activedInstance, route) {
         activedInstance.referrerDir = route.referrerDir;
     }
 
-    if (activedInstance.autosetBackUrl) {
-        backUrl = route.query.from || activedInstance.referrer || activedInstance.defBackUrl;
-        backUrl && getPath(backUrl) != route.path.toLowerCase() && (activedInstance.swipeRightBackAction = backUrl);
+    if (activedInstance.recordBackURL) {
+        var backURL = route.query.from || activedInstance.referrer || activedInstance.defaultBackURL;
+        backURL && getPath(backURL) != route.path.toLowerCase() && (activedInstance.swipeBack = backURL);
     }
 }
 

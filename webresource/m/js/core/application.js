@@ -12,10 +12,18 @@ var Route = require('./route');
 var Activity = require('./activity');
 var Toast = require('../widget/toast');
 
+var URL = require('./url');
+
 var noop = util.noop;
 var lastIndexOf = util.lastIndexOf;
 var slice = Array.prototype.slice;
 var getPath = util.getPath;
+
+
+function adjustActivity(currentActivity, activity) {
+    currentActivity.$el.siblings('.view:not([data-path="' + activity.path + '"])').hide();
+    if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
+}
 
 function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
     if (!toggleAnim) toggleAnim = (isForward ? activity : currentActivity).toggleAnim;
@@ -43,11 +51,39 @@ function getToggleAnimation(isForward, currentActivity, activity, toggleAnim) {
     }];
 }
 
-function adjustActivity(currentActivity, activity) {
-    currentActivity.$el.siblings('.view:not([data-path="' + activity.path + '"])').hide();
-    if (activity.el.parentNode === null) activity.$el.appendTo(currentActivity.application.el);
+var isExiting = false;
+function startExiting(activity) {
+    if (isExiting) return;
+    isExiting = true;
+
+    var application = activity.application;
+
+    if (application.activeInput) {
+        application.activeInput.blur();
+        application.activeInput = null;
+    }
+    application.mask.show();
 }
 
+function enterAnimationEnd(activity) {
+    activity.application.mask.hide();
+
+    isExiting = false;
+
+    activity.$el.addClass('active');
+    activity.trigger('Show');
+}
+
+
+/**
+ * 启用前进、后退手势操作
+ * 
+ * 后退时手指滑动方向 ---> 默认返回到`activity.swipeBack`设置的连接
+ * 前进时手指滑动方向 <--- 默认不做处理，除非设置了`activity.swipeForward`
+ * 反向操作可设置 `activity.swipe[Back|Forward]Reverse`
+ * 
+ * @param {Application} application 
+ */
 function bindBackGesture(application) {
 
     var touch = application.touch = new Touch(application.el, {
@@ -65,7 +101,6 @@ function bindBackGesture(application) {
 
     }).on('start', function () {
         var that = this,
-            action,
             isForward,
             deltaX = that.deltaX;
 
@@ -76,17 +111,18 @@ function bindBackGesture(application) {
             that.stop();
             return;
         }
+
         that.width = window.innerWidth;
         that.minX = that.width * -1;
         that.maxX = 0;
+        that.swiper = null;
 
         var currentActivity = application.activityManager.getCurrentActivity();
         var isSwipeLeft = that.isSwipeLeft = deltaX > 0;
 
-        that.swiper = null;
-
-        action = isSwipeLeft ? (currentActivity.swipeLeftForwardAction ? (isForward = true, currentActivity.swipeLeftForwardAction) : (isForward = false, currentActivity.swipeLeftBackAction)) :
-            (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeRightBackAction));
+        // 获取正向、反向手势操作需返回、前进到的链接
+        var action = isSwipeLeft ? (currentActivity.swipeForward ? (isForward = true, currentActivity.swipeForward) : (isForward = false, currentActivity.swipeBackReverse)) :
+            (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeBack));
 
         if (!action) {
             if (isSwipeLeft && currentActivity.referrerDir == "Left") {
@@ -100,8 +136,7 @@ function bindBackGesture(application) {
         if (action) {
             that.swiperQueue = new Queue(function (next) {
 
-                application.mask.show();
-                currentActivity._startExiting();
+                startExiting(currentActivity);
 
                 application.activityManager.get(action, function (activity) {
                     that.needRemove = activity.el.parentNode === null;
@@ -170,7 +205,7 @@ function bindBackGesture(application) {
                             application.navigate(activity.url, that.isSwipeOpen);
 
                             currentActivity.trigger('Hide');
-                            activity._enterAnimationEnd();
+                            enterAnimationEnd(activity);
 
                             if (that.isSwipeOpen) {
                                 activity.referrer = currentActivity.url;
@@ -323,7 +358,7 @@ var Application = Component.extend({
             $('body').addClass('has_status_bar');
         }
 
-        this.hash = Route.formatUrl(location.hash);
+        this.hash = URL.trim(location.hash);
 
         this.historyQueue = Queue.done();
 
@@ -378,7 +413,7 @@ var Application = Component.extend({
             });
 
             $win.on('hashchange', function () {
-                var hash = that.hash = Route.formatUrl(location.hash);
+                var hash = that.hash = URI.trim(location.hash);
                 var hashIndex;
 
                 if (that.hashChanged) {
@@ -443,7 +478,7 @@ var Application = Component.extend({
             route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
         }
 
-        currentActivity._startExiting();
+        startExiting(currentActivity);
 
         activityManager.get(route, function (activity) {
 
@@ -465,7 +500,8 @@ var Application = Component.extend({
                 executedFinish = true;
 
                 currentActivity.trigger('Hide');
-                activity._enterAnimationEnd();
+                enterAnimationEnd(activity);
+
                 toggleFinish && toggleFinish.call(that, activity);
                 queueDone();
             };
@@ -516,7 +552,7 @@ var Application = Component.extend({
 
         this.historyQueue.push(function (err, res, next) {
             var index,
-                hashChanged = !Route.compareUrl(url, location.hash);
+                hashChanged = !URL.isEqual(url, location.hash);
 
             this.hashChanged = hashChanged;
 

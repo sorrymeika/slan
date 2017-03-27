@@ -22,12 +22,12 @@ module.exports = Activity.extend({
 
         self.user = util.store('user');
 
-        self.swipeRightBackAction = self.route.query.from || '/';
+        self.swipeBack = self.route.query.from || '/';
 
         this.bindScrollTo($main);
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '收货地址'
         });
 

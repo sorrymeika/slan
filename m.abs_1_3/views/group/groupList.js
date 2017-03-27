@@ -13,15 +13,15 @@ module.exports = Activity.extend({
         }
     },
 
-    defBackUrl: '/',
+    defaultBackURL: '/',
 
     onCreate: function () {
         var self = this;
 
-        self.swipeRightBackAction = self.query.from || self.referrer || self.defBackUrl;
+        self.swipeBack = self.query.from || self.referrer || self.defaultBackURL;
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '去拼团吧'
         });
 

@@ -20,10 +20,10 @@ module.exports = Activity.extend({
 
         self.user = userModel.get();
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
+        self.swipeBack = self.route.query.from || self.route.referrer || '/';
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: self.route.query.name || '会生活'
         });
 

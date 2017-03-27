@@ -94,7 +94,7 @@ module.exports = Activity.extend({
 
         this.model = new Model(this.$el, {
             title: '我的月礼',
-            back: this.swipeRightBackAction,
+            back: this.swipeBack,
             user: self.user
         });
 

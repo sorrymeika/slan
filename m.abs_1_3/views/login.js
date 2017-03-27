@@ -82,14 +82,14 @@ module.exports = Activity.extend({
         var self = this;
         var $main = this.$('.main');
 
-        this.swipeRightBackAction = this.query.from || this.referrer || '/';
+        this.swipeBack = this.query.from || this.referrer || '/';
 
         this.bindScrollTo($main);
 
         this.model = new model.ViewModel(this.$el, {
             title: '快速登录 / 注册',
             valid: '获取验证码',
-            back: this.swipeRightBackAction,
+            back: this.swipeBack,
             captcha: Loading.prototype.baseUri + '/captcha/1.jpg?v='
         });
 
@@ -114,9 +114,9 @@ module.exports = Activity.extend({
                     util.store('ivcode', res.ivcode || null);
                     userModel.set(res.data);
 
-                    var backUrl = self.route.query.success || self.swipeRightBackAction;
+                    var backURL = self.route.query.success || self.swipeBack;
 
-                    self.back(backUrl == '/' ? backUrl + '?tab=0' : backUrl);
+                    self.back(backURL == '/' ? backURL + '?tab=0' : backURL);
                     setTimeout(function() {
                         self.setResult("Login");
                     }, 0);
@@ -164,11 +164,11 @@ module.exports = Activity.extend({
     },
 
     onShow: function() {
-        if (this.swipeRightBackAction == '/') {
-            this.swipeRightBackAction = this.swipeRightBackAction + '?tab=0';
+        if (this.swipeBack == '/') {
+            this.swipeBack = this.swipeBack + '?tab=0';
 
             this.model.set({
-                back: this.swipeRightBackAction
+                back: this.swipeBack
             })
         }
     },

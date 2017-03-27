@@ -24,7 +24,7 @@ module.exports = Activity.extend({
         this.bindScrollTo(model.refs.main);
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeBack);
         }
 
         model.camera = function () {

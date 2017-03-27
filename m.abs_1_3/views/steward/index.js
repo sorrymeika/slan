@@ -12,7 +12,7 @@ module.exports = Activity.extend({
 
         }
     },
-    swipeRightBackAction: '/',
+    swipeBack: '/',
 
     onCreate: function() {
         var self = this;

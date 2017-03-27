@@ -18,7 +18,7 @@ module.exports = Activity.extend({
         var self = this;
         var $main = self.$('.main');
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
+        self.swipeBack = self.route.query.from || self.route.referrer || '/';
 
         this.bindScrollTo($main);
 
@@ -97,7 +97,7 @@ module.exports = Activity.extend({
         console.profile('test');
 
         var data = {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '标题',
             data: [{
                 name: '1234',

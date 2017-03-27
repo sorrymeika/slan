@@ -40,7 +40,7 @@ module.exports = Activity.extend({
         model.refs.text.focus();
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeBack);
         }
 
         model.save = function () {

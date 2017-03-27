@@ -15,12 +15,12 @@ module.exports = Activity.extend({
         var self = this;
         var $main = self.$('.main');
 
-        self.swipeRightBackAction = self.route.query.from || '/settings';
+        self.swipeBack = self.route.query.from || '/settings';
 
         this.bindScrollTo($main);
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '修改密码'
         });
     },

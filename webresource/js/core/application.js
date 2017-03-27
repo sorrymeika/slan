@@ -5,6 +5,8 @@ var $ = require('$'),
     Component = require('./component'),
     Queue = require('./queue');
 
+var URL = require('./url');
+
 var noop = util.noop,
     slice = Array.prototype.slice,
     getPath = util.getPath;
@@ -57,7 +59,7 @@ var Navigation = Component.extend({
         }
 
         if (!location.hash) location.hash = '/';
-        that.hash = Route.formatUrl(location.hash);
+        that.hash = URL.trim(location.hash);
 
         that.queue.push(function (err, res, next) {
 
@@ -76,7 +78,7 @@ var Navigation = Component.extend({
             });
 
             $win.on('hashchange', function () {
-                that.hash = Route.formatUrl(location.hash);
+                that.hash = URL.trim(location.hash);
 
                 if (that.skip == 0) {
 
@@ -93,13 +95,13 @@ var Navigation = Component.extend({
     },
 
     navigate: function (url) {
-        url = Route.formatUrl(url);
+        url = URL.trim(url);
         this.skip++;
         location.hash = url;
     },
 
     to: function (url) {
-        url = Route.formatUrl(url);
+        url = URL.trim(url);
 
         var that = this;
         var queue = this.queue;
@@ -109,7 +111,7 @@ var Navigation = Component.extend({
             var currentActivity = activityManager.getCurrentActivity(),
                 route = that.routeManager.match(url);
 
-            if (queue.queue.length == 0 && !Route.compareUrl(url, location.hash)) {
+            if (queue.queue.length == 0 && !URL.isEqual(url, location.hash)) {
                 that.navigate(url);
             }
 

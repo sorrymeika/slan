@@ -1,4 +1,6 @@
 
+var $ = require('$');
+
 var util = require('util'),
     Event = require('./event'),
     Promise = require('promise'),
@@ -46,8 +48,10 @@ var Activity = Component.extend({
     el: '<div class="view"></div>',
 
     toggleAnim: 'def',
-    defBackUrl: '/',
-    autosetBackUrl: true,
+
+    recordBackURL: true,
+    defaultBackURL: '/',
+
     status: STATUS.INIT,
 
     initialize: function (options) {
@@ -153,17 +157,13 @@ var Activity = Component.extend({
         return this;
     },
 
-    compareUrl: function (url) {
-        return getUrlPath(url) === this.route.path.toLowerCase();
-    },
-
     forward: function (url, duration, toggleAnim, data) {
         this.application.forward(url, duration, toggleAnim, data);
         return this;
     },
 
     back: function (url, duration, toggleAnim, data) {
-        this.application.back(url || this.swipeRightBackAction, duration, toggleAnim, data);
+        this.application.back(url || this.swipeBack, duration, toggleAnim, data);
         return this;
     },
 
@@ -197,29 +197,6 @@ var Activity = Component.extend({
         this.trigger(new Event('QueryChange', {
             data: data
         }));
-    },
-
-    isExiting: false,
-    _startExiting: function () {
-        var self = this;
-        if (self.isExiting) return;
-        self.isExiting = true;
-        var application = self.application;
-        if (application.activeInput) {
-            application.activeInput.blur();
-            application.activeInput = null;
-        }
-        application.mask.show();
-    },
-
-    _enterAnimationEnd: function () {
-        var self = this;
-        self.application.mask.hide();
-
-        self.isExiting = false;
-
-        self.$el.addClass('active');
-        self.trigger('Show');
     }
 });
 

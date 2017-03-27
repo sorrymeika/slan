@@ -26,14 +26,14 @@ define(function (require, exports, module) {
             var self = this;
             var $main = this.$('.main');
 
-            this.swipeRightBackAction = this.route.from || this.route.referrer || '/steward';
+            this.swipeBack = this.route.from || this.route.referrer || '/steward';
 
             self.user = util.store('user');
 
             this.bindScrollTo($main);
 
             this.model = new model.ViewModel(this.$el, {
-                back: this.swipeRightBackAction,
+                back: this.swipeBack,
                 title: '爱管家',
                 id: this.route.params.id
             });

@@ -1,19 +1,5 @@
 ﻿var util = require('util');
-
-function formatUrl(hash) {
-    var searchIndex = hash.indexOf('?');
-    var search = '';
-    if (searchIndex != -1) {
-        search = hash.substr(searchIndex);
-        hash = hash.substr(0, searchIndex);
-    }
-    return (hash.replace(/^#+|\/$/, '') || '/') + search;
-}
-
-function compareUrl(a, b) {
-    return formatUrl(a).toLowerCase() == formatUrl(b).toLowerCase();
-}
-
+var URL = require('./url');
 
 function Route(options) {
     this.routes = [];
@@ -59,48 +45,33 @@ Route.prototype.append = function (options) {
     }
 }
 
-Route.prototype.match = function (url) {
+Route.prototype.match = function (urlString) {
     var result = null,
-        query = {},
-        hash = url = formatUrl(url),
-        index = url.indexOf('?'),
-        search,
         routes = this.routes,
         route,
         match;
 
-    if (index != -1) {
-        search = url.substr(index + 1);
+    var url = URL.from(urlString);
 
-        url = url.substr(0, index);
-
-        search.replace(/(?:^|&)([^=&]+)=([^&]*)/g, function (r0, r1, r2) {
-            query[r1] = decodeURIComponent(r2);
-            return '';
-        })
-    } else {
-        search = '';
-    }
+    urlString = url + '';
 
     for (var i = 0, length = routes.length; i < length; i++) {
         route = routes[i];
 
-        match = route.regex ? url.match(route.regex) : null;
+        match = route.regex ? urlString.match(route.regex) : null;
 
         if (match) {
-            result = {
-                path: match[0],
-                url: hash,
-                hash: '#' + hash,
+
+            result = Object.assign(url.toURI(), {
+                url: urlString,
+                hash: '#' + urlString,
                 root: route.root,
                 template: route.template,
                 package: sl.isDebug ? false : util.joinPath(route.root, route.group || 'controller'),
                 view: route.view,
                 params: {},
-                search: search,
-                query: query,
                 data: {}
-            };
+            });
 
             for (var j = 0, len = route.parts.length; j < len; j++) {
                 result.params[route.parts[j]] = match[j + 1];
@@ -121,9 +92,5 @@ Route.prototype.match = function (url) {
 
     return result;
 }
-
-
-Route.formatUrl = formatUrl;
-Route.compareUrl = compareUrl;
 
 module.exports = Route;

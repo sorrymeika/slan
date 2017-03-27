@@ -20,7 +20,7 @@ module.exports = Activity.extend({
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeBack);
         }
 
         this.bindScrollTo(model.refs.main);

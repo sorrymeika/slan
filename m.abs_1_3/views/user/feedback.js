@@ -28,7 +28,7 @@ module.exports = Activity.extend({
         var loader = new Loader(this.$el);
 
         model.back = function() {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeBack);
         }
 
         model.selectImage = function() {

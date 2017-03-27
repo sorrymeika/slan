@@ -21,7 +21,7 @@ define(function(require, exports, module) {
             this.bindScrollTo($main);
 
             self.model = new model.ViewModel(this.$el, {
-                back: self.swipeRightBackAction,
+                back: self.swipeBack,
                 title: '确认订单',
                 payType: 1,
                 couponprice: 0

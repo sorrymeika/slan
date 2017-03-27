@@ -28,7 +28,7 @@ module.exports = Activity.extend({
 
         self.model = new model.ViewModel(this.$el, {
             url: encodeURIComponent(self.route.url),
-            back: self.swipeRightBackAction
+            back: self.swipeBack
         });
 
         var title = '';

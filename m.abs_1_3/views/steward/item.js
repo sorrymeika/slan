@@ -16,7 +16,7 @@ define(function (require, exports, module) {
 
             }
         },
-        swipeRightBackAction: '/steward',
+        swipeBack: '/steward',
 
         onCreate: function () {
             var self = this;

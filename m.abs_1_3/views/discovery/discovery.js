@@ -33,10 +33,10 @@ module.exports = Activity.extend({
         }
         self.share.$el.appendTo(self.$el);
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
+        self.swipeBack = self.route.query.from || self.route.referrer || '/';
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             url: encodeURIComponent(self.route.url)
         });
 

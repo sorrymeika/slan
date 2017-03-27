@@ -24,7 +24,7 @@ define(function(require, exports, module) {
             }
         },
 
-        swipeRightBackAction: '/',
+        swipeBack: '/',
 
         onCreate: function() {
             var self = this;

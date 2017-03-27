@@ -8,7 +8,7 @@ var animation = require('animation');
 module.exports = Activity.extend({
     events: {
         'tap .js_back': function () {
-            this.back(this.swipeRightBackAction);
+            this.back(this.swipeBack);
         }
     },
 

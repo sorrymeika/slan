@@ -42,7 +42,7 @@ module.exports = Activity.extend({
         var routeData = this.route.data;
 
         var model = new Model(this.$el, {
-            back: this.swipeRightBackAction,
+            back: this.swipeBack,
             title: '发票信息',
             user: self.user,
             company: routeData.company,

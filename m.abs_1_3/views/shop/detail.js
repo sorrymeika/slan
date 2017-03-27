@@ -16,7 +16,7 @@ module.exports = Activity.extend({
         var self = this;
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '图文详情',
             id: self.route.params.id
         });

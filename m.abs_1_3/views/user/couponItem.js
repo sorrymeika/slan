@@ -74,7 +74,7 @@ module.exports = Activity.extend({
         self.user = userModel.get();
 
         var model = new Model(this.$el, {
-            back: this.swipeRightBackAction,
+            back: this.swipeBack,
             title: '我的卡券'
         });
 

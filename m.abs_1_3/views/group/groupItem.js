@@ -16,8 +16,8 @@ module.exports = Activity.extend({
     events: {
         'tap [ref="back"]': function () {
 
-            console.log(this.swipeRightBackAction);
-            this.back(this.swipeRightBackAction);
+            console.log(this.swipeBack);
+            this.back(this.swipeBack);
         },
 
         'tap .js_buy:not(.disabled)': function () {

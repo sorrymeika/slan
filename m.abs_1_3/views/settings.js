@@ -15,7 +15,7 @@ return Activity.extend({
         var user = userModel.get();
 
         this.model = new model.Model(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '设置',
             user: user,
             version: sl.appVersion

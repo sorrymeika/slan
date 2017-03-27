@@ -11,7 +11,7 @@ var bridge = require('bridge');
 module.exports = Activity.extend({
     events: {},
 
-    swipeRightBackAction: '/',
+    swipeBack: '/',
 
     onCreate: function () {
         var self = this;

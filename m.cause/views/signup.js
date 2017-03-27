@@ -48,10 +48,10 @@ define(function(require, exports, module) {
         onCreate: function() {
             var self = this;
 
-            this.swipeRightBackAction = this.route.query.from || '/login';
+            this.swipeBack = this.route.query.from || '/login';
 
             this.model = new model.ViewModel(this.$el, {
-                back: this.swipeRightBackAction,
+                back: this.swipeBack,
                 validcodeImg: api.url("/api/user/captcha?token=" + util.store('token'))
             });
 
@@ -72,7 +72,7 @@ define(function(require, exports, module) {
                         });
 
                     } else {
-                        //var backUrl = self.route.query.success || "/";
+                        //var backURL = self.route.query.success || "/";
 
                         userModel.set(res.user);
                     }

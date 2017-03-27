@@ -364,7 +364,7 @@ module.exports = Activity.extend({
         self.user = userModel.get();
 
         self.model.set({
-            back: self.swipeRightBackAction
+            back: self.swipeBack
         });
 
         bridge.statusBar('dark');

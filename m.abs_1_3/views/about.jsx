@@ -8,7 +8,7 @@ define(function (require, exports, module) {
 
     return Activity.extend({
         events: {},
-        swipeRightBackAction: '/settings',
+        swipeBack: '/settings',
 
         onCreate: function () {
             var self = this;

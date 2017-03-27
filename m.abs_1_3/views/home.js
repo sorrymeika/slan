@@ -21,7 +21,7 @@ var Album = require("widget/album");
 
 var Discovery = require('./discovery/discovery_index');
 
-var trimHash = require('core/route').formatUrl;
+var trimHash = require('core/url').trim;
 
 Global.set({
     msg_count: 0,

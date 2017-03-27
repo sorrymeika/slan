@@ -16,7 +16,7 @@ module.exports = Activity.extend({
         var self = this;
         var $main = self.$('.main');
 
-        self.swipeRightBackAction = undefined;
+        self.swipeBack = undefined;
 
         this.bindScrollTo($main);
 

@@ -17,7 +17,7 @@ define(function(require, exports, module) {
             var self = this;
             var $main = self.$('.main');
 
-            self.swipeRightBackAction = self.route.query.from || '/all';
+            self.swipeBack = self.route.query.from || '/all';
 
             this.bindScrollTo($main);
 
@@ -28,7 +28,7 @@ define(function(require, exports, module) {
             }) : null;
 
             self.model = new model.ViewModel(this.$el, {
-                back: self.swipeRightBackAction,
+                back: self.swipeBack,
                 title: cate ? cate.PCG_NAME : '商品列表',
                 orderBy: 'PRD_ONLINE_DT|desc',
                 priceSort: true,

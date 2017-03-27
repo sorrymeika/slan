@@ -64,12 +64,12 @@ module.exports = Activity.extend({
 
         self.user = userModel.get();
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || '/';
+        self.swipeBack = self.route.query.from || self.route.referrer || '/';
 
         this.bindScrollTo($main);
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: '订单详情',
             payType: 1
         });

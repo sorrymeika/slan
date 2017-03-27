@@ -21,7 +21,7 @@ define(function (require, exports, module) {
             var cart = new Cart();
 
             self.model = new model.ViewModel(this.$el, {
-                back: self.swipeRightBackAction,
+                back: self.swipeBack,
                 title: '我的购物车',
                 user: self.user,
                 cart: cart
@@ -43,7 +43,7 @@ define(function (require, exports, module) {
 
             self.model.set({
                 user: self.user,
-                back: self.swipeRightBackAction
+                back: self.swipeBack
             });
 
         },

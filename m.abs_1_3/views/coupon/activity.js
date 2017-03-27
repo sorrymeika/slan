@@ -40,15 +40,15 @@ module.exports = Activity.extend({
         }
     },
 
-    defBackUrl: '/',
+    defaultBackURL: '/',
 
     onCreate: function () {
         var self = this;
 
-        self.swipeRightBackAction = self.route.query.from || self.route.referrer || self.defBackUrl;
+        self.swipeBack = self.route.query.from || self.route.referrer || self.defaultBackURL;
 
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: 'ABS家居'
         });
 

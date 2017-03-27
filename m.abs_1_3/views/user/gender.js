@@ -28,7 +28,7 @@ module.exports = Activity.extend({
         });
 
         model.back = function () {
-            self.back(self.swipeRightBackAction);
+            self.back(self.swipeBack);
         }
 
         model.save = function (gender) {

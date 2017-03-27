@@ -61,7 +61,7 @@ module.exports = Activity.extend({
 
         var model = this.model = new vm.Model(this.$el, {
             title: '个人信息',
-            back: self.swipeRightBackAction
+            back: self.swipeBack
         });
 
         this.bindScrollTo(this.model.refs.main);

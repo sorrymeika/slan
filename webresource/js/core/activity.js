@@ -96,9 +96,6 @@ var Page = Component.extend({
         return this;
     },
 
-    compareUrl: function (url) {
-        return getUrlPath(url) === this.route.path.toLowerCase();
-    },
     back: function (url) {
         this.application.to(url);
     },

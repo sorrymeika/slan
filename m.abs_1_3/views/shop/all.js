@@ -26,7 +26,7 @@ module.exports = Activity.extend({
     onCreate: function () {
         var self = this;
 
-        self.swipeRightBackAction = self.route.query.from || '/';
+        self.swipeBack = self.route.query.from || '/';
 
         var $main = this.$('.main');
 
@@ -74,7 +74,7 @@ module.exports = Activity.extend({
 
 
         this.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             resource: 'http://appuser.abs.cn'
         });
 

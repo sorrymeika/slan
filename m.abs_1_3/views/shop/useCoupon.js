@@ -34,7 +34,7 @@ module.exports = Activity.extend({
         var props = this.route.data || {};
 
         var model = new Model(this.$el, {
-            back: this.swipeRightBackAction,
+            back: this.swipeBack,
             title: '使用优惠券',
             isFree: props.isFree,
             bag_amount: props.bag_amount,

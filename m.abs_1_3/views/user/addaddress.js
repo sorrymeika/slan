@@ -30,13 +30,13 @@ module.exports = Activity.extend({
 
         self.user = util.store('user');
 
-        self.swipeRightBackAction = self.route.query.from || '/address';
+        self.swipeBack = self.route.query.from || '/address';
 
         this.bindScrollTo($main);
 
         var id = self.route.query.id;
         self.model = new model.ViewModel(this.$el, {
-            back: self.swipeRightBackAction,
+            back: self.swipeBack,
             title: id ? '设置地址' : '添加地址',
             address: {
                 mbaDefault: true,
@@ -203,7 +203,7 @@ module.exports = Activity.extend({
                     });
                 }
 
-                self.back(self.route.query.buy ? decodeURIComponent(self.route.query.from.match(/from=([^&]+?)(&|$)/)[1]) : self.swipeRightBackAction);
+                self.back(self.route.query.buy ? decodeURIComponent(self.route.query.from.match(/from=([^&]+?)(&|$)/)[1]) : self.swipeBack);
             }
         });
     },
