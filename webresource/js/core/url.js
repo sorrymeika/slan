@@ -1,5 +1,5 @@
 
-function trimHash(hash) {
+function trim(hash) {
 
     var searchIndex = hash.indexOf('?');
     var search = '';
