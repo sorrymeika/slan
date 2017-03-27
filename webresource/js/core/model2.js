@@ -270,7 +270,7 @@ function formatData(viewModel, element, snData) {
 }
 
 function executeFunction(viewModel, functionId, data) {
-    return viewModel.fns[functionId].call(viewModel, data);
+    return viewModel.fns[functionId - 1].call(viewModel, data);
 }
 
 
@@ -1039,7 +1039,7 @@ function createFunction(viewModel, expression) {
 
     var expId = viewModel._expressions[expression];
 
-    if (expId) {
+    if (expId !== undefined) {
         return expId;
     }
 
@@ -1049,7 +1049,7 @@ function createFunction(viewModel, expression) {
 
     viewModel._codes.push('function($data){' + res.code + '}');
 
-    expId = viewModel._expressions.length++;
+    expId = viewModel._expressions.id++;
 
     viewModel._expressions[expression] = expId;
 
@@ -2208,7 +2208,7 @@ var ViewModel = Event.mixin(
 
             this._model = {};
             this._expressions = {
-                length: 0
+                id: 1
             };
             this.fns = [];
             this.refs = {};
