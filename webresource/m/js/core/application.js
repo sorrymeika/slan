@@ -121,8 +121,13 @@ function bindBackGesture(application) {
         var isSwipeLeft = that.isSwipeLeft = deltaX > 0;
 
         // 获取正向、反向手势操作需返回、前进到的链接
-        var action = isSwipeLeft ? (currentActivity.swipeForward ? (isForward = true, currentActivity.swipeForward) : (isForward = false, currentActivity.swipeBackReverse)) :
-            (currentActivity.swipeRightForwardAction ? (isForward = true, currentActivity.swipeRightForwardAction) : (isForward = false, currentActivity.swipeBack));
+        var action = isSwipeLeft ?
+            (currentActivity.swipeForward ?
+                (isForward = true, currentActivity.swipeForward) :
+                (isForward = false, currentActivity.swipeBackReverse)) :
+            (currentActivity.swipeForwardReverse ?
+                (isForward = true, currentActivity.swipeForwardReverse) :
+                (isForward = false, currentActivity.swipeBack));
 
         if (!action) {
             if (isSwipeLeft && currentActivity.referrerDir == "Left") {
@@ -475,7 +480,7 @@ var Application = Component.extend({
         } else if (isForward) {
             route.prevActivity = currentActivity;
             route.referrer = currentActivity.url;
-            route.referrerDir = currentActivity.swipeRightForwardAction == url ? "Left" : "Right";
+            route.referrerDir = currentActivity.swipeForwardReverse == url ? "Left" : "Right";
         }
 
         startExiting(currentActivity);
@@ -525,10 +530,6 @@ var Application = Component.extend({
             if (!duration) {
                 finish();
             }
-
-            //setTimeout(finish, duration + 300);
-            //anim.finish = finish;
-            //animation.parallel(anims);
         });
     },
 
