@@ -104,10 +104,6 @@ ActivityManager.prototype = {
         }
     },
 
-    set: function (url, activity) {
-        this._activities[getUrlPath(url)] = activity;
-    },
-
     get: function (url, callback) {
         var that = this;
         var route = typeof url === 'string' ? this.routeManager.match(url) : url;
@@ -166,6 +162,10 @@ ActivityManager.prototype = {
 
             callback.call(that, activity, route);
         }
+    },
+
+    set: function (url, activity) {
+        this._activities[getUrlPath(url)] = activity;
     },
 
     remove: function (url) {

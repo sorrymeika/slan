@@ -1,5 +1,61 @@
 ﻿var LinkList = require('./core/linklist');
 
+var BrowserMutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+var flushQueue = [];
+let len = 0;
+
+function asap(callback, arg) {
+    flushQueue[len] = callback;
+    flushQueue[len + 1] = arg;
+    len += 2;
+    if (len === 2) {
+        scheduleFlush();
+    }
+}
+
+function flush() {
+    for (var i = 0; i < len; i += 2) {
+        var callback = flushQueue[i];
+        var arg = flushQueue[i + 1];
+
+        callback(arg);
+
+        flushQueue[i] = undefined;
+        flushQueue[i + 1] = undefined;
+    }
+
+    len = 0;
+}
+
+function useMutationObserver() {
+    var iterations = 0;
+    var observer = new BrowserMutationObserver(flush);
+    var node = document.createTextNode('');
+    observer.observe(node, { characterData: true });
+
+    return function () {
+
+        node.data = (iterations = ++iterations % 2);
+    };
+}
+
+function useSetTimeout() {
+
+    return function () {
+
+        setTimeout(flush, 0);
+    };
+}
+
+var scheduleFlush;
+
+if (BrowserMutationObserver) {
+    scheduleFlush = useMutationObserver();
+} else {
+    scheduleFlush = useSetTimeout();
+}
+
 function isThenable(thenable) {
     return thenable && typeof thenable.then === 'function';
 }
@@ -10,14 +66,16 @@ function tryResolve(thenable, _resolve, _reject) {
         thenable.then(_resolve, _reject);
 
     } else {
+
         try {
             if (typeof _resolve == 'function') {
-                _resolve(thenable);
+                asap(_resolve, thenable);
             }
 
         } catch (e) {
-            _reject && _reject(e);
+            _reject && asap(_reject, e);
         }
+
     }
 }
 
@@ -31,7 +89,7 @@ function resolve(thenable) {
 function reject(value) {
 
     return new Promise(function (_resolve, _reject) {
-        _reject(value);
+        asap(_reject, value);
     });
 }
 
@@ -46,26 +104,27 @@ function catchAndContinue(e, onRejected, nextFulfilled, nextRejected) {
     }
 }
 
-function subscribe(res, onFulfilled, onRejected, nextFulfilled, nextRejected) {
+function emit(res, onFulfilled, onRejected, nextFulfilled, nextRejected) {
     var thenable;
 
-    try {
-        thenable = onFulfilled ? onFulfilled(res) : null;
+    asap(function () {
 
-    } catch (e) {
-        catchAndContinue(e, onRejected, nextFulfilled, nextRejected);
-        return;
-    }
+        try {
+            thenable = onFulfilled(res);
 
-    tryResolve(thenable, nextFulfilled, nextRejected);
+        } catch (e) {
+            catchAndContinue(e, onRejected, nextFulfilled, nextRejected);
+            return;
+        }
+
+        tryResolve(thenable, nextFulfilled, nextRejected);
+    })
 }
 
-Promise.resolve = resolve;
-Promise.reject = reject;
 
-function Promise(callback, ctx) {
+function Promise(callback) {
     if (!(this instanceof Promise))
-        return new Promise(callback, ctx);
+        return new Promise(callback);
 
     var self = this;
     var queue = new LinkList();
@@ -79,10 +138,12 @@ function Promise(callback, ctx) {
         self._result = res;
 
         for (var next; next = queue.shift();) {
-            subscribe(res, next.onFulfilled, next.onRejected, next.nextFulfilled, next.nextRejected);
+
+            emit(res, next.onFulfilled, next.onRejected, next.nextFulfilled, next.nextRejected);
         }
 
     }, function (e) {
+        
         self.state = 0;
         self._error = e;
 
@@ -92,7 +153,11 @@ function Promise(callback, ctx) {
     });
 }
 
+Promise.resolve = resolve;
+Promise.reject = reject;
+
 Promise.prototype = {
+
     then: function (onFulfilled, onRejected) {
         var self = this;
 
@@ -108,7 +173,7 @@ Promise.prototype = {
                     });
                     break;
                 case 1:
-                    subscribe(self._result, onFulfilled, onRejected, nextFulfilled, nextRejected);
+                    emit(self._result, onFulfilled, onRejected, nextFulfilled, nextRejected);
                     break;
                 case 0:
                     catchAndContinue(self._error, onRejected, nextFulfilled, nextRejected);
