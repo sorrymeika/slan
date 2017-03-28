@@ -390,17 +390,28 @@ ScrollBindResult.prototype = {
     }
 }
 
+
+/**
+ * 给Element元素绑定Scroll
+ * 
+ * @param {String|Element|Zepto} selector
+ * @param {Object} options
+ * @param {Function} options.refresh 下拉刷新触发时调用的方法 
+ * @param {boolean} options.vScroll 是否允许垂直方向滚动 
+ * @param {boolean} options.hScroll 是否允许水平方向滚动 
+ * 
+ * @return {ScrollBindResult}
+ * 
+ * @example
+ * exports.bind({
+ *      refresh: function(resolve, reject) {
+ *          setTimeout(function() {
+ *              reject('出错啦');
+ *          },1000);
+ *      }
+ * })
+ */
 exports.bind = function (selector, options) {
-	/*//<--debug
-	options={
-	useScroll: true,
-	refresh: function(resolve,reject) {
-	setTimeout(function() {
-	reject('出错啦');
-	},1000);
-	}
-	}
-	//debug-->*/
 
     options = $.extend({
         vScroll: true,
