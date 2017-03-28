@@ -874,9 +874,13 @@ function bindNodeAttributes(viewModel, el) {
                     el.removeAttribute(attr);
                     el.setAttribute(viewModel.snModelKey, val);
                     break;
+
                 case 'sn-require':
-                    el.snRequire = window.seajs && seajs.require(val) || val;
+                    el.snRequire = typeof viewModel.requires == 'function' ?
+                        viewModel.requires(val) :
+                        viewModel.requires[val];
                     break;
+
                 default:
                     //处理事件绑定
                     var origAttr = attr;
@@ -2183,19 +2187,35 @@ RepeatSource.prototype.appendChild = function (child) {
 }
 
 var ViewModel = Event.mixin(
+
     Model.extend({
 
         /**
          * 双向绑定model
          * 
-         * @param {String|Element|Boolean} [template] 字符类型或dom元素时为模版
+         * @param {String|Element|Boolean|Object} [template] 字符类型或dom元素时为模版
          * @param {Object} [attributes] 属性
-         * @param {Array} children 字节点列表
+         * @param {Array} [children] 子节点列表
          */
         constructor: function (template, attributes, children) {
 
-            if ((typeof attributes === 'undefined' || isArray(attributes)) && (template === undefined || template === null || $.isPlainObject(template)))
-                children = attributes, attributes = template, template = this.el;
+            if (template && template.attributes && template.el) {
+
+                children = template.children;
+                attributes = template.attributes;
+
+                this.requires = template.requires;
+                this.delegate = template.delegate;
+
+                template = template.el;
+
+            } else if ((typeof attributes === 'undefined' || isArray(attributes))
+                && (template === undefined || template === null || $.isPlainObject(template))) {
+
+                children = attributes;
+                attributes = template;
+                template = this.el;
+            }
 
             this.children = children ? [].concat(children) : [];
 
@@ -2217,7 +2237,7 @@ var ViewModel = Event.mixin(
             this.refs = {};
             this.root = this;
 
-            template && this.bind(template);
+            template && this._bind(template);
 
             this.set(this.attributes);
 
@@ -2251,25 +2271,7 @@ var ViewModel = Event.mixin(
             }
         },
 
-        dataOfElement: function (el, modelName, value) {
-            var attrs = modelName.split('.');
-            var model;
-
-            if (el.snData && attrs[0] in el.snData) {
-                model = el.snData[attrs.shift()];
-            } else {
-                model = this;
-            }
-
-            if (arguments.length == 3) {
-                model.set(attrs, value);
-                return this;
-            }
-
-            return model.get(attrs);
-        },
-
-        bind: function (el) {
+        _bind: function (el) {
 
             var self = this;
             var $el = $(el).on('input change blur', '[' + this.snModelKey + ']', function (e) {
@@ -2308,6 +2310,24 @@ var ViewModel = Event.mixin(
             })
 
             return this;
+        },
+
+        dataOfElement: function (el, modelName, value) {
+            var attrs = modelName.split('.');
+            var model;
+
+            if (el.snData && attrs[0] in el.snData) {
+                model = el.snData[attrs.shift()];
+            } else {
+                model = this;
+            }
+
+            if (arguments.length == 3) {
+                model.set(attrs, value);
+                return this;
+            }
+
+            return model.get(attrs);
         },
 
         nextUpdate: function (cb) {

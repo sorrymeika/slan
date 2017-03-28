@@ -230,11 +230,36 @@ var model = new ViewModel(this.$el, {
 
 * `sn-require` 引入其他组建
 
+```js
+
+var model = new ViewModel({
+
+    requires: {
+        tab: require('widget/tab')
+    },
+
+    el: template,
+    
+    delegate: this,
+
+    attributes:  {
+        title: '标题',
+        list: [{
+            name: 1,
+            children: [{
+                name: '子'
+            }]
+        }, {
+            name: 2
+        }]
+    }
+});
+
+```
 
 ```html
-@use '../components/tab' as tab;
 
-<div class="tab" sn-require="components/tab" sn-data="{{items:['生活服务','通信服务']}}"></div>
+<div class="tab" sn-require="tab" sn-data="{{items:['生活服务','通信服务']}}"></div>
 ```
 
 
