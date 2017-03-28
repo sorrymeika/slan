@@ -2,9 +2,10 @@
 
 var BrowserMutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-var flushQueue = [];
+var flushQueue = new Array(1000);
 let len = 0;
 
+// as soon as possible
 function asap(callback, arg) {
     flushQueue[len] = callback;
     flushQueue[len + 1] = arg;
@@ -32,18 +33,16 @@ function useMutationObserver() {
     var iterations = 0;
     var observer = new BrowserMutationObserver(flush);
     var node = document.createTextNode('');
+
     observer.observe(node, { characterData: true });
 
     return function () {
-
         node.data = (iterations = ++iterations % 2);
     };
 }
 
 function useSetTimeout() {
-
     return function () {
-
         setTimeout(flush, 0);
     };
 }
@@ -60,34 +59,25 @@ function isThenable(thenable) {
     return thenable && typeof thenable.then === 'function';
 }
 
-function tryResolve(thenable, _resolve, _reject) {
-
+function tryCatch(thenable, _resolve, _reject) {
     if (isThenable(thenable)) {
         thenable.then(_resolve, _reject);
-
     } else {
-
         try {
-            if (typeof _resolve == 'function') {
-                asap(_resolve, thenable);
-            }
-
+            if (typeof _resolve == 'function') asap(_resolve, thenable);
         } catch (e) {
             _reject && asap(_reject, e);
         }
-
     }
 }
 
 function resolve(thenable) {
-
     return new Promise(function (_resolve, _reject) {
-        tryResolve(thenable, _resolve, _reject);
+        tryCatch(thenable, _resolve, _reject);
     });
 }
 
 function reject(value) {
-
     return new Promise(function (_resolve, _reject) {
         asap(_reject, value);
     });
@@ -111,13 +101,12 @@ function emit(res, onFulfilled, onRejected, nextFulfilled, nextRejected) {
 
         try {
             thenable = onFulfilled(res);
-
         } catch (e) {
             catchAndContinue(e, onRejected, nextFulfilled, nextRejected);
             return;
         }
 
-        tryResolve(thenable, nextFulfilled, nextRejected);
+        tryCatch(thenable, nextFulfilled, nextRejected);
     })
 }
 
@@ -143,7 +132,7 @@ function Promise(callback) {
         }
 
     }, function (e) {
-        
+
         self.state = 0;
         self._error = e;
 
@@ -162,7 +151,6 @@ Promise.prototype = {
         var self = this;
 
         return new Promise(function (nextFulfilled, nextRejected) {
-
             switch (self.state) {
                 case -1:
                     self.queue.append({
@@ -186,23 +174,18 @@ Promise.prototype = {
     'catch': function (onRejected) {
         return this.then(null, onRejected);
     }
-};
 
+}
 
 Promise.all = function (all) {
-
     return this.each(all, null, false);
 }
 
-
 Promise.race = function (all) {
-
     return this.each(all, false, false);
 }
 
-
 Promise.some = function (some) {
-
     return this.each(some);
 }
 
@@ -242,7 +225,7 @@ Promise.each = function (all, _resolve, _reject) {
         }
 
         all.forEach(function (item, i) {
-            tryResolve(item, checkNext(results, onFulfilled, _resolve, i), checkNext(errors, onRejected, _reject, i));
+            tryCatch(item, checkNext(results, onFulfilled, _resolve, i), checkNext(errors, onRejected, _reject, i));
         });
     });
 }
