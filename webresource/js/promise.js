@@ -83,26 +83,29 @@ function reject(value) {
     });
 }
 
-function catchAndContinue(e, onRejected, nextFulfilled, nextRejected) {
-
+function handleRejection(e, onRejected, nextFulfilled, nextRejected) {
     if (typeof onRejected === 'function') {
         onRejected(e);
         nextFulfilled(null);
-
     } else {
         nextRejected(e);
     }
+}
+
+function emitRejection(e, onRejected, nextFulfilled, nextRejected) {
+    asap(function () {
+        handleRejection(e, onRejected, nextFulfilled, nextRejected);
+    })
 }
 
 function emit(res, onFulfilled, onRejected, nextFulfilled, nextRejected) {
     var thenable;
 
     asap(function () {
-
         try {
-            thenable = onFulfilled(res);
+            thenable = onFulfilled ? onFulfilled(res) : null;
         } catch (e) {
-            catchAndContinue(e, onRejected, nextFulfilled, nextRejected);
+            handleRejection(e, onRejected, nextFulfilled, nextRejected);
             return;
         }
 
@@ -122,22 +125,19 @@ function Promise(callback) {
     this.queue = queue;
 
     callback(function (res) {
-
         self.state = 1;
         self._result = res;
 
         for (var next; next = queue.shift();) {
-
             emit(res, next.onFulfilled, next.onRejected, next.nextFulfilled, next.nextRejected);
         }
 
     }, function (e) {
-
         self.state = 0;
         self._error = e;
 
         for (var next; next = queue.shift();) {
-            catchAndContinue(e, next.onRejected, next.nextFulfilled, next.nextRejected);
+            emitRejection(e, next.onRejected, next.nextFulfilled, next.nextRejected);
         }
     });
 }
@@ -146,7 +146,6 @@ Promise.resolve = resolve;
 Promise.reject = reject;
 
 Promise.prototype = {
-
     then: function (onFulfilled, onRejected) {
         var self = this;
 
@@ -164,17 +163,15 @@ Promise.prototype = {
                     emit(self._result, onFulfilled, onRejected, nextFulfilled, nextRejected);
                     break;
                 case 0:
-                    catchAndContinue(self._error, onRejected, nextFulfilled, nextRejected);
+                    emitRejection(self._error, onRejected, nextFulfilled, nextRejected);
                     break;
             }
         });
-
     },
 
     'catch': function (onRejected) {
         return this.then(null, onRejected);
     }
-
 }
 
 Promise.all = function (all) {
@@ -190,17 +187,13 @@ Promise.some = function (some) {
 }
 
 Promise.each = function (all, _resolve, _reject) {
-
     return new Promise(function (onFulfilled, onRejected) {
-
         var count = all.length;
         var results = [];
         var errors = [];
 
         var checkNext = function (data, onFinish, each, i) {
-
             return function (e) {
-
                 if (count == -1) return;
 
                 if (each === false || typeof each === 'function' && each(e, i) === false) {
