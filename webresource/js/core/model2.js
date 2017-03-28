@@ -20,7 +20,6 @@ var TRANSITION_END = $.fx.transitionEnd;
 var isArray = Array.isArray;
 var extend = $.extend;
 
-
 var EVENTS = {
     tap: 'tap',
     'long-tap': 'longTap',
@@ -120,7 +119,6 @@ function valueExpression(str, variables) {
     //typeof ' + str + '==="function"?' + str + '():
     return '((' + code + ')?' + str + ':"")';
 }
-
 
 function insertElementAfter(cursorElem, elem) {
     if (cursorElem.nextSibling != elem) {
@@ -273,7 +271,6 @@ function formatData(viewModel, element, snData) {
 function executeFunction(viewModel, functionId, data) {
     return viewModel.fns[functionId - 1].call(viewModel, data);
 }
-
 
 function checkOwnNode(viewModel, node) {
     if (typeof node == 'string') {
@@ -761,6 +758,11 @@ function updateNodeAttributes(viewModel, el, attribute) {
                     $el.removeClass('sn-display-hide');
                 }
                 break;
+
+            case 'classname':
+            case 'class':
+                el.className = val;
+                break;
             case 'sn-css':
                 el.style.cssText += val;
                 break;
@@ -798,10 +800,6 @@ function updateNodeAttributes(viewModel, el, attribute) {
                 }
                 break;
 
-            case 'classname':
-            case 'class':
-                el.className = val;
-                break;
             default:
                 val === null ? el.removeAttribute(attr) : el.setAttribute(attr, val);
                 break;
@@ -883,18 +881,16 @@ function bindNodeAttributes(viewModel, el) {
 
                 default:
                     //处理事件绑定
-                    var origAttr = attr;
+                    var oldAttr = attr;
 
                     attr = attr.replace(rSnAttr, '');
 
                     var evt = EVENTS[attr];
 
                     if (evt) {
-                        el.removeAttribute(origAttr);
+                        el.removeAttribute(oldAttr);
 
                         attr = "sn-" + viewModel.cid + evt;
-
-                        var a = /\d+$/g;
 
                         if (testRegExp(rset, val) || testRegExp(rfunc, val)) {
 
@@ -903,13 +899,11 @@ function bindNodeAttributes(viewModel, el) {
                                 if (/^(Math\.|encodeURIComponent\(|parseInt\()/.test($1)) {
                                     return match;
                                 }
-
                                 return $1 + $2 + ($2 ? ',e)' : 'e)');
                             })
                                 // .replace(rset, function (match, $1, $2) {
                                 //     console.log(match, $1, $2);
                                 //     return match;
-
                                 // })
                                 .replace(rset, 'this.dataOfElement(e.currentTarget,"$1",$2)');
 
