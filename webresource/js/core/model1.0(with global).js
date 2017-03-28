@@ -1955,7 +1955,7 @@ Collection.prototype = {
     },
 
     // 只更新collection中匹配到的
-    updateMatches: function (arr, primaryKeyOrFunc) {
+    updateMatched: function (arr, primaryKeyOrFunc) {
         return this.update(arr, primaryKeyOrFunc, false);
     },
 

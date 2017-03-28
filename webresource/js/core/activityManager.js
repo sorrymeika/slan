@@ -1,8 +1,8 @@
-﻿
+
 var $ = require('$');
 var util = require('util');
 var Event = require('./event');
-var getPath = util.getPath;
+var getUrlPath = require('./url').getPath;
 
 
 function setActivityReferrer(activedInstance, route) {
@@ -30,7 +30,7 @@ function setActivityReferrer(activedInstance, route) {
 
     if (activedInstance.recordBackURL) {
         var backURL = route.query.from || activedInstance.referrer || activedInstance.defaultBackURL;
-        backURL && getPath(backURL) != route.path.toLowerCase() && (activedInstance.swipeBack = backURL);
+        backURL && getUrlPath(backURL) != route.path.toLowerCase() && (activedInstance.swipeBack = backURL);
     }
 }
 
@@ -105,7 +105,7 @@ ActivityManager.prototype = {
     },
 
     set: function (url, activity) {
-        this._activities[getPath(url)] = activity;
+        this._activities[getUrlPath(url)] = activity;
     },
 
     get: function (url, callback) {
@@ -116,7 +116,7 @@ ActivityManager.prototype = {
             return;
         }
 
-        var path = getPath(route.path);
+        var path = getUrlPath(route.path);
         var activity = this._activities[path];
 
         if (activity == null) {
@@ -169,7 +169,7 @@ ActivityManager.prototype = {
     },
 
     remove: function (url) {
-        this._activities[getPath(url)] = null;
+        this._activities[getUrlPath(url)] = null;
     }
 }
 

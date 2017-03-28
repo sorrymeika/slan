@@ -31,10 +31,6 @@ var util = {
     osVersion: osVersion ? parseFloat(osVersion[0] + '.' + osVersion[1]) : 0,
     isInWechat: /micromessenger/i.test(ua),
 
-    getPath: function (url) {
-        return url ? url.replace(/^http:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
-    },
-
     joinPath: function () {
         var args = [].slice.apply(arguments);
         var result = args.join('/').replace(/[\\]+/g, '/').replace(/([^:\/]|^)[\/]{2,}/g, '$1/').replace(/([^\.]|^)\.\//g, '$1');

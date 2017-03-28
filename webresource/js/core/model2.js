@@ -149,6 +149,7 @@ function cloneElement(node, each) {
     var nodeClone = node.cloneNode(false);
     var parentNode = nodeClone;
     var nextSibling;
+    var clone;
 
     each(node, nodeClone);
 
@@ -874,7 +875,7 @@ function bindNodeAttributes(viewModel, el) {
                     el.setAttribute(viewModel.snModelKey, val);
                     break;
                 case 'sn-require':
-                    el.snRequire = require(val) || val;
+                    el.snRequire = window.seajs && seajs.require(val) || val;
                     break;
                 default:
                     //处理事件绑定
@@ -1140,6 +1141,7 @@ function updateParentAttrTo(model) {
 function updateModelOnKeys(model, cover, keys, val) {
     var lastKey = keys.pop();
     var tmp;
+    var key;
 
     for (var i = 0, len = keys.length; i < len; i++) {
         key = keys[i];
@@ -1331,7 +1333,6 @@ var Model = util.createClass({
     set: function (cover, key, val) {
         var self = this,
             model,
-            origin,
             changed,
             attrs,
             parent,
@@ -1399,6 +1400,8 @@ var Model = util.createClass({
         var hasChange = false;
         var valueType;
         var changes = [];
+        var origin;
+        var value;
 
         for (var attr in attrs) {
             origin = model[attr];
@@ -1939,7 +1942,7 @@ Collection.prototype = {
     },
 
     // 只更新collection中匹配到的
-    updateMatches: function (arr, primaryKeyOrFunc) {
+    updateMatched: function (arr, primaryKeyOrFunc) {
         return this.update(arr, primaryKeyOrFunc, false);
     },
 

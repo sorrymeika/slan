@@ -1,4 +1,11 @@
-﻿var $ = require('$');
+﻿/**
+ * 作者: sunlu
+ * 用途: 元素滚动，下拉刷新
+ * 默认使用原生滚动，并fix click点击问题
+ * 不支持原生滚动的os，使用transform方式滚动
+ */
+
+var $ = require('$');
 var util = require('util');
 var animation = require('../core/animation');
 var ScrollView = require('./scrollview');
@@ -425,7 +432,11 @@ exports.bind = function (selector, options) {
         result.add(ret);
 
         ret.imageLazyLoad = function (options) {
-            var images = $('img[data-src]:not([src])', this.$el).css({
+            var images = $('img[data-src]:not([src])', this.$el);
+
+            if (!images.length) return;
+
+            images.css({
                 opacity: 0
             });
             var scrollTop = options ? options.y : 0;

@@ -4,8 +4,7 @@ var $ = require('$'),
 
 var noop = util.noop,
     indexOf = util.indexOf,
-    slice = Array.prototype.slice,
-    getUrlPath = util.getPath;
+    slice = Array.prototype.slice;
 
 var Page = Component.extend({
     el: '<div class="view"></div>',

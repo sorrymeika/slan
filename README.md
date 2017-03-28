@@ -134,14 +134,6 @@ collection.update([{ id: 3, name: 'C1' }, { id: 4, name: 'D1' }], function(a, b)
 });
 ```
 
-# Model/Collection 查询
-
-* `-`
-```js
-// 详情见源码
-model._('collection[name~="aa"|id=1,type!=2]').toJSON();
-collection._('[name="aa"]').toJSON();
-```
 
 # 监听 Model
 
@@ -157,8 +149,8 @@ model.observe('user', function(e) {
 
 });
 
-// 监听 `user.userName` 数据变动
-model.on('change:user.userName', function(e) {
+// 监听 `user.userName` 属性变动
+model.change('user.userName', function(e) {
 
 });
 ```
@@ -465,3 +457,391 @@ bridge.getLocation(function(res) {
 
 * `update(updateUrl, versionName, callback)` 更新app
 
+<br>
+<br>
+
+## API文档
+
+### `Model`、`Collection`
+
+#### `vm.createModel`、`vm.createCollection` 方法
+
+* 创建 `Model`、`Collection`
+
+```js
+var vm = require('core/model2');
+
+// 创建一个 `model`
+var user = vm.createModel({
+    attributes: {
+        userId: 1,
+        userName: '用户名'
+    },
+
+    setId: function(id) {
+        this.set({
+            userId: id
+        })
+    }
+})
+
+
+// 创建一个collection
+var collection = vm.createCollection({
+    array: [{
+        id: 1,
+        name: 'collection item0'
+    }],
+
+    getById: function(id){
+        return this.find('id', id)
+    }
+})
+
+
+// 创建一个关联了其他 model/collection 的 model
+var home = vm.createModel({
+    attributes: {
+        title: '首页',
+
+        // 可以设置为其他 model
+        user: user,
+
+        // 可以设置为collection
+        collection: collection
+    }
+})
+```
+
+#### `(Model|Collection).prototype.set` 方法
+
+* 设置 `Model`、`Collection`
+
+```js
+// 通过 `set` 方法来改变数据
+// 此时关联了 `user` 的 `home` 的数据也会改变 
+user.set({
+    userName: 'asdf'
+});
+
+home.set({
+    title: 1,
+    user: {
+        age: 10
+    }
+});
+
+// 通过 `collection.set` 方法覆盖数据
+collection.set([{
+    id: 1,
+    name: 'A'
+}]);
+
+```
+
+#### `Model.prototype.observe` 方法
+
+* 监听 Model变化
+
+```js
+// 监听所有数据变动
+model.observe(function(e) {
+
+});
+
+// 监听 `user` 数据变动，不监听属性的变动
+model.observe('user', function(e) {
+
+});
+
+// 监听 `user.userName` 属性变动
+model.change('user.userName', function(e) {
+
+});
+```
+
+#### `Model.prototype.removeObserve` 方法
+
+* 移除监听
+
+
+#### `Model.prototype.collection(key)` 方法
+
+* 获取属性名为key的collection，不存在即创建
+
+```js
+model.collection('productList').add([{ id: 1 }]);
+```
+
+#### `Model.prototype.model(key)` 方法
+
+* 获取属性名为key的model，不存在即创建
+```js
+home.model('settings').toJSON();
+```
+
+#### `(Collection|Model).prototype._` 方法
+
+* Model/Collection 查询
+
+```js
+
+/**
+  * 搜索子Model/Collection，
+  * 支持多种搜索条件
+  * 
+  * 搜索子Model:
+  * model._('user') 或 model._('user.address')
+  * 
+  * 根据查询条件查找子Collection下的Model:
+  * model._('collection[id=222][0].options[text~="aa"&value="1"][0]')
+  * model._('collection[id=222][0].options[text~="aa"&value="1",attr^='somevalue'|attr=1][0]')
+  * 
+  * 且条件:
+  * model._("collection[attr='somevalue'&att2=2][1].aaa[333]")
+  * 
+  * 或条件:
+  * model._("collection[attr^='somevalue'|attr=1]")
+  * 
+  * 不存在时添加，不可用模糊搜索:
+  * model._("collection[attr='somevalue',attr2=1][+]")
+  * 
+  * @param {string} search 搜索条件
+  * @param {any} [def] collection[attr='val'][+]时的默认值
+  */
+home._('collection[name~="aa"|id=1,type!=2]').toJSON();
+
+
+/**
+ * 查询Collection的子Model/Collection
+ * 
+ * 第n个:
+ * collection._(1)
+ * 
+ * 查询所有符合的:
+ * collection._("[attr='val']")
+ * 数据类型也相同:[attr=='val']
+ * 以val开头:[attr^='val']
+ * 以val结尾:[attr$='val']
+ * 包含val，区分大小写:[attr*='val']
+ * 包含val，不区分大小写:[attr~='val']
+ * 或:[attr='val'|attr=1,attr='val'|attr=1]
+ * 且:[attr='val'&attr=1,attr='val'|attr=1]
+ * 
+ * 查询并返回第n个:
+ * collection._("[attr='val'][n]")
+ * 
+ * 一个都不存在则添加:
+ * collection._("[attr='val'][+]")
+ * 
+ * 结果小于n个时则添加:
+ * collection._("[attr='val'][+n]")
+ * 
+ * 删除全部搜索到的，并返回被删除的:
+ * collection._("[attr='val'][-]")
+ * 
+ * 删除搜索结果中第n个，并返回被删除的:
+ * collection._("[attr='val'][-n]")
+ * 
+ * @param {string} search 查询条件
+ * @param {object} [def] 数据不存在时默认添加的数据
+ * 
+ * @return {array|Model|Collection}
+ */
+collection._('[name="aa"]').toJSON();
+```
+
+#### `Collection.prototype.add` 方法
+
+```js
+// 通过 `collection.add` 方法添加数据
+collection.add({ id: 2, name: 'B' })
+collection.add([{ id: 3, name: 'C' }, { id: 4, name: 'D' }])
+```
+
+#### `Collection.prototype.update` 方法
+
+```js
+// 通过 `collection.update` 方法更新数据
+collection.update([{ id: 3, name: 'C1' }, { id: 4, name: 'D1' }], 'id');
+collection.update([{ id: 3, name: 'C1' }, { id: 4, name: 'D1' }], function(a, b) {
+
+    return a.id === b.id;
+});
+```
+
+#### `Collection.prototype.updateTo` 方法
+
+* 与update的差异：已有项将被增量覆盖，不在arr中的项将被删除
+
+```js
+var arr = [{ id: 3, name: 'C1' }, { id: 4, name: 'D1' }];
+
+// 通过 `collection.updateTo` 方法更新数据
+collection.updateTo(arr, 'id');
+```
+
+
+#### `Collection.prototype.updateMatched` 方法
+
+* 与update的差异：只更新collection中已有的，不在collection中的不处理
+
+```js
+var arr = [{ id: 3, name: 'C1' }, { id: 4, name: 'D1' }];
+
+// 通过 `collection.updateTo` 方法更新数据
+collection.updateTo(arr, 'id');
+```
+
+#### `Collection.prototype.unshift` 方法
+
+* 首部插入数据
+
+```js
+collection.unshift({ id: 1 });
+```
+
+#### `Collection.prototype.splice` 方法
+
+* 移除或插入数据
+
+```js
+collection.splice(0,1,{ id: 1 });
+```
+
+#### `Collection.prototype.size` 方法 | `Collection.prototype.length` 属性
+
+* Collection 长度
+
+
+#### `Collection.prototype.map` 方法
+
+* 同 `Array.prototype.map`
+
+#### `Collection.prototype.find` 方法
+
+* 查找某条子Model
+
+```js
+collection.find('id', 1);
+```
+
+#### `Collection.prototype.filter` 方法
+
+* 同 `Array.prototype.filter`
+
+
+#### `Collection.prototype.remove` 方法
+
+* 从 collection 中移除
+
+```js
+collection.remove('id', 1);
+
+collection.remove(model);
+
+collection.remove(function(item) {
+    return true|false;
+});
+```
+
+
+#### `Collection.prototype.clear` 方法
+
+* 清除 collection
+
+
+#### `Collection.prototype.each` 方法
+
+* 遍历 collection
+
+
+#### `Collection.prototype.toArray` | `Collection.prototype.toJSON` 方法
+
+* 将 collection 转为数组
+
+#### `(Model|Collection).prototype.destroy`
+
+* 销毁 Model | Collection
+
+
+<br>
+
+-------
+
+<br>
+
+###  `util`
+
+* 工具类
+
+#### `util.pick` 方法
+
+* 同 _.pick
+
+
+#### `util.encodeHTML` 方法
+
+* html 转码
+
+#### `util.store` 方法
+
+* 获取、设置localStorage
+
+#### `util.equals` 方法
+
+* 判断两个 Object、Array 结构是否相同（引用不同）
+
+#### `util.groupBy` 方法
+
+* 数组分组
+
+#### `util.sum` 方法
+
+* 数组求和
+
+
+#### `util.array` 方法
+
+* 数组操作链
+
+```js
+// 链式处理，并返回数组中某个item
+util.array([{ id: 1 }, { id: 2 }])
+    .filter('id', 1)
+    .concat([{ id: 3 }])
+    .map((item) => item)
+    .exclude('id', 2)
+    .find('id', 3);
+
+// 链式处理，并返回 Array
+util.array([{ id: 1 }, { id: 2 }])
+    ._('[id=1,name=2]')
+    .filter((item) => item.id == 1)
+    .toArray();
+```
+
+#### `util.query` 方法
+
+* 数组搜索，类似 `Collection.prototype._`
+
+
+#### `util.formatDate` 方法
+
+* 日期转字符串
+
+
+```js
+
+util.formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss_ffff');
+
+// 2012-02-03 星期一
+util.formatDate(new Date(), 'yyyy-MM-dd W');
+
+// 刚刚、n分钟前、n小时前、昨天 HH:mm、yyyy-MM-dd HH:mm
+util.formatDate(Date.now(), 'short');
+
+// HH:mm、昨天 HH:mm、yyyy-MM-dd HH:mm
+util.formatDate(Date.now(), 'minutes');
+
+```

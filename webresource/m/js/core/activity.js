@@ -8,8 +8,7 @@ var util = require('util'),
     Component = require('./component'),
     bridge = require('bridge'),
     slice = Array.prototype.slice,
-    indexOf = util.indexOf,
-    getUrlPath = util.getPath;
+    indexOf = util.indexOf;
 
 
 var STATUS = {

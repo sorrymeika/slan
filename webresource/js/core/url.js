@@ -105,6 +105,10 @@ URL.isEqual = function (a, b) {
 
 URL.trim = trim;
 
+URL.getPath = function (url) {
+    return url ? url.replace(/^https?:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
+};
+
 console.log(URL.from('#/?asf=bbb') + '');
 
 module.exports = URL;

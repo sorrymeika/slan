@@ -7,8 +7,7 @@ var $ = require('$'),
 var URL = require('./url');
 
 var noop = util.noop,
-    slice = Array.prototype.slice,
-    getPath = util.getPath;
+    slice = Array.prototype.slice;
 
 var Navigation = Component.extend({
     events: {

@@ -17,7 +17,6 @@ var URL = require('./url');
 var noop = util.noop;
 var lastIndexOf = util.lastIndexOf;
 var slice = Array.prototype.slice;
-var getPath = util.getPath;
 
 
 function adjustActivity(currentActivity, activity) {

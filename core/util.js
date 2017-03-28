@@ -197,10 +197,6 @@ var Util = {
         return ("" + text).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#34;").split("'").join("&#39;");
     },
 
-    getPath: function (url) {
-        return url.replace(/^http\:\/\/[^\/]+|\?.*$/g, '').toLowerCase();
-    },
-
     noop: function () { },
 
     validateEmail: function (email) {
