@@ -215,7 +215,7 @@ var model = new ViewModel(this.$el, {
 <div class="item" sn-else>当title不为空时插入该element</div>
 ```
 
-* `sn-display` 控件是否显示（有淡入淡出效果，若不需要可使用 `sn-if`）
+* `sn-display` 控件是否显示（有淡入淡出效果，若不需要动画效果可使用`sn-visible`或`sn-if`）
 
 ```html
 <div class="item" sn-display="{title}">当title不为空时显示</div>

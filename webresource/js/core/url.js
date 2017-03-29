@@ -74,7 +74,6 @@ URL.prototype.toURI = function () {
 }
 
 URL.prototype.equal = function (url) {
-
     return url + '' === this.toString();
 }
 
@@ -89,7 +88,6 @@ URL.prototype.toString = function () {
 
 
 URL.from = function (url) {
-
     if (url) {
         url = url.replace(/^#+/g, '')
     }
@@ -99,7 +97,6 @@ URL.from = function (url) {
 
 
 URL.isEqual = function (a, b) {
-
     return trim(a + '') == trim(b + '');
 }
 
@@ -108,7 +105,5 @@ URL.trim = trim;
 URL.getPath = function (url) {
     return url ? url.replace(/^https?:\/\/[^\/]+|\?.*$/g, '').toLowerCase() : null;
 };
-
-console.log(URL.from('#/?asf=bbb') + '');
 
 module.exports = URL;
