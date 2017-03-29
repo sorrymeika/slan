@@ -1160,11 +1160,9 @@ var Model = util.createClass({
         if (parent instanceof Model) {
             this.key = parent.key ? parent.key + '.' + key : key;
             this._key = key;
-
         } else if (parent instanceof Collection) {
             this.key = parent.key + '^child';
             this._key = parent._key + '^child';
-
         } else {
             throw new Error('Model\'s parent mast be Collection or Model');
         }
@@ -1542,6 +1540,12 @@ function Collection(parent, attributeName, array) {
     if (array) this.add(array);
 }
 
+var CollectionUpdateType = {
+    DEFAULT: 1,
+    UPDATE_ONLY_MATCHED: 2,
+    UPDATE_MATCHED_AND_REMOVE_UNMATCHED: 3
+};
+
 Collection.prototype = {
 
     length: 0,
@@ -1583,14 +1587,12 @@ Collection.prototype = {
      * @return {array|Model|Collection}
      */
     _: function (search, def) {
-
         if (typeof search == 'number' || /^\d+$/.test(search))
             return this[search];
         else if (/^\[(\d+)\]$/.test(search))
             return this[RegExp.$1];
 
         var match = search.match(RE_COLL_QUERY);
-
         var query = match[1];
         var next = match[4];
         var model;
@@ -1613,11 +1615,8 @@ Collection.prototype = {
 
             for (var i = 0, n = array.length; i < n; i++) {
                 if (test(array[i])) {
-
                     if (j >= from && j <= to) {
-
                         model = this.splice(i, 1)[0];
-
                         results.push(next ? model._(next) : model);
                     }
 
@@ -1631,7 +1630,6 @@ Collection.prototype = {
             var results = [];
             for (var i = 0, n = array.length; i < n; i++) {
                 if (test(array[i])) {
-
                     results.push(next ? this[i]._(next) : this[i]);
                 }
             }
@@ -1681,10 +1679,8 @@ Collection.prototype = {
     },
 
     set: function (array) {
-
         if (!array || array.length == 0) {
             this.clear();
-
         } else {
             var modelsLen = this.length;
 
@@ -1700,7 +1696,6 @@ Collection.prototype = {
                 item = array[i];
 
                 if (item instanceof Model) {
-
                     if (item != model) {
                         if (!hasChange) {
                             hasChange = true;
@@ -1711,7 +1706,6 @@ Collection.prototype = {
                         this[i] = item;
                         this.array[i] = item.array;
                     }
-
                 } else {
                     model.set(true, item);
                     if (!hasChange && model.changed) {
@@ -1730,7 +1724,6 @@ Collection.prototype = {
         }
         return this;
     },
-
 
     add: function (array) {
         var model;
@@ -1791,26 +1784,21 @@ Collection.prototype = {
      * 
      * @param {array} arr 需要更新的数组
      * @param {string|function} primaryKey 唯一健 或 (a, b)=>boolean
-     * @param {boolean|undefined} [updateType] 更新类型
-     * updateType=undefined:collection中存在既覆盖，不存在既添加
-     * updateType=true:根据arr更新，不在arr中的项将被删除
-     * updateType=false:只更新collection中存在的
+     * @param {CollectionUpdateType} [updateType] 更新类型
+     * CollectionUpdateType.DEFAULT - collection中存在既覆盖，不存在既添加
+     * CollectionUpdateType.UPDATE_MATCHED_AND_REMOVE_UNMATCHED - 根据arr更新，不在arr中的项将被删除
+     * CollectionUpdateType.UPDATE_ONLY_MATCHED - 只更新collection中存在的
      * 
      * @return {Collection} self
      */
     update: function (arr, primaryKey, updateType) {
-        if (typeof arr === 'boolean')
-            arr = [arr, primaryKey, updateType], updateType = arr[0], primaryKey = arr[2], arr = arr[1];
-
-        if (!arr) {
-            return this;
-        }
+        if (!arr) return this;
 
         var fn;
         var length = this.length;
 
         if (!length) {
-            (updateType !== false) && this.add(arr);
+            (updateType !== CollectionUpdateType.UPDATE_ONLY_MATCHED) && this.add(arr);
 
             return this;
         }
@@ -1848,12 +1836,12 @@ Collection.prototype = {
                 }
             }
 
-            if (updateType === true && !exists) {
+            if (updateType === CollectionUpdateType.UPDATE_MATCHED_AND_REMOVE_UNMATCHED && !exists) {
                 this.splice(i, 1);
             }
         }
 
-        if (updateType !== false) {
+        if (updateType !== CollectionUpdateType.UPDATE_ONLY_MATCHED) {
             var appends = [];
             for (var i = 0, n = arr.length; i < n; i++) {
                 if (arr[i] !== undefined) {
@@ -1870,13 +1858,13 @@ Collection.prototype = {
     },
 
     // 已有项将被增量覆盖，不在arr中的项将被删除
-    updateTo: function (arr, primaryKeyOrFunc) {
-        return this.update(arr, primaryKeyOrFunc, true);
+    updateTo: function (arr, primaryKey) {
+        return this.update(arr, primaryKey, CollectionUpdateType.UPDATE_MATCHED_AND_REMOVE_UNMATCHED);
     },
 
     // 只更新collection中匹配到的
-    updateMatched: function (arr, primaryKeyOrFunc) {
-        return this.update(arr, primaryKeyOrFunc, false);
+    updateMatched: function (arr, primaryKey) {
+        return this.update(arr, primaryKey, CollectionUpdateType.UPDATE_ONLY_MATCHED);
     },
 
     unshift: function (data) {
@@ -2109,7 +2097,6 @@ RepeatSource.prototype.appendChild = function (child) {
 }
 
 var ViewModel = Event.mixin(
-
     Model.extend({
 
         /**
@@ -2130,7 +2117,6 @@ var ViewModel = Event.mixin(
          * @param {Array} [children] 子节点列表
          */
         constructor: function (template, attributes, children) {
-
             if (arguments.length === 1 && template && template.attributes && template.el) {
                 children = template.children;
                 attributes = template.attributes;
@@ -2189,16 +2175,11 @@ var ViewModel = Event.mixin(
 
             if (eventCode == 'false') {
                 return false;
-
             } else if (/^\d+$/.test(eventCode)) {
-
                 var snData = formatData(this, target, target.snData);
-
                 snData.e = e;
 
-                var res = executeFunction(this, eventCode, snData);
-
-                return res;
+                return executeFunction(this, eventCode, snData);
             }
         },
 
@@ -2270,14 +2251,10 @@ var ViewModel = Event.mixin(
             if (ref) {
                 if (!cb) return ref;
                 else cb.call(this, ref);
-
             } else {
-
                 var self = this;
                 var getRef = function (resolve) {
-
                     self.onceTrue('viewDidUpdate', function () {
-
                         if (this.refs[name]) {
                             resolve.call(this, this.refs[name]);
                             return true;
@@ -2287,9 +2264,7 @@ var ViewModel = Event.mixin(
 
                 if (cb) {
                     getRef(cb);
-
                 } else {
-
                     return new Promise(getRef)
                 }
             }
@@ -2298,7 +2273,6 @@ var ViewModel = Event.mixin(
         isOwnNode: function (node) {
             if (typeof node == 'string') {
                 return !this.$el.find(node).length;
-
             } else {
                 var flag = true;
                 this.$el.each(function () {
@@ -2309,7 +2283,6 @@ var ViewModel = Event.mixin(
         },
 
         before: function (newNode, referenceNode) {
-
             referenceNode = checkOwnNode(this, referenceNode);
 
             return bindNewElement(this, newNode)
