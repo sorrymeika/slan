@@ -313,7 +313,6 @@ function updateRequiredView(viewModel, el) {
 
 function cloneRepeatElement(source, snData) {
     return cloneElement(source, function (node, clone) {
-
         clone.snData = snData;
 
         if (node.snRepeatSource) {
@@ -355,7 +354,6 @@ function updateRepeatElement(viewModel, el) {
     }
 
     if (!collection) {
-
         if (!offsetParent) {
             model = viewModel;
         } else {
@@ -376,7 +374,6 @@ function updateRepeatElement(viewModel, el) {
         if (!collection) return;
 
         el.snCollection = collection;
-
     } else if (repeatSource.isFn) {
         collection.set(collectionData);
     }
@@ -406,7 +403,6 @@ function updateRepeatElement(viewModel, el) {
         if (!elem) {
             snData = Object.assign({}, parentSNData);
             snData[repeatSource.alias] = model;
-
         } else {
             snData = elem.snData;
         }
@@ -429,7 +425,6 @@ function updateRepeatElement(viewModel, el) {
                 el: elem,
                 model: model
             });
-
         } else if (elemIndex != -1) {
             elemContain[elemIndex] = false;
         }
@@ -437,11 +432,9 @@ function updateRepeatElement(viewModel, el) {
     });
 
     if (orderBy) {
-
         if (typeof orderBy == 'string') {
             // 排序方法
             list.sort(viewModel[orderBy]);
-
         } else {
             // orderBy=['a',true,someFunctionId,false]
             orderBy = orderBy.map(function (item) {
@@ -549,25 +542,21 @@ function findModelByKey(model, key) {
 function updateNode(viewModel, el) {
     if (el.nodeType == 8 && el.snRepeatSource) {
         updateRepeatElement(viewModel, el);
-
     } else if (el.snIfOrigin) {
         return {
             isSkipChildNodes: true,
             nextSibling: el.snIfOrigin
         };
-
     } else {
         el.snBinding && updateNodeAttributes(viewModel, el);
 
         if (el.nodeType == 1) {
-
             if (el.snIf) {
                 if (!el.parentNode) {
                     return {
                         isSkipChildNodes: true,
                         nextSibling: el.snIf.nextSibling
                     };
-
                 } else {
                     if (el.snRequiredInstance || el.snRequire) updateRequiredView(viewModel, el);
                     else setRef(viewModel, el);
@@ -606,10 +595,8 @@ function updateNode(viewModel, el) {
 
                     return currentElement.nextSibling;
                 }
-
             } else if (el.snRequiredInstance || el.snRequire) {
                 updateRequiredView(viewModel, el);
-
             } else {
                 setRef(viewModel, el);
             }
@@ -642,7 +629,6 @@ function setSNDisplay(el, val) {
                 .one(TRANSITION_END, onHide);
             setTimeout(onHide, 300);
         }
-
     } else if (!isInitDisplay || $el.hasClass('sn-display-hide')) {
         $el.css({
             display: display
@@ -663,7 +649,6 @@ function updateNodeAttributes(viewModel, el, attribute) {
         attrsBinding = el.snBinding;
 
     var attrs = el.snAttrs || (el.snAttrs = {});
-
     var keys = [];
 
     for (var key in attrsBinding) {
@@ -700,7 +685,6 @@ function updateNodeAttributes(viewModel, el, attribute) {
     }
 
     for (var i = 0, n = keys.length; i < n; i++) {
-
         var attr = keys[i];
         var val = executeFunction(viewModel, attrsBinding[attr], data);
 
@@ -765,27 +749,24 @@ function updateNodeAttributes(viewModel, el, attribute) {
                 el.src = val;
                 break;
             case 'sn-src':
-                if (el.getAttribute('sn-' + viewModel.cid + 'load') || el.getAttribute('sn-' + viewModel.cid + 'error'))
+                if (el.getAttribute('sn-' + viewModel.cid + 'load') || el.getAttribute('sn-' + viewModel.cid + 'error')) {
                     $(el).one('load error', viewModel._handleSNEvent);
+                }
 
                 if (el.src) {
                     el.src = val;
-
                 } else {
                     $(el).one('load error', function (e) {
                         $(this).animate({
                             opacity: 1
                         }, 200);
-
                     }).css({
                         opacity: 0
-
                     }).attr({
                         src: val
                     });
                 }
                 break;
-
             default:
                 val === null ? el.removeAttribute(attr) : el.setAttribute(attr, val);
                 break;
@@ -795,7 +776,6 @@ function updateNodeAttributes(viewModel, el, attribute) {
 
 
 function bindNodeAttributes(viewModel, el) {
-
     if (el.nodeType == 3) {
         var fid = createFunction(viewModel, el.textContent);
 
@@ -813,7 +793,6 @@ function bindNodeAttributes(viewModel, el) {
         var val = el.attributes[j].value;
 
         if (val || attr == 'sn-else') {
-
             switch (attr) {
                 case 'sn-if':
                 case 'sn-else':
@@ -829,7 +808,6 @@ function bindNodeAttributes(viewModel, el) {
                         (el.snBinding || (el.snBinding = {}))[attr] = attr;
                         break;
                     }
-
                 case 'sn-src':
                 case 'sn-html':
                 case 'sn-display':
@@ -853,18 +831,15 @@ function bindNodeAttributes(viewModel, el) {
                         viewModel.refs[val] = el;
                     }
                     break;
-
                 case 'sn-model':
                     el.removeAttribute(attr);
                     el.setAttribute(viewModel.snModelKey, val);
                     break;
-
                 case 'sn-require':
                     el.snRequire = typeof viewModel.requires == 'function' ?
                         viewModel.requires(val) :
                         viewModel.requires[val];
                     break;
-
                 default:
                     //处理事件绑定
                     var evt = EVENTS[attr.replace(snAttrRE, '')];
@@ -900,8 +875,7 @@ function bindNewElement(viewModel, newNode) {
     newNode = $(newNode);
 
     newNode.each(function () {
-        if (this.snViewModel)
-            throw new Error("can not insert or append binded node!");
+        if (this.snViewModel) throw new Error("can not insert or append binded node!");
     });
 
     bindElement(viewModel, newNode);
@@ -911,20 +885,19 @@ function bindNewElement(viewModel, newNode) {
     return newNode;
 }
 
-
 function bindElement(viewModel, $el) {
-
     viewModel._codes = [];
 
     eachElement($el, function (node) {
-
         if (node.snViewModel) return false;
 
         if (node.nodeType != 8)
             bindNodeAttributes(viewModel, node);
 
         var parentRepeatSource;
-        for (var parentNode = (node.snIf || node).parentNode; parentNode && !parentNode.snViewModel; parentNode = (parentNode.snIf || parentNode).parentNode) {
+        for (var parentNode = (node.snIf || node).parentNode;
+            parentNode && !parentNode.snViewModel;
+            parentNode = (parentNode.snIf || parentNode).parentNode) {
 
             if (parentNode.snRepeatSource) {
                 parentRepeatSource = parentNode.snRepeatSource;
@@ -962,7 +935,6 @@ function bindElement(viewModel, $el) {
         viewModel.fns.push(fn);
     });
 }
-
 
 function linkModels(model, value, key) {
     var root = model.root;
@@ -1092,24 +1064,22 @@ function genFunction(expression) {
     };
 }
 
-
-function updateParentAttrTo(model) {
+function updateParent(model) {
     var parent = model.parent;
 
-    if (!parent) {
+    if (!parent) return;
 
-    } else if (parent instanceof Collection) {
+    if (parent instanceof Collection) {
         var index = parent.indexOf(model);
         if (index != -1) {
             parent.array[index] = model.attributes;
         }
-
     } else {
         parent.attributes[model._key] = model.attributes;
     }
 }
 
-function updateModelOnKeys(model, cover, keys, val) {
+function updateModelOnKeys(model, renew, keys, val) {
     var lastKey = keys.pop();
     var tmp;
     var key;
@@ -1127,7 +1097,7 @@ function updateModelOnKeys(model, cover, keys, val) {
             model = model._model[key];
         }
     }
-    return model.set(cover, lastKey, val);
+    return model.set(renew, lastKey, val);
 }
 
 function updateViewNextTick(model) {
@@ -1187,7 +1157,6 @@ var RE_COLL_QUERY = /\[((?:'(?:\\'|[^'])*'|"(?:\\"|[^"])*"|[^\]])+)\](?:\[([\+\-
 var Model = util.createClass({
 
     constructor: function (parent, key, attributes) {
-
         if (parent instanceof Model) {
             this.key = parent.key ? parent.key + '.' + key : key;
             this._key = key;
@@ -1237,7 +1206,6 @@ var Model = util.createClass({
      * @param {any} [def] collection[attr='val'][+]时的默认值
      */
     _: function (search, def) {
-
         var attr;
         var query;
         var result = this;
@@ -1263,8 +1231,7 @@ var Model = util.createClass({
     },
 
     get: function (key) {
-        if (typeof key === 'undefined')
-            return this.attributes;
+        if (typeof key === 'undefined') return this.attributes;
 
         if (typeof key == 'string' && key.indexOf('.') != -1) {
             key = key.split('.');
@@ -1278,10 +1245,8 @@ var Model = util.createClass({
                 if (!(data = data[key[i]]))
                     return null;
             }
-
         } else if (key == 'this') {
             return this.attributes;
-
         } else {
             data = this.attributes[key];
         }
@@ -1299,49 +1264,55 @@ var Model = util.createClass({
         return extend(true, {}, this.attributes);
     },
 
-    //[cover,object]|[cover,key,val]|[key,va]|[object]
-    //@cover=true|false 是否覆盖数据，[cover,key,val]时覆盖子model数据,[cover,object]时覆盖当前model数据
-    set: function (cover, key, val) {
+    /**
+     * 设置Model
+     * 
+     * 参数: [renew, Object] | [renew, key, val] | [key, val] | [Object]
+     * [renew, key, val] 替换子model数据
+     * [renew, Object] 时覆盖当前model数据
+     * 
+     * @param {Boolean} [renew] 是否替换掉现有数据
+     * @param {String|Object} key 属性名
+     * @param {any} [val] 属性值
+     */
+    set: function (renew, key, val) {
         var self = this,
             model,
-            changed,
             attrs,
             parent,
             keys,
-            coverChild = false,
+            renewChild = false,
             root = this.root;
 
-        if (typeof cover != "boolean")
-            val = key, key = cover, cover = false;
+        if (typeof renew != "boolean") {
+            val = key;
+            key = renew;
+            renew = false;
+        }
 
         var isArrayKey = isArray(key);
 
         if (key === null) {
-            this.reset();
+            this.restore();
             this.attributes = null;
             return this;
-
         } else if (!isArrayKey && typeof key == 'object') {
             attrs = key;
-
         } else if (typeof val == 'undefined') {
             val = key;
             key = '';
 
             if (this.attributes != val) {
                 this.attributes = val;
-
-                updateParentAttrTo(this);
-
+                updateParent(this);
                 updateViewNextTick(this);
             }
             return this;
-
         } else {
             keys = isArrayKey ? key : key.split('.');
 
             if (keys.length > 1) {
-                model = updateModelOnKeys(this, cover, keys, val);
+                model = updateModelOnKeys(this, renew, keys, val);
 
                 if (model.changed) {
                     updateViewNextTick(this);
@@ -1349,21 +1320,21 @@ var Model = util.createClass({
                 return this;
 
             } else {
-                coverChild = cover;
-                cover = false;
+                renewChild = renew;
+                renew = false;
                 (attrs = {})[key] = val;
             }
         }
 
         if (this.attributes === null || !isPlainObject(this.attributes)) {
             this.attributes = {};
-            updateParentAttrTo(this);
+            updateParent(this);
         }
 
         var data = this.attributes;
         model = this._model;
 
-        if (cover) {
+        if (renew) {
             for (var attr in data) {
                 if (attrs[attr] === undefined) {
                     attrs[attr] = null;
@@ -1387,21 +1358,19 @@ var Model = util.createClass({
                     data[attr] = value instanceof Collection ? value.array : value.attributes;
 
                     if (origin instanceof Model || origin instanceof Collection) {
-                        unlinkModels(self, origin);
+                        unlinkModels(this, origin);
                     }
 
-                    linkModels(self, value, model.key ? model.key + '.' + attr : attr);
+                    linkModels(this, value, model.key ? model.key + '.' + attr : attr);
 
                     hasChange = true;
-
                 } else if (origin instanceof Model) {
-
                     if (value === null || value === undefined) {
-                        origin.reset();
+                        origin.restore();
                         origin.attributes = null;
 
                     } else {
-                        origin.set(coverChild, value);
+                        origin.set(renewChild, value);
                     }
                     data[attr] = origin.attributes;
 
@@ -1425,7 +1394,6 @@ var Model = util.createClass({
                     value.then(function (res) {
                         self.set(attr, res);
                     });
-
                 } else {
                     valueType = value === null || value === undefined ? null : toString.call(value);
 
@@ -1435,13 +1403,11 @@ var Model = util.createClass({
                             model[attr] = value;
                             data[attr] = value.attributes;
                             break;
-
                         case '[object Array]':
                             value = new Collection(this, attr, value);
                             model[attr] = value;
                             data[attr] = value.array;
                             break;
-
                         default:
                             changes.push(this.key ? this.key + "." + attr : attr, value, data[attr]);
                             data[attr] = model[attr] = value;
@@ -1459,12 +1425,11 @@ var Model = util.createClass({
             for (var i = 0, length = changes.length; i < length; i += 3) {
                 root.trigger(new Event("change:" + changes[i], {
                     target: this
-
                 }), changes[i + 1], changes[i + 2]);
             }
         }
 
-        return self;
+        return this;
     },
 
     contains: function (model) {
@@ -1483,7 +1448,7 @@ var Model = util.createClass({
         var self = this;
 
         this.root.on("change:" + attributeName, function (e, oldValue, newValue) {
-            if (e.target === this) {
+            if (e.target === self) {
                 return fn.call(self, e, oldValue, newValue);
             }
         });
@@ -1522,7 +1487,7 @@ var Model = util.createClass({
         return this.root.off(DATACHANGED_EVENT + key, fn);
     },
 
-    reset: function () {
+    restore: function () {
         var data = {};
         for (var key in this.attributes) {
             data[key] = null;
@@ -1544,13 +1509,11 @@ var Model = util.createClass({
     },
 
     model: function (key) {
-
         if (!this._model[key])
             this.set(key, {});
 
         return this._model[key];
     }
-
 });
 
 
@@ -2428,7 +2391,7 @@ var ViewModel = Event.mixin(
 
             var children = this._linkedModels;
             if (children) {
-                for (var i = 0, len = children.length; i < len; i++) {
+                for (var i = 0; i < children.length; i++) {
                     var link = children[i];
                     var childModel = link.childModel;
                     var linkedParents = childModel._linkedParents;

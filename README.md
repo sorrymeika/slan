@@ -1,10 +1,7 @@
-SLAN
+Snowball
 =======
 
 简洁又强大的mvvm前端框架
-
-用户体验可媲美原生应用
-
 核心文件 https://github.com/sorrymeika/slan/blob/master/webresource/js/core/model2.js
 
 

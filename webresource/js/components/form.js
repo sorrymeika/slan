@@ -299,7 +299,7 @@ FormComponent.prototype = {
         for (var key in this.compo) {
             this.compo[key].val('');
         }
-        this.model.getModel("data").reset();
+        this.model._("data").restore();
 
         this.form.reset();
 
