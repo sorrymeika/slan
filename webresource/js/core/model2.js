@@ -1782,8 +1782,8 @@ Collection.prototype = {
     /**
      * 更新 collection 中的 model
      * 
-     * @param {array} arr 需要更新的数组
-     * @param {string|function} primaryKey 唯一健 或 (a, b)=>boolean
+     * @param {Array} arr 需要更新的数组
+     * @param {String|Function} primaryKey 唯一健 或 (a, b)=>boolean
      * @param {CollectionUpdateType} [updateType] 更新类型
      * CollectionUpdateType.DEFAULT - collection中存在既覆盖，不存在既添加
      * CollectionUpdateType.UPDATE_MATCHED_AND_REMOVE_UNMATCHED - 根据arr更新，不在arr中的项将被删除
